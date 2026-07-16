@@ -118,8 +118,8 @@ jobs:
           $releaseFiles = @(Get-ChildItem .\artifacts\release -File)
           $files = @($releaseFiles | ForEach-Object FullName)
           $expectedNames = @($releaseFiles | ForEach-Object Name | Sort-Object)
-          gh release view $tag *> $null
-          if ($LASTEXITCODE -eq 0) {
+          $releaseExists = @(gh release list --limit 1000 --json tagName --jq '.[].tagName') -contains $tag
+          if ($releaseExists) {
             $existingNames = @(gh release view $tag --json assets --jq '.assets[].name')
             foreach ($staleName in @($existingNames | Where-Object { $_ -notin $expectedNames })) {
               gh release delete-asset $tag $staleName --yes
