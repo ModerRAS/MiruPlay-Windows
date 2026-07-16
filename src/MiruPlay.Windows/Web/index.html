@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>MiruPlay Web Control</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/web/app.css">
+</head>
+<body>
+  <section id="access" class="access" aria-labelledby="access-title">
+    <form id="access-form" class="access-form">
+      <div class="brand-mark" aria-hidden="true">M</div>
+      <h1 id="access-title">连接 MiruPlay</h1>
+      <p>输入 Windows 客户端设置页显示的 WebUI 访问令牌。</p>
+      <input name="username" autocomplete="username" value="MiruPlay" hidden>
+      <label>访问令牌<input id="access-token" type="password" autocomplete="current-password" required></label>
+      <button class="primary" type="submit">连接</button>
+      <output id="access-error" class="error" aria-live="polite"></output>
+    </form>
+  </section>
+
+  <div id="app" class="app" hidden>
+    <aside class="sidebar">
+      <header class="brand"><div class="brand-mark">M</div><div><strong>MiruPlay</strong><span id="device-name">Windows</span></div></header>
+      <nav id="nav" aria-label="主导航">
+        <button data-view="library" aria-current="page">片库</button>
+        <button data-view="sources">媒体源</button>
+        <button data-view="automation">自动化</button>
+        <button data-view="metadata">元数据</button>
+        <button data-view="playback">播放设置</button>
+        <button data-view="access">WebUI 访问</button>
+      </nav>
+      <small id="server-url"></small>
+    </aside>
+    <section class="workspace">
+      <header class="toolbar">
+        <div><h1 id="view-title">片库</h1><p id="view-subtitle">浏览并播放 MLIP 媒体库</p></div>
+        <div id="toolbar-actions"></div>
+      </header>
+      <main id="content" tabindex="-1"></main>
+    </section>
+    <section id="player-bar" class="player-bar" aria-label="当前播放" hidden></section>
+  </div>
+
+  <dialog id="modal"><div id="modal-content"></div><button id="modal-close" class="icon-button modal-close" title="关闭" aria-label="关闭">×</button></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/web/app.js"></script>
+</body>
+</html>

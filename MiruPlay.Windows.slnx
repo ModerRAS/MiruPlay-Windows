@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MiruPlay.Windows/MiruPlay.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MiruPlay.Windows.Tests/MiruPlay.Windows.Tests.csproj" />
+  </Folder>
+</Solution>

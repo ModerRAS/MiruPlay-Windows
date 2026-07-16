@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: SemVer used for a validation artifact build
+        required: true
+        default: 0.1.0
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        run: dotnet restore MiruPlay.Windows.slnx
+      - name: Build
+        run: dotnet build MiruPlay.Windows.slnx -c Release --no-restore
+      - name: Test
+        run: dotnet test MiruPlay.Windows.slnx -c Release --no-build
+      - name: Audit dependencies
+        run: dotnet list MiruPlay.Windows.slnx package --vulnerable --include-transitive
+
+  mpv-integration:
+    needs: build-test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        run: dotnet restore MiruPlay.Windows.slnx
+      - name: Acquire pinned mpv runtime
+        shell: powershell
+        run: .\tools\Get-MpvRuntime.ps1
+      - name: Run mandatory real-mpv integration
+        shell: powershell
+        env:
+          MIRUPLAY_MPV_PATH: ${{ github.workspace }}\runtime\mpv\mpv.exe
+          MIRUPLAY_MPV_SMOKE_MEDIA: ${{ github.workspace }}\tests\fixtures\mpv-smoke.mp4
+          MIRUPLAY_REQUIRE_MPV_SMOKE: '1'
+        run: dotnet test MiruPlay.Windows.slnx -c Release --filter Category=Integration
+
+  package:
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    needs: [build-test, mpv-integration]
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Install Inno Setup
+        shell: powershell
+        run: choco install innosetup --no-progress -y
+      - name: Build release artifacts
+        id: package
+        shell: powershell
+        env:
+          WINDOWS_SIGNING_CERT_BASE64: ${{ secrets.WINDOWS_SIGNING_CERT_BASE64 }}
+          WINDOWS_SIGNING_CERT_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERT_PASSWORD }}
+        run: |
+          $version = if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $tagVersion = $env:GITHUB_REF.Substring('refs/tags/v'.Length)
+            if ($tagVersion -notmatch '^\d+\.\d+\.\d+$') {
+              throw "Release tags must use stable SemVer: v<major>.<minor>.<patch>."
+            }
+            $tagVersion
+          } else {
+            '${{ inputs.version }}'
+          }
+          $parameters = @{ Version = $version }
+          $certificatePath = Join-Path $env:RUNNER_TEMP 'miruplay-signing.pfx'
+          $certificateBase64 = $env:WINDOWS_SIGNING_CERT_BASE64
+          $certificatePassword = $env:WINDOWS_SIGNING_CERT_PASSWORD
+          Remove-Item Env:WINDOWS_SIGNING_CERT_BASE64, Env:WINDOWS_SIGNING_CERT_PASSWORD -ErrorAction SilentlyContinue
+          try {
+            if (-not [string]::IsNullOrWhiteSpace($certificateBase64)) {
+              [IO.File]::WriteAllBytes($certificatePath, [Convert]::FromBase64String($certificateBase64))
+              $certificateBase64 = $null
+              $parameters.CertificatePath = $certificatePath
+              $parameters.CertificatePassword = $certificatePassword
+            }
+            .\tools\Publish-Release.ps1 @parameters
+          } finally {
+            Remove-Item $certificatePath -Force -ErrorAction SilentlyContinue
+          }
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - name: Validate portable and installer artifacts
+        shell: powershell
+        run: .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MiruPlay-${{ steps.package.outputs.version }}-win-x64
+          path: artifacts/release/*
+          if-no-files-found: error
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:GITHUB_REF.Substring('refs/tags/'.Length)
+          $releaseFiles = @(Get-ChildItem .\artifacts\release -File)
+          $files = @($releaseFiles | ForEach-Object FullName)
+          $expectedNames = @($releaseFiles | ForEach-Object Name | Sort-Object)
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            $existingNames = @(gh release view $tag --json assets --jq '.assets[].name')
+            foreach ($staleName in @($existingNames | Where-Object { $_ -notin $expectedNames })) {
+              gh release delete-asset $tag $staleName --yes
+              if ($LASTEXITCODE -ne 0) { throw "Failed to delete stale release asset: $staleName" }
+            }
+            gh release upload $tag @files --clobber
+          } else {
+            gh release create $tag @files --verify-tag --generate-notes --title "MiruPlay $tag"
+          }
+          if ($LASTEXITCODE -ne 0) { throw "GitHub Release publication failed with exit code $LASTEXITCODE" }
+          $publishedNames = @(gh release view $tag --json assets --jq '.assets[].name' | Sort-Object)
+          if (Compare-Object $expectedNames $publishedNames) {
+            throw 'Published release assets do not exactly match the validated release directory.'
+          }

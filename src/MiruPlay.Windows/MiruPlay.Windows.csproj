@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>MiruPlay</AssemblyName>
+    <RootNamespace>MiruPlay.Windows</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MiruPlay.Windows.Tests" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('..\..\runtime\mpv\mpv.exe')">
+    <Content Include="..\..\runtime\mpv\mpv.exe" Link="runtime\mpv\mpv.exe" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\runtime\mpv\d3dcompiler_43.dll" Link="runtime\mpv\d3dcompiler_43.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Google.Protobuf" Version="3.35.1" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.80.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.82.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.2" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\clouddrive-auth.proto" GrpcServices="Client" />
+    <EmbeddedResource Include="Web\**\*" />
+  </ItemGroup>
+
+</Project>

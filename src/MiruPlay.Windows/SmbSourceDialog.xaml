@@ -1,0 +1,55 @@
+<Window x:Class="MiruPlay.Windows.SmbSourceDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="添加 SMB MLIP"
+        Width="560"
+        Height="500"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource DarkBackground}">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="SMB MLIP" Style="{StaticResource PageTitle}" FontSize="28" />
+        <TextBlock Grid.Row="1" Text="名称" Style="{StaticResource SecondaryText}" Margin="0,20,0,6" />
+        <TextBox x:Name="SourceNameBox" Grid.Row="2" Text="SMB" />
+        <Grid Grid.Row="3" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="域（可选）" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                <TextBox x:Name="DomainBox" />
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="用户名" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                <TextBox x:Name="UsernameBox" />
+            </StackPanel>
+            <StackPanel Grid.Column="4">
+                <TextBlock Text="密码" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                <PasswordBox x:Name="PasswordValueBox" Padding="10,8" />
+            </StackPanel>
+        </Grid>
+        <StackPanel Grid.Row="4" Margin="0,16,0,0">
+            <TextBlock Text="共享地址" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+            <TextBox x:Name="LocationBox" ToolTip="例如 smb://nas/anime 或 \\nas\anime" />
+        </StackPanel>
+        <TextBlock Grid.Row="5" Text="保存前会通过 Windows SMB 会话只读验证根目录的 library.db。" Style="{StaticResource SecondaryText}" Margin="0,18,0,0" />
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource SecondaryButton}" Content="取消" IsCancel="True" />
+            <Button Content="连接并保存" Margin="10,0,0,0" Click="Save_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

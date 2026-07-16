@@ -1,0 +1,15 @@
+﻿<Application x:Class="MiruPlay.Windows.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:MiruPlay.Windows"
+             xmlns:converters="clr-namespace:MiruPlay.Windows.Converters"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <converters:PosterImageConverter x:Key="PosterImageConverter" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/MiruPlayTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
