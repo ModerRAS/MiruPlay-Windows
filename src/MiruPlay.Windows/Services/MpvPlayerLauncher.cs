@@ -80,6 +80,7 @@ public static class MpvPlayerLauncher
             startInfo.ArgumentList.Add("--ao=null");
         }
         startInfo.ArgumentList.Add("--resume-playback=no");
+        startInfo.ArgumentList.Add("--keep-open=yes");
         if (authConfigPath is not null) startInfo.ArgumentList.Add($"--include={authConfigPath}");
         startInfo.ArgumentList.Add($"--input-ipc-server=\\\\.\\pipe\\{pipeName}");
         if (progress is { IsCompleted: false, PositionMs: > 0 })

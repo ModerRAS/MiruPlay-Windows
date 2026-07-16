@@ -26,6 +26,7 @@ public sealed class MpvPlayerLauncherTests : IDisposable
 
         Assert.Contains("--input-ipc-server=\\\\.\\pipe\\test-pipe", startInfo.ArgumentList);
         Assert.Contains("--resume-playback=no", startInfo.ArgumentList);
+        Assert.Contains("--keep-open=yes", startInfo.ArgumentList);
         Assert.DoesNotContain("--save-position-on-quit=yes", startInfo.ArgumentList);
         Assert.Contains("--start=30", startInfo.ArgumentList);
         Assert.Contains("--slang=zh-Hans,zh-CN,chs,sc,chi,zho", startInfo.ArgumentList);

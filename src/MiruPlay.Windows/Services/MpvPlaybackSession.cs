@@ -24,6 +24,7 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
     private int _requestId;
     private int _ending;
     private int _explicitStopRequested;
+    private int _naturalEndObserved;
     private int _activeCommands;
     private long _positionMs;
     private long _durationMs;
@@ -255,6 +256,7 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
             while (Volatile.Read(ref _ending) == 0 && !_process.HasExited)
             {
                 await SampleRuntimeStateAsync().ConfigureAwait(false);
+                if (Volatile.Read(ref _ending) != 0) break;
                 if (saveInterval.Elapsed >= TimeSpan.FromSeconds(15))
                 {
                     SaveCurrent(completed: false);
@@ -274,7 +276,8 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
         {
             Interlocked.Exchange(ref _ending, 1);
             WasCompleted = Volatile.Read(ref _explicitStopRequested) == 0 &&
-                DurationMs > 0 && PositionMs >= DurationMs * 0.9;
+                (Volatile.Read(ref _naturalEndObserved) != 0 ||
+                    DurationMs > 0 && PositionMs >= DurationMs * 0.9);
             SaveCurrent(WasCompleted);
             await CleanupProcessAndPipeAsync().ConfigureAwait(false);
         }
@@ -289,6 +292,7 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
             var position = await ReadNumberPropertyLockedAsync("time-pos").ConfigureAwait(false);
             var duration = await ReadNumberPropertyLockedAsync("duration").ConfigureAwait(false);
             var paused = await ReadBooleanPropertyLockedAsync("pause").ConfigureAwait(false);
+            var reachedEnd = await ReadBooleanPropertyLockedAsync("eof-reached").ConfigureAwait(false);
             var trackData = await SendRequestLockedAsync(["get_property", "track-list"], throwOnError: false).ConfigureAwait(false);
             var sidData = await SendRequestLockedAsync(["get_property", "sid"], throwOnError: false).ConfigureAwait(false);
             if (position is not null) Interlocked.Exchange(ref _positionMs, ToMilliseconds(position.Value));
@@ -297,6 +301,19 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
             if (trackData is not null)
             {
                 UpdateSubtitleState(ParseSubtitleTracks(trackData.Value), ParseSubtitleTrackId(sidData));
+            }
+            if (reachedEnd == true)
+            {
+                Interlocked.Exchange(ref _naturalEndObserved, 1);
+                Interlocked.Exchange(ref _ending, 1);
+                try
+                {
+                    await SendRequestLockedAsync(["quit"]).ConfigureAwait(false);
+                }
+                catch (Exception error) when (error is IOException or ObjectDisposedException or TimeoutException)
+                {
+                    // A successful quit can close IPC before mpv sends its response.
+                }
             }
         }
         finally
