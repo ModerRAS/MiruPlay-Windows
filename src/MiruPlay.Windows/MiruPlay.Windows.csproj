@@ -6,6 +6,7 @@
     <AssemblyName>MiruPlay</AssemblyName>
     <RootNamespace>MiruPlay.Windows</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\MiruPlay.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -16,6 +17,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="MiruPlay.Windows.Tests" />
+    <Resource Include="Assets\MiruPlay.ico" />
   </ItemGroup>
 
   <ItemGroup Condition="Exists('..\..\runtime\mpv\mpv.exe')">

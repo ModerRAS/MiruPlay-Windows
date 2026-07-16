@@ -4,6 +4,7 @@
         Title="添加 WebDAV MLIP"
         Width="560"
         Height="430"
+        Icon="Assets/MiruPlay.ico"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource DarkBackground}">
@@ -37,9 +38,9 @@
         </Grid>
         <StackPanel Grid.Row="4" Margin="0,16,0,0">
             <TextBlock Text="根地址" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
-            <TextBox x:Name="LocationBox" ToolTip="包含 library.db 的 WebDAV 目录" />
+            <TextBox x:Name="LocationBox" ToolTip="支持 HTTP 和 HTTPS；请输入包含 library.db 的 WebDAV 目录" />
         </StackPanel>
-        <TextBlock Grid.Row="5" Text="保存前会下载并只读验证根目录的 library.db。" Style="{StaticResource SecondaryText}" Margin="0,18,0,0" />
+        <TextBlock Grid.Row="5" Text="支持 HTTP 和 HTTPS。HTTP 凭据会以明文传输，请仅在可信网络使用。保存前会只读验证 library.db。" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,18,0,0" />
         <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource SecondaryButton}" Content="取消" IsCancel="True" />
             <Button Content="连接并保存" Margin="10,0,0,0" Click="Save_Click" />

@@ -188,10 +188,6 @@ public sealed class WebDavMlipClient : IDisposable
         {
             throw new ArgumentException("WebDAV 地址不能包含嵌入凭据、查询或片段。", nameof(rootUrl));
         }
-        if (uri.Scheme == "http" && !uri.IsLoopback)
-        {
-            throw new ArgumentException("带凭据的 WebDAV 必须使用 HTTPS；仅本机回环地址允许 HTTP。", nameof(rootUrl));
-        }
         var builder = new UriBuilder(uri);
         builder.Path = $"{builder.Path.TrimEnd('/')}/";
         return builder.Uri;

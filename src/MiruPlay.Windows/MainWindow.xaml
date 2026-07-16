@@ -9,29 +9,28 @@
         Height="780"
         MinWidth="720"
         MinHeight="540"
+        Icon="Assets/MiruPlay.ico"
         Background="{StaticResource DarkBackground}"
         Foreground="{StaticResource TextPrimary}"
         WindowStartupLocation="CenterScreen">
     <Grid Background="{StaticResource DarkBackground}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="216" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" Background="{StaticResource DarkSurface}" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="0,0,1,0">
-            <Grid Margin="18,22">
+            <Grid Margin="12,16">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="32" />
+                    <RowDefinition Height="24" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="38" Height="38" Background="{StaticResource AnimeRed}" CornerRadius="6">
-                        <TextBlock Text="M" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="MiruPlay" Margin="12,0,0,0" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" Margin="6,0" VerticalAlignment="Center">
+                    <Image Source="Assets/MiruPlay.ico" Width="34" Height="34" />
+                    <TextBlock Text="MiruPlay" Margin="10,0,0,0" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
                 </StackPanel>
 
                 <StackPanel Grid.Row="2">
@@ -69,7 +68,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Grid Margin="32,26,32,20">
+                <Grid Margin="30,24,30,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="320" />
@@ -101,7 +100,7 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
                                   HorizontalContentAlignment="Stretch"
-                                  Padding="32,0,20,24">
+                                  Padding="30,0,20,24">
                         <StackPanel>
                         <StackPanel x:Name="ContinueSection" Visibility="Collapsed" Margin="0,0,0,24">
                             <TextBlock Text="继续观看" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
@@ -532,7 +531,7 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <Border x:Name="BusyOverlay" Grid.ColumnSpan="2" Background="#B01A1A2E" Visibility="Collapsed">
+            <Border x:Name="BusyOverlay" Grid.ColumnSpan="2" Background="#D9202020" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <ProgressBar Width="260" Height="4" IsIndeterminate="True" Foreground="{StaticResource AnimeRed}" />
                     <TextBlock Text="正在读取媒体库…" Margin="0,16,0,0" FontSize="16" />

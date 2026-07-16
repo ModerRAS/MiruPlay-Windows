@@ -181,11 +181,12 @@ public sealed class MediaSourceRegistryTests : IDisposable
     }
 
     [Fact]
-    public void WebDavRequiresHttpsOutsideLoopback()
+    public void WebDavAcceptsHttpAndHttps()
     {
-        Assert.Throws<ArgumentException>(() => WebDavMlipClient.NormalizeRoot("http://example.com/dav"));
+        Assert.Equal("http://example.com/dav/", WebDavMlipClient.NormalizeRoot("http://example.com/dav").AbsoluteUri);
         Assert.Equal("https://example.com/dav/", WebDavMlipClient.NormalizeRoot("https://example.com/dav").AbsoluteUri);
         Assert.Equal("http://127.0.0.1:9978/dav/", WebDavMlipClient.NormalizeRoot("http://127.0.0.1:9978/dav").AbsoluteUri);
+        Assert.Throws<ArgumentException>(() => WebDavMlipClient.NormalizeRoot("ftp://example.com/dav"));
     }
 
     [Fact]

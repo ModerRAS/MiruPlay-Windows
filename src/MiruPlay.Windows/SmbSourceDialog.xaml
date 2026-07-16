@@ -4,6 +4,7 @@
         Title="添加 SMB MLIP"
         Width="560"
         Height="500"
+        Icon="Assets/MiruPlay.ico"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{StaticResource DarkBackground}">
