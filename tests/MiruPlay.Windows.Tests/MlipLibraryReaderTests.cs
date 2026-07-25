@@ -39,6 +39,61 @@ public sealed class MlipLibraryReaderTests : IDisposable
     }
 
     [Fact]
+    public void LoadReadsV4ArtworkCatalogAndKeepsLegacyFallback()
+    {
+        CreateDatabase();
+        ExecuteSql("""
+            PRAGMA user_version = 4;
+            UPDATE meta SET value = '4' WHERE key = 'schema';
+            INSERT INTO capability VALUES ('artwork_pack', 1);
+            ALTER TABLE series_artwork ADD COLUMN asset_id INTEGER;
+            ALTER TABLE series_artwork ADD COLUMN source_provider INTEGER;
+            ALTER TABLE series_artwork ADD COLUMN source_subject_id TEXT;
+            ALTER TABLE series_artwork ADD COLUMN source_url TEXT;
+            ALTER TABLE series_artwork ADD COLUMN downloaded_at TEXT;
+            ALTER TABLE episode_artwork ADD COLUMN asset_id INTEGER;
+            ALTER TABLE episode_artwork ADD COLUMN source_provider INTEGER;
+            ALTER TABLE episode_artwork ADD COLUMN source_subject_id TEXT;
+            ALTER TABLE episode_artwork ADD COLUMN source_url TEXT;
+            ALTER TABLE episode_artwork ADD COLUMN downloaded_at TEXT;
+            CREATE TABLE artwork_pack(id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL, sha256 TEXT UNIQUE NOT NULL, byte_length INTEGER NOT NULL, asset_count INTEGER NOT NULL);
+            CREATE TABLE artwork_asset(id INTEGER PRIMARY KEY, sha256 TEXT UNIQUE NOT NULL, pack_id INTEGER NOT NULL, member_name TEXT NOT NULL, data_offset INTEGER NOT NULL, byte_length INTEGER NOT NULL, media_type TEXT NOT NULL, width INTEGER, height INTEGER);
+            INSERT INTO artwork_pack VALUES (1, 'MLIP-Artwork/artwork-000001.tar', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 1024, 1);
+            INSERT INTO artwork_asset VALUES (1, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 1, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.png', 512, 68, 'image/png', 1, 1);
+            UPDATE series_artwork SET asset_id = 1, source_provider = 1, source_subject_id = '431767', source_url = 'https://example.test/poster.png', downloaded_at = '2026-01-01T00:00:00Z';
+            """);
+
+        var catalog = MlipLibraryReader.Load(_root);
+        var series = Assert.Single(catalog.Series);
+        var pack = Assert.Single(catalog.ArtworkPacks);
+
+        Assert.Equal(4, catalog.SchemaVersion);
+        Assert.Equal("MLIP-Artwork/artwork-000001.tar", pack.Path);
+        Assert.EndsWith(Path.Combine("Frieren", "poster.jpg"), series.PosterPath);
+        Assert.Equal(pack.Id, series.PosterArtwork?.Asset.PackId);
+        Assert.Equal("431767", series.PosterArtwork?.SourceSubjectId);
+        var binding = Assert.Single(catalog.ArtworkBindings);
+        Assert.Equal("series", binding.OwnerKind);
+        Assert.Equal(1, binding.ArtworkKind);
+        Assert.Equal("https://example.test/poster.png", binding.Reference?.SourceUrl);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void LoadV1ThroughV3ArtworkUsesLegacyPath(int schemaVersion)
+    {
+        CreateDatabase();
+        ExecuteSql($"PRAGMA user_version = {schemaVersion}; UPDATE meta SET value = '{schemaVersion}' WHERE key = 'schema';");
+
+        var series = Assert.Single(MlipLibraryReader.Load(_root).Series);
+
+        Assert.EndsWith(Path.Combine("Frieren", "poster.jpg"), series.PosterPath);
+        Assert.Null(series.PosterArtwork);
+    }
+
+    [Fact]
     public void LoadSkipsFractionalEpisodeNumbers()
     {
         CreateDatabase();

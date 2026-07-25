@@ -445,13 +445,16 @@ public partial class MainWindow : Window, IAsyncDisposable
                 if (ReferenceEquals(_activeSession, previous)) _activeSession = null;
             }
 
-            var credential = episode.SourceId > 0 ? _mediaSourceRegistry.GetCredential(episode.SourceId) : null;
+            var source = episode.SourceId > 0 ? _mediaSourceRegistry.Get(episode.SourceId) : null;
+            var playbackProxy = source?.Type == "WEBDAV"
+                ? _mediaSourceRegistry.CreatePlaybackProxy(source.Id, episode)
+                : null;
             var session = await MpvPlayerLauncher.PlayAsync(
                 episode,
                 _settings,
                 _progressStore,
                 startPositionMs,
-                credential: credential);
+                playbackProxy: playbackProxy);
             _activeSession = session;
             StatusText.Text = session is null
                 ? $"已交给 Windows 播放器：{episode.DisplayTitle}"
@@ -866,7 +869,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         UpdateContinueWatching();
         ShowSeries(_allSeries);
         LibraryRootValue.Text = "尚未设置";
-        LibrarySchemaText.Text = "MLIP v1-v3";
+        LibrarySchemaText.Text = "MLIP v1-v4";
         LibrarySummaryText.Text = "选择一个媒体源以开始";
         StatusText.Text = "尚未选择媒体源";
     }

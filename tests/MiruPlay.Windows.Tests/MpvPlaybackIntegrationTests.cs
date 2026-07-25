@@ -33,12 +33,21 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
             {
                 SourceId = 3,
             };
+            using var webDav = new WebDavMlipClient(
+                cacheRoot: Path.Combine(_directory, "webdav-cache"),
+                minimumRequestInterval: TimeSpan.Zero);
+            var credential = new MediaSourceCredential("alice", "p@ss");
+            var playbackProxy = new WebDavPlaybackProxy(
+                webDav,
+                new Uri(new Uri(remoteServer.MediaUrl), "/").AbsoluteUri,
+                credential,
+                remoteEpisode);
             var remoteSession = await MpvPlayerLauncher.PlayAsync(
                 remoteEpisode,
                 new AppSettings(PlayerPath: mpvPath),
                 remoteStore,
                 headless: true,
-                credential: new MediaSourceCredential("alice", "p@ss"));
+                playbackProxy: playbackProxy);
 
             Assert.NotNull(remoteSession);
             await Task.Delay(TimeSpan.FromSeconds(1));

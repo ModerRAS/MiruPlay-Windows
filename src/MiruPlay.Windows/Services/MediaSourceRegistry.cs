@@ -318,6 +318,13 @@ public sealed class MediaSourceRegistry : IDisposable
 
     public MediaSourceCredential? GetCredential(long sourceId) => _credentials.Get(sourceId);
 
+    internal WebDavPlaybackProxy CreatePlaybackProxy(long sourceId, LibraryEpisode episode)
+    {
+        var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
+        if (source.Type != "WEBDAV") throw new NotSupportedException("只有 WebDAV 媒体源使用 HTTP 播放代理。");
+        return new WebDavPlaybackProxy(_webDav, source.Location, _credentials.Get(sourceId), episode);
+    }
+
     public Task<string> CacheArtworkAsync(long sourceId, string artworkUrl, CancellationToken cancellationToken = default)
     {
         var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");

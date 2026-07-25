@@ -13,7 +13,48 @@ public sealed record ExternalMetadataId(string Provider, string Value)
     };
 }
 
-public sealed record LibraryCatalog(int SchemaVersion, string RootPath, IReadOnlyList<LibrarySeries> Series);
+public sealed record MlipArtworkPack(
+    long Id,
+    string Path,
+    string Sha256,
+    long ByteSize,
+    int EntryCount,
+    IReadOnlyList<MlipArtworkAsset> Assets);
+
+public sealed record MlipArtworkAsset(
+    long Id,
+    string Sha256,
+    long PackId,
+    string MemberName,
+    long DataOffset,
+    long DataLength,
+    string MediaType,
+    int? Width,
+    int? Height)
+{
+    public string Extension => Path.GetExtension(MemberName).ToLowerInvariant();
+}
+
+public sealed record MlipArtworkReference(
+    MlipArtworkAsset Asset,
+    string? LegacyPath,
+    int? SourceProvider,
+    string? SourceSubjectId,
+    string? SourceUrl,
+    string? DownloadedAt);
+
+public sealed record MlipArtworkBinding(
+    string OwnerKind,
+    long OwnerId,
+    int ArtworkKind,
+    string? LegacyPath,
+    MlipArtworkReference? Reference);
+
+public sealed record LibraryCatalog(int SchemaVersion, string RootPath, IReadOnlyList<LibrarySeries> Series)
+{
+    public IReadOnlyList<MlipArtworkPack> ArtworkPacks { get; init; } = [];
+    public IReadOnlyList<MlipArtworkBinding> ArtworkBindings { get; init; } = [];
+}
 
 public sealed record LibrarySeries(
     long Id,
@@ -29,6 +70,7 @@ public sealed record LibrarySeries(
     IReadOnlyList<LibraryExtra> Extras)
 {
     public IReadOnlyList<ExternalMetadataId> ExternalIds { get; init; } = [];
+    public MlipArtworkReference? PosterArtwork { get; init; }
     public string ApiId => $"mlip:windows:{Uuid}";
     public ExternalMetadataId? ExternalId(string provider) =>
         ExternalIds.FirstOrDefault(item => item.Provider.Equals(provider, StringComparison.OrdinalIgnoreCase));

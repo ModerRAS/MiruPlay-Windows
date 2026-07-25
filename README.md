@@ -4,7 +4,7 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 
 ## 当前可用
 
-- 管理 Local、HTTPS WebDAV 和 Windows SMB/UNC MLIP 媒体源；远程凭据由 CurrentUser DPAPI 保护
+- 管理 Local、HTTP(S) WebDAV 和 Windows SMB/UNC MLIP v1-v4 媒体源；远程凭据由 CurrentUser DPAPI 保护
 - 校验协议版本、必需表、capability 和不安全路径
 - 按 Anime/Drama 模式隔离媒体源，并提供海报墙、搜索、作品详情和剧集列表
 - 使用 mpv 或 Windows 默认播放器播放本地视频

@@ -527,7 +527,7 @@
                     <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="关于" Style="{StaticResource SectionTitle}" Margin="0,28,0,12" />
                     <TextBlock Text="MiruPlay Windows" FontWeight="SemiBold" />
-                    <TextBlock Text="原生 Windows 客户端 · 支持 MLIP v1-v3" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
+                    <TextBlock Text="原生 Windows 客户端 · 支持 MLIP v1-v4" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
                 </StackPanel>
             </ScrollViewer>
 

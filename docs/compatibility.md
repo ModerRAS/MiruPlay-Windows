@@ -4,13 +4,13 @@
 
 | 功能 | 状态 | 当前边界 |
 |---|---|---|
-| MLIP v1-v3 本地读取 | 完成 | 只读；校验版本、表、v3 extra capability 和路径安全 |
+| MLIP v1-v4 读取 | 完成 | 只读；校验版本、表、capability、路径安全和 v4 artwork pack 哈希/边界；v1-v3 保留 path 行为 |
 | 海报墙、搜索、详情 | 完成 | Anime/Drama 媒体源；桌面响应式布局 |
 | 本地视频播放 | 完成 | 支持固定 mpv/默认播放器、命名管道状态和暂停/继续/停止/跳转/倍速控制 |
 | 内封/外挂字幕与语言偏好 | 完成 | 通过 mpv `track-list`/`sid` 枚举、自动偏好、手动选择和关闭；WPF 与 WebControl/WebUI 共用会话状态 |
 | 播放进度、继续观看、下一集 | 完成 | 独立 state.db、15 秒保存、继续观看入口、90% 完成判定和下一集动作 |
 | 独立目录识别 | 明确不支持 | Windows 只读消费 anime-organizer 生成的 MLIP；来源扫描会重新验证 MLIP，不伪装成目录识别 |
-| Local/WebDAV/SMB 来源管理 | 完成 | Local、WebDAV、SMB 均支持 MLIP 只读验证、WPF/WebUI CRUD、扫描、海报、字幕与播放；远程凭据使用 CurrentUser DPAPI |
+| Local/WebDAV/SMB 来源管理 | 完成 | Local、WebDAV、SMB 均支持 MLIP 只读验证、WPF/WebUI CRUD、扫描、海报、字幕与播放；WebDAV 由每端点单消费者队列、流式 lease 和 405 circuit 统一调度；远程凭据使用 CurrentUser DPAPI |
 | Anime/Drama 模式 | 完成 | 模式持久化；Local/WebDAV/SMB MLIP 来源按内容模式隔离，WPF 与 `/api/settings/scan`/WebUI 可切换；Windows 目录识别仍明确不支持 |
 | Bangumi/TMDB 补充元数据 | 完成 | MLIP 是唯一元数据权威；支持只读搜索、加密 Token、Bangumi 身份验证、作品收藏读写、完整分页的分集状态读取，以及自然播放完成后标记单集“看过” |
 | WebControl/WebUI | 完成 | 内嵌响应式 WebUI 已覆盖令牌认证、真实媒体库/海报/详情/播放/字幕、Local/WebDAV/SMB CRUD/测试/扫描与目录浏览、Anime/Drama 模式、CloudDrive2/RSS 配置/运行/预览、Bangumi/TMDB、播放设置和令牌轮换；本地与认证 WebDAV 海报均通过受保护代理提供 |

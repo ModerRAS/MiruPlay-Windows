@@ -15,6 +15,7 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
     private readonly StreamWriter _writer;
     private readonly LibraryEpisode _episode;
     private readonly PlaybackProgressStore _progressStore;
+    private readonly IAsyncDisposable? _transportLease;
     private readonly SemaphoreSlim _ipcLock = new(1, 1);
     private readonly object _errorSync = new();
     private readonly Queue<string> _errors = new();
@@ -34,7 +35,8 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
         Process process,
         NamedPipeClientStream pipe,
         LibraryEpisode episode,
-        PlaybackProgressStore progressStore)
+        PlaybackProgressStore progressStore,
+        IAsyncDisposable? transportLease)
     {
         _process = process;
         _pipe = pipe;
@@ -42,6 +44,7 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
         _writer = new StreamWriter(pipe) { AutoFlush = true };
         _episode = episode;
         _progressStore = progressStore;
+        _transportLease = transportLease;
         _durationMs = Convert.ToInt64(episode.Duration.TotalMilliseconds, CultureInfo.InvariantCulture);
         _process.ErrorDataReceived += Process_ErrorDataReceived;
         try
@@ -106,7 +109,8 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
         string pipeName,
         LibraryEpisode episode,
         PlaybackProgressStore progressStore,
-        int connectTimeoutMs = 5_000)
+        int connectTimeoutMs = 5_000,
+        IAsyncDisposable? transportLease = null)
     {
         var pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
         try
@@ -120,7 +124,7 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
             throw new InvalidOperationException("mpv 已启动，但无法建立控制连接。", error);
         }
 
-        var session = new MpvPlaybackSession(process, pipe, episode, progressStore);
+        var session = new MpvPlaybackSession(process, pipe, episode, progressStore, transportLease);
         session.Completion = session.MonitorAsync();
         return session;
     }
@@ -450,6 +454,7 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
         {
             await Task.Delay(10).ConfigureAwait(false);
         }
+        if (_transportLease is not null) await _transportLease.DisposeAsync().ConfigureAwait(false);
         _ipcLock.Dispose();
     }
 

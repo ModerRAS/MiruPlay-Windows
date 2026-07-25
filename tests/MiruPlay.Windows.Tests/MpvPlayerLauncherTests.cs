@@ -35,34 +35,19 @@ public sealed class MpvPlayerLauncherTests : IDisposable
     }
 
     [Fact]
-    public void RemoteStartInfoUsesTemporaryAuthConfigAndRemoteSubtitle()
+    public async Task RemotePlaybackWithoutSharedProxyIsRejected()
     {
-        var credential = new MediaSourceCredential("alice", "p@ss");
-        var configPath = MpvPlayerLauncher.CreateAuthConfig(credential);
-        try
-        {
-            var episode = CreateEpisode(
-                "https://example.com/dav/Anime/01.mkv",
-                "https://example.com/dav/Anime/01.zh-CN.srt");
-            var startInfo = MpvPlayerLauncher.CreateStartInfo(
-                "mpv.exe",
-                "remote-pipe",
-                episode,
-                new AppSettings(),
-                null,
-                authConfigPath: configPath);
+        var episode = CreateEpisode(
+            "https://example.com/dav/Anime/01.mkv",
+            "https://example.com/dav/Anime/01.zh-CN.srt");
+        var progress = new PlaybackProgressStore(Path.Combine(_directory, "remote-state.db"));
 
-            Assert.Contains($"--include={configPath}", startInfo.ArgumentList);
-            Assert.Contains("--sub-file=https://example.com/dav/Anime/01.zh-CN.srt", startInfo.ArgumentList);
-            Assert.Equal(AppContext.BaseDirectory, startInfo.WorkingDirectory);
-            var config = File.ReadAllText(configPath);
-            Assert.Contains("http-header-fields=Authorization: Basic ", config, StringComparison.Ordinal);
-            Assert.DoesNotContain("p@ss", config, StringComparison.Ordinal);
-        }
-        finally
-        {
-            if (File.Exists(configPath)) File.Delete(configPath);
-        }
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => MpvPlayerLauncher.PlayAsync(
+            episode,
+            new AppSettings(PlayerPath: "missing-mpv.exe"),
+            progress));
+
+        Assert.Contains("shared endpoint consumer", error.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -125,6 +110,7 @@ public sealed class MpvPlayerLauncherTests : IDisposable
 
     public void Dispose()
     {
+        Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
         if (Directory.Exists(_directory)) Directory.Delete(_directory, true);
     }
 }

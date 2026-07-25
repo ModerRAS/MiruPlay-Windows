@@ -591,7 +591,6 @@ public sealed class WebControlServer : IAsyncDisposable
                 ?? throw new BadHttpRequestException("番剧不存在", StatusCodes.Status404NotFound);
             var path = await _resolvePosterPath(series, request.HttpContext.RequestAborted).ConfigureAwait(false);
             if (path is not null && File.Exists(path)) return Results.File(path, PosterContentType(path));
-            if (series.PosterUri?.Scheme is "http" or "https") return Results.Redirect(series.PosterPath!);
             throw new BadHttpRequestException("海报不存在", StatusCodes.Status404NotFound);
         });
 

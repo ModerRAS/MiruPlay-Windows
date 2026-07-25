@@ -1,58 +1,62 @@
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using MiruPlay.Windows.Models;
 
 namespace MiruPlay.Windows.Services;
 
 public static class MpvPlayerLauncher
 {
-    public static async Task<MpvPlaybackSession?> PlayAsync(
+    internal static async Task<MpvPlaybackSession?> PlayAsync(
         LibraryEpisode episode,
         AppSettings settings,
         PlaybackProgressStore progressStore,
         long? startPositionMs = null,
         bool headless = false,
-        MediaSourceCredential? credential = null)
+        WebDavPlaybackProxy? playbackProxy = null)
     {
         var isRemote = IsRemoteUri(episode.MediaPath);
-        if (!isRemote && !File.Exists(episode.MediaPath))
-        {
-            throw new FileNotFoundException("找不到视频文件。", episode.MediaPath);
-        }
-
-        var mpvPath = FindMpv(settings.PlayerPath);
-        if (mpvPath is null)
-        {
-            if (isRemote) throw new NotSupportedException("播放 WebDAV 媒体需要 mpv。");
-            Process.Start(new ProcessStartInfo(episode.MediaPath) { UseShellExecute = true });
-            return null;
-        }
-
-        var pipeName = $"miruplay-{Guid.NewGuid():N}";
-        var progress = progressStore.Get(episode.ProgressKey);
-        if (startPositionMs is not null)
-        {
-            var durationMs = progress?.DurationMs ?? Convert.ToInt64(episode.Duration.TotalMilliseconds);
-            progress = new PlaybackProgress(
-                episode.ProgressKey,
-                Math.Clamp(startPositionMs.Value, 0, durationMs > 0 ? durationMs : long.MaxValue),
-                durationMs,
-                progress?.LastWatchedEpochMs ?? 0,
-                progress?.PlayCount ?? 0);
-        }
-        var authConfigPath = isRemote && credential is { IsEmpty: false }
-            ? CreateAuthConfig(credential)
-            : null;
         try
         {
-            var startInfo = CreateStartInfo(mpvPath, pipeName, episode, settings, progress, headless, authConfigPath);
+            if (isRemote && playbackProxy is null)
+                throw new InvalidOperationException("WebDAV playback must use the shared endpoint consumer.");
+            if (!isRemote && !File.Exists(episode.MediaPath))
+                throw new FileNotFoundException("找不到视频文件。", episode.MediaPath);
+
+            var mpvPath = FindMpv(settings.PlayerPath);
+            if (mpvPath is null)
+            {
+                if (isRemote) throw new NotSupportedException("播放 WebDAV 媒体需要 mpv。");
+                Process.Start(new ProcessStartInfo(episode.MediaPath) { UseShellExecute = true });
+                return null;
+            }
+
+            var pipeName = $"miruplay-{Guid.NewGuid():N}";
+            var progress = progressStore.Get(episode.ProgressKey);
+            if (startPositionMs is not null)
+            {
+                var durationMs = progress?.DurationMs ?? Convert.ToInt64(episode.Duration.TotalMilliseconds);
+                progress = new PlaybackProgress(
+                    episode.ProgressKey,
+                    Math.Clamp(startPositionMs.Value, 0, durationMs > 0 ? durationMs : long.MaxValue),
+                    durationMs,
+                    progress?.LastWatchedEpochMs ?? 0,
+                    progress?.PlayCount ?? 0);
+            }
+            var launchEpisode = playbackProxy?.Episode ?? episode;
+            var startInfo = CreateStartInfo(mpvPath, pipeName, launchEpisode, settings, progress, headless);
             var process = Process.Start(startInfo) ?? throw new InvalidOperationException("无法启动 mpv。 ");
-            return await MpvPlaybackSession.AttachAsync(process, pipeName, episode, progressStore).ConfigureAwait(false);
+            var session = await MpvPlaybackSession.AttachAsync(
+                process,
+                pipeName,
+                episode,
+                progressStore,
+                transportLease: playbackProxy).ConfigureAwait(false);
+            playbackProxy = null;
+            return session;
         }
         finally
         {
-            if (authConfigPath is not null && File.Exists(authConfigPath)) File.Delete(authConfigPath);
+            if (playbackProxy is not null) await playbackProxy.DisposeAsync().ConfigureAwait(false);
         }
     }
 
@@ -62,8 +66,7 @@ public static class MpvPlayerLauncher
         LibraryEpisode episode,
         AppSettings settings,
         PlaybackProgress? progress,
-        bool headless = false,
-        string? authConfigPath = null)
+        bool headless = false)
     {
         var startInfo = new ProcessStartInfo(mpvPath)
         {
@@ -81,7 +84,6 @@ public static class MpvPlayerLauncher
         }
         startInfo.ArgumentList.Add("--resume-playback=no");
         startInfo.ArgumentList.Add("--keep-open=yes");
-        if (authConfigPath is not null) startInfo.ArgumentList.Add($"--include={authConfigPath}");
         startInfo.ArgumentList.Add($"--input-ipc-server=\\\\.\\pipe\\{pipeName}");
         if (progress is { IsCompleted: false, PositionMs: > 0 })
         {
@@ -109,32 +111,6 @@ public static class MpvPlayerLauncher
         return pathDirectories
             .Select(directory => Path.Combine(directory.Trim('"'), "mpv.exe"))
             .FirstOrDefault(File.Exists);
-    }
-
-    internal static string CreateAuthConfig(MediaSourceCredential credential)
-    {
-        ArgumentNullException.ThrowIfNull(credential);
-        var directory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "MiruPlay",
-            "runtime-secrets");
-        Directory.CreateDirectory(directory);
-        foreach (var stalePath in Directory.EnumerateFiles(directory, "mpv-auth-*.conf"))
-        {
-            try
-            {
-                File.Delete(stalePath);
-            }
-            catch (IOException)
-            {
-                // A concurrent mpv startup can still be reading its include file.
-            }
-        }
-        var path = Path.Combine(directory, $"mpv-auth-{Guid.NewGuid():N}.conf");
-        var basic = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{credential.Username}:{credential.Password}"));
-        File.WriteAllText(path, $"http-header-fields=Authorization: Basic {basic}{Environment.NewLine}", new UTF8Encoding(false));
-        File.SetAttributes(path, FileAttributes.Hidden | FileAttributes.Temporary);
-        return path;
     }
 
     private static bool IsRemoteUri(string path) =>
