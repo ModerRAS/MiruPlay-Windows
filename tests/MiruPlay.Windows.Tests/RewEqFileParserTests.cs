@@ -5,21 +5,24 @@ namespace MiruPlay.Windows.Tests;
 
 public sealed class RewEqFileParserTests
 {
+    private static readonly string[] FixtureLines =
+    [
+        "Generic",
+        "Number\tEnabled\tControl\tType\tFrequency(Hz)\tGain(dB)\tQ\tBandwidth(Hz)",
+        "1\tTrue\tAuto\tPK\t70.00\t-14.7\t10.398\t6.73",
+        "2\tFalse\tAuto\tPK\t71.90\t9.0\t6.993\t10.28",
+        "3\tTrue\tManual\tLS\t78.30\t5.7",
+        "4\tTrue\tAuto\tNone",
+        "",
+        "Compound_filters",
+        "Number\tEnabled\tControl\tType",
+        "1\tTrue\tAuto\tNone",
+    ];
+
     [Fact]
     public void ParseReadsGenericColumnsByNameAndSkipsDisabledAndNoneRows()
     {
-        const string text = """
-Generic
-Number\tEnabled\tControl\tType\tFrequency(Hz)\tGain(dB)\tQ\tBandwidth(Hz)
-1\tTrue\tAuto\tPK\t70.00\t-14.7\t10.398\t6.73
-2\tFalse\tAuto\tPK\t71.90\t9.0\t6.993\t10.28
-3\tTrue\tManual\tLS\t78.30\t5.7
-4\tTrue\tAuto\tNone
-
-Compound_filters
-Number\tEnabled\tControl\tType
-1\tTrue\tAuto\tNone
-""";
+        var text = string.Join(Environment.NewLine, FixtureLines);
 
         var result = RewEqFileParser.Parse(text);
 
