@@ -18,7 +18,8 @@ public sealed record PlaybackControlCommand(
     long? PositionMs = null,
     long? DeltaMs = null,
     float? Speed = null,
-    int? SubtitleTrackId = null);
+    int? SubtitleTrackId = null,
+    int? AudioTrackId = null);
 
 public sealed record MediaSourceActions(
     Func<IReadOnlyList<MediaSourceInfoDto>> List,
@@ -59,13 +60,19 @@ public sealed record PlaybackRuntimeStatus(
     bool IsPlaying = false,
     string? Error = null,
     IReadOnlyList<PlaybackSubtitleTrack>? SubtitleTracks = null,
-    int? SelectedSubtitleTrackId = null);
+    int? SelectedSubtitleTrackId = null,
+    IReadOnlyList<MpvAudioTrack>? AudioTracks = null,
+    int? SelectedAudioTrackId = null);
 
 public sealed class WebControlServer : IAsyncDisposable
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+    };
+    private static readonly JsonSerializerOptions AudioDspJsonOptions = new(JsonOptions)
+    {
+        Converters = { new JsonStringEnumConverter() },
     };
 
     private readonly int _port;
@@ -76,6 +83,7 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly Func<PlaybackControlCommand, Task<PlaybackRuntimeStatus>> _playbackCommand;
     private readonly Func<AppSettings> _getSettings;
     private readonly Func<Func<AppSettings, AppSettings>, Task<AppSettings>> _updateSettings;
+    private readonly Func<AudioDspConfig, Task>? _applyAudioDsp;
     private readonly SemaphoreSlim _settingsLock = new(1, 1);
     private readonly MediaSourceActions _mediaSources;
     private readonly BangumiMetadataClient _bangumiMetadata;
@@ -88,6 +96,11 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly RssFeedClient _rssFeedClient;
     private readonly RssProcessedStore _rssProcessed;
     private readonly CloudDriveRssRunner _cloudDriveRunner;
+    private readonly RotatingLocalLogStore _localLogs;
+    private readonly OpenObserveLogService _openObserveLogs;
+    private readonly WindowsAppUpdater _appUpdater;
+    private readonly HeadlessTaskScheduler _tasks;
+    private readonly Func<string, Task<bool>>? _appControl;
     private readonly Func<LibrarySeries, CancellationToken, Task<string?>> _resolvePosterPath;
     private readonly bool _listenOnAnyIp;
     private readonly long _startedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -114,7 +127,13 @@ public sealed class WebControlServer : IAsyncDisposable
         RssFeedClient? rssFeedClient = null,
         RssProcessedStore? rssProcessed = null,
         CloudDriveRssRunner? cloudDriveRunner = null,
-        Func<LibrarySeries, CancellationToken, Task<string?>>? resolvePosterPath = null)
+        Func<LibrarySeries, CancellationToken, Task<string?>>? resolvePosterPath = null,
+        RotatingLocalLogStore? localLogs = null,
+        OpenObserveLogService? openObserveLogs = null,
+        WindowsAppUpdater? appUpdater = null,
+        HeadlessTaskScheduler? tasks = null,
+        Func<string, Task<bool>>? appControl = null,
+        Func<AudioDspConfig, Task>? applyAudioDsp = null)
     {
         _port = port;
         _tokens = tokens;
@@ -124,6 +143,7 @@ public sealed class WebControlServer : IAsyncDisposable
         _playbackCommand = playbackCommand;
         _getSettings = getSettings;
         _updateSettings = updateSettings;
+        _applyAudioDsp = applyAudioDsp;
         _mediaSources = mediaSources;
         _bangumiMetadata = bangumiMetadata ?? new BangumiMetadataClient();
         _tmdbMetadata = tmdbMetadata ?? new TmdbMetadataClient();
@@ -141,6 +161,11 @@ public sealed class WebControlServer : IAsyncDisposable
             _rssFeedClient,
             _rssProcessed,
             _cloudDriveClient);
+        _localLogs = localLogs ?? new RotatingLocalLogStore();
+        _openObserveLogs = openObserveLogs ?? new OpenObserveLogService(_localLogs, new OpenObserveTokenStore());
+        _appUpdater = appUpdater ?? new WindowsAppUpdater();
+        _tasks = tasks ?? new HeadlessTaskScheduler();
+        _appControl = appControl;
         _resolvePosterPath = resolvePosterPath ?? ((series, _) => Task.FromResult(
             series.PosterUri?.IsFile == true ? series.PosterPath : null));
         _listenOnAnyIp = listenOnAnyIp;
@@ -185,6 +210,7 @@ public sealed class WebControlServer : IAsyncDisposable
             context.Response.Headers.CacheControl = "no-store";
             context.Response.Headers.XContentTypeOptions = "nosniff";
             context.Response.Headers["Referrer-Policy"] = "no-referrer";
+            _localLogs.Write("info", $"HTTP {context.Request.Method} {context.Request.Path}");
             if (HttpMethods.IsOptions(context.Request.Method))
             {
                 context.Response.StatusCode = StatusCodes.Status204NoContent;
@@ -243,7 +269,89 @@ public sealed class WebControlServer : IAsyncDisposable
             versionName = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "",
             versionCode = 0,
             packageName = "MiruPlay.Windows",
+            capabilities = new
+            {
+                logUpload = true,
+                localLogs = true,
+                appUpdate = _appUpdater.IsSupported,
+                appUpdateInstall = false,
+                appControl = _appControl is not null,
+                formatAwareToneMapping = false,
+                backgroundTasks = false,
+            },
         }));
+
+        app.MapGet("/api/tasks", () => Success(_tasks.List()));
+        app.MapGet("/api/tasks/{id}", (string id) =>
+        {
+            var task = _tasks.Get(id) ?? throw new KeyNotFoundException("任务不存在。");
+            return Success(task);
+        });
+
+        app.MapGet("/api/logs", (HttpRequest request) =>
+        {
+            var limit = ParseOptionalInt(request.Query["limit"].ToString(), "limit") ?? 200;
+            return Success(_localLogs.ReadRecent(limit));
+        });
+        app.MapGet("/api/logs/download", (HttpRequest request) =>
+        {
+            var since = ParseOptionalLong(request.Query["sinceMs"].ToString(), "sinceMs");
+            var content = _localLogs.ExportJsonLines(since);
+            return Results.Text(content, "application/x-ndjson; charset=utf-8");
+        });
+        app.MapGet("/api/log-upload", () => Success(ToLogUploadDto(_getSettings())));
+        app.MapPut("/api/log-upload/config", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<LogUploadConfigRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            var endpoint = body.Endpoint.Trim();
+            if (body.Enabled) _ = OpenObserveLogService.NormalizeEndpoint(endpoint, body.StreamName);
+            var updated = await UpdateSettingsAsync(current => current with
+            {
+                LogUploadEnabled = body.Enabled,
+                LogUploadEndpoint = endpoint,
+                LogUploadStreamName = body.StreamName.Trim().Length == 0 ? "miruplay" : body.StreamName.Trim(),
+            }).ConfigureAwait(false);
+            return Success(ToLogUploadDto(updated));
+        });
+        app.MapPost("/api/log-upload/token", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<LogUploadTokenRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            _openObserveLogs.SaveToken(body.Token);
+            return Success(ToLogUploadDto(_getSettings()));
+        });
+        app.MapDelete("/api/log-upload/token", () =>
+        {
+            _openObserveLogs.ClearToken();
+            return Success(ToLogUploadDto(_getSettings()));
+        });
+        app.MapPost("/api/log-upload/run", async (HttpRequest request) =>
+        {
+            var result = await _openObserveLogs.UploadAsync(_getSettings(), request.HttpContext.RequestAborted).ConfigureAwait(false);
+            var updated = await UpdateSettingsAsync(current => current with
+            {
+                LastLogUploadAt = result.CompletedAt,
+                LastLogUploadStatus = result.Message,
+            }).ConfigureAwait(false);
+            return Success(new { config = ToLogUploadDto(updated), result });
+        });
+
+        app.MapGet("/api/app-update", () => Success(_appUpdater.Status));
+        app.MapPost("/api/app-update/check", async (HttpRequest request) =>
+            Success(await _appUpdater.CheckAsync(request.HttpContext.RequestAborted).ConfigureAwait(false)));
+        app.MapPost("/api/app-update/download", async (HttpRequest request) =>
+            Success(await _appUpdater.DownloadAsync(request.HttpContext.RequestAborted).ConfigureAwait(false)));
+        app.MapPost("/api/app-update/install-permission", () => UnsupportedOnWindows());
+        app.MapPost("/api/app-control", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<AppControlRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            var action = body.Action.Trim().ToLowerInvariant();
+            if (action is not ("restart" or "exit")) return Success(new { action, accepted = false, message = "不支持的应用控制动作。" });
+            var accepted = _appControl is not null && await _appControl(action).ConfigureAwait(false);
+            return Success(new { action, accepted, message = accepted ? "已接受应用控制请求。" : "Windows 客户端尚未连接应用生命周期处理器。" });
+        });
 
         app.MapGet("/api/sources", () => Success(_mediaSources.List()));
         app.MapGet("/api/local-directories", (HttpRequest request) => Success(BrowseLocalDirectories(request.Query["path"].ToString())));
@@ -280,16 +388,17 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var body = await JsonSerializer.DeserializeAsync<ScanSettingsRequest>(request.Body, JsonOptions).ConfigureAwait(false)
                 ?? new ScanSettingsRequest();
-            if (body.AutoScanEnabled == true || body.MergeSameAnimeEnabled == true ||
-                body.AutoScanIntervalHours is not (null or 24) ||
-                body.PosterWallArrangement is not (null or "TITLE"))
-            {
-                throw new NotSupportedException("Windows 客户端当前仅支持手动扫描和标题排列。");
-            }
+            if (body.MergeSameAnimeEnabled == true || body.PosterWallArrangement is not (null or "TITLE"))
+                throw new NotSupportedException("Windows 客户端当前仅支持标题排列，尚未支持同名合并。");
+            if (body.AutoScanIntervalHours is int intervalHours &&
+                !MediaSourceAutoScanScheduler.IntervalOptionsHours.Contains(intervalHours))
+                throw new BadHttpRequestException("autoScanIntervalHours 必须是 1、6、12 或 24。");
             var requestedMode = body.CurrentAppMode;
             if (requestedMode is not (null or "anime" or "drama")) throw new BadHttpRequestException("currentAppMode 不正确");
             var updated = await UpdateSettingsAsync(current => current with
             {
+                AutoScanEnabled = body.AutoScanEnabled ?? current.AutoScanEnabled,
+                AutoScanIntervalHours = body.AutoScanIntervalHours ?? current.AutoScanIntervalHours,
                 CurrentAppMode = requestedMode ?? current.CurrentAppMode,
             }).ConfigureAwait(false);
             return Success(ToScanSettings(updated, _mediaSources.List()));
@@ -634,7 +743,8 @@ public sealed class WebControlServer : IAsyncDisposable
                 body.PositionMs,
                 body.DeltaMs,
                 body.Speed,
-                body.SubtitleTrackId)).ConfigureAwait(false);
+                body.SubtitleTrackId,
+                body.AudioTrackId)).ConfigureAwait(false);
             return Success(status);
         });
 
@@ -657,6 +767,74 @@ public sealed class WebControlServer : IAsyncDisposable
             return Success(ToPlaybackSettings(updated));
         });
 
+        app.MapGet("/api/audio-dsp", () =>
+            Success(ToAudioDspDto(_getSettings().AudioDsp ?? AudioDspConfig.Neutral())));
+        app.MapPut("/api/audio-dsp", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<AudioDspPutRequest>(
+                request.Body, AudioDspJsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("音频 DSP 请求不能为空。");
+            var requestedConfig = body.Config;
+            var config = requestedConfig is null ? AudioDspConfig.Neutral() : requestedConfig.Normalize();
+            var errors = requestedConfig?.Validate() ?? [];
+            if (errors.Count > 0)
+                throw new BadHttpRequestException(string.Join("; ", errors));
+            _ = AudioDspFilterGraphCompiler.Compile(config, AudioDspLayout(config), 48_000);
+            if (_applyAudioDsp is not null)
+                await _applyAudioDsp(config).ConfigureAwait(false);
+            var updated = await UpdateSettingsAsync(current => current with { AudioDsp = config }).ConfigureAwait(false);
+            return Success(ToAudioDspDto(updated.AudioDsp ?? config));
+        });
+        app.MapPost("/api/audio-dsp/preview", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<AudioDspPreviewRequest>(
+                request.Body, AudioDspJsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("音频 DSP 预览请求不能为空。");
+            var config = (body.Config ?? AudioDspConfig.Neutral()).Normalize();
+            var errors = config.Validate();
+            if (errors.Count > 0) throw new BadHttpRequestException(string.Join("; ", errors));
+            var sampleRateHz = body.SampleRateHz ?? 48_000;
+            var preset = config.Presets!.First(item =>
+                item.Id.Equals(config.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
+            var responses = AudioDspSignalMath.SampleChannels(
+                preset, AudioDspLayout(config), sampleRateHz);
+            return Success(new
+            {
+                sampleRateHz,
+                channels = responses.Select(response => new
+                {
+                    channel = response.ChannelName,
+                    frequenciesHz = response.Samples.Select(point => point.FrequencyHz).ToArray(),
+                    magnitudeDb = response.Samples.Select(point => point.MagnitudeDb).ToArray(),
+                }).ToArray(),
+            });
+        });
+        app.MapPost("/api/audio-dsp/import-rew", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<RewImportRequest>(
+                request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("REW 导入请求不能为空。");
+            var target = ParseAudioDspTarget(body.Target);
+            var result = RewEqFileParser.Parse(body.Content ?? string.Empty);
+            return Success(new
+            {
+                target = target.ToStorageValue(),
+                bands = result.Bands.Select(item => new
+                {
+                    type = item.Band.Type.ToStorageValue(),
+                    frequencyHz = item.Band.FrequencyHz,
+                    gainDb = item.Band.GainDb,
+                    q = item.Band.Q,
+                    enabled = item.Band.Enabled,
+                    lineNumber = item.LineNumber,
+                    control = item.Control,
+                    bandwidthHz = item.BandwidthHz,
+                }).ToArray(),
+                errors = result.Errors,
+                warnings = result.Warnings,
+            });
+        });
+
         app.MapGet("/api/web-control/access", () => Success(new
         {
             enabled = _getSettings().WebControlEnabled,
@@ -676,10 +854,6 @@ public sealed class WebControlServer : IAsyncDisposable
 
         foreach (var (method, path) in new (string Method, string Path)[]
         {
-            ("GET", "/api/app-update"),
-            ("POST", "/api/app-update/check"),
-            ("POST", "/api/app-update/download"),
-            ("POST", "/api/app-update/install-permission"),
             ("GET", "/api/playback/clock-samples"),
             ("GET", "/api/playback/native-diagnostics"),
             ("POST", "/api/playback/native-profile"),
@@ -868,30 +1042,117 @@ public sealed class WebControlServer : IAsyncDisposable
             : throw new BadHttpRequestException($"{name} 必须是整数。");
     }
 
+    private static long? ParseOptionalLong(string value, string name)
+    {
+        if (value.Length == 0) return null;
+        return long.TryParse(value, out var parsed) && parsed > 0
+            ? parsed
+            : throw new BadHttpRequestException($"{name} 必须是正整数。");
+    }
+
     private sealed record MetadataTokenRequest(string Token);
     private sealed record BangumiCollectionRequest(int Type);
     private sealed record CloudDriveLoginRequest(string EndpointUrl, string Username, string Password);
     private sealed record CloudDriveTokenRequest(string EndpointUrl, string Token);
     private sealed record CloudDriveOfflineRequest(IReadOnlyList<string> Urls, string TargetFolder);
 
+    private sealed record LogUploadConfigRequest(bool Enabled = false, string Endpoint = "", string StreamName = "miruplay");
+    private sealed record LogUploadTokenRequest(string Token);
+    private sealed record AppControlRequest(string Action);
+    private sealed record AudioDspPutRequest(AudioDspConfig? Config = null);
+    private sealed record AudioDspPreviewRequest(AudioDspConfig? Config = null, int? SampleRateHz = null);
+    private sealed record RewImportRequest(string? Target = null, string? Content = null);
+
+    private static object ToAudioDspDto(AudioDspConfig config)
+    {
+        var normalized = config.Normalize();
+        var graph = AudioDspFilterGraphCompiler.Compile(
+            normalized, AudioDspLayout(normalized), 48_000);
+        return new
+        {
+            config = normalized,
+            layouts = new[]
+            {
+                AudioDspChannelLayout.Mono,
+                AudioDspChannelLayout.Stereo,
+                AudioDspChannelLayout.Surround51,
+                AudioDspChannelLayout.Surround71,
+            }.Select(layout => new { id = layout.Id, channels = layout.Channels }).ToArray(),
+            sampleRatesHz = new[] { 44_100, 48_000, 96_000 },
+            effectiveRoute = graph.EffectiveRoute,
+            warnings = graph.Warnings,
+        };
+    }
+
+    private static AudioDspChannelTarget ParseAudioDspTarget(string? value) =>
+        value?.Trim().ToLowerInvariant() switch
+        {
+            "all" => AudioDspChannelTarget.All,
+            "front" => AudioDspChannelTarget.Front,
+            "center_lfe" => AudioDspChannelTarget.CenterLfe,
+            "surround" => AudioDspChannelTarget.Surround,
+            "surround_5_1" or "surround51" => AudioDspChannelTarget.Surround51,
+            "surround_7_1" or "surround71" => AudioDspChannelTarget.Surround71,
+            "left" => AudioDspChannelTarget.Left,
+            "right" => AudioDspChannelTarget.Right,
+            "center" => AudioDspChannelTarget.Center,
+            "lfe" => AudioDspChannelTarget.Lfe,
+            "left_surround" => AudioDspChannelTarget.LeftSurround,
+            "right_surround" => AudioDspChannelTarget.RightSurround,
+            _ => throw new BadHttpRequestException("REW 目标声道不正确。"),
+        };
+
+    private static AudioDspChannelLayout AudioDspLayout(AudioDspConfig config)
+    {
+        var preset = config.Presets!.First(item =>
+            item.Id.Equals(config.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
+        return AudioDspChannelLayout.ForId(preset.ChannelLayoutId);
+    }
+
+    private object ToLogUploadDto(AppSettings settings) => new
+    {
+        config = new
+        {
+            enabled = settings.LogUploadEnabled,
+            endpoint = settings.LogUploadEndpoint,
+            streamName = settings.LogUploadStreamName,
+            lastUploadAt = settings.LastLogUploadAt,
+            lastUploadStatus = settings.LastLogUploadStatus,
+        },
+        status = new
+        {
+            pendingCount = _localLogs.PendingCount(),
+            isUploading = false,
+            lastUploadAt = settings.LastLogUploadAt,
+            lastUploadStatus = settings.LastLogUploadStatus,
+            tokenConfigured = _openObserveLogs.TokenConfigured,
+        },
+        tokenConfigured = _openObserveLogs.TokenConfigured,
+    };
+
     private static object ToScanSettings(AppSettings settings, IReadOnlyList<MediaSourceInfoDto> sources) => new
     {
-        autoScanEnabled = false,
-        autoScanIntervalHours = 24,
+        autoScanEnabled = settings.AutoScanEnabled,
+        autoScanIntervalHours = settings.AutoScanIntervalHours,
         lastScanAt = sources.Count == 0 ? 0 : sources.Max(source => source.LastScanned),
         mergeSameAnimeEnabled = false,
         posterWallArrangement = "TITLE",
         currentAppMode = settings.CurrentAppMode,
         appModeOptions = new[] { "anime", "drama" },
         posterWallArrangementOptions = new[] { "TITLE" },
-        autoScanIntervalOptionsHours = new[] { 24 },
+        autoScanIntervalOptionsHours = MediaSourceAutoScanScheduler.IntervalOptionsHours,
     };
 
     private static object ToPlaybackSettings(AppSettings settings) => new
     {
         endAction = settings.PlaybackEndAction,
         preferredSubtitleLanguage = settings.PreferredSubtitleLanguage,
-        formatAwareToneMapping = new { defaultBackend = "STANDARD_EXO", rules = new Dictionary<string, object>() },
+        formatAwareToneMapping = new
+        {
+            supported = false,
+            defaultBackend = (string?)null,
+            rules = new Dictionary<string, object>(),
+        },
         endActionOptions = new[] { "return_to_detail", "play_next_episode" },
         preferredSubtitleLanguageOptions = new[] { "auto", "zh_hans", "zh_hant", "zh", "en", "ja" },
     };
@@ -997,7 +1258,8 @@ public sealed class WebControlServer : IAsyncDisposable
         long? PositionMs = null,
         long? DeltaMs = null,
         float? Speed = null,
-        int? SubtitleTrackId = null);
+        int? SubtitleTrackId = null,
+        int? AudioTrackId = null);
     private sealed record PlaybackSettingsRequest(
         string? EndAction = null,
         string? PreferredSubtitleLanguage = null,

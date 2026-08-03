@@ -7,13 +7,15 @@ const content = $('#content')
 const toolbarActions = $('#toolbar-actions')
 const modal = $('#modal')
 const modalContent = $('#modal-content')
-const state = { token: '', view: 'library', info: null, sources: [], cloud: null, rssEditId: null, playbackTimer: null, episodeTitles: new Map() }
+const state = { token: '', view: 'library', info: null, sources: [], cloud: null, rssEditId: null, playbackTimer: null, episodeTitles: new Map(), dspConfig: null, dspData: null }
 const views = {
+  'audio-dsp': ['音频 DSP', '逐声道 PEQ、REW 导入和线性相位 FIR'],
   library: ['片库', '浏览并播放 MLIP 媒体库'],
   sources: ['媒体源', '管理 Local、WebDAV 与 SMB 来源'],
   automation: ['自动化', 'CloudDrive2 入库与 RSS 提交'],
   metadata: ['元数据', '管理凭据并搜索补充元数据'],
   playback: ['播放设置', '设置结束动作和字幕语言优先级'],
+  operations: ['运维', '查看本地日志、后台任务和更新状态'],
   access: ['WebUI 访问', '查看地址并轮换访问令牌'],
 }
 
@@ -104,6 +106,8 @@ async function renderView(view) {
     if (view === 'automation') await loadAutomation()
     if (view === 'metadata') await loadMetadata()
     if (view === 'playback') await loadPlaybackSettings()
+    if (view === 'audio-dsp') await loadAudioDsp()
+    if (view === 'operations') await loadOperations()
     if (view === 'access') await loadAccess()
   } catch (error) {
     content.innerHTML = `<div class="panel error">${escapeHtml(error.message)}</div>`
@@ -166,11 +170,21 @@ function renderPlayer(status) {
   const bar = $('#player-bar')
   if (!status || status.state === 'IDLE') { bar.hidden = true; return }
   if (!bar.dataset.ready) {
-    bar.innerHTML = `<div><strong data-player-title></strong><small data-player-state></small></div><div class="player-time"><progress></progress><small data-player-time></small></div><div class="player-controls"><select data-subtitle aria-label="字幕轨道" title="字幕轨道"></select><button data-command="seek_relative" data-delta="-10000" title="后退 10 秒" aria-label="后退 10 秒">−10</button><button data-command="toggle" title="播放或暂停" aria-label="播放或暂停"></button><button data-command="seek_relative" data-delta="30000" title="前进 30 秒" aria-label="前进 30 秒">+30</button><button data-command="stop" title="停止" aria-label="停止">■</button></div>`
+    bar.innerHTML = `<div><strong data-player-title></strong><small data-player-state></small></div><div class="player-time"><progress></progress><small data-player-time></small></div><div class="player-controls"><select data-audio aria-label="音频轨道" title="音频轨道"></select><select data-subtitle aria-label="字幕轨道" title="字幕轨道"></select><button data-command="seek_relative" data-delta="-10000" title="后退 10 秒" aria-label="后退 10 秒">−10</button><button data-command="toggle" title="播放或暂停" aria-label="播放或暂停"></button><button data-command="seek_relative" data-delta="30000" title="前进 30 秒" aria-label="前进 30 秒">+30</button><button data-command="stop" title="停止" aria-label="停止">■</button></div>`
     $$('[data-command]', bar).forEach(button => button.onclick = () => playbackCommand(button.dataset.command, button.dataset.delta ? { deltaMs: Number(button.dataset.delta) } : {}))
+    $('[data-audio]', bar).onchange = event => playbackCommand('audio', { audioTrackId: event.target.value === '' ? null : Number(event.target.value) })
     $('[data-subtitle]', bar).onchange = event => playbackCommand('subtitle', { subtitleTrackId: event.target.value === '' ? null : Number(event.target.value) })
     bar.dataset.ready = 'true'
   }
+  const audioTracks = status.audioTracks || []
+  const audio = $('[data-audio]', bar)
+  const audioOptions = audioTracks.map(track => ({ id: track.id, label: track.displayLabel }))
+  const audioSignature = JSON.stringify(audioOptions)
+  if (audio.dataset.options !== audioSignature) {
+    audio.innerHTML = audioOptions.map(option => `<option value="${option.id}">${escapeHtml(option.label)}</option>`).join('')
+    audio.dataset.options = audioSignature
+  }
+  audio.value = status.selectedAudioTrackId == null ? '' : String(status.selectedAudioTrackId)
   const tracks = status.subtitleTracks || []
   const subtitle = $('[data-subtitle]', bar)
   const subtitleOptions = [{ id: null, label: '关闭字幕' }, ...tracks.map(track => ({ id: track.id, label: track.displayLabel }))]
@@ -201,7 +215,7 @@ async function loadSources() {
   $('#scan-all').onclick = scanAllSources
 }
 function sourceForm() {
-  return `<form id="source-form" class="form"><input id="source-id" type="hidden"><div class="form-grid"><label>类型<select id="source-type"><option>LOCAL</option><option>WEBDAV</option><option>SMB</option></select></label><label>内容类型<select id="source-mode"><option value="ANIME">动漫</option><option value="DRAMA">电视剧</option></select></label></div><label>显示名称<input id="source-name" required maxlength="100"></label><label>位置<div class="actions"><input id="source-location" required placeholder="本地目录、https:// WebDAV 或 smb://"><button id="browse-local" type="button">浏览</button></div></label><div id="source-credentials" class="form-grid"><label>用户名<input id="source-username" autocomplete="username"></label><label>密码<input id="source-password" type="password" autocomplete="new-password" placeholder="编辑时留空保留"></label><label id="source-domain-label">域（可选）<input id="source-domain"></label></div><label id="source-recognition-label">识别方式<select id="source-recognition"><option value="MLIP">MLIP library.db</option></select></label><div class="actions"><button id="source-test" type="button">测试连接</button><button class="primary" type="submit">保存</button><button id="source-reset" type="button">清空</button></div></form>`
+  return `<form id="source-form" class="form"><input id="source-id" type="hidden"><div class="form-grid"><label>类型<select id="source-type"><option>LOCAL</option><option>WEBDAV</option><option>SMB</option></select></label><label>内容类型<select id="source-mode"><option value="ANIME">动漫</option><option value="DRAMA">电视剧</option></select></label></div><label>显示名称<input id="source-name" required maxlength="100"></label><label>位置<div class="actions"><input id="source-location" required placeholder="本地目录、https:// WebDAV 或 smb://"><button id="browse-local" type="button">浏览</button></div></label><div id="source-credentials" class="form-grid"><label>用户名<input id="source-username" autocomplete="username"></label><label>密码<input id="source-password" type="password" autocomplete="new-password" placeholder="编辑时留空保留"></label><label id="source-domain-label">域（可选）<input id="source-domain"></label></div><label id="source-recognition-label">识别方式<select id="source-recognition"><option value="MLIP">MLIP library.db</option><option value="DIRECTORY">普通目录扫描</option></select></label><div class="actions"><button id="source-test" type="button">测试连接</button><button class="primary" type="submit">保存</button><button id="source-reset" type="button">清空</button></div></form>`
 }
 function bindSourceForm() {
   $('#source-form').onsubmit = saveSource
@@ -216,10 +230,10 @@ function updateSourceFields() {
   $('#source-credentials').hidden = type === 'LOCAL'
   $('#source-domain-label').hidden = type !== 'SMB'
   $('#browse-local').hidden = type !== 'LOCAL'
-  $('#source-recognition-label').hidden = type !== 'WEBDAV'
+  $('#source-recognition-label').hidden = false
 }
 function sourcePayload() {
-  return { name: $('#source-name').value.trim(), type: $('#source-type').value, location: $('#source-location').value.trim(), username: $('#source-username').value.trim() || null, password: $('#source-password').value || null, domain: $('#source-domain').value.trim() || null, contentMode: $('#source-mode').value, recognitionMode: $('#source-type').value === 'WEBDAV' ? $('#source-recognition').value : 'MLIP' }
+  return { name: $('#source-name').value.trim(), type: $('#source-type').value, location: $('#source-location').value.trim(), username: $('#source-username').value.trim() || null, password: $('#source-password').value || null, domain: $('#source-domain').value.trim() || null, contentMode: $('#source-mode').value, recognitionMode: $('#source-recognition').value }
 }
 function editSource(id) {
   const source = state.sources.find(item => item.id === id)
@@ -304,6 +318,23 @@ async function toggleRss(id) { const item = state.cloud.subscriptions.find(value
 async function deleteRss(id) { if (!confirm('删除这个 RSS 订阅？已处理记录会保留用于去重。')) return; try { await api(`/api/cloud-drive/rss/${id}`, { method: 'DELETE' }); toast('RSS 订阅已删除'); await loadAutomation() } catch (error) { toast(error.message, true) } }
 async function previewRss(id) { try { const result = await api(`/api/cloud-drive/rss/${id}/preview`, { method: 'POST' }); modalContent.innerHTML = `<h2>RSS 预览</h2><p>${result.total} 项 · 可提交 ${result.wouldSubmit} · 已跳过 ${result.skipped} · 缺少链接 ${result.missing}</p><table class="preview-table"><thead><tr><th>标题</th><th>链接</th><th>状态</th></tr></thead><tbody>${result.items.map(item => `<tr><td>${escapeHtml(item.title)}</td><td>${escapeHtml(item.submissionUrl || '')}</td><td><span class="badge ${item.processed ? 'ok' : ''}">${item.processed ? '已处理' : escapeHtml(item.status)}</span></td></tr>`).join('')}</tbody></table>`; modal.showModal() } catch (error) { toast(error.message, true) } }
 
+async function loadOperations() {
+  const [upload, update, tasks, logs] = await Promise.all([api('/api/log-upload'), api('/api/app-update'), api('/api/tasks'), api('/api/logs?limit=100')])
+  content.innerHTML = `<div class="stack"><section class="panel"><div class="card-head"><h2>OpenObserve 日志</h2><span class="badge ${upload.tokenConfigured ? 'ok' : 'warn'}">${upload.tokenConfigured ? '令牌已配置' : '令牌未配置'}</span></div><form id="log-upload-form" class="form"><label class="switch"><input id="log-enabled" type="checkbox" ${upload.config.enabled ? 'checked' : ''}>启用日志上报</label><label>OpenObserve 地址<input id="log-endpoint" value="${escapeHtml(upload.config.endpoint)}" placeholder="https://logs.example.test"></label><label>Stream<input id="log-stream" value="${escapeHtml(upload.config.streamName)}" maxlength="100"></label><label>令牌<input id="log-token" type="password" autocomplete="new-password"></label><div class="actions"><button class="primary" type="submit">保存设置</button><button id="log-run" type="button">立即上报</button><button id="log-clear" class="danger" type="button">清除令牌</button></div></form><p class="muted">待上报 ${upload.status.pendingCount} 条 · ${escapeHtml(upload.status.lastUploadStatus || '尚未上报')}</p></section><section class="panel"><div class="card-head"><h2>Windows 更新</h2><span class="badge ${update.updateAvailable ? 'ok' : ''}">${update.supported ? (update.updateAvailable ? '有可用更新' : '暂无更新') : '未配置清单'}</span></div><p class="break">当前版本 ${escapeHtml(update.currentVersionName)}</p>${update.latest ? `<p class="break">最新版本 ${escapeHtml(update.latest.versionName)} · ${escapeHtml(update.latest.assetName)}</p>` : ''}<div class="actions"><button id="update-check">检查更新</button><button id="update-download" class="primary" ${update.updateAvailable ? '' : 'disabled'}>下载并暂存</button></div>${update.stagedInstallerPath ? `<p class="success break">已暂存：${escapeHtml(update.stagedInstallerPath)}</p>` : ''}${update.lastError ? `<p class="error">${escapeHtml(update.lastError)}</p>` : ''}<p class="muted">安装启动由 Windows 客户端生命周期处理器负责。</p></section><section class="panel"><div class="card-head"><h2>后台任务</h2><span class="muted">${tasks.length} 项</span></div><div class="list">${tasks.length ? tasks.map(task => `<article class="list-item"><div class="card-head"><strong>${escapeHtml(task.title)}</strong><span class="badge ${task.state === 'SUCCEEDED' ? 'ok' : task.state === 'FAILED' ? 'warn' : ''}">${escapeHtml(task.state)}</span></div><small>${escapeHtml(task.message || task.error || task.id)}</small></article>`).join('') : '<p class="muted">尚无后台任务。</p>'}</div></section><section class="panel"><div class="card-head"><h2>本地日志</h2><button id="download-logs">下载 JSONL</button></div><pre class="log-output">${escapeHtml(logs.records.map(record => `[${new Date(record.timestampMs).toLocaleString()}] ${record.level} ${record.message}`).join('\\n'))}</pre></section></div>`
+  $('#log-upload-form').onsubmit = saveLogUpload
+  $('#log-run').onclick = runLogUpload
+  $('#log-clear').onclick = clearLogToken
+  $('#update-check').onclick = checkUpdate
+  $('#update-download').onclick = downloadUpdate
+  $('#download-logs').onclick = downloadLogs
+}
+async function saveLogUpload(event) { event.preventDefault(); try { await api('/api/log-upload/config', { method: 'PUT', body: JSON.stringify({ enabled: $('#log-enabled').checked, endpoint: $('#log-endpoint').value.trim(), streamName: $('#log-stream').value.trim() }) }); if ($('#log-token').value) await api('/api/log-upload/token', { method: 'POST', body: JSON.stringify({ token: $('#log-token').value }) }); toast('日志上报设置已保存'); await loadOperations() } catch (error) { toast(error.message, true) } }
+async function runLogUpload() { try { const result = await api('/api/log-upload/run', { method: 'POST' }); toast(result.result.message); await loadOperations() } catch (error) { toast(error.message, true) } }
+async function clearLogToken() { if (!confirm('清除 OpenObserve 令牌？')) return; try { await api('/api/log-upload/token', { method: 'DELETE' }); toast('令牌已清除'); await loadOperations() } catch (error) { toast(error.message, true) } }
+async function checkUpdate() { try { await api('/api/app-update/check', { method: 'POST' }); toast('更新检查完成'); await loadOperations() } catch (error) { toast(error.message, true) } }
+async function downloadUpdate() { try { const result = await api('/api/app-update/download', { method: 'POST' }); toast(result.stagedInstallerPath ? '更新已暂存' : result.lastError || '更新未下载'); await loadOperations() } catch (error) { toast(error.message, true) } }
+async function downloadLogs() { try { const content = await fetch('/api/logs/download', { headers: { 'X-MiruPlay-Token': state.token } }).then(response => response.text()); const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([content], { type: 'application/x-ndjson' })); link.download = 'miruplay-logs.jsonl'; link.click(); URL.revokeObjectURL(link.href) } catch (error) { toast(error.message, true) } }
+
 async function loadMetadata() {
   const settings = await api('/api/settings/metadata')
   content.innerHTML = `<div class="grid"><section class="panel"><div class="card-head"><h2>Bangumi</h2><span class="badge ${settings.bangumiTokenConfigured ? 'ok' : 'warn'}">${settings.bangumiTokenConfigured ? '已配置' : '未配置'}</span></div><form id="bangumi-token-form" class="form"><input name="username" value="Bangumi" autocomplete="username" hidden><label>Access Token<input id="bangumi-token" type="password" autocomplete="new-password"></label><div class="actions"><button class="primary" type="submit">保存</button><button id="bangumi-clear" class="danger" type="button" ${settings.bangumiTokenConfigured ? '' : 'disabled'}>清除</button></div></form></section><section class="panel"><div class="card-head"><h2>TMDB</h2><span class="badge ${settings.tmdbTokenConfigured ? 'ok' : 'warn'}">${settings.tmdbTokenConfigured ? '已配置' : '未配置'}</span></div><form id="tmdb-token-form" class="form"><input name="username" value="TMDB" autocomplete="username" hidden><label>Read Access Token<input id="tmdb-token" type="password" autocomplete="new-password"></label><div class="actions"><button class="primary" type="submit">保存</button><button id="tmdb-clear" class="danger" type="button" ${settings.tmdbTokenConfigured ? '' : 'disabled'}>清除</button></div></form></section><section class="panel" style="grid-column:1/-1"><h2>在线搜索</h2><form id="metadata-search-form" class="form-grid"><label>提供方<select id="metadata-provider"><option value="bangumi">Bangumi</option><option value="tmdb">TMDB</option></select></label><label>关键词<input id="metadata-query" required></label><label>年份（TMDB，可选）<input id="metadata-year" type="number" min="1900" max="2100"></label><div class="actions"><button class="primary" type="submit">搜索</button></div></form><div id="metadata-results" class="list"></div></section></div>`
@@ -319,9 +350,89 @@ async function searchMetadata(event) { event.preventDefault(); const provider = 
 
 async function loadPlaybackSettings() {
   const [settings, scan] = await Promise.all([api('/api/settings/playback'), api('/api/settings/scan')])
-  content.innerHTML = `<section class="panel"><form id="playback-settings-form" class="form"><label>应用模式<select id="app-mode"><option value="anime" ${scan.currentAppMode === 'anime' ? 'selected' : ''}>动漫</option><option value="drama" ${scan.currentAppMode === 'drama' ? 'selected' : ''}>电视剧</option></select></label><label>播放结束后<select id="playback-end"><option value="return_to_detail" ${settings.endAction === 'return_to_detail' ? 'selected' : ''}>返回详情</option><option value="play_next_episode" ${settings.endAction === 'play_next_episode' ? 'selected' : ''}>自动播放下一集</option></select></label><label>字幕语言优先级<select id="playback-subtitle">${[['auto','自动'],['zh_hans','简体中文'],['zh_hant','繁体中文'],['zh','中文'],['en','英语'],['ja','日语']].map(([value,label]) => `<option value="${value}" ${settings.preferredSubtitleLanguage === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><div class="actions"><button class="primary" type="submit">保存播放设置</button></div></form></section>`
-  $('#playback-settings-form').onsubmit = async event => { event.preventDefault(); try { await api('/api/settings/playback', { method: 'PUT', body: JSON.stringify({ endAction: $('#playback-end').value, preferredSubtitleLanguage: $('#playback-subtitle').value }) }); await api('/api/settings/scan', { method: 'PUT', body: JSON.stringify({ currentAppMode: $('#app-mode').value }) }); toast('播放设置已保存') } catch (error) { toast(error.message, true) } }
+  content.innerHTML = `<section class="panel"><form id="playback-settings-form" class="form"><div class="form-grid"><label>应用模式<select id="app-mode"><option value="anime" ${scan.currentAppMode === 'anime' ? 'selected' : ''}>动漫</option><option value="drama" ${scan.currentAppMode === 'drama' ? 'selected' : ''}>电视剧</option></select></label><label class="switch"><input id="auto-scan-enabled" type="checkbox" ${scan.autoScanEnabled ? 'checked' : ''}>自动扫描</label></div><label>扫描周期<select id="auto-scan-interval">${scan.autoScanIntervalOptionsHours.map(hours => `<option value="${hours}" ${scan.autoScanIntervalHours === hours ? 'selected' : ''}>每 ${hours} 小时</option>`).join('')}</select></label><label>播放结束后<select id="playback-end"><option value="return_to_detail" ${settings.endAction === 'return_to_detail' ? 'selected' : ''}>返回详情</option><option value="play_next_episode" ${settings.endAction === 'play_next_episode' ? 'selected' : ''}>自动播放下一集</option></select></label><label>字幕语言优先级<select id="playback-subtitle">${[['auto','自动'],['zh_hans','简体中文'],['zh_hant','繁体中文'],['zh','中文'],['en','英语'],['ja','日语']].map(([value,label]) => `<option value="${value}" ${settings.preferredSubtitleLanguage === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><div class="actions"><button class="primary" type="submit">保存播放设置</button></div></form></section>`
+  $('#playback-settings-form').onsubmit = async event => { event.preventDefault(); try { await api('/api/settings/playback', { method: 'PUT', body: JSON.stringify({ endAction: $('#playback-end').value, preferredSubtitleLanguage: $('#playback-subtitle').value }) }); await api('/api/settings/scan', { method: 'PUT', body: JSON.stringify({ currentAppMode: $('#app-mode').value, autoScanEnabled: $('#auto-scan-enabled').checked, autoScanIntervalHours: Number($('#auto-scan-interval').value) }) }); toast('播放设置已保存') } catch (error) { toast(error.message, true) } }
 }
+const dspTypeNames = ['peaking', 'low_shelf', 'high_shelf', 'low_pass', 'high_pass', 'notch', 'band_pass']
+const dspTargetNames = [['6', '左'], ['7', '右'], ['8', '中置'], ['9', 'LFE'], ['10', '左环绕'], ['11', '右环绕'], ['0', '全部'], ['1', '前置'], ['2', '中置/LFE'], ['3', '环绕'], ['4', '5.1'], ['5', '7.1']]
+const dspTargetStorage = { 0: 'all', 1: 'front', 2: 'center_lfe', 3: 'surround', 4: 'surround_5_1', 5: 'surround_7_1', 6: 'left', 7: 'right', 8: 'center', 9: 'lfe', 10: 'left_surround', 11: 'right_surround' }
+function dspTypeOptions(selected) {
+  return dspTypeNames.map((name, index) => `<option value="${index}" ${Number(selected) === index ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')
+}
+function dspTargetOptions(selected) {
+  return dspTargetNames.map(([value, label]) => `<option value="${value}" ${Number(selected) === Number(value) ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')
+}
+function dspPreset() {
+  return state.dspConfig.presets.find(item => item.id === state.dspConfig.selectedPresetId) || state.dspConfig.presets[0]
+}
+function dspRule(target) {
+  return (dspPreset().rules || []).find(rule => Number(rule.target) === Number(target))
+}
+function currentDspConfig() {
+  const config = JSON.parse(JSON.stringify(state.dspConfig))
+  const preset = config.presets.find(item => item.id === config.selectedPresetId) || config.presets[0]
+  config.selectedPresetId = preset.id
+  config.enabled = $('#dsp-enabled').checked
+  preset.phaseMode = Number($('#dsp-phase').value)
+  preset.firQuality = Number($('#dsp-fir').value)
+  preset.outputMode = Number($('#dsp-output').value)
+  preset.channelLayoutId = $('#dsp-layout').value
+  preset.limiter = { enabled: $('#dsp-limiter').checked, ceilingDb: Number($('#dsp-limiter-ceiling').value), releaseMs: Number($('#dsp-limiter-release').value) }
+  const target = Number($('#dsp-target').value)
+  const bands = $$('[data-dsp-band]').map(row => ({
+    type: Number($('[data-band-type]', row).value),
+    frequencyHz: Number($('[data-band-frequency]', row).value),
+    gainDb: Number($('[data-band-gain]', row).value),
+    q: Number($('[data-band-q]', row).value),
+    enabled: $('[data-band-enabled]', row).checked,
+  }))
+  const previousRule = (preset.rules || []).find(rule => Number(rule.target) === target)
+  preset.rules = (preset.rules || []).filter(rule => Number(rule.target) !== target)
+  preset.rules.push({ target, bands, outputGainDb: previousRule?.outputGainDb || 0 })
+  return config
+}
+function renderDspBands() {
+  const target = Number($('#dsp-target').value)
+  const rule = dspRule(target)
+  const bands = rule?.bands || []
+  $('#dsp-bands').innerHTML = bands.map((band, index) => `<tr data-dsp-band>
+    <td><input data-band-enabled type="checkbox" ${band.enabled !== false ? 'checked' : ''} aria-label="启用第 ${index + 1} 个 PEQ"></td>
+    <td><select data-band-type aria-label="第 ${index + 1} 个 PEQ 类型">${dspTypeOptions(band.type)}</select></td>
+    <td><input data-band-frequency type="number" min="10" max="24000" step="0.01" value="${Number(band.frequencyHz || 1000)}"></td>
+    <td><input data-band-gain type="number" min="-24" max="24" step="0.1" value="${Number(band.gainDb || 0)}"></td>
+    <td><input data-band-q type="number" min="0.1" max="20" step="0.001" value="${Number(band.q || 1)}"></td>
+    <td><button type="button" class="icon-button" data-remove-band title="删除频段" aria-label="删除第 ${index + 1} 个 PEQ">×</button></td>
+  </tr>`).join('')
+  $$('[data-remove-band]').forEach(button => button.onclick = () => { button.closest('tr').remove() })
+}
+function renderDspView() {
+  const config = state.dspConfig
+  const preset = dspPreset()
+  content.innerHTML = `<div class="grid"><section class="panel stack"><form id="dsp-form" class="form">
+    <label class="switch"><input id="dsp-enabled" type="checkbox" ${config.enabled ? 'checked' : ''}>启用 DSP</label>
+    <label>预设<select id="dsp-preset">${config.presets.map(item => `<option value="${escapeHtml(item.id)}" ${item.id === config.selectedPresetId ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select></label>
+    <div class="form-grid"><label>相位模式<select id="dsp-phase"><option value="0" ${Number(preset.phaseMode) === 0 ? 'selected' : ''}>最小相位</option><option value="1" ${Number(preset.phaseMode) === 1 ? 'selected' : ''}>线性相位 FIR</option></select></label>
+    <label>FIR 质量<select id="dsp-fir"><option value="1024" ${Number(preset.firQuality) === 1024 ? 'selected' : ''}>低（1024 taps）</option><option value="2048" ${Number(preset.firQuality) === 2048 ? 'selected' : ''}>中（2048 taps）</option><option value="4096" ${Number(preset.firQuality) === 4096 ? 'selected' : ''}>高（4096 taps）</option></select></label>
+    <label>声道布局<select id="dsp-layout"><option value="mono" ${preset.channelLayoutId === 'mono' ? 'selected' : ''}>Mono</option><option value="stereo" ${preset.channelLayoutId === 'stereo' ? 'selected' : ''}>Stereo</option><option value="5.1" ${preset.channelLayoutId === '5.1' ? 'selected' : ''}>5.1</option><option value="7.1" ${preset.channelLayoutId === '7.1' ? 'selected' : ''}>7.1</option></select></label></div>
+    <div class="form-grid"><label>目标声道<select id="dsp-target">${dspTargetOptions(6)}</select></label><label>输出模式<select id="dsp-output"><option value="0" ${Number(preset.outputMode) === 0 ? 'selected' : ''}>保持原声道</option><option value="1" ${Number(preset.outputMode) === 1 ? 'selected' : ''}>立体声下混</option><option value="2" ${Number(preset.outputMode) === 2 ? 'selected' : ''}>HRTF 双耳</option></select></label><label class="switch"><input id="dsp-limiter" type="checkbox" ${preset.limiter?.enabled ? 'checked' : ''}>限幅</label><label>上限 dB<input id="dsp-limiter-ceiling" type="number" min="-24" max="0" step="0.1" value="${Number(preset.limiter?.ceilingDb ?? -1)}"></label><label>释放 ms<input id="dsp-limiter-release" type="number" min="1" max="2000" step="1" value="${Number(preset.limiter?.releaseMs ?? 100)}"></label></div>
+    <div class="actions"><label class="file-button">导入 REW<input id="dsp-rew-file" type="file" accept=".txt,.req,text/plain" hidden></label><button id="dsp-import" type="button">导入到当前声道</button><button id="dsp-add" type="button">添加频段</button><button id="dsp-preview" type="button">预览响应</button></div>
+    <div class="table-scroll"><table class="data-table"><thead><tr><th>启用</th><th>类型</th><th>频率 Hz</th><th>增益 dB</th><th>Q</th><th></th></tr></thead><tbody id="dsp-bands"></tbody></table></div>
+    <div id="dsp-preview-result" class="muted" role="status"></div><div class="actions"><button class="primary" type="submit">应用 DSP</button></div>
+  </form></section><section class="panel"><h2>状态</h2><p class="muted">${escapeHtml(state.dspData.effectiveRoute || 'disabled')}</p><p class="muted">${(state.dspData.warnings || []).map(escapeHtml).join('<br>') || '没有警告'}</p><p class="muted">预览和 REW 导入不会自动保存，点击应用后才会作用于当前 MiruPlay mpv。</p></section></div>`
+  renderDspBands()
+  $('#dsp-target').onchange = () => { state.dspConfig = currentDspConfig(); renderDspBands() }
+  $('#dsp-preset').onchange = () => { state.dspConfig.selectedPresetId = $('#dsp-preset').value; renderDspView() }
+  $('#dsp-add').onclick = () => { const target = Number($('#dsp-target').value); state.dspConfig = currentDspConfig(); const preset = dspPreset(); const rule = dspRule(target) || { target, bands: [], outputGainDb: 0 }; rule.bands.push({ type: 0, frequencyHz: 1000, gainDb: 0, q: 1, enabled: true }); if (!preset.rules.includes(rule)) preset.rules.push(rule); renderDspBands() }
+  $('#dsp-preview').onclick = async () => { try { state.dspConfig = currentDspConfig(); const preview = await api('/api/audio-dsp/preview', { method: 'POST', body: JSON.stringify({ config: state.dspConfig }) }); $('#dsp-preview-result').textContent = preview.channels.map(channel => `${channel.channel}: ${channel.magnitudeDb.length} 个采样点`).join('；') } catch (error) { toast(error.message, true) } }
+  $('#dsp-import').onclick = async () => { const file = $('#dsp-rew-file').files[0]; if (!file) { toast('请先选择 REW 文件', true); return } try { const target = Number($('#dsp-target').value); const imported = await api('/api/audio-dsp/import-rew', { method: 'POST', body: JSON.stringify({ target: dspTargetStorage[target], content: await file.text() }) }); state.dspConfig = currentDspConfig(); const presetNow = dspPreset(); presetNow.rules = (presetNow.rules || []).filter(rule => Number(rule.target) !== target); presetNow.rules.push({ target, bands: imported.bands.map(band => ({ type: dspTypeNames.indexOf(band.type), frequencyHz: band.frequencyHz, gainDb: band.gainDb, q: band.q, enabled: band.enabled })), outputGainDb: 0 }); renderDspBands(); toast(`已导入 ${imported.bands.length} 个频段`) } catch (error) { toast(error.message, true) } }
+  $('#dsp-form').onsubmit = async event => { event.preventDefault(); try { state.dspConfig = currentDspConfig(); const result = await api('/api/audio-dsp', { method: 'PUT', body: JSON.stringify({ config: state.dspConfig }) }); state.dspConfig = result.config; state.dspData = result; toast('音频 DSP 已应用'); renderDspView() } catch (error) { toast(error.message, true) } }
+}
+async function loadAudioDsp() {
+  state.dspData = await api('/api/audio-dsp')
+  state.dspConfig = state.dspData.config
+  renderDspView()
+}
+
 async function loadAccess() {
   const data = await api('/api/web-control/access')
   content.innerHTML = `<section class="panel stack"><div class="card-head"><h2>访问状态</h2><span class="badge ${data.enabled ? 'ok' : 'warn'}">${data.enabled ? '已启用' : '已停用'}</span></div><div class="status-tiles">${data.urls.map(url => `<div class="status-tile"><span>访问地址</span><strong>${escapeHtml(url)}</strong></div>`).join('')}</div><label>当前访问令牌<input id="current-token" value="${escapeHtml(data.accessToken)}" readonly></label><div class="actions"><button id="copy-token">复制令牌</button><button id="rotate-token" class="danger">轮换令牌</button><button id="disconnect">断开此浏览器</button></div></section>`

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:services="clr-namespace:MiruPlay.Windows.Services"
         mc:Ignorable="d"
         Title="MiruPlay"
         Width="1200"
@@ -64,6 +65,7 @@
             <Grid x:Name="LibraryPage">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -91,7 +93,28 @@
                     </Button>
                 </Grid>
 
-                <Grid Grid.Row="1">
+                <Grid Grid.Row="1" x:Name="PlaybackSurface" Visibility="Collapsed" Margin="30,0,30,16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="230" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Border Background="#121820" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="1">
+                        <services:MpvWindowHost x:Name="MpvHost" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                    </Border>
+                    <Grid Grid.Row="1" Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="PlaybackInfoText" Text="正在准备播放器…" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button x:Name="EmbeddedPreviousButton" Style="{StaticResource IconButton}" ToolTip="上一集" AutomationProperties.Name="上一集" Click="PreviousEpisode_Click"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE892;" /></Button>
+                            <Button x:Name="EmbeddedNextButton" Style="{StaticResource IconButton}" ToolTip="下一集" AutomationProperties.Name="下一集" Click="NextEpisode_Click" Margin="6,0,0,0"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE893;" /></Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition x:Name="DetailColumn" Width="0" />
@@ -132,6 +155,51 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </StackPanel>
+                        <StackPanel x:Name="RecentSection" Visibility="Collapsed" Margin="0,0,0,24">
+                            <TextBlock Text="最近观看" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
+                            <ItemsControl x:Name="RecentList">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Width="220" Height="70" Margin="0,0,12,0" Style="{StaticResource MediaCardButton}" Tag="{Binding}" Click="SeriesCard_Click" AutomationProperties.Name="{Binding Title}">
+                                            <StackPanel Margin="12,10"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" /><TextBlock Text="{Binding CompletionText}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" /></StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                        <StackPanel x:Name="FeaturedSection" Visibility="Collapsed" Margin="0,0,0,24">
+                            <TextBlock Text="精选作品" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
+                            <ItemsControl x:Name="FeaturedList">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Width="220" Height="70" Margin="0,0,12,0" Style="{StaticResource MediaCardButton}" Tag="{Binding}" Click="SeriesCard_Click" AutomationProperties.Name="{Binding Title}">
+                                            <StackPanel Margin="12,10"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" /><TextBlock Text="{Binding MetadataLine}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" /></StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                        <ItemsControl x:Name="GenreGroupList" Margin="0,0,0,24">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,0,18">
+                                        <TextBlock Text="{Binding DisplayName}" Style="{StaticResource SectionTitle}" Margin="0,0,0,10" />
+                                        <ItemsControl ItemsSource="{Binding Series}">
+                                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Width="174" Height="54" Margin="0,0,12,10" Style="{StaticResource MediaCardButton}" Tag="{Binding}" Click="SeriesCard_Click" AutomationProperties.Name="{Binding Title}">
+                                                        <StackPanel Margin="10,8"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" /><TextBlock Text="{Binding CompletionText}" Style="{StaticResource SecondaryText}" FontSize="11" Margin="0,3,0,0" /></StackPanel>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <TextBlock x:Name="AllSeriesTitle" Text="全部作品" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" Visibility="Collapsed" />
                         <ItemsControl x:Name="SeriesList" HorizontalAlignment="Stretch">
                             <ItemsControl.ItemsPanel>
@@ -223,38 +291,71 @@
                                     </ItemsControl>
                                     <TextBlock Text="{Binding Summary}" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" LineHeight="21" Margin="0,16,0,0" />
                                     <TextBlock Text="剧集" Style="{StaticResource SectionTitle}" Margin="0,24,0,12" />
-                                    <ItemsControl ItemsSource="{Binding Episodes}">
+                                    <ItemsControl ItemsSource="{Binding Seasons}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Grid Margin="0,0,0,8">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding DisplayNumber}" FontWeight="SemiBold" />
-                                                        <TextBlock Text="{Binding DisplayTitle}" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis" MaxWidth="270" />
-                                                        <TextBlock Text="{Binding DurationText}" Style="{StaticResource SecondaryText}" FontSize="11" />
-                                                        <TextBlock Text="{Binding ProgressText}" Foreground="{StaticResource AnimeRed}" FontSize="11" />
-                                                        <ProgressBar Height="3" Margin="0,5,12,0" Maximum="100" Value="{Binding ProgressPercent, Mode=OneWay}" Foreground="{StaticResource AnimeRed}" Background="{StaticResource AccentBlue}" />
-                                                    </StackPanel>
-                                                    <Button Grid.Column="1" Tag="{Binding}" AutomationProperties.Name="{Binding DisplayTitle, StringFormat=播放 {0}}" Click="PlayEpisode_Click" ToolTip="播放" Padding="12,8">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE768;" Margin="0,0,6,0" />
-                                                            <TextBlock Text="{Binding PlayActionLabel}" />
-                                                        </StackPanel>
-                                                    </Button>
-                                                </Grid>
+                                                <StackPanel Margin="0,0,0,14">
+                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" Foreground="{StaticResource AnimeRed}" Margin="0,0,0,6" />
+                                                    <ItemsControl ItemsSource="{Binding Groups}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Margin="0,0,0,8">
+                                                                    <TextBlock Text="{Binding VersionText}" Style="{StaticResource SecondaryText}" FontSize="11" Visibility="{Binding HasVersions, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                                    <ItemsControl ItemsSource="{Binding Versions}">
+                                                                        <ItemsControl.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <Grid Margin="0,0,0,6">
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="*" />
+                                                                                        <ColumnDefinition Width="Auto" />
+                                                                                    </Grid.ColumnDefinitions>
+                                                                                    <StackPanel VerticalAlignment="Center">
+                                                                                        <TextBlock Text="{Binding DisplayNumber}" FontWeight="SemiBold" />
+                                                                                        <TextBlock Text="{Binding DisplayTitle}" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis" MaxWidth="270" />
+                                                                                        <TextBlock Text="{Binding VersionLabel}" Style="{StaticResource SecondaryText}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                                                                        <TextBlock Text="{Binding DurationText}" Style="{StaticResource SecondaryText}" FontSize="11" />
+                                                                                        <TextBlock Text="{Binding ProgressText}" Foreground="{StaticResource AnimeRed}" FontSize="11" />
+                                                                                        <ProgressBar Height="3" Margin="0,5,12,0" Maximum="100" Value="{Binding ProgressPercent, Mode=OneWay}" Foreground="{StaticResource AnimeRed}" Background="{StaticResource AccentBlue}" />
+                                                                                    </StackPanel>
+                                                                                    <Button Grid.Column="1" Tag="{Binding}" AutomationProperties.Name="{Binding DisplayTitle, StringFormat=播放 {0}}" Click="PlayEpisode_Click" ToolTip="播放" Padding="12,8">
+                                                                                        <StackPanel Orientation="Horizontal">
+                                                                                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE768;" Margin="0,0,6,0" />
+                                                                                            <TextBlock Text="{Binding PlayActionLabel}" />
+                                                                                        </StackPanel>
+                                                                                    </Button>
+                                                                                </Grid>
+                                                                            </DataTemplate>
+                                                                        </ItemsControl.ItemTemplate>
+                                                                    </ItemsControl>
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
+                                    <StackPanel Visibility="{Binding HasExtras, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="特典" Style="{StaticResource SectionTitle}" Margin="0,16,0,10" />
+                                        <ItemsControl ItemsSource="{Binding Extras}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                                        <StackPanel><TextBlock Text="{Binding DisplayTitle}" FontWeight="SemiBold" /><TextBlock Text="{Binding DurationText}" Style="{StaticResource SecondaryText}" FontSize="11" /></StackPanel>
+                                                        <Button Grid.Column="1" Tag="{Binding}" Click="PlayExtra_Click" ToolTip="播放特典" AutomationProperties.Name="播放特典" Padding="12,8"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE768;" /></Button>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="2" Background="{StaticResource DarkSurface}" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="0,1,0,0" Padding="32,8">
+                <Border Grid.Row="3" Background="{StaticResource DarkSurface}" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="0,1,0,0" Padding="32,8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -262,7 +363,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="StatusText" Text="就绪" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         <StackPanel x:Name="ActivePlaybackControls" Grid.Column="1" Orientation="Horizontal" Visibility="Collapsed">
-                            <TextBlock Text="字幕" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox x:Name="ActiveAudioTrack" Width="220" DisplayMemberPath="DisplayLabel" SelectionChanged="ActiveAudioTrack_SelectionChanged" AutomationProperties.Name="当前音频轨道" />
                             <ComboBox x:Name="ActiveSubtitleTrack" Width="220" DisplayMemberPath="Label" SelectionChanged="ActiveSubtitleTrack_SelectionChanged" AutomationProperties.Name="当前字幕轨道" />
                             <Button Style="{StaticResource IconButton}" Margin="8,0,0,0" ToolTip="播放或暂停" AutomationProperties.Name="播放或暂停" Click="TogglePlayback_Click">
                                 <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE769;" />
@@ -333,6 +434,21 @@
 
                     <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="在线元数据" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <TextBlock Text="音频 DSP / PEQ" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <Grid Margin="0,14,0,28">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock x:Name="AudioDspSummaryText" Text="DSP 已关闭" FontWeight="SemiBold" />
+                            <TextBlock Text="支持逐声道 REW 导入、独立 PEQ 和线性相位 FIR；只作用于 MiruPlay 启动的 mpv。" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <CheckBox x:Name="AudioDspEnabledCheckBox" IsHitTestVisible="False" Focusable="False" Content="启用" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" AutomationProperties.Name="音频 DSP 启用状态" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="编辑 DSP" Padding="14,7" Margin="14,0,0,0" Click="OpenAudioDsp_Click" AutomationProperties.Name="编辑音频 DSP" />
+                        </StackPanel>
+                    </Grid>
                     <TextBlock Text="Bangumi Access Token" FontWeight="SemiBold" Margin="0,14,0,0" />
                     <Grid Margin="0,8,0,8">
                         <Grid.ColumnDefinitions>
@@ -425,6 +541,35 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <Separator Background="{StaticResource SubtleBorder}" />
+                    <TextBlock Text="媒体库扫描" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <Grid Margin="0,14,0,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="180" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <CheckBox x:Name="AutoScanEnabledCheckBox"
+                                      Content="自动扫描媒体源"
+                                      Foreground="{StaticResource TextPrimary}"
+                                      AutomationProperties.Name="自动扫描媒体源"
+                                      Click="AutoScanEnabled_Click" />
+                            <TextBlock x:Name="AutoScanStatusText"
+                                       Text="自动扫描已关闭。"
+                                       Style="{StaticResource SecondaryText}"
+                                       Margin="24,5,18,0" />
+                        </StackPanel>
+                        <ComboBox x:Name="AutoScanIntervalBox"
+                                  Grid.Column="1"
+                                  AutomationProperties.Name="自动扫描周期"
+                                  SelectionChanged="AutoScanInterval_SelectionChanged">
+                            <ComboBoxItem Tag="1"><TextBlock Text="每 1 小时" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="6"><TextBlock Text="每 6 小时" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="12"><TextBlock Text="每 12 小时" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="24"><TextBlock Text="每 24 小时" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
 
                     <Separator Background="{StaticResource SubtleBorder}" />
                     <Grid Margin="0,28,0,0">
@@ -533,8 +678,10 @@
 
             <Border x:Name="BusyOverlay" Grid.ColumnSpan="2" Background="#D9202020" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <ProgressBar Width="260" Height="4" IsIndeterminate="True" Foreground="{StaticResource AnimeRed}" />
-                    <TextBlock Text="正在读取媒体库…" Margin="0,16,0,0" FontSize="16" />
+                    <ProgressBar x:Name="BusyProgressBar" Width="260" Height="4" IsIndeterminate="True" Foreground="{StaticResource AnimeRed}" />
+                    <TextBlock x:Name="BusyOperationText" Text="正在读取媒体库…" Margin="0,16,0,0" FontSize="16" />
+                    <TextBlock x:Name="BusyProgressText" Text="" Style="{StaticResource SecondaryText}" Margin="0,6,0,0" />
+                    <Button x:Name="CancelScanButton" Content="取消扫描" Visibility="Collapsed" Margin="0,12,0,0" Click="CancelScan_Click" />
                 </StackPanel>
             </Border>
         </Grid>

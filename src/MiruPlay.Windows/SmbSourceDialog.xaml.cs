@@ -9,9 +9,11 @@ public partial class SmbSourceDialog : Window
         string? sourceName = null,
         string? sourceLocation = null,
         string? domain = null,
-        string? username = null)
+        string? username = null,
+        string recognitionMode = "MLIP")
     {
         InitializeComponent();
+        RecognitionModeBox.SelectedItem = RecognitionModeBox.Items.OfType<System.Windows.Controls.ComboBoxItem>().FirstOrDefault(item => Equals(item.Tag, recognitionMode)) ?? RecognitionModeBox.Items[0] as System.Windows.Controls.ComboBoxItem;
         if (sourceName is not null) SourceNameBox.Text = sourceName;
         if (sourceLocation is not null) LocationBox.Text = sourceLocation;
         if (domain is not null) DomainBox.Text = domain;
@@ -22,6 +24,7 @@ public partial class SmbSourceDialog : Window
     public string SourceLocation => LocationBox.Text.Trim();
     public string Domain => DomainBox.Text.Trim();
     public string Username => UsernameBox.Text.Trim();
+    public string RecognitionMode => (RecognitionModeBox.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Tag as string ?? "MLIP";
 
     public string TakePassword()
     {

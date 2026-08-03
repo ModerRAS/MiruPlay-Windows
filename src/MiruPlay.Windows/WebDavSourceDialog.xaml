@@ -1,9 +1,9 @@
 <Window x:Class="MiruPlay.Windows.WebDavSourceDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="添加 WebDAV MLIP"
+        Title="添加 WebDAV 媒体源"
         Width="560"
-        Height="430"
+        Height="500"
         Icon="Assets/MiruPlay.ico"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
@@ -15,10 +15,11 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="WebDAV MLIP" Style="{StaticResource PageTitle}" FontSize="28" />
+        <TextBlock Text="WebDAV 媒体源" Style="{StaticResource PageTitle}" FontSize="28" />
         <TextBlock Grid.Row="1" Text="名称" Style="{StaticResource SecondaryText}" Margin="0,20,0,6" />
         <TextBox x:Name="SourceNameBox" Grid.Row="2" Text="WebDAV" />
         <Grid Grid.Row="3" Margin="0,16,0,0">
@@ -40,8 +41,15 @@
             <TextBlock Text="根地址" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
             <TextBox x:Name="LocationBox" ToolTip="支持 HTTP 和 HTTPS；请输入包含 library.db 的 WebDAV 目录" />
         </StackPanel>
-        <TextBlock Grid.Row="5" Text="支持 HTTP 和 HTTPS。HTTP 凭据会以明文传输，请仅在可信网络使用。保存前会只读验证 library.db。" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,18,0,0" />
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="5" Margin="0,16,0,0">
+            <TextBlock Text="识别方式" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+            <ComboBox x:Name="RecognitionModeBox" AutomationProperties.Name="WebDAV 识别方式">
+                <ComboBoxItem Tag="MLIP"><TextBlock Text="MLIP library.db" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                <ComboBoxItem Tag="DIRECTORY"><TextBlock Text="普通目录扫描" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+        <TextBlock Grid.Row="6" Text="支持 HTTP 和 HTTPS。HTTP 凭据会以明文传输，请仅在可信网络使用。普通目录扫描会在本机保存索引，不会修改远端文件。" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,18,0,0" />
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource SecondaryButton}" Content="取消" IsCancel="True" />
             <Button Content="连接并保存" Margin="10,0,0,0" Click="Save_Click" />
         </StackPanel>

@@ -6,13 +6,39 @@ namespace MiruPlay.Windows.Services;
 
 public static class MpvPlayerLauncher
 {
+    private const string StripAssOverridesArgument = "--sub-ass-override=strip";
+
+    public static IReadOnlyList<string> SystemPlayerFallbackDegradations { get; } =
+        ["无 IPC 进度同步", "无轨道选择", "无倍速与精确跳转", "无自动连播"];
+
     internal static async Task<MpvPlaybackSession?> PlayAsync(
         LibraryEpisode episode,
         AppSettings settings,
         PlaybackProgressStore progressStore,
         long? startPositionMs = null,
         bool headless = false,
-        WebDavPlaybackProxy? playbackProxy = null)
+        WebDavPlaybackProxy? playbackProxy = null,
+        IntPtr? windowHandle = null,
+        MpvWindowsVideoOptions? videoOptions = null) =>
+        (await PlayDetailedAsync(
+            episode,
+            settings,
+            progressStore,
+            startPositionMs,
+            headless,
+            playbackProxy,
+            windowHandle,
+            videoOptions).ConfigureAwait(false)).Session;
+
+    internal static async Task<MpvPlaybackLaunchResult> PlayDetailedAsync(
+        LibraryEpisode episode,
+        AppSettings settings,
+        PlaybackProgressStore progressStore,
+        long? startPositionMs = null,
+        bool headless = false,
+        WebDavPlaybackProxy? playbackProxy = null,
+        IntPtr? windowHandle = null,
+        MpvWindowsVideoOptions? videoOptions = null)
     {
         var isRemote = IsRemoteUri(episode.MediaPath);
         try
@@ -27,7 +53,10 @@ public static class MpvPlayerLauncher
             {
                 if (isRemote) throw new NotSupportedException("播放 WebDAV 媒体需要 mpv。");
                 Process.Start(new ProcessStartInfo(episode.MediaPath) { UseShellExecute = true });
-                return null;
+                return new MpvPlaybackLaunchResult(
+                    null,
+                    MpvFallbackMode.SystemPlayerDegraded,
+                    SystemPlayerFallbackDegradations);
             }
 
             var pipeName = $"miruplay-{Guid.NewGuid():N}";
@@ -43,7 +72,15 @@ public static class MpvPlayerLauncher
                     progress?.PlayCount ?? 0);
             }
             var launchEpisode = playbackProxy?.Episode ?? episode;
-            var startInfo = CreateStartInfo(mpvPath, pipeName, launchEpisode, settings, progress, headless);
+            var startInfo = CreateStartInfo(
+                mpvPath,
+                pipeName,
+                launchEpisode,
+                settings,
+                progress,
+                headless,
+                windowHandle,
+                videoOptions);
             var process = Process.Start(startInfo) ?? throw new InvalidOperationException("无法启动 mpv。 ");
             var session = await MpvPlaybackSession.AttachAsync(
                 process,
@@ -52,7 +89,7 @@ public static class MpvPlayerLauncher
                 progressStore,
                 transportLease: playbackProxy).ConfigureAwait(false);
             playbackProxy = null;
-            return session;
+            return new MpvPlaybackLaunchResult(session, MpvFallbackMode.Mpv, []);
         }
         finally
         {
@@ -66,7 +103,9 @@ public static class MpvPlayerLauncher
         LibraryEpisode episode,
         AppSettings settings,
         PlaybackProgress? progress,
-        bool headless = false)
+        bool headless = false,
+        IntPtr? windowHandle = null,
+        MpvWindowsVideoOptions? videoOptions = null)
     {
         var startInfo = new ProcessStartInfo(mpvPath)
         {
@@ -77,6 +116,15 @@ public static class MpvPlayerLauncher
                 : Path.GetDirectoryName(episode.MediaPath)!,
         };
         startInfo.ArgumentList.Add(headless ? "--force-window=no" : "--force-window=yes");
+        if (!headless)
+        {
+            foreach (var argument in MpvWindowsVideoOptionMapper.BuildArguments(videoOptions))
+                startInfo.ArgumentList.Add(argument);
+            startInfo.ArgumentList.Add("--osc=no");
+            startInfo.ArgumentList.Add("--input-default-bindings=yes");
+        }
+        if (!headless && windowHandle is { } handle && handle != IntPtr.Zero)
+            startInfo.ArgumentList.Add($"--wid={handle.ToInt64().ToString(CultureInfo.InvariantCulture)}");
         if (headless)
         {
             startInfo.ArgumentList.Add("--vo=null");
@@ -96,6 +144,19 @@ public static class MpvPlayerLauncher
         {
             startInfo.ArgumentList.Add($"--sub-file={subtitlePath}");
         }
+        if (settings.AudioDsp?.Enabled == true)
+        {
+            var audioDsp = settings.AudioDsp.Normalize();
+            var preset = audioDsp.Presets!.First(item =>
+                item.Id.Equals(audioDsp.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
+            var graph = AudioDspFilterGraphCompiler.Compile(
+                audioDsp,
+                AudioDspChannelLayout.ForId(preset.ChannelLayoutId),
+                48_000);
+            foreach (var argument in graph.MpvArguments)
+                startInfo.ArgumentList.Add(argument);
+        }
+        startInfo.ArgumentList.Add(StripAssOverridesArgument);
         startInfo.ArgumentList.Add(episode.MediaPath);
         return startInfo;
     }

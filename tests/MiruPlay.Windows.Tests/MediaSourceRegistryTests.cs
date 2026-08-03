@@ -50,6 +50,87 @@ public sealed class MediaSourceRegistryTests : IDisposable
     }
 
     [Fact]
+    public async Task LocalDirectorySourceScansPersistsUpdatesAndDeletes()
+    {
+        var settings = new AppSettings(MediaSourceSchemaVersion: 1, MediaSources: []);
+        var indexPath = Path.Combine(_root, "directory-cache.db");
+        var mediaPath = Path.Combine(_root, "Anime", "01.mkv");
+        var subtitlePath = Path.Combine(_root, "Anime", "01.zh-Hans.ass");
+        File.WriteAllText(subtitlePath, "subtitle");
+        using var registry = new MediaSourceRegistry(
+            () => settings,
+            updated => settings = updated,
+            directoryIndex: new DirectoryLibraryIndex(indexPath));
+        var request = new MediaSourceRequest(
+            "Directory Anime",
+            "LOCAL",
+            _root,
+            ContentMode: "ANIME",
+            RecognitionMode: "DIRECTORY");
+
+        var test = await registry.TestAsync(request);
+        var added = await registry.AddAsync(request);
+        var firstScan = await registry.ScanAsync(added.Id);
+        var firstCatalog = registry.LoadCatalog(added.Id);
+        var episode = Assert.Single(Assert.Single(firstCatalog.Series).Episodes);
+        var unchangedScan = await registry.ScanAsync(added.Id);
+
+        Assert.True(test.Connected);
+        Assert.Equal("DIRECTORY", registry.Get(added.Id)?.RecognitionMode);
+        Assert.Equal("本地目录", registry.Get(added.Id)?.TypeLabel);
+        Assert.Equal(1, firstScan.EpisodesFound);
+        Assert.Equal(1, firstScan.NewEpisodes);
+        Assert.Equal(0, firstScan.UpdatedEpisodes);
+        Assert.Equal(1, episode.Number);
+        Assert.Equal(mediaPath, episode.MediaPath);
+        Assert.Equal([subtitlePath], episode.SubtitlePaths);
+        Assert.Equal(0, unchangedScan.NewEpisodes);
+        Assert.Equal(0, unchangedScan.UpdatedEpisodes);
+
+        using var reloaded = new MediaSourceRegistry(
+            () => settings,
+            updated => settings = updated,
+            directoryIndex: new DirectoryLibraryIndex(indexPath));
+        Assert.Single(Assert.Single(reloaded.LoadCatalog(added.Id).Series).Episodes);
+
+        File.AppendAllText(mediaPath, "updated");
+        var updatedScan = await registry.ScanAsync(added.Id);
+        Assert.Equal(1, updatedScan.UpdatedEpisodes);
+
+        File.Delete(mediaPath);
+        var deletedScan = await registry.ScanAsync(added.Id);
+        Assert.Equal(0, deletedScan.EpisodesFound);
+        Assert.Empty(registry.LoadCatalog(added.Id).Series);
+
+        registry.Remove(added.Id);
+        Assert.Empty(registry.List());
+    }
+
+    [Fact]
+    public async Task ChangingDirectorySourceRootClearsStaleIndexRows()
+    {
+        var firstRoot = Path.Combine(_root, "first");
+        var secondRoot = Path.Combine(_root, "second");
+        Directory.CreateDirectory(firstRoot);
+        Directory.CreateDirectory(secondRoot);
+        File.WriteAllText(Path.Combine(firstRoot, "01.mkv"), "video");
+        var settings = new AppSettings(MediaSourceSchemaVersion: 1, MediaSources: []);
+        using var registry = new MediaSourceRegistry(
+            () => settings,
+            updated => settings = updated,
+            directoryIndex: new DirectoryLibraryIndex(Path.Combine(_root, "root-change.db")));
+        var source = await registry.AddAsync(new MediaSourceRequest(
+            "First", "LOCAL", firstRoot, RecognitionMode: "DIRECTORY"));
+        await registry.ScanAsync(source.Id);
+        Assert.NotEmpty(registry.LoadCatalog(source.Id).Series);
+
+        await registry.UpdateAsync(source.Id, new MediaSourceRequest(
+            "Second", "LOCAL", secondRoot, RecognitionMode: "DIRECTORY"));
+
+        Assert.Empty(registry.LoadCatalog(source.Id).Series);
+    }
+
+    [Fact]
     public async Task DramaMlipSourceIsPersistedAsCurrentMode()
     {
         var settings = new AppSettings(MediaSourceSchemaVersion: 1, MediaSources: []);

@@ -112,7 +112,8 @@ public sealed record AudioDspPreset(
     AudioDspFirQuality FirQuality = AudioDspFirQuality.Medium,
     AudioDspOutputMode OutputMode = AudioDspOutputMode.AutoPreserve,
     IReadOnlyList<AudioDspChannelRule>? Rules = null,
-    AudioDspLimiter? Limiter = null)
+    AudioDspLimiter? Limiter = null,
+    string ChannelLayoutId = "stereo")
 {
     public static AudioDspPreset Neutral() => new("neutral", "Neutral");
 
@@ -126,6 +127,7 @@ public sealed record AudioDspPreset(
         OutputMode = Enum.IsDefined(OutputMode) ? OutputMode : AudioDspOutputMode.AutoPreserve,
         Rules = (Rules ?? []).Select(rule => rule.Normalize()).ToList(),
         Limiter = (Limiter ?? new AudioDspLimiter()).Normalize(),
+        ChannelLayoutId = AudioDspStorage.NormalizeChannelLayoutId(ChannelLayoutId),
     };
 }
 
@@ -187,6 +189,8 @@ public sealed record AudioDspConfig(
             if (!Enum.IsDefined(preset.PhaseMode)) errors.Add($"presets[{presetIndex}].phaseMode is invalid");
             if (!Enum.IsDefined(preset.FirQuality)) errors.Add($"presets[{presetIndex}].firQuality is invalid");
             if (!Enum.IsDefined(preset.OutputMode)) errors.Add($"presets[{presetIndex}].outputMode is invalid");
+            if (!AudioDspStorage.IsKnownChannelLayout(preset.ChannelLayoutId))
+                errors.Add($"presets[{presetIndex}].channelLayoutId is invalid");
             if (preset.Rules is null) continue;
             for (var ruleIndex = 0; ruleIndex < preset.Rules.Count; ruleIndex++)
             {
@@ -224,6 +228,13 @@ public sealed record AudioDspConfig(
 
 public static class AudioDspStorage
 {
+    public static bool IsKnownChannelLayout(string? value) => value?.Trim().ToLowerInvariant() is "mono" or "stereo" or "5.1" or "7.1";
+
+    public static string NormalizeChannelLayoutId(string? value) =>
+        value?.Trim().ToLowerInvariant() is { } normalized && IsKnownChannelLayout(normalized)
+            ? normalized
+            : "stereo";
+
     public static string ToStorageValue(this AudioDspPhaseMode value) => value switch
     {
         AudioDspPhaseMode.Linear => "linear",

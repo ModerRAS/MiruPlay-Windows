@@ -17,11 +17,14 @@ public sealed record MediaSourceDefinition(
     long LastScanned = 0)
 {
     [JsonIgnore]
-    public string TypeLabel => Type.ToUpperInvariant() switch
+    public string TypeLabel => (Type.ToUpperInvariant(), RecognitionMode.ToUpperInvariant()) switch
     {
-        "LOCAL" => "本地 MLIP",
-        "WEBDAV" => "WebDAV MLIP",
-        "SMB" => "SMB MLIP",
+        ("LOCAL", "DIRECTORY") => "本地目录",
+        ("LOCAL", _) => "本地 MLIP",
+        ("WEBDAV", "DIRECTORY") => "WebDAV 目录",
+        ("WEBDAV", _) => "WebDAV MLIP",
+        ("SMB", "DIRECTORY") => "SMB 目录",
+        ("SMB", _) => "SMB MLIP",
         _ => Type,
     };
 
@@ -59,7 +62,8 @@ public sealed record SourceScanResponse(
     int EpisodesFound,
     int NewEpisodes,
     int UpdatedEpisodes,
-    string? Error = null);
+    string? Error = null,
+    int DeletedEpisodes = 0);
 
 public sealed class MediaSourceRegistry : IDisposable
 {
@@ -68,6 +72,9 @@ public sealed class MediaSourceRegistry : IDisposable
     private readonly MediaSourceCredentialStore _credentials;
     private readonly WebDavMlipClient _webDav;
     private readonly SmbConnectionManager _smbConnections;
+    private readonly Lazy<DirectoryLibraryIndex> _directoryIndex;
+    private readonly WebDavDirectoryEnumerator _webDavDirectory;
+    private readonly SemaphoreSlim _scanLock = new(1, 1);
     private readonly object _sync = new();
 
     public MediaSourceRegistry(
@@ -75,7 +82,9 @@ public sealed class MediaSourceRegistry : IDisposable
         Action<AppSettings> saveSettings,
         MediaSourceCredentialStore? credentials = null,
         WebDavMlipClient? webDav = null,
-        SmbConnectionManager? smbConnections = null)
+        SmbConnectionManager? smbConnections = null,
+        DirectoryLibraryIndex? directoryIndex = null,
+        WebDavDirectoryEnumerator? webDavDirectory = null)
         : this(
             getSettings,
             update =>
@@ -86,7 +95,9 @@ public sealed class MediaSourceRegistry : IDisposable
             },
             credentials,
             webDav,
-            smbConnections)
+            smbConnections,
+            directoryIndex,
+            webDavDirectory)
     {
     }
 
@@ -95,13 +106,17 @@ public sealed class MediaSourceRegistry : IDisposable
         Func<Func<AppSettings, AppSettings>, AppSettings> updateSettings,
         MediaSourceCredentialStore? credentials = null,
         WebDavMlipClient? webDav = null,
-        SmbConnectionManager? smbConnections = null)
+        SmbConnectionManager? smbConnections = null,
+        DirectoryLibraryIndex? directoryIndex = null,
+        WebDavDirectoryEnumerator? webDavDirectory = null)
     {
         _getSettings = getSettings;
         _updateSettings = updateSettings;
         _credentials = credentials ?? new MediaSourceCredentialStore();
         _webDav = webDav ?? new WebDavMlipClient();
         _smbConnections = smbConnections ?? new SmbConnectionManager();
+        _directoryIndex = new Lazy<DirectoryLibraryIndex>(() => directoryIndex ?? new DirectoryLibraryIndex());
+        _webDavDirectory = webDavDirectory ?? new WebDavDirectoryEnumerator();
     }
 
     public IReadOnlyList<MediaSourceInfoDto> List() =>
@@ -112,9 +127,11 @@ public sealed class MediaSourceRegistry : IDisposable
         try
         {
             var validated = await ValidateAsync(request).ConfigureAwait(false);
-            return new SourceTestResponse(
-                true,
-                $"MLIP v{validated.SchemaVersion}，{validated.SeriesCount} 部作品");
+            return validated.RecognitionMode == "DIRECTORY"
+                ? new SourceTestResponse(true, "目录可读")
+                : new SourceTestResponse(
+                    true,
+                    $"MLIP v{validated.SchemaVersion}，{validated.SeriesCount} 部作品");
         }
         catch (Exception error) when (IsSourceFailure(error))
         {
@@ -221,20 +238,28 @@ public sealed class MediaSourceRegistry : IDisposable
                     MediaSourceSchemaVersion = 1,
                 };
             });
-            if (existing.Type == "WEBDAV" && !SameLocation(existing.Location, updatedSource!.Location))
+            var savedSource = updatedSource!;
+            if (existing.Type == "WEBDAV" && !SameLocation(existing.Location, savedSource.Location))
             {
                 _webDav.DeleteCache(existing.Location);
             }
             if (existing.Type == "SMB" &&
-                (updatedSource!.Type != "SMB" || !SmbPath.ShareRoot(existing.Location).Equals(
-                    SmbPath.ShareRoot(updatedSource.Location),
+                (savedSource.Type != "SMB" || !SmbPath.ShareRoot(existing.Location).Equals(
+                    SmbPath.ShareRoot(savedSource.Location),
                     StringComparison.OrdinalIgnoreCase)) &&
                 !updatedSources.Any(item => item.Id != sourceId && item.Type == "SMB" &&
                     SmbPath.ShareRoot(item.Location).Equals(SmbPath.ShareRoot(existing.Location), StringComparison.OrdinalIgnoreCase)))
             {
                 _smbConnections.Disconnect(existing.Location);
             }
-            return ToDto(updatedSource!);
+            if ((existing.RecognitionMode == "DIRECTORY" || savedSource.RecognitionMode == "DIRECTORY") &&
+                (existing.Type != savedSource.Type ||
+                 existing.RecognitionMode != savedSource.RecognitionMode ||
+                 !SameLocation(existing.Location, savedSource.Location)))
+            {
+                _directoryIndex.Value.Remove(sourceId);
+            }
+            return ToDto(savedSource);
         }
     }
 
@@ -266,6 +291,7 @@ public sealed class MediaSourceRegistry : IDisposable
                 };
             });
             _credentials.Delete(sourceId);
+            if (_directoryIndex.IsValueCreated) _directoryIndex.Value.Remove(sourceId);
             if (removedSource!.Type == "WEBDAV") _webDav.DeleteCache(removedSource.Location);
             if (removedSource.Type == "SMB" && !remainingSources.Any(item => item.Type == "SMB" &&
                     SmbPath.ShareRoot(item.Location).Equals(SmbPath.ShareRoot(removedSource.Location), StringComparison.OrdinalIgnoreCase)))
@@ -275,11 +301,66 @@ public sealed class MediaSourceRegistry : IDisposable
         }
     }
 
-    public async Task<SourceScanResponse> ScanAsync(long sourceId)
+    public async Task<SourceScanResponse> ScanAsync(long sourceId) =>
+        await ScanAsync(sourceId, progress: null, CancellationToken.None).ConfigureAwait(false);
+
+    public Task<SourceScanResponse> ScanAsync(long sourceId, CancellationToken cancellationToken) =>
+        ScanAsync(sourceId, progress: null, cancellationToken);
+
+    public async Task<SourceScanResponse> ScanAsync(
+        long sourceId,
+        IProgress<DirectoryScanProgress>? progress,
+        CancellationToken cancellationToken = default)
+    {
+        await _scanLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return await ScanCoreAsync(sourceId, progress, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _scanLock.Release();
+        }
+    }
+
+    private async Task<SourceScanResponse> ScanCoreAsync(
+        long sourceId,
+        IProgress<DirectoryScanProgress>? progress,
+        CancellationToken cancellationToken)
     {
         var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
         try
         {
+            if (source.RecognitionMode == "DIRECTORY")
+            {
+                var result = source.Type switch
+                {
+                    "LOCAL" => await _directoryIndex.Value.ScanLocalAsync(
+                        sourceId,
+                        source.Location,
+                        progress,
+                        cancellationToken).ConfigureAwait(false),
+                    "WEBDAV" => await ScanWebDavDirectoryAsync(
+                        sourceId,
+                        source,
+                        progress,
+                        cancellationToken).ConfigureAwait(false),
+                    "SMB" => await ScanSmbDirectoryAsync(
+                        sourceId,
+                        source,
+                        progress,
+                        cancellationToken).ConfigureAwait(false),
+                    _ => throw new NotSupportedException($"Windows 客户端尚未实现 {source.Type} 普通目录扫描。"),
+                };
+                SetConnectionState(sourceId, connected: true, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                return new SourceScanResponse(
+                    sourceId,
+                    source.Name,
+                    result.EpisodesFound,
+                    result.NewEpisodes,
+                    result.UpdatedEpisodes,
+                    DeletedEpisodes: result.DeletedEpisodes);
+            }
             var validated = source.Type switch
             {
                 "LOCAL" => await ValidateLocalAsync(source.Location).ConfigureAwait(false),
@@ -294,6 +375,10 @@ public sealed class MediaSourceRegistry : IDisposable
             SetConnectionState(sourceId, connected: true, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             return new SourceScanResponse(sourceId, source.Name, validated.EpisodeCount, 0, 0);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception error) when (IsSourceFailure(error))
         {
             SetConnectionState(sourceId, connected: false, source.LastScanned);
@@ -307,13 +392,52 @@ public sealed class MediaSourceRegistry : IDisposable
     public LibraryCatalog LoadCatalog(long sourceId)
     {
         var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
-        return source.Type switch
-        {
-            "LOCAL" => MlipLibraryReader.Load(source.Location),
-            "WEBDAV" => _webDav.LoadCachedCatalog(source.Location),
-            "SMB" => LoadSmbCatalog(source),
-            _ => throw new NotSupportedException($"Windows 客户端尚未实现 {source.Type} 媒体源。"),
-        };
+        return source.RecognitionMode == "DIRECTORY"
+            ? _directoryIndex.Value.LoadDirectory(sourceId, source.Location)
+            : source.Type switch
+            {
+                "LOCAL" => MlipLibraryReader.Load(source.Location),
+                "WEBDAV" => _webDav.LoadCachedCatalog(source.Location),
+                "SMB" => LoadSmbCatalog(source),
+                _ => throw new NotSupportedException($"Windows 客户端尚未实现 {source.Type} 媒体源。"),
+            };
+    }
+
+    private async Task<DirectoryScanResult> ScanWebDavDirectoryAsync(
+        long sourceId,
+        MediaSourceDefinition source,
+        IProgress<DirectoryScanProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        var entries = await _webDavDirectory.EnumerateAsync(
+            source.Location,
+            _credentials.Get(sourceId),
+            progress,
+            cancellationToken).ConfigureAwait(false);
+        return await _directoryIndex.Value.ScanAsync(
+            sourceId,
+            source.Location,
+            entries,
+            progress,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<DirectoryScanResult> ScanSmbDirectoryAsync(
+        long sourceId,
+        MediaSourceDefinition source,
+        IProgress<DirectoryScanProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        var normalized = SmbPath.NormalizeRoot(source.Location);
+        await Task.Run(
+            () => _smbConnections.EnsureConnected(normalized, _credentials.Get(sourceId)),
+            cancellationToken).ConfigureAwait(false);
+        return await _directoryIndex.Value.ScanFileSystemAsync(
+            sourceId,
+            SmbPath.ToUncPath(normalized),
+            normalized,
+            progress,
+            cancellationToken).ConfigureAwait(false);
     }
 
     public MediaSourceCredential? GetCredential(long sourceId) => _credentials.Get(sourceId);
@@ -346,6 +470,8 @@ public sealed class MediaSourceRegistry : IDisposable
     {
         _smbConnections.Dispose();
         _webDav.Dispose();
+        _webDavDirectory.Dispose();
+        _scanLock.Dispose();
         GC.SuppressFinalize(this);
     }
 
@@ -373,11 +499,12 @@ public sealed class MediaSourceRegistry : IDisposable
         {
             throw new NotSupportedException("内容模式必须是 ANIME 或 DRAMA。");
         }
-        if (!request.RecognitionMode.Trim().Equals("MLIP", StringComparison.OrdinalIgnoreCase))
+        if (request.RecognitionMode.Trim().ToUpperInvariant() is not ("MLIP" or "DIRECTORY"))
         {
-            throw new NotSupportedException("Windows 客户端当前仅支持 MLIP 识别模式。");
+            throw new NotSupportedException("识别模式必须是 MLIP 或 DIRECTORY。");
         }
-        if (!request.MlipMetadataMode.Trim().Equals("LIBRARY_DB_LOCAL_PRIORITY", StringComparison.OrdinalIgnoreCase))
+        if (request.RecognitionMode.Trim().Equals("MLIP", StringComparison.OrdinalIgnoreCase) &&
+            !request.MlipMetadataMode.Trim().Equals("LIBRARY_DB_LOCAL_PRIORITY", StringComparison.OrdinalIgnoreCase))
         {
             throw new NotSupportedException("Windows 客户端当前仅支持 LIBRARY_DB_LOCAL_PRIORITY 元数据模式。");
         }
@@ -391,12 +518,20 @@ public sealed class MediaSourceRegistry : IDisposable
         {
             throw new NotSupportedException("本地媒体源不接受域、用户名或密码。");
         }
+        if (request.RecognitionMode.Trim().Equals("DIRECTORY", StringComparison.OrdinalIgnoreCase))
+            return await ValidateLocalDirectoryAsync(request.Location).ConfigureAwait(false);
         return await ValidateLocalAsync(request.Location).ConfigureAwait(false);
     }
 
     private async Task<ValidatedSource> ValidateWebDavRequestAsync(MediaSourceRequest request)
     {
         var credential = new MediaSourceCredential(request.Username?.Trim() ?? "", request.Password ?? "");
+        if (request.RecognitionMode.Trim().Equals("DIRECTORY", StringComparison.OrdinalIgnoreCase))
+        {
+            var root = WebDavMlipClient.NormalizeRoot(request.Location);
+            await _webDavDirectory.ValidateAsync(root.AbsoluteUri, credential).ConfigureAwait(false);
+            return new ValidatedSource(root.AbsoluteUri.TrimEnd('/'), "WEBDAV", "DIRECTORY", 1, 0, 0, credential);
+        }
         return await ValidateWebDavAsync(request.Location, credential).ConfigureAwait(false);
     }
 
@@ -405,6 +540,13 @@ public sealed class MediaSourceRegistry : IDisposable
         bool replaceSmbCredentials)
     {
         var credential = CredentialFromRequest(request);
+        if (request.RecognitionMode.Trim().Equals("DIRECTORY", StringComparison.OrdinalIgnoreCase))
+        {
+            var normalized = SmbPath.NormalizeRoot(request.Location);
+            await Task.Run(
+                () => _smbConnections.EnsureConnected(normalized, credential, replaceSmbCredentials)).ConfigureAwait(false);
+            return new ValidatedSource(normalized, "SMB", "DIRECTORY", 1, 0, 0, credential);
+        }
         return await ValidateSmbAsync(request.Location, credential, replaceSmbCredentials).ConfigureAwait(false);
     }
 
@@ -412,6 +554,12 @@ public sealed class MediaSourceRegistry : IDisposable
         request.Username?.Trim() ?? "",
         request.Password ?? "",
         request.Domain?.Trim());
+
+    private static Task<ValidatedSource> ValidateLocalDirectoryAsync(string location)
+    {
+        var fullPath = DirectoryLibraryIndex.NormalizeLocalRoot(location);
+        return Task.FromResult(new ValidatedSource(fullPath, "LOCAL", "DIRECTORY", 1, 0, 0, null));
+    }
 
     private static async Task<ValidatedSource> ValidateLocalAsync(string location)
     {
@@ -422,6 +570,7 @@ public sealed class MediaSourceRegistry : IDisposable
             return new ValidatedSource(
                 catalog.RootPath,
                 "LOCAL",
+                "MLIP",
                 catalog.SchemaVersion,
                 catalog.Series.Count,
                 catalog.Series.Sum(series => series.Episodes.Count),
@@ -442,6 +591,7 @@ public sealed class MediaSourceRegistry : IDisposable
             return new ValidatedSource(
                 root.AbsoluteUri.TrimEnd('/'),
                 "WEBDAV",
+                "MLIP",
                 snapshot.SchemaVersion,
                 snapshot.SeriesCount,
                 snapshot.EpisodeCount,
@@ -469,6 +619,7 @@ public sealed class MediaSourceRegistry : IDisposable
             return new ValidatedSource(
                 normalized,
                 "SMB",
+                "MLIP",
                 catalog.SchemaVersion,
                 catalog.Series.Count,
                 catalog.Series.Sum(series => series.Episodes.Count),
@@ -546,7 +697,7 @@ public sealed class MediaSourceRegistry : IDisposable
         validated.Type,
         validated.Location,
         request.ContentMode.Trim().ToUpperInvariant(),
-        "MLIP",
+        validated.RecognitionMode,
         "LIBRARY_DB_LOCAL_PRIORITY",
         request.DisableOnlineMetadata,
         true,
@@ -602,6 +753,7 @@ public sealed class MediaSourceRegistry : IDisposable
     private sealed record ValidatedSource(
         string Location,
         string Type,
+        string RecognitionMode,
         int SchemaVersion,
         int SeriesCount,
         int EpisodeCount,

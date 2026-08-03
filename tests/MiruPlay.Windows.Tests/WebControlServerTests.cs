@@ -73,6 +73,11 @@ public sealed class WebControlServerTests : IDisposable
             </channel></rss>
             """));
         var rssProcessed = new RssProcessedStore(Path.Combine(_directory, "rss-state.db"));
+        var localLogs = new RotatingLocalLogStore(Path.Combine(_directory, "logs", "miruplay.jsonl"));
+        localLogs.Write("info", "test log");
+        var openObserveLogs = new OpenObserveLogService(
+            localLogs,
+            new OpenObserveTokenStore(Path.Combine(_directory, "openobserve-token.bin")));
         var cloudDriveClient = new CloudDriveGrpcClient(
             (_, username, password, _) =>
             {
@@ -115,7 +120,9 @@ public sealed class WebControlServerTests : IDisposable
                 State: "PLAYING",
                 Title: "第 1 集 · 测试分集",
                 SubtitleTracks: [new PlaybackSubtitleTrack(7, "zh-CN", "简体中文", "subrip", true, "episode.zh-CN.srt", true)],
-                SelectedSubtitleTrackId: 7),
+                SelectedSubtitleTrackId: 7,
+                AudioTracks: [new MpvAudioTrack(2, "jpn", "日语", "aac", false, true)],
+                SelectedAudioTrackId: 2),
             (episodeId, positionMs) =>
             {
                 requestedEpisode = episodeId;
@@ -150,6 +157,8 @@ public sealed class WebControlServerTests : IDisposable
             cloudDriveClient: cloudDriveClient,
             rssFeedClient: rssFeedClient,
             rssProcessed: rssProcessed,
+            localLogs: localLogs,
+            openObserveLogs: openObserveLogs,
             resolvePosterPath: (value, _) => Task.FromResult<string?>(
                 value.ApiId == series.ApiId ? posterPath : null));
         await server.StartAsync();
@@ -167,8 +176,33 @@ public sealed class WebControlServerTests : IDisposable
 
         using var client = new HttpClient { BaseAddress = unauthorized.BaseAddress };
         client.DefaultRequestHeaders.Add("X-MiruPlay-Token", tokens.AccessToken);
+        var dsp = await ReadJson(await client.GetAsync("/api/audio-dsp"));
+        Assert.False(dsp.RootElement.GetProperty("data").GetProperty("config").GetProperty("enabled").GetBoolean());
+        var rewImport = await client.PostAsJsonAsync("/api/audio-dsp/import-rew", new
+        {
+            target = "left",
+            content = "Generic\nType\tEnabled\tFrequency(Hz)\tGain(dB)\tQ\nPK\tTrue\t70\t-14.7\t10.398",
+        });
+        Assert.Equal(HttpStatusCode.OK, rewImport.StatusCode);
+        Assert.Single((await ReadJson(rewImport)).RootElement.GetProperty("data").GetProperty("bands").EnumerateArray());
+        var invalidDsp = await client.PutAsJsonAsync("/api/audio-dsp", new
+        {
+            config = new { schemaVersion = 1, enabled = true, selectedPresetId = "missing", presets = Array.Empty<object>() },
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidDsp.StatusCode);
         var sources = await ReadJson(await client.GetAsync("/api/sources"));
         Assert.Single(sources.RootElement.GetProperty("data").EnumerateArray());
+        var info = await ReadJson(await client.GetAsync("/api/info"));
+        var capabilities = info.RootElement.GetProperty("data").GetProperty("capabilities");
+        Assert.True(capabilities.GetProperty("logUpload").GetBoolean());
+        Assert.False(capabilities.GetProperty("appUpdate").GetBoolean());
+        Assert.False(capabilities.GetProperty("formatAwareToneMapping").GetBoolean());
+        Assert.False(capabilities.GetProperty("backgroundTasks").GetBoolean());
+        var logs = await ReadJson(await client.GetAsync("/api/logs?limit=1"));
+        Assert.Equal(1, logs.RootElement.GetProperty("data").GetProperty("records").GetArrayLength());
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/tasks")).StatusCode);
+        var appControl = await ReadJson(await client.PostAsJsonAsync("/api/app-control", new { action = "restart" }));
+        Assert.False(appControl.RootElement.GetProperty("data").GetProperty("accepted").GetBoolean());
         var addSource = await client.PostAsJsonAsync("/api/sources", new
         {
             name = "Anime",
@@ -179,6 +213,16 @@ public sealed class WebControlServerTests : IDisposable
         });
         Assert.Equal(HttpStatusCode.OK, addSource.StatusCode);
         Assert.Equal("MLIP", requestedSource?.RecognitionMode);
+        var addDirectorySource = await client.PostAsJsonAsync("/api/sources", new
+        {
+            name = "Directory Anime",
+            type = "LOCAL",
+            location = Path.Combine(_directory, "directory"),
+            contentMode = "ANIME",
+            recognitionMode = "DIRECTORY",
+        });
+        Assert.Equal(HttpStatusCode.OK, addDirectorySource.StatusCode);
+        Assert.Equal("DIRECTORY", requestedSource?.RecognitionMode);
         var localDirectories = await client.GetAsync($"/api/local-directories?path={Uri.EscapeDataString(_directory)}");
         Assert.Equal(HttpStatusCode.OK, localDirectories.StatusCode);
 
@@ -357,6 +401,8 @@ public sealed class WebControlServerTests : IDisposable
         Assert.Equal(7, statusData.GetProperty("selectedSubtitleTrackId").GetInt32());
         Assert.Equal("第 1 集 · 测试分集", statusData.GetProperty("title").GetString());
         Assert.Equal("简体中文（外挂）", Assert.Single(statusData.GetProperty("subtitleTracks").EnumerateArray()).GetProperty("displayLabel").GetString());
+        Assert.Equal(2, statusData.GetProperty("selectedAudioTrackId").GetInt32());
+        Assert.Equal("日语", Assert.Single(statusData.GetProperty("audioTracks").EnumerateArray()).GetProperty("displayLabel").GetString());
         var subtitleCommand = await client.PostAsJsonAsync("/api/playback/command", new
         {
             command = "subtitle",
@@ -364,6 +410,14 @@ public sealed class WebControlServerTests : IDisposable
         });
         Assert.Equal(HttpStatusCode.OK, subtitleCommand.StatusCode);
         Assert.Equal(new PlaybackControlCommand("subtitle", SubtitleTrackId: 7), requestedCommand);
+
+        var audioCommand = await client.PostAsJsonAsync("/api/playback/command", new
+        {
+            command = "audio",
+            audioTrackId = 2,
+        });
+        Assert.Equal(HttpStatusCode.OK, audioCommand.StatusCode);
+        Assert.Equal(new PlaybackControlCommand("audio", AudioTrackId: 2), requestedCommand);
 
         var missingCommand = await client.PostAsJsonAsync("/api/playback/command", new { deltaMs = 1_000 });
         Assert.Equal(HttpStatusCode.BadRequest, missingCommand.StatusCode);
@@ -388,20 +442,23 @@ public sealed class WebControlServerTests : IDisposable
         Assert.Equal("play_next_episode", settings.PlaybackEndAction);
         Assert.Equal("zh_hans", settings.PreferredSubtitleLanguage);
         var playbackSettings = await ReadJson(await client.GetAsync("/api/settings/playback"));
-        Assert.Equal(
-            "STANDARD_EXO",
-            playbackSettings.RootElement.GetProperty("data").GetProperty("formatAwareToneMapping").GetProperty("defaultBackend").GetString());
+        Assert.False(
+            playbackSettings.RootElement.GetProperty("data").GetProperty("formatAwareToneMapping").GetProperty("supported").GetBoolean());
         var unsupportedToneMapping = await client.PutAsJsonAsync("/api/settings/playback", new
         {
             formatAwareToneMapping = new { defaultBackend = "EXPERIMENTAL_MPV_EMBEDDED" },
         });
         Assert.Equal(HttpStatusCode.NotImplemented, unsupportedToneMapping.StatusCode);
 
+        var updateStatus = await ReadJson(await client.GetAsync("/api/app-update"));
+        Assert.False(updateStatus.RootElement.GetProperty("data").GetProperty("supported").GetBoolean());
+        var updateCheck = await ReadJson(await client.PostAsync("/api/app-update/check", null));
+        Assert.False(updateCheck.RootElement.GetProperty("data").GetProperty("updateAvailable").GetBoolean());
+        var updateDownload = await ReadJson(await client.PostAsync("/api/app-update/download", null));
+        Assert.Contains("尚未配置", updateDownload.RootElement.GetProperty("data").GetProperty("lastError").GetString(), StringComparison.Ordinal);
+
         foreach (var (method, path) in new (HttpMethod Method, string Path)[]
         {
-            (HttpMethod.Get, "/api/app-update"),
-            (HttpMethod.Post, "/api/app-update/check"),
-            (HttpMethod.Post, "/api/app-update/download"),
             (HttpMethod.Post, "/api/app-update/install-permission"),
             (HttpMethod.Get, "/api/playback/clock-samples"),
             (HttpMethod.Get, "/api/playback/native-diagnostics"),
@@ -428,8 +485,21 @@ public sealed class WebControlServerTests : IDisposable
             scanSettings.RootElement.GetProperty("data").GetProperty("appModeOptions").EnumerateArray(),
             item => Assert.Equal("anime", item.GetString()),
             item => Assert.Equal("drama", item.GetString()));
-        var unsupportedAutomaticScan = await client.PutAsJsonAsync("/api/settings/scan", new { autoScanEnabled = true });
-        Assert.Equal(HttpStatusCode.NotImplemented, unsupportedAutomaticScan.StatusCode);
+        var automaticScan = await ReadJson(await client.PutAsJsonAsync("/api/settings/scan", new
+        {
+            autoScanEnabled = true,
+            autoScanIntervalHours = 12,
+        }));
+        Assert.True(settings.AutoScanEnabled);
+        Assert.Equal(12, settings.AutoScanIntervalHours);
+        Assert.True(automaticScan.RootElement.GetProperty("data").GetProperty("autoScanEnabled").GetBoolean());
+        Assert.Equal(12, automaticScan.RootElement.GetProperty("data").GetProperty("autoScanIntervalHours").GetInt32());
+        Assert.Equal(
+            [1, 6, 12, 24],
+            automaticScan.RootElement.GetProperty("data").GetProperty("autoScanIntervalOptionsHours")
+                .EnumerateArray().Select(item => item.GetInt32()).ToArray());
+        var invalidAutomaticScan = await client.PutAsJsonAsync("/api/settings/scan", new { autoScanIntervalHours = 2 });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidAutomaticScan.StatusCode);
         beforeSettingsUpdate = () => settings = settings with { PlayerPath = @"C:\Players\mpv.exe" };
         var concurrentPlaybackUpdate = client.PutAsJsonAsync("/api/settings/playback", new
         {

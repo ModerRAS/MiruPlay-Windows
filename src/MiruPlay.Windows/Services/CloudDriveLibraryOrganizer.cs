@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace MiruPlay.Windows.Services;
 
-public sealed record CloudDriveVideoClassification(string ShowName, int SeasonNumber);
+public sealed record CloudDriveVideoClassification(string ShowName, int SeasonNumber, double? EpisodeNumber = null);
 
 public sealed class CloudDriveLibraryOrganizer
 {
@@ -11,8 +11,15 @@ public sealed class CloudDriveLibraryOrganizer
         ".mkv", ".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm", ".m4v", ".ts", ".m2ts",
     };
     private readonly CloudDriveGrpcClient _cloudDrive;
+    private readonly IAnimeVideoClassifier _classifier;
 
-    public CloudDriveLibraryOrganizer(CloudDriveGrpcClient cloudDrive) => _cloudDrive = cloudDrive;
+    public CloudDriveLibraryOrganizer(
+        CloudDriveGrpcClient cloudDrive,
+        IAnimeVideoClassifier? classifier = null)
+    {
+        _cloudDrive = cloudDrive;
+        _classifier = classifier ?? SharedAnimeVideoClassifier.Instance;
+    }
 
     public async Task<int> OrganizeAsync(
         CloudDriveAutomationConfig config,
@@ -33,7 +40,10 @@ public sealed class CloudDriveLibraryOrganizer
         foreach (var video in videos)
         {
             if (!IsChild(video.Path, inbox)) continue;
-            var classification = VideoFilenameInference.Classify(video.Name, ParentPath(video.Path).Split('/').LastOrDefault());
+            var classification = _classifier.Classify(
+                video.Path,
+                video.Name,
+                ParentPath(video.Path).Split('/').LastOrDefault());
             var showFolder = SafeFolderSegment(classification.ShowName);
             var seasonFolder = $"Season {Math.Max(1, classification.SeasonNumber)}";
             var showPath = $"{library}/{showFolder}";
@@ -134,7 +144,14 @@ public static class VideoFilenameInference
         if (title.Length == 0) title = parent.Length == 0 ? "Unknown" : parent;
         var seasonMatch = SeasonEpisode.Match(stem);
         var season = seasonMatch.Success && int.TryParse(seasonMatch.Groups[1].Value, out var number) ? number : 1;
-        return new CloudDriveVideoClassification(title, season);
+        double? episode = match.Success && double.TryParse(
+            match.Groups[match.Groups.Count - 1].Value,
+            System.Globalization.NumberStyles.None,
+            System.Globalization.CultureInfo.InvariantCulture,
+            out var parsedEpisode)
+            ? parsedEpisode
+            : null;
+        return new CloudDriveVideoClassification(title, season, episode);
     }
 
     private static string Cleanup(string value) =>

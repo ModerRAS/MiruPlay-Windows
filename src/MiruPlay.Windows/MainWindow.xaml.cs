@@ -23,7 +23,12 @@ public partial class MainWindow : Window, IAsyncDisposable
     private readonly RssProcessedStore _rssProcessed = new();
     private readonly CloudDriveRssRunner _cloudDriveRunner;
     private readonly CloudDriveRssScheduler _cloudDriveScheduler;
+    private readonly MediaSourceAutoScanScheduler _mediaSourceAutoScanScheduler;
     private readonly MediaSourceRegistry _mediaSourceRegistry;
+    private readonly RotatingLocalLogStore _localLogs = new();
+    private readonly OpenObserveLogService _openObserveLogs;
+    private readonly WindowsAppUpdater _appUpdater = new();
+    private readonly HeadlessTaskScheduler _tasks = new();
     private readonly WebControlServer _webControlServer;
     private const int SeriesPageSize = 40;
     private AppSettings _settings = new();
@@ -43,6 +48,9 @@ public partial class MainWindow : Window, IAsyncDisposable
     private bool _shutdownComplete;
     private long? _editingRssId;
     private MpvPlaybackSession? _activeSession;
+    private MpvPlaybackQueue? _activePlaybackQueue;
+    private CancellationTokenSource? _scanCancellation;
+    private bool _loadingAudioTracks;
 
     public MainWindow()
     {
@@ -52,6 +60,11 @@ public partial class MainWindow : Window, IAsyncDisposable
             _metadataTokens,
             _bangumiMetadata.UpdateEpisodeCollectionAsync);
         _mediaSourceRegistry = new MediaSourceRegistry(() => _settings, UpdateSettingsFromMediaSource);
+        _mediaSourceAutoScanScheduler = new MediaSourceAutoScanScheduler(
+            () => _settings,
+            _mediaSourceRegistry.List,
+            ScanSourceAutomaticallyAsync);
+        _openObserveLogs = new OpenObserveLogService(_localLogs, new OpenObserveTokenStore());
         _cloudDriveRunner = new CloudDriveRssRunner(
             _cloudDriveConfig,
             _cloudDriveCredentials,
@@ -86,10 +99,26 @@ public partial class MainWindow : Window, IAsyncDisposable
             rssFeedClient: _rssFeedClient,
             rssProcessed: _rssProcessed,
             cloudDriveRunner: _cloudDriveRunner,
-            resolvePosterPath: ResolvePosterForWebAsync);
+            localLogs: _localLogs,
+            openObserveLogs: _openObserveLogs,
+            appUpdater: _appUpdater,
+            tasks: _tasks,
+            resolvePosterPath: ResolvePosterForWebAsync,
+            applyAudioDsp: ApplyAudioDspFromWebAsync);
         ApplySettingsToView();
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
+    }
+
+    private Task ApplyAudioDspFromWebAsync(AudioDspConfig config) =>
+        Dispatcher.InvokeAsync(() => ApplyAudioDspConfigAsync(config)).Task.Unwrap();
+
+    private async Task ApplyAudioDspConfigAsync(AudioDspConfig config)
+    {
+        var graph = AudioDspFilterGraphCompiler.Compile(
+            config, AudioDspChannelLayout.Stereo, 48_000);
+        if (_activeSession is { IsActive: true } session)
+            await session.ApplyAudioDspAsync(graph).ConfigureAwait(true);
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -108,6 +137,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
         UpdateWebControlView();
         _cloudDriveScheduler.Start();
+        _mediaSourceAutoScanScheduler.Start();
 
         var contentMode = CurrentContentMode;
         var activeSource = _settings.ActiveSourceId is long sourceId
@@ -122,14 +152,13 @@ public partial class MainWindow : Window, IAsyncDisposable
 
     private async void OpenLibrary_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFolderDialog
+        var dialog = new LocalSourceDialog(
+            sourceLocation: Directory.Exists(_settings.LibraryRoot) ? _settings.LibraryRoot : null)
         {
-            Title = "选择包含 library.db 的媒体库目录",
-            InitialDirectory = Directory.Exists(_settings.LibraryRoot) ? _settings.LibraryRoot : null,
+            Owner = this,
         };
-        if (dialog.ShowDialog(this) != true) return;
-
-        await AddOrActivateLocalSourceAsync(dialog.FolderName);
+        if (dialog.ShowDialog() != true) return;
+        await AddOrActivateLocalSourceAsync(dialog.SourceName, dialog.SourceLocation, dialog.RecognitionMode);
     }
 
     private async void AddWebDavSource_Click(object sender, RoutedEventArgs e)
@@ -139,7 +168,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
         var password = dialog.TakePassword();
         BusyOverlay.Visibility = Visibility.Visible;
-        StatusText.Text = "正在连接 WebDAV 并验证 MLIP…";
+        StatusText.Text = $"正在连接 WebDAV 并验证{(dialog.RecognitionMode == "DIRECTORY" ? "目录" : " MLIP")}…";
         try
         {
             var source = await _mediaSourceRegistry.AddAsync(new MediaSourceRequest(
@@ -149,7 +178,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 Username: dialog.Username,
                 Password: password,
                 ContentMode: CurrentContentMode,
-                RecognitionMode: "MLIP"));
+                RecognitionMode: dialog.RecognitionMode));
             await LoadSourceAsync(_mediaSourceRegistry.Get(source.Id)!);
         }
         catch (Exception error) when (error is HttpRequestException or IOException or InvalidDataException or InvalidOperationException or NotSupportedException or UnauthorizedAccessException)
@@ -171,7 +200,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
         var password = dialog.TakePassword();
         BusyOverlay.Visibility = Visibility.Visible;
-        StatusText.Text = "正在连接 SMB 并验证 MLIP…";
+        StatusText.Text = $"正在连接 SMB 并验证{(dialog.RecognitionMode == "DIRECTORY" ? "目录" : " MLIP")}…";
         try
         {
             var source = await _mediaSourceRegistry.AddAsync(new MediaSourceRequest(
@@ -182,7 +211,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 Password: password,
                 Domain: dialog.Domain,
                 ContentMode: CurrentContentMode,
-                RecognitionMode: "MLIP"));
+                RecognitionMode: dialog.RecognitionMode));
             await LoadSourceAsync(_mediaSourceRegistry.Get(source.Id)!);
         }
         catch (Exception error) when (error is IOException or InvalidDataException or InvalidOperationException or NotSupportedException or UnauthorizedAccessException)
@@ -197,7 +226,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
     }
 
-    private async Task AddOrActivateLocalSourceAsync(string rootPath)
+    private async Task AddOrActivateLocalSourceAsync(string sourceName, string rootPath, string recognitionMode)
     {
         try
         {
@@ -205,13 +234,24 @@ public partial class MainWindow : Window, IAsyncDisposable
             var existing = (_settings.MediaSources ?? []).FirstOrDefault(source => SamePath(source.Location, fullPath));
             if (existing is null)
             {
-                var name = Path.GetFileName(fullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                var name = string.IsNullOrWhiteSpace(sourceName)
+                    ? Path.GetFileName(fullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                    : sourceName;
                 await _mediaSourceRegistry.AddAsync(new MediaSourceRequest(
                     name,
                     "LOCAL",
                     fullPath,
                     ContentMode: CurrentContentMode,
-                    RecognitionMode: "MLIP"));
+                    RecognitionMode: recognitionMode));
+            }
+            else if (!existing.RecognitionMode.Equals(recognitionMode, StringComparison.OrdinalIgnoreCase))
+            {
+                await _mediaSourceRegistry.UpdateAsync(existing.Id, new MediaSourceRequest(
+                    sourceName,
+                    "LOCAL",
+                    fullPath,
+                    ContentMode: CurrentContentMode,
+                    RecognitionMode: recognitionMode));
             }
             else
             {
@@ -287,6 +327,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         _filteredSeries = series;
         _visibleSeriesCount = Math.Min(SeriesPageSize, series.Count);
         RenderSeriesPage();
+        UpdateBrowseSections();
         EmptyState.Visibility = series.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         if (_allSeries.Count > 0 && series.Count == 0)
         {
@@ -441,6 +482,8 @@ public partial class MainWindow : Window, IAsyncDisposable
             {
                 _supersededSessions.Add(previous);
                 previous.SubtitleTracksChanged -= ActiveSession_SubtitleTracksChanged;
+                previous.AudioTracksChanged -= ActiveSession_AudioTracksChanged;
+                previous.PlaybackInfoChanged -= ActiveSession_PlaybackInfoChanged;
                 await previous.DisposeAsync();
                 if (ReferenceEquals(_activeSession, previous)) _activeSession = null;
             }
@@ -449,19 +492,39 @@ public partial class MainWindow : Window, IAsyncDisposable
             var playbackProxy = source?.Type == "WEBDAV"
                 ? _mediaSourceRegistry.CreatePlaybackProxy(source.Id, episode)
                 : null;
-            var session = await MpvPlayerLauncher.PlayAsync(
+            var series = _allSeries.FirstOrDefault(item => item.Episodes.Any(candidate => candidate.ProgressKey == episode.ProgressKey));
+            _activePlaybackQueue = series is null ? null : new MpvPlaybackQueue(series.Episodes, episode.ProgressKey);
+            IntPtr? windowHandle = null;
+            if (MpvPlayerLauncher.FindMpv(_settings.PlayerPath) is not null)
+            {
+                PlaybackSurface.Visibility = Visibility.Visible;
+                UpdateLayout();
+                MpvHost.ValidateForMpv();
+                windowHandle = MpvHost.Handle;
+            }
+            var launch = await MpvPlayerLauncher.PlayDetailedAsync(
                 episode,
                 _settings,
                 _progressStore,
                 startPositionMs,
-                playbackProxy: playbackProxy);
+                playbackProxy: playbackProxy,
+                windowHandle: windowHandle,
+                videoOptions: new MpvWindowsVideoOptions());
+            var session = launch.Session;
+            if (launch.UsedSystemPlayerFallback)
+            {
+                PlaybackSurface.Visibility = Visibility.Collapsed;
+                _activePlaybackQueue = null;
+            }
             _activeSession = session;
-            StatusText.Text = session is null
-                ? $"已交给 Windows 播放器：{episode.DisplayTitle}"
+            StatusText.Text = launch.UsedSystemPlayerFallback
+                ? $"已交给 Windows 播放器：{episode.DisplayTitle}（能力受限）"
                 : $"正在播放并记录进度：{episode.DisplayNumber} {episode.DisplayTitle}";
             if (session is not null)
             {
                 session.SubtitleTracksChanged += ActiveSession_SubtitleTracksChanged;
+                session.AudioTracksChanged += ActiveSession_AudioTracksChanged;
+                session.PlaybackInfoChanged += ActiveSession_PlaybackInfoChanged;
                 UpdateActivePlaybackControls(session);
                 _ = RefreshAfterPlaybackAsync(session, episode, launchGeneration);
             }
@@ -486,17 +549,25 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         await session.Completion;
         session.SubtitleTracksChanged -= ActiveSession_SubtitleTracksChanged;
+        session.AudioTracksChanged -= ActiveSession_AudioTracksChanged;
+        session.PlaybackInfoChanged -= ActiveSession_PlaybackInfoChanged;
         var wasSuperseded = _supersededSessions.Remove(session);
         if (ReferenceEquals(_activeSession, session))
         {
             _activeSession = null;
+            _activePlaybackQueue = null;
+            PlaybackSurface.Visibility = Visibility.Collapsed;
             ActivePlaybackControls.Visibility = Visibility.Collapsed;
         }
         LibraryEpisode? nextEpisode = null;
         if (!wasSuperseded && session.WasCompleted && _settings.PlaybackEndAction == "play_next_episode")
         {
             var series = _allSeries.FirstOrDefault(item => item.Episodes.Any(episode => episode.ProgressKey == playedEpisode.ProgressKey));
-            if (series is not null) nextEpisode = NextEpisodeResolver.NextAfter(series.Episodes, playedEpisode.ProgressKey);
+            if (series is not null)
+            {
+                var queue = new MpvPlaybackQueue(series.Episodes, playedEpisode.ProgressKey);
+                nextEpisode = queue.Next();
+            }
         }
 
         string? syncStatus = null;
@@ -547,6 +618,35 @@ public partial class MainWindow : Window, IAsyncDisposable
         }).ToList();
     }
 
+    private void UpdateBrowseSections()
+    {
+        var recent = _filteredSeries
+            .Where(series => series.LastWatchedEpochMs > 0)
+            .OrderByDescending(series => series.LastWatchedEpochMs)
+            .Take(8)
+            .ToList();
+        RecentList.ItemsSource = recent;
+        RecentSection.Visibility = recent.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var featured = _filteredSeries
+            .OrderByDescending(series => series.Episodes.Count)
+            .ThenByDescending(series => series.Year ?? 0)
+            .ThenBy(series => series.Title, StringComparer.CurrentCultureIgnoreCase)
+            .Take(6)
+            .ToList();
+        FeaturedList.ItemsSource = featured;
+        FeaturedSection.Visibility = featured.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var groups = _filteredSeries
+            .SelectMany(series => series.Genres.DefaultIfEmpty("未分类"), (series, genre) => new { series, genre })
+            .GroupBy(item => item.genre, StringComparer.CurrentCultureIgnoreCase)
+            .OrderBy(group => group.Key, StringComparer.CurrentCultureIgnoreCase)
+            .Select(group => new LibraryGenreGroup(group.Key, group.Select(item => item.series).ToList()))
+            .ToList();
+        GenreGroupList.ItemsSource = groups;
+        GenreGroupList.Visibility = groups.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void UpdateContinueWatching()
     {
         var items = _allSeries
@@ -565,14 +665,21 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         _posterCacheCancellation?.Cancel();
         _posterCacheCancellation?.Dispose();
+        _scanCancellation?.Cancel();
+        _scanCancellation?.Dispose();
         var session = _activeSession;
         _activeSession = null;
         if (session is not null)
         {
             _supersededSessions.Add(session);
+            session.SubtitleTracksChanged -= ActiveSession_SubtitleTracksChanged;
+            session.AudioTracksChanged -= ActiveSession_AudioTracksChanged;
+            session.PlaybackInfoChanged -= ActiveSession_PlaybackInfoChanged;
             await session.DisposeAsync();
         }
+        await _mediaSourceAutoScanScheduler.DisposeAsync();
         await _cloudDriveScheduler.DisposeAsync();
+        await _tasks.DisposeAsync();
         await _webControlServer.DisposeAsync();
         _bangumiMetadata.Dispose();
         _mediaSourceRegistry.Dispose();
@@ -613,7 +720,9 @@ public partial class MainWindow : Window, IAsyncDisposable
             IsPlaying: session.IsPlaying,
             Error: session.LastError,
             SubtitleTracks: session.SubtitleTracks,
-            SelectedSubtitleTrackId: session.SelectedSubtitleTrackId);
+            SelectedSubtitleTrackId: session.SelectedSubtitleTrackId,
+            AudioTracks: session.AudioTracks,
+            SelectedAudioTrackId: session.SelectedAudioTrackId);
     }
 
     private async Task<bool> PlayEpisodeFromWebAsync(string episodeId, long? startPositionMs)
@@ -638,6 +747,8 @@ public partial class MainWindow : Window, IAsyncDisposable
             {
                 _supersededSessions.Add(session);
                 _activeSession = null;
+                _activePlaybackQueue = null;
+                PlaybackSurface.Visibility = Visibility.Collapsed;
                 ActivePlaybackControls.Visibility = Visibility.Collapsed;
             }
             return GetPlaybackRuntimeStatus();
@@ -652,21 +763,70 @@ public partial class MainWindow : Window, IAsyncDisposable
         });
     }
 
+    private void ActiveSession_AudioTracksChanged(object? sender, EventArgs e)
+    {
+        if (sender is not MpvPlaybackSession session) return;
+        _ = Dispatcher.InvokeAsync(() =>
+        {
+            if (ReferenceEquals(_activeSession, session)) UpdateActivePlaybackControls(session);
+        });
+    }
+
+    private void ActiveSession_PlaybackInfoChanged(object? sender, EventArgs e)
+    {
+        if (sender is not MpvPlaybackSession session) return;
+        _ = Dispatcher.InvokeAsync(() =>
+        {
+            if (!ReferenceEquals(_activeSession, session)) return;
+            var info = session.PlaybackInfo;
+            var video = info.Video;
+            PlaybackInfoText.Text = $"{FormatPlaybackTime(info.PositionMs)} / {FormatPlaybackTime(info.DurationMs)} · {video?.Width}×{video?.Height}{(video?.IsHdr == true ? " · HDR" : "")}";
+            EmbeddedPreviousButton.IsEnabled = _activePlaybackQueue?.CanPlayPrevious == true;
+            EmbeddedNextButton.IsEnabled = _activePlaybackQueue?.CanPlayNext == true;
+        });
+    }
+
+    private static string FormatPlaybackTime(long milliseconds) =>
+        TimeSpan.FromMilliseconds(Math.Max(0, milliseconds)).ToString(
+            milliseconds >= 3_600_000 ? @"h\:mm\:ss" : @"m\:ss",
+            System.Globalization.CultureInfo.InvariantCulture);
+
     private void UpdateActivePlaybackControls(MpvPlaybackSession session)
     {
         _loadingPlaybackTracks = true;
+        _loadingAudioTracks = true;
         try
         {
             ActivePlaybackControls.Visibility = Visibility.Visible;
+            var audioTracks = session.AudioTracks.ToList();
+            ActiveAudioTrack.ItemsSource = audioTracks;
+            ActiveAudioTrack.SelectedItem = audioTracks.FirstOrDefault(track => track.Id == session.SelectedAudioTrackId);
             var choices = new List<SubtitleChoice> { new(null, "关闭字幕") };
             choices.AddRange(session.SubtitleTracks.Select(track => new SubtitleChoice(track.Id, track.DisplayLabel)));
             ActiveSubtitleTrack.ItemsSource = choices;
             ActiveSubtitleTrack.SelectedItem = choices.FirstOrDefault(choice => choice.TrackId == session.SelectedSubtitleTrackId)
                 ?? choices[0];
+            var info = session.PlaybackInfo;
+            PlaybackInfoText.Text = $"{FormatPlaybackTime(info.PositionMs)} / {FormatPlaybackTime(info.DurationMs)} · {info.Video?.Codec ?? "视频"}{(info.Video?.IsHdr == true ? " · HDR" : "")}";
         }
         finally
         {
+            _loadingAudioTracks = false;
             _loadingPlaybackTracks = false;
+        }
+    }
+
+    private async void ActiveAudioTrack_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingAudioTracks || ActiveAudioTrack.SelectedItem is not MpvAudioTrack track || _activeSession is not { } session) return;
+        try
+        {
+            await session.SetAudioTrackAsync(track.Id);
+        }
+        catch (Exception error) when (error is IOException or InvalidOperationException or ArgumentOutOfRangeException or TimeoutException)
+        {
+            StatusText.Text = $"切换音轨失败：{error.Message}";
+            if (ReferenceEquals(_activeSession, session)) UpdateActivePlaybackControls(session);
         }
     }
 
@@ -684,6 +844,39 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
     }
 
+    private async void PreviousEpisode_Click(object sender, RoutedEventArgs e)
+    {
+        var episode = _activePlaybackQueue?.Previous();
+        if (episode is not null) await PlayEpisodeAsync(episode, showErrorDialog: false);
+    }
+
+    private async void NextEpisode_Click(object sender, RoutedEventArgs e)
+    {
+        var episode = _activePlaybackQueue?.Next();
+        if (episode is not null) await PlayEpisodeAsync(episode, showErrorDialog: false);
+    }
+
+    private async void PlayExtra_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: LibraryExtra extra }) return;
+        var sourceId = (DetailPanel.DataContext as LibrarySeries)?.Episodes is { Count: > 0 } episodes ? episodes[0].SourceId : 0;
+        var episode = new LibraryEpisode(
+            extra.Id,
+            $"extra-{extra.Id}",
+            $"extra:{sourceId}:{extra.Id}",
+            1,
+            extra.Ordinal,
+            extra.SortOrder,
+            extra.Title,
+            extra.MediaPath,
+            extra.Duration,
+            [])
+        {
+            SourceId = sourceId,
+        };
+        await PlayEpisodeAsync(episode);
+    }
+
     private async void TogglePlayback_Click(object sender, RoutedEventArgs e) =>
         await ExecuteActivePlaybackCommandAsync("toggle");
 
@@ -696,6 +889,12 @@ public partial class MainWindow : Window, IAsyncDisposable
         try
         {
             await session.ExecuteCommandAsync(new PlaybackControlCommand(command));
+            if (command.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            {
+                _activePlaybackQueue = null;
+                PlaybackSurface.Visibility = Visibility.Collapsed;
+                ActivePlaybackControls.Visibility = Visibility.Collapsed;
+            }
         }
         catch (Exception error) when (error is IOException or InvalidOperationException or TimeoutException)
         {
@@ -769,9 +968,61 @@ public partial class MainWindow : Window, IAsyncDisposable
     private async void ScanSource_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: MediaSourceDefinition source }) return;
-        var result = await ScanSourceFromWebAsync(source.Id);
-        StatusText.Text = result.Error is null ? $"已扫描 {source.Name}" : result.Error;
+        try
+        {
+            var result = await ScanSourceForUiAsync(source.Id);
+            StatusText.Text = result.Error is null
+                ? $"已扫描 {source.Name}：{result.EpisodesFound} 集，新增 {result.NewEpisodes}，删除 {result.DeletedEpisodes}"
+                : result.Error;
+        }
+        catch (OperationCanceledException)
+        {
+            StatusText.Text = "扫描已取消";
+        }
     }
+
+    private async Task<SourceScanResponse> ScanSourceForUiAsync(long sourceId)
+    {
+        _scanCancellation?.Cancel();
+        _scanCancellation?.Dispose();
+        var scanCancellation = new CancellationTokenSource();
+        _scanCancellation = scanCancellation;
+        var cancellationToken = scanCancellation.Token;
+        var progress = new Progress<DirectoryScanProgress>(value =>
+        {
+            BusyProgressBar.IsIndeterminate = false;
+            BusyProgressText.Text = value.FilesDiscovered > 0
+                ? $"已处理 {value.FilesProcessed}/{value.FilesDiscovered} 个文件 · {value.EpisodesFound} 集"
+                : "正在发现媒体文件…";
+        });
+        BusyOverlay.Visibility = Visibility.Visible;
+        BusyOperationText.Text = "正在扫描媒体源…";
+        BusyProgressText.Text = "正在发现媒体文件…";
+        BusyProgressBar.IsIndeterminate = true;
+        CancelScanButton.Visibility = Visibility.Visible;
+        try
+        {
+            var result = await _mediaSourceRegistry.ScanAsync(sourceId, progress, cancellationToken);
+            var source = _mediaSourceRegistry.Get(sourceId);
+            if (result.Error is null && source is not null && _settings.ActiveSourceId == sourceId)
+                await LoadSourceAsync(source);
+            return result;
+        }
+        finally
+        {
+            CancelScanButton.Visibility = Visibility.Collapsed;
+            BusyProgressBar.IsIndeterminate = true;
+            BusyProgressText.Text = string.Empty;
+            if (ReferenceEquals(_scanCancellation, scanCancellation))
+            {
+                _scanCancellation = null;
+            }
+            scanCancellation.Dispose();
+            BusyOverlay.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void CancelScan_Click(object sender, RoutedEventArgs e) => _scanCancellation?.Cancel();
 
     private async void EditSource_Click(object sender, RoutedEventArgs e)
     {
@@ -779,22 +1030,18 @@ public partial class MainWindow : Window, IAsyncDisposable
         MediaSourceRequest? request = null;
         if (source.Type == "LOCAL")
         {
-            var dialog = new OpenFolderDialog
-            {
-                Title = "选择更新后的 MLIP 媒体库目录",
-                InitialDirectory = Directory.Exists(source.Location) ? source.Location : null,
-            };
-            if (dialog.ShowDialog(this) != true) return;
+            var dialog = new LocalSourceDialog(source.Name, source.Location, source.RecognitionMode) { Owner = this };
+            if (dialog.ShowDialog() != true) return;
             request = new MediaSourceRequest(
-                source.Name,
+                dialog.SourceName,
                 "LOCAL",
-                dialog.FolderName,
+                dialog.SourceLocation,
                 ContentMode: source.ContentMode,
-                RecognitionMode: "MLIP");
+                RecognitionMode: dialog.RecognitionMode);
         }
         else if (source.Type == "WEBDAV")
         {
-            var dialog = new WebDavSourceDialog(source.Name, source.Location) { Owner = this };
+            var dialog = new WebDavSourceDialog(source.Name, source.Location, recognitionMode: source.RecognitionMode) { Owner = this };
             if (dialog.ShowDialog() != true) return;
             var password = dialog.TakePassword();
             request = new MediaSourceRequest(
@@ -804,11 +1051,11 @@ public partial class MainWindow : Window, IAsyncDisposable
                 Username: dialog.Username,
                 Password: password,
                 ContentMode: source.ContentMode,
-                RecognitionMode: "MLIP");
+                RecognitionMode: dialog.RecognitionMode);
         }
         else if (source.Type == "SMB")
         {
-            var dialog = new SmbSourceDialog(source.Name, source.Location) { Owner = this };
+            var dialog = new SmbSourceDialog(source.Name, source.Location, recognitionMode: source.RecognitionMode) { Owner = this };
             if (dialog.ShowDialog() != true) return;
             var password = dialog.TakePassword();
             request = new MediaSourceRequest(
@@ -819,7 +1066,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 Password: password,
                 Domain: dialog.Domain,
                 ContentMode: source.ContentMode,
-                RecognitionMode: "MLIP");
+                RecognitionMode: dialog.RecognitionMode);
         }
         if (request is null) return;
 
@@ -931,6 +1178,28 @@ public partial class MainWindow : Window, IAsyncDisposable
     private void LibraryNav_Click(object sender, RoutedEventArgs e) => ShowPage(showSettings: false);
 
     private void SettingsNav_Click(object sender, RoutedEventArgs e) => ShowPage(showSettings: true);
+
+    private async void OpenAudioDsp_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new AudioDspDialog(_settings.AudioDsp ?? AudioDspConfig.Neutral())
+        {
+            Owner = this,
+        };
+        if (dialog.ShowDialog() != true || dialog.Result is not { } config) return;
+
+        try
+        {
+            await ApplyAudioDspConfigAsync(config);
+            _settings = _settings with { AudioDsp = config };
+            _settingsStore.Save(_settings);
+            ApplySettingsToView();
+            StatusText.Text = "音频 DSP 已应用到当前 MiruPlay mpv，并已保存。";
+        }
+        catch (Exception error) when (error is ArgumentException or IOException or InvalidOperationException or TimeoutException)
+        {
+            StatusText.Text = $"音频 DSP 应用失败：{error.Message}";
+        }
+    }
 
     private void ShowPage(bool showSettings)
     {
@@ -1267,6 +1536,41 @@ public partial class MainWindow : Window, IAsyncDisposable
         WebControlTokenValue.Text = _webControlTokens.AccessToken;
     }
 
+    private async Task<SourceScanResponse> ScanSourceAutomaticallyAsync(long sourceId, CancellationToken cancellationToken)
+    {
+        var result = await _mediaSourceRegistry.ScanAsync(sourceId, cancellationToken).ConfigureAwait(false);
+        if (result.Error is null && _loadedSourceId == sourceId)
+        {
+            await Dispatcher.InvokeAsync(async () =>
+            {
+                var source = _mediaSourceRegistry.Get(sourceId);
+                if (source is not null) await LoadSourceAsync(source);
+            }).Task.Unwrap();
+        }
+        return result;
+    }
+
+    private async void AutoScanEnabled_Click(object sender, RoutedEventArgs e)
+    {
+        if (_loadingSettings) return;
+        _settings = _settings with { AutoScanEnabled = AutoScanEnabledCheckBox.IsChecked == true };
+        _settingsStore.Save(_settings);
+        ApplySettingsToView();
+        if (_settings.AutoScanEnabled)
+            await _mediaSourceAutoScanScheduler.RunIfDueAsync(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+    }
+
+    private async void AutoScanInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || AutoScanIntervalBox.SelectedItem is not ComboBoxItem { Tag: string value } ||
+            !int.TryParse(value, out var hours)) return;
+        _settings = _settings with { AutoScanIntervalHours = hours };
+        _settingsStore.Save(_settings);
+        ApplySettingsToView();
+        if (_settings.AutoScanEnabled)
+            await _mediaSourceAutoScanScheduler.RunIfDueAsync(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+    }
+
     private void PlaybackEndAction_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loadingSettings || PlaybackEndAction.SelectedItem is not ComboBoxItem { Tag: string value }) return;
@@ -1312,6 +1616,20 @@ public partial class MainWindow : Window, IAsyncDisposable
             UpdateWebControlView();
             PlayerPathValue.Text = MpvPlayerLauncher.FindMpv(_settings.PlayerPath)
                 ?? "自动检测；找不到时使用 Windows 默认播放器";
+            var audioDsp = (_settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
+            AudioDspEnabledCheckBox.IsChecked = audioDsp.Enabled;
+            AudioDspSummaryText.Text = audioDsp.Enabled
+                ? $"DSP 已启用：{audioDsp.SelectedPresetId}（{audioDsp.Presets!.Count} 个预设）"
+                : "DSP 已关闭";
+            AutoScanEnabledCheckBox.IsChecked = _settings.AutoScanEnabled;
+            AutoScanIntervalBox.IsEnabled = _settings.AutoScanEnabled;
+            AutoScanIntervalBox.SelectedItem = AutoScanIntervalBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => Equals(item.Tag, _settings.AutoScanIntervalHours.ToString(System.Globalization.CultureInfo.InvariantCulture)))
+                ?? AutoScanIntervalBox.Items[1];
+            AutoScanStatusText.Text = _settings.AutoScanEnabled
+                ? $"已启用，每 {_settings.AutoScanIntervalHours} 小时检查一次。"
+                : "自动扫描已关闭。";
             PlaybackEndAction.SelectedItem = PlaybackEndAction.Items
                 .OfType<ComboBoxItem>()
                 .FirstOrDefault(item => Equals(item.Tag, _settings.PlaybackEndAction))

@@ -131,6 +131,59 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
         await stopSession.DisposeAsync();
     }
 
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task RealMpvAcceptsPerChannelLinearPhaseDspThroughItsOwnIpcSession()
+    {
+        var mpvPath = Environment.GetEnvironmentVariable("MIRUPLAY_MPV_PATH");
+        var mediaPath = Environment.GetEnvironmentVariable("MIRUPLAY_MPV_SMOKE_MEDIA");
+        if (mpvPath is null || mediaPath is null || !File.Exists(mpvPath) || !File.Exists(mediaPath))
+        {
+            Assert.False(
+                Environment.GetEnvironmentVariable("MIRUPLAY_REQUIRE_MPV_DSP_SMOKE") == "1",
+                "The required real-mpv DSP smoke paths are missing.");
+            return;
+        }
+
+        var episode = Episode(4, "dsp-smoke-episode", "dsp-smoke-progress", "DSP IPC smoke", mediaPath);
+        var settings = new AppSettings(
+            PlayerPath: mpvPath,
+            AudioDsp: new AudioDspConfig(
+                true,
+                "linear-stereo",
+                [new AudioDspPreset(
+                    "linear-stereo",
+                    "Linear stereo",
+                    PhaseMode: AudioDspPhaseMode.Linear,
+                    FirQuality: AudioDspFirQuality.Low,
+                    Rules:
+                    [
+                        new(AudioDspChannelTarget.Left, [new(GainDb: 3, FrequencyHz: 1_000, Q: 1)]),
+                        new(AudioDspChannelTarget.Right, [new(GainDb: -3, FrequencyHz: 1_000, Q: 1)]),
+                    ])]));
+        var store = new PlaybackProgressStore(Path.Combine(_directory, "dsp-state.db"));
+        await using var session = await MpvPlayerLauncher.PlayAsync(
+            episode,
+            settings,
+            store,
+            headless: true) ?? throw new InvalidOperationException("Real mpv DSP smoke did not create a session.");
+
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        Assert.True(session.IsActive, session.LastError);
+        var graph = AudioDspFilterGraphCompiler.Compile(
+            settings.AudioDsp!,
+            AudioDspChannelLayout.Stereo,
+            48_000);
+        await session.ApplyAudioDspAsync(graph);
+        var actualAf = await session.GetAudioFilterGraphAsync();
+
+        Assert.NotNull(actualAf);
+        Assert.Contains("channelsplit", actualAf, StringComparison.Ordinal);
+        Assert.Equal(2, actualAf.Split("firequalizer", StringSplitOptions.None).Length - 1);
+        Assert.Equal(2, System.Text.RegularExpressions.Regex.Count(actualAf, "delay="));
+        Assert.Equal(graph.AfValue, session.AppliedAudioDsp?.AfValue);
+    }
+
     private static LibraryEpisode Episode(
         long id,
         string uuid,

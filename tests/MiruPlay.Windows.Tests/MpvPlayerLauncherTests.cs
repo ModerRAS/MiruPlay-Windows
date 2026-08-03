@@ -89,6 +89,19 @@ public sealed class MpvPlayerLauncherTests : IDisposable
         Assert.DoesNotContain(startInfo.ArgumentList, argument => argument.StartsWith("--start=", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void CreateStartInfoAppliesAssOverrideLastForEveryMpvPlaybackMode()
+    {
+        var episode = CreateEpisode(CreateFile("episode.mkv"), CreateFile("episode.ass"));
+
+        var embedded = MpvPlayerLauncher.CreateStartInfo("mpv.exe", "embedded-pipe", episode, new AppSettings(), null);
+        var headless = MpvPlayerLauncher.CreateStartInfo("mpv.exe", "headless-pipe", episode, new AppSettings(), null, headless: true);
+
+        Assert.All(
+            new[] { embedded, headless },
+            startInfo => Assert.Equal("--sub-ass-override=strip", startInfo.ArgumentList[^2]));
+    }
+
     private static LibraryEpisode CreateEpisode(string mediaPath, params string[] subtitles) => new(
         1,
         "episode-uuid",

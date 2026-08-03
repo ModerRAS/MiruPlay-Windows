@@ -6,7 +6,7 @@ namespace MiruPlay.Windows.Tests;
 public sealed class NextEpisodeResolverTests
 {
     [Fact]
-    public void NextAfterUsesSeasonEpisodeAndPathOrdering()
+    public void NextAfterUsesLogicalEpisodesInsteadOfAlternateVersions()
     {
         var episodes = new[]
         {
@@ -17,7 +17,8 @@ public sealed class NextEpisodeResolverTests
         };
 
         Assert.Equal("s1e2a", NextEpisodeResolver.NextAfter(episodes, "s1e1")?.ProgressKey);
-        Assert.Equal("s1e2b", NextEpisodeResolver.NextAfter(episodes, "s1e2a")?.ProgressKey);
+        Assert.Equal("s2e1", NextEpisodeResolver.NextAfter(episodes, "s1e2a")?.ProgressKey);
+        Assert.Equal("s1e1", NextEpisodeResolver.PreviousBefore(episodes, "s1e2a")?.ProgressKey);
         Assert.Equal("s2e1", NextEpisodeResolver.NextAfter(episodes, "s1e2b")?.ProgressKey);
         Assert.Null(NextEpisodeResolver.NextAfter(episodes, "s2e1"));
     }

@@ -19,7 +19,16 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
     private readonly SemaphoreSlim _ipcLock = new(1, 1);
     private readonly object _errorSync = new();
     private readonly Queue<string> _errors = new();
+    private readonly object _audioSync = new();
     private readonly object _subtitleSync = new();
+    private IReadOnlyList<MpvAudioTrack> _audioTracks = [];
+    private int? _selectedAudioTrackId;
+    private double _speed = 1.0;
+    private string? _fileName;
+    private string? _mediaTitle;
+    private string? _containerFormat;
+    private string? _audioCodec;
+    private MpvVideoTrackInfo? _video;
     private IReadOnlyList<PlaybackSubtitleTrack> _subtitleTracks = [];
     private int? _selectedSubtitleTrackId;
     private int _requestId;
@@ -30,6 +39,7 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
     private long _positionMs;
     private long _durationMs;
     private volatile bool _paused;
+    private AudioDspFilterGraph? _appliedAudioDsp;
 
     private MpvPlaybackSession(
         Process process,
@@ -84,9 +94,101 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
             lock (_subtitleSync) return _selectedSubtitleTrackId;
         }
     }
+    public IReadOnlyList<MpvAudioTrack> AudioTracks
+    {
+        get
+        {
+            lock (_audioSync) return _audioTracks.ToArray();
+        }
+    }
+    public int? SelectedAudioTrackId
+    {
+        get
+        {
+            lock (_audioSync) return _selectedAudioTrackId;
+        }
+    }
+    public double Speed => Volatile.Read(ref _speed);
+    public MpvPlaybackInfo PlaybackInfo => BuildPlaybackInfo();
+    public AudioDspFilterGraph? AppliedAudioDsp => _appliedAudioDsp;
     public bool IsActive => !Completion.IsCompleted && Volatile.Read(ref _ending) == 0;
     public bool IsPlaying => IsActive && !IsPaused;
     public event EventHandler? SubtitleTracksChanged;
+    public event EventHandler? AudioTracksChanged;
+    public event EventHandler? PlaybackInfoChanged;
+
+    public async Task SetSubtitleTrackAsync(int? trackId) =>
+        await ExecuteCommandAsync(new MpvPlaybackCommand("subtitle", SubtitleTrackId: trackId)).ConfigureAwait(false);
+
+    public async Task SetAudioTrackAsync(int? trackId) =>
+        await ExecuteCommandAsync(new MpvPlaybackCommand("audio", AudioTrackId: trackId)).ConfigureAwait(false);
+
+    public Task SeekAsync(long positionMs) =>
+        ExecuteCommandAsync(new MpvPlaybackCommand("seek", PositionMs: positionMs));
+
+    public Task SeekRelativeAsync(long deltaMs) =>
+        ExecuteCommandAsync(new MpvPlaybackCommand("seek_relative", DeltaMs: deltaMs));
+
+    public Task SetSpeedAsync(float speed) =>
+        ExecuteCommandAsync(new MpvPlaybackCommand("speed", Speed: speed));
+
+    public Task TogglePauseAsync() => ExecuteCommandAsync(new MpvPlaybackCommand("toggle"));
+
+    public async Task ApplyAudioDspAsync(AudioDspFilterGraph graph)
+    {
+        ArgumentNullException.ThrowIfNull(graph);
+        if (!IsActive) throw new InvalidOperationException("当前没有可控制的 mpv 播放会话。");
+
+        await _ipcLock.WaitAsync(IpcTimeout).ConfigureAwait(false);
+        try
+        {
+            if (Volatile.Read(ref _ending) != 0)
+                throw new InvalidOperationException("mpv 播放会话正在结束。");
+            await SendRequestLockedAsync(CreateAudioDspCommand(graph)).ConfigureAwait(false);
+            _appliedAudioDsp = graph;
+        }
+        finally
+        {
+            _ipcLock.Release();
+        }
+    }
+
+    public async Task<string?> GetAudioFilterGraphAsync()
+    {
+        if (!IsActive) return null;
+        await _ipcLock.WaitAsync(IpcTimeout).ConfigureAwait(false);
+        try
+        {
+            var data = await SendRequestLockedAsync(["get_property", "af"], throwOnError: false).ConfigureAwait(false);
+            return data is null
+                ? null
+                : data.Value.ValueKind == JsonValueKind.String
+                    ? data.Value.GetString()
+                    : JsonSerializer.Serialize(data.Value);
+        }
+        finally
+        {
+            _ipcLock.Release();
+        }
+    }
+
+    internal static object[] CreateAudioDspCommand(AudioDspFilterGraph graph) =>
+        ["set_property", "af", string.IsNullOrWhiteSpace(graph.AfValue) ? Array.Empty<object>() : $"lavfi=[{graph.AfValue}]"];
+
+    public async Task<MpvPlaybackInfo> GetPlaybackInfoAsync()
+    {
+        if (!IsActive) return PlaybackInfo;
+        await _ipcLock.WaitAsync(IpcTimeout).ConfigureAwait(false);
+        try
+        {
+            await RefreshPlaybackInfoLockedAsync().ConfigureAwait(false);
+            return BuildPlaybackInfo();
+        }
+        finally
+        {
+            _ipcLock.Release();
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {
@@ -149,7 +251,19 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
         }
     }
 
-    public async Task ExecuteCommandAsync(PlaybackControlCommand request)
+    public Task ExecuteCommandAsync(PlaybackControlCommand request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return ExecuteCommandAsync(new MpvPlaybackCommand(
+            request.Command,
+            request.PositionMs,
+            request.DeltaMs,
+            request.Speed,
+            request.SubtitleTrackId,
+            request.AudioTrackId));
+    }
+
+    public async Task ExecuteCommandAsync(MpvPlaybackCommand request)
     {
         ArgumentNullException.ThrowIfNull(request);
         if (!IsActive) throw new InvalidOperationException("当前没有可控制的 mpv 播放会话。");
@@ -213,24 +327,14 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
                             throw new ArgumentOutOfRangeException(nameof(request), "播放速度必须大于 0。");
                         }
                         await SendRequestLockedAsync(["set_property", "speed", speed]).ConfigureAwait(false);
+                        Volatile.Write(ref _speed, speed);
+                        PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
                         break;
                     case "subtitle":
-                        if (request.SubtitleTrackId is not null && SubtitleTracks.Count == 0)
-                        {
-                            var trackData = await SendRequestLockedAsync(["get_property", "track-list"], throwOnError: false).ConfigureAwait(false);
-                            if (trackData is not null) UpdateSubtitleState(ParseSubtitleTracks(trackData.Value), null);
-                        }
-                        if (request.SubtitleTrackId is int selectedTrackId &&
-                            !SubtitleTracks.Any(track => track.Id == selectedTrackId))
-                        {
-                            throw new ArgumentOutOfRangeException(nameof(request), "字幕轨道不存在。");
-                        }
-                        await SendRequestLockedAsync([
-                            "set_property",
-                            "sid",
-                            request.SubtitleTrackId is int selectedId ? selectedId : "no",
-                        ]).ConfigureAwait(false);
-                        UpdateSelectedSubtitle(request.SubtitleTrackId);
+                        await SetSubtitleTrackLockedAsync(request.SubtitleTrackId).ConfigureAwait(false);
+                        break;
+                    case "audio":
+                        await SetAudioTrackLockedAsync(request.AudioTrackId).ConfigureAwait(false);
                         break;
                     default:
                         throw new ArgumentException($"未知播放命令: {request.Command}", nameof(request));
@@ -299,13 +403,19 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
             var reachedEnd = await ReadBooleanPropertyLockedAsync("eof-reached").ConfigureAwait(false);
             var trackData = await SendRequestLockedAsync(["get_property", "track-list"], throwOnError: false).ConfigureAwait(false);
             var sidData = await SendRequestLockedAsync(["get_property", "sid"], throwOnError: false).ConfigureAwait(false);
+            var aidData = await SendRequestLockedAsync(["get_property", "aid"], throwOnError: false).ConfigureAwait(false);
+            var speedData = await SendRequestLockedAsync(["get_property", "speed"], throwOnError: false).ConfigureAwait(false);
             if (position is not null) Interlocked.Exchange(ref _positionMs, ToMilliseconds(position.Value));
             if (duration is not null) Interlocked.Exchange(ref _durationMs, ToMilliseconds(duration.Value));
             if (paused is not null) _paused = paused.Value;
+            if (speedData is { ValueKind: JsonValueKind.Number } && speedData.Value.TryGetDouble(out var speed) && double.IsFinite(speed))
+                Volatile.Write(ref _speed, speed);
             if (trackData is not null)
             {
                 UpdateSubtitleState(ParseSubtitleTracks(trackData.Value), ParseSubtitleTrackId(sidData));
+                UpdateAudioState(ParseAudioTracks(trackData.Value), ParseAudioTrackId(aidData));
             }
+            PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
             if (reachedEnd == true)
             {
                 Interlocked.Exchange(ref _naturalEndObserved, 1);
@@ -347,6 +457,22 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
         return tracks;
     }
 
+    internal static IReadOnlyList<MpvAudioTrack> ParseAudioTracks(JsonElement data)
+    {
+        if (data.ValueKind != JsonValueKind.Array) return [];
+        return data.EnumerateArray()
+            .Where(item => StringProperty(item, "type") == "audio" &&
+                item.TryGetProperty("id", out var idValue) && idValue.TryGetInt32(out _))
+            .Select(item => new MpvAudioTrack(
+                item.GetProperty("id").GetInt32(),
+                StringProperty(item, "lang") ?? "und",
+                StringProperty(item, "title") ?? string.Empty,
+                StringProperty(item, "codec") ?? string.Empty,
+                BooleanProperty(item, "external"),
+                BooleanProperty(item, "selected")))
+            .ToArray();
+    }
+
     internal static int? ParseSubtitleTrackId(JsonElement? data)
     {
         if (data is not JsonElement value) return null;
@@ -354,11 +480,124 @@ public sealed class MpvPlaybackSession : IAsyncDisposable
         return value.ValueKind == JsonValueKind.String && int.TryParse(value.GetString(), out id) ? id : null;
     }
 
+    internal static int? ParseAudioTrackId(JsonElement? data) => ParseSubtitleTrackId(data);
+
     private static string? StringProperty(JsonElement item, string name) =>
         item.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
 
     private static bool BooleanProperty(JsonElement item, string name) =>
         item.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.True;
+
+    private async Task SetSubtitleTrackLockedAsync(int? selectedTrackId)
+    {
+        if (selectedTrackId is not null && SubtitleTracks.Count == 0)
+            await RefreshTracksLockedAsync().ConfigureAwait(false);
+        if (selectedTrackId is int id && !SubtitleTracks.Any(track => track.Id == id))
+            throw new ArgumentOutOfRangeException(nameof(selectedTrackId), "字幕轨道不存在。");
+        await SendRequestLockedAsync(["set_property", "sid", selectedTrackId is int selected ? selected : "no"]).ConfigureAwait(false);
+        UpdateSelectedSubtitle(selectedTrackId);
+    }
+
+    private async Task SetAudioTrackLockedAsync(int? selectedTrackId)
+    {
+        if (selectedTrackId is not null && AudioTracks.Count == 0)
+            await RefreshTracksLockedAsync().ConfigureAwait(false);
+        if (selectedTrackId is int id && !AudioTracks.Any(track => track.Id == id))
+            throw new ArgumentOutOfRangeException(nameof(selectedTrackId), "音频轨道不存在。");
+        await SendRequestLockedAsync(["set_property", "aid", selectedTrackId is int selected ? selected : "no"]).ConfigureAwait(false);
+        UpdateSelectedAudio(selectedTrackId);
+    }
+
+    private async Task RefreshTracksLockedAsync()
+    {
+        var trackData = await SendRequestLockedAsync(["get_property", "track-list"], throwOnError: false).ConfigureAwait(false);
+        if (trackData is null) return;
+        var sidData = await SendRequestLockedAsync(["get_property", "sid"], throwOnError: false).ConfigureAwait(false);
+        var aidData = await SendRequestLockedAsync(["get_property", "aid"], throwOnError: false).ConfigureAwait(false);
+        UpdateSubtitleState(ParseSubtitleTracks(trackData.Value), ParseSubtitleTrackId(sidData));
+        UpdateAudioState(ParseAudioTracks(trackData.Value), ParseAudioTrackId(aidData));
+    }
+
+    private async Task RefreshPlaybackInfoLockedAsync()
+    {
+        var position = await ReadNumberPropertyLockedAsync("time-pos").ConfigureAwait(false);
+        var duration = await ReadNumberPropertyLockedAsync("duration").ConfigureAwait(false);
+        var paused = await ReadBooleanPropertyLockedAsync("pause").ConfigureAwait(false);
+        var speed = await ReadNumberPropertyLockedAsync("speed").ConfigureAwait(false);
+        var fileName = await ReadStringPropertyLockedAsync("filename").ConfigureAwait(false);
+        var mediaTitle = await ReadStringPropertyLockedAsync("media-title").ConfigureAwait(false);
+        var container = await ReadStringPropertyLockedAsync("file-format").ConfigureAwait(false);
+        var audioCodec = await ReadStringPropertyLockedAsync("audio-codec-name").ConfigureAwait(false);
+        var videoCodec = await ReadStringPropertyLockedAsync("video-codec").ConfigureAwait(false);
+        var videoParams = await SendRequestLockedAsync(["get_property", "video-params"], throwOnError: false).ConfigureAwait(false);
+        await RefreshTracksLockedAsync().ConfigureAwait(false);
+        if (position is not null) Interlocked.Exchange(ref _positionMs, ToMilliseconds(position.Value));
+        if (duration is not null) Interlocked.Exchange(ref _durationMs, ToMilliseconds(duration.Value));
+        if (paused is not null) _paused = paused.Value;
+        if (speed is not null && double.IsFinite(speed.Value)) Volatile.Write(ref _speed, speed.Value);
+        _fileName = fileName;
+        _mediaTitle = mediaTitle;
+        _containerFormat = container;
+        _audioCodec = audioCodec;
+        _video = ParseVideoTrackInfo(videoCodec, videoParams);
+        PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private static MpvVideoTrackInfo? ParseVideoTrackInfo(string? codec, JsonElement? data)
+    {
+        if (data is not JsonElement value || value.ValueKind != JsonValueKind.Object) return codec is null ? null : new(codec, null, null, null, null, null);
+        return new(
+            codec,
+            StringProperty(value, "pixelformat"),
+            StringProperty(value, "primaries"),
+            StringProperty(value, "gamma") ?? StringProperty(value, "transfer"),
+            IntProperty(value, "w"),
+            IntProperty(value, "h"));
+    }
+
+    private static int? IntProperty(JsonElement item, string name) =>
+        item.TryGetProperty(name, out var value) && value.TryGetInt32(out var result) ? result : null;
+
+    private async Task<string?> ReadStringPropertyLockedAsync(string property)
+    {
+        var data = await SendRequestLockedAsync(["get_property", property], throwOnError: false).ConfigureAwait(false);
+        return data is { ValueKind: JsonValueKind.String } ? data.Value.GetString() : null;
+    }
+
+    private void UpdateSelectedAudio(int? selectedTrackId)
+    {
+        IReadOnlyList<MpvAudioTrack> tracks;
+        lock (_audioSync) tracks = _audioTracks;
+        UpdateAudioState(tracks, selectedTrackId);
+    }
+
+    private void UpdateAudioState(IReadOnlyList<MpvAudioTrack> tracks, int? selectedTrackId)
+    {
+        var normalized = tracks.Select(track => track with { IsSelected = track.Id == selectedTrackId }).ToArray();
+        bool changed;
+        lock (_audioSync)
+        {
+            changed = _selectedAudioTrackId != selectedTrackId || !_audioTracks.SequenceEqual(normalized);
+            _audioTracks = normalized;
+            _selectedAudioTrackId = selectedTrackId;
+        }
+        if (changed) AudioTracksChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private MpvPlaybackInfo BuildPlaybackInfo() => new(
+        PositionMs,
+        DurationMs,
+        IsPaused,
+        Speed,
+        _fileName,
+        _mediaTitle,
+        _containerFormat,
+        _audioCodec,
+        _video,
+        AudioTracks,
+        SubtitleTracks,
+        SelectedAudioTrackId,
+        SelectedSubtitleTrackId);
 
     private void UpdateSelectedSubtitle(int? selectedTrackId)
     {

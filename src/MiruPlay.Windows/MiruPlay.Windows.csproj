@@ -18,6 +18,9 @@
   <ItemGroup>
     <InternalsVisibleTo Include="MiruPlay.Windows.Tests" />
     <Resource Include="Assets\MiruPlay.ico" />
+    <Content Include="Assets\anime_parser\**\*"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup Condition="Exists('..\..\runtime\mpv\mpv.exe')">
@@ -32,6 +35,7 @@
     <PackageReference Include="Grpc.Tools" Version="2.82.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.2" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
   </ItemGroup>
 
   <ItemGroup>

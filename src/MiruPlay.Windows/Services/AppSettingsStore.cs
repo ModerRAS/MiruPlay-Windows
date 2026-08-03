@@ -1,4 +1,6 @@
+using System.Text;
 using System.Text.Json;
+using MiruPlay.Windows.Models;
 
 namespace MiruPlay.Windows.Services;
 
@@ -12,10 +14,19 @@ public sealed record AppSettings(
     int WebControlPort = 9978,
     long? ActiveSourceId = null,
     int MediaSourceSchemaVersion = 0,
-    IReadOnlyList<MediaSourceDefinition>? MediaSources = null);
+    IReadOnlyList<MediaSourceDefinition>? MediaSources = null,
+    bool AutoScanEnabled = false,
+    int AutoScanIntervalHours = 6,
+    bool LogUploadEnabled = false,
+    string LogUploadEndpoint = "",
+    string LogUploadStreamName = "miruplay",
+    long LastLogUploadAt = 0,
+    string? LastLogUploadStatus = null,
+    AudioDspConfig? AudioDsp = null);
 
 public sealed class AppSettingsStore
 {
+    private const int MaxSettingsBytes = 1 * 1024 * 1024;
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private readonly string _settingsPath;
 
@@ -30,15 +41,30 @@ public sealed class AppSettingsStore
 
     public AppSettings Load()
     {
-        if (!File.Exists(_settingsPath)) return new AppSettings(MediaSourceSchemaVersion: 1, MediaSources: []);
+        if (!File.Exists(_settingsPath)) return new AppSettings(
+            MediaSourceSchemaVersion: 1,
+            MediaSources: [],
+            AudioDsp: AudioDspConfig.Neutral());
 
         try
         {
+            var fileInfo = new FileInfo(_settingsPath);
+            if (fileInfo.Length > MaxSettingsBytes) throw new InvalidDataException("设置文件过大。");
             var json = File.ReadAllText(_settingsPath);
             var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions)
                 ?? new AppSettings();
             var needsCleanup = json.Contains("\"TypeLabel\"", StringComparison.Ordinal) ||
                 json.Contains("\"StatusText\"", StringComparison.Ordinal);
+            var normalizedDsp = (settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
+            if (settings.AudioDsp is null ||
+                !string.Equals(
+                    JsonSerializer.Serialize(settings.AudioDsp, JsonOptions),
+                    JsonSerializer.Serialize(normalizedDsp, JsonOptions),
+                    StringComparison.Ordinal))
+            {
+                settings = settings with { AudioDsp = normalizedDsp };
+                needsCleanup = true;
+            }
             if (settings.MediaSourceSchemaVersion == 0)
             {
                 var sources = string.IsNullOrWhiteSpace(settings.LibraryRoot)
@@ -68,6 +94,12 @@ public sealed class AppSettingsStore
                 settings = settings with { CurrentAppMode = normalizedMode };
                 needsCleanup = true;
             }
+            var normalizedInterval = MediaSourceAutoScanScheduler.NormalizeIntervalHours(settings.AutoScanIntervalHours);
+            if (settings.AutoScanIntervalHours != normalizedInterval)
+            {
+                settings = settings with { AutoScanIntervalHours = normalizedInterval };
+                needsCleanup = true;
+            }
             if (settings.ActiveSourceId is null && settings.MediaSources is { Count: > 0 })
             {
                 var mode = normalizedMode.ToUpperInvariant();
@@ -83,14 +115,20 @@ public sealed class AppSettingsStore
         }
         catch (JsonException)
         {
-            return new AppSettings(MediaSourceSchemaVersion: 1, MediaSources: []);
+            return new AppSettings(
+                MediaSourceSchemaVersion: 1,
+                MediaSources: [],
+                AudioDsp: AudioDspConfig.Neutral());
         }
     }
 
     public void Save(AppSettings settings)
     {
-        var tempPath = $"{_settingsPath}.tmp";
-        File.WriteAllText(tempPath, JsonSerializer.Serialize(settings, JsonOptions));
+        var json = JsonSerializer.Serialize(settings, JsonOptions);
+        if (Encoding.UTF8.GetByteCount(json) > MaxSettingsBytes)
+            throw new InvalidDataException("设置文件过大。");
+        var tempPath = $"{_settingsPath}.{Guid.NewGuid():N}.tmp";
+        File.WriteAllText(tempPath, json, Encoding.UTF8);
         File.Move(tempPath, _settingsPath, true);
     }
 }

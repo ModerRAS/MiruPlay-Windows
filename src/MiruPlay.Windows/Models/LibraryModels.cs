@@ -56,6 +56,30 @@ public sealed record LibraryCatalog(int SchemaVersion, string RootPath, IReadOnl
     public IReadOnlyList<MlipArtworkBinding> ArtworkBindings { get; init; } = [];
 }
 
+public sealed record LibraryEpisodeGroup(
+    double Number,
+    IReadOnlyList<LibraryEpisode> Versions)
+{
+    public LibraryEpisode DefaultEpisode => Versions[0];
+    public string DisplayNumber => Number % 1 == 0 ? $"第 {Number:0} 集" : $"第 {Number:0.##} 集";
+    public bool HasVersions => Versions.Count > 1;
+    public string VersionText => HasVersions ? $"{Versions.Count} 个版本" : string.Empty;
+}
+
+public sealed record LibrarySeason(
+    int Number,
+    IReadOnlyList<LibraryEpisodeGroup> Groups)
+{
+    public string DisplayName => Number <= 1 ? "第 1 季" : $"第 {Number} 季";
+    public int EpisodeCount => Groups.Count;
+    public int VersionCount => Groups.Sum(group => group.Versions.Count);
+}
+
+public sealed record LibraryGenreGroup(string Name, IReadOnlyList<LibrarySeries> Series)
+{
+    public string DisplayName => $"{Name} · {Series.Count}";
+}
+
 public sealed record LibrarySeries(
     long Id,
     string Uuid,
@@ -75,6 +99,24 @@ public sealed record LibrarySeries(
     public ExternalMetadataId? ExternalId(string provider) =>
         ExternalIds.FirstOrDefault(item => item.Provider.Equals(provider, StringComparison.OrdinalIgnoreCase));
     public IReadOnlyList<ExternalMetadataId> ExternalLinks => ExternalIds.Where(item => item.Link is not null).ToList();
+    public IReadOnlyList<LibrarySeason> Seasons => Episodes
+        .GroupBy(episode => Math.Max(1, episode.Season))
+        .OrderBy(group => group.Key)
+        .Select(group => new LibrarySeason(
+            group.Key,
+            group.GroupBy(episode => episode.Number)
+                .OrderBy(episodeGroup => episodeGroup.Key)
+                .Select(episodeGroup => new LibraryEpisodeGroup(
+                    episodeGroup.Key,
+                    episodeGroup.OrderBy(episode => episode.MediaPath, StringComparer.OrdinalIgnoreCase).ToList()))
+                .ToList()))
+        .ToList();
+    public IReadOnlyList<LibraryEpisode> OrderedEpisodes => Seasons.SelectMany(season => season.Groups.SelectMany(group => group.Versions)).ToList();
+    public bool HasMultipleVersions => Seasons.Any(season => season.Groups.Any(group => group.HasVersions));
+    public bool HasExtras => Extras.Count > 0;
+    public long LastWatchedEpochMs => Episodes.Max(episode => episode.LastWatchedEpochMs);
+    public int CompletedEpisodeCount => Episodes.Count(episode => episode.IsCompleted);
+    public string CompletionText => Episodes.Count == 0 ? string.Empty : $"{CompletedEpisodeCount}/{Episodes.Count} 集已看";
     public Uri? PosterUri => PosterPath switch
     {
         null => null,
@@ -113,8 +155,10 @@ public sealed record LibraryEpisode(
     public int PlayCount { get; init; }
 
     public string ApiId => ProgressKey;
+    public string FileName => Path.GetFileName(MediaPath);
     public string DisplayNumber => Number % 1 == 0 ? $"第 {Number:0} 集" : $"第 {Number:0.##} 集";
     public string DisplayTitle => string.IsNullOrWhiteSpace(Title) ? Path.GetFileNameWithoutExtension(MediaPath) : Title;
+    public string VersionLabel => Path.GetFileNameWithoutExtension(MediaPath);
     public string DurationText => Duration <= TimeSpan.Zero ? string.Empty : $"{(int)Duration.TotalMinutes} 分钟";
     public bool IsCompleted => WatchedDurationMs > 0 && WatchedPositionMs >= WatchedDurationMs * 0.9 || WatchedDurationMs == 0 && PlayCount > 0;
     public bool IsInProgress => WatchedPositionMs > 0 && !IsCompleted;
@@ -132,4 +176,8 @@ public sealed record LibraryExtra(
     int SortOrder,
     string Title,
     string MediaPath,
-    TimeSpan Duration);
+    TimeSpan Duration)
+{
+    public string DisplayTitle => string.IsNullOrWhiteSpace(Title) ? Path.GetFileNameWithoutExtension(MediaPath) : Title;
+    public string DurationText => Duration <= TimeSpan.Zero ? string.Empty : $"{(int)Duration.TotalMinutes} 分钟";
+}

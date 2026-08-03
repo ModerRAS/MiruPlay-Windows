@@ -1,0 +1,80 @@
+<Window x:Class="MiruPlay.Windows.AudioDspDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MiruPlay.Windows"
+        Title="音频 DSP"
+        Width="920"
+        Height="680"
+        MinWidth="760"
+        MinHeight="560"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource DarkBackground}"
+        Foreground="{StaticResource TextPrimary}">
+    <Grid Margin="22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="音频 DSP / PEQ" Style="{StaticResource PageTitle}" />
+        <TextBlock Grid.Row="1" Text="仅作用于 MiruPlay 启动的 mpv；线性相位模式为每个声道生成相同延迟的独立 FIR。" Style="{StaticResource SecondaryText}" Margin="0,4,0,16" TextWrapping="Wrap" />
+
+        <Grid Grid.Row="2" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="180" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="150" />
+            </Grid.ColumnDefinitions>
+            <CheckBox x:Name="EnabledBox" Content="启用 DSP" VerticalAlignment="Center" AutomationProperties.Name="启用音频 DSP" />
+            <TextBlock Grid.Column="2" Text="预设" VerticalAlignment="Center" Margin="20,0,8,0" />
+            <ComboBox x:Name="PresetBox" Grid.Column="3" DisplayMemberPath="Name" SelectionChanged="Preset_SelectionChanged" AutomationProperties.Name="DSP 预设" />
+            <TextBlock Grid.Column="4" Text="相位" VerticalAlignment="Center" Margin="20,0,8,0" />
+            <ComboBox x:Name="PhaseBox" Grid.Column="5" AutomationProperties.Name="DSP 相位模式" />
+            <TextBlock Grid.Column="6" Text="FIR" VerticalAlignment="Center" Margin="20,0,8,0" />
+            <ComboBox x:Name="FirQualityBox" Grid.Column="7" AutomationProperties.Name="FIR 质量" />
+        </Grid>
+
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="布局" VerticalAlignment="Center" />
+                <ComboBox x:Name="LayoutBox" Width="110" Margin="10,0,14,0" AutomationProperties.Name="DSP 声道布局" />
+                <TextBlock Text="目标声道" VerticalAlignment="Center" />
+                <ComboBox x:Name="TargetBox" Width="160" Margin="10,0,10,0" SelectionChanged="Target_SelectionChanged" AutomationProperties.Name="PEQ 目标声道" />
+                <TextBlock Text="输出" VerticalAlignment="Center" />
+                <ComboBox x:Name="OutputBox" Width="160" Margin="10,0,10,0" AutomationProperties.Name="DSP 输出模式" />
+                <CheckBox x:Name="LimiterBox" Content="限幅" Margin="14,0,8,0" VerticalAlignment="Center" AutomationProperties.Name="DSP 限幅" />
+                <TextBox x:Name="LimiterCeilingBox" Width="58" ToolTip="限幅上限 dB" AutomationProperties.Name="限幅上限 dB" />
+                <TextBox x:Name="LimiterReleaseBox" Width="68" Margin="6,0,0,0" ToolTip="释放毫秒" AutomationProperties.Name="限幅释放毫秒" />
+                <Button Content="导入 REW 校准文件" Style="{StaticResource SecondaryButton}" Padding="12,7" Click="ImportRew_Click" AutomationProperties.Name="导入 REW 校准文件" />
+            </StackPanel>
+            <DataGrid x:Name="BandGrid" Grid.Row="1" Margin="0,12,0,12" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HeadersVisibility="Column" IsReadOnly="False" Background="{StaticResource DarkSurface}" Foreground="{StaticResource TextPrimary}" BorderBrush="{StaticResource SubtleBorder}" AutomationProperties.Name="PEQ 频段列表">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Header="启用" Binding="{Binding Enabled, UpdateSourceTrigger=PropertyChanged}" Width="58" />
+                    <DataGridComboBoxColumn Header="类型" SelectedItemBinding="{Binding Type, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{x:Static local:AudioDspDialog.FilterTypes}" Width="120" />
+                    <DataGridTextColumn Header="频率 Hz" Binding="{Binding FrequencyHz, UpdateSourceTrigger=PropertyChanged}" Width="120" />
+                    <DataGridTextColumn Header="增益 dB" Binding="{Binding GainDb, UpdateSourceTrigger=PropertyChanged}" Width="120" />
+                    <DataGridTextColumn Header="Q" Binding="{Binding Q, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                    <DataGridTextColumn Header="来源行" Binding="{Binding LineNumber}" IsReadOnly="True" Width="80" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock x:Name="StatusBox" Grid.Row="2" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" />
+        </Grid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="取消" Style="{StaticResource SecondaryButton}" Padding="16,8" Click="Cancel_Click" AutomationProperties.Name="取消音频 DSP 编辑" />
+            <Button Content="应用" Style="{StaticResource SecondaryButton}" Padding="18,8" Margin="8,0,0,0" Click="Apply_Click" AutomationProperties.Name="应用音频 DSP" />
+        </StackPanel>
+    </Grid>
+</Window>

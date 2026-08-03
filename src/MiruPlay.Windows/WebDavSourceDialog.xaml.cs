@@ -8,9 +8,11 @@ public partial class WebDavSourceDialog : Window
     public WebDavSourceDialog(
         string? sourceName = null,
         string? sourceLocation = null,
-        string? username = null)
+        string? username = null,
+        string recognitionMode = "MLIP")
     {
         InitializeComponent();
+        RecognitionModeBox.SelectedItem = RecognitionModeBox.Items.OfType<System.Windows.Controls.ComboBoxItem>().FirstOrDefault(item => Equals(item.Tag, recognitionMode)) ?? RecognitionModeBox.Items[0] as System.Windows.Controls.ComboBoxItem;
         if (sourceName is not null) SourceNameBox.Text = sourceName;
         if (sourceLocation is not null) LocationBox.Text = sourceLocation;
         if (username is not null) UsernameBox.Text = username;
@@ -19,6 +21,7 @@ public partial class WebDavSourceDialog : Window
     public string SourceName => SourceNameBox.Text.Trim();
     public string SourceLocation => LocationBox.Text.Trim();
     public string Username => UsernameBox.Text.Trim();
+    public string RecognitionMode => (RecognitionModeBox.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Tag as string ?? "MLIP";
 
     public string TakePassword()
     {
