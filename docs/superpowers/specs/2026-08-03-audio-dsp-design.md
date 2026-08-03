@@ -1,165 +1,135 @@
-# MiruPlay Windows Audio DSP Design
+# MiruPlay Windows 音频 DSP 设计
 
-## Goal
+## 目标
 
-Add the Android audio DSP feature set to the Windows client for playback
-started by MiruPlay's own `mpv.exe` process. The feature must include PEQ,
-minimum-phase and linear-phase modes, output routing, limiter/headroom
-controls, versioned persistence, settings editing, and Web API parity.
+为 Windows 客户端增加 Android 端已有的音频 DSP 能力，仅作用于 MiruPlay
+自己启动的 `mpv.exe` 播放进程。功能包括 PEQ、最小相位和线性相位模式、
+输出路由、限幅/余量控制、版本化持久化、设置编辑和 Web API 对等能力。
 
-The Windows system-player fallback remains unchanged and does not receive DSP.
+Windows 系统播放器回退路径保持不变，不注入 DSP。
 
-## Scope
+## 范围
 
-The persisted configuration mirrors the Android contract:
+持久化配置与 Android 端契约保持一致：
 
-- `enabled` and `selectedPresetId`.
-- PEQ presets with stable ids and names.
-- Preamp, phase mode, FIR quality, output mode, channel rules, and limiter.
-- Band types: peaking, low/high shelf, low/high pass, notch, and band pass.
-- Channel targets: all, front, center/LFE, surround groups, and concrete
-  channels where the input layout is known.
-- Output modes: automatic preserve, standard stereo downmix, and HRTF
-  binaural.
+- `enabled` 和 `selectedPresetId`。
+- 带稳定 id 和名称的 PEQ 预设。
+- 前级增益、相位模式、FIR 质量、输出模式、通道规则和限幅器。
+- 峰值、低/高架、低/高通、陷波和带通滤波器。
+- 全部、前置、中置/LFE、环绕声组，以及输入布局明确时的具体声道目标。
+- 自动保留、标准立体声降混和 HRTF 双耳输出模式。
 
-DSP is disabled by default and a neutral preset is always available. This
-release does not add stereo-to-surround upmixing, room correction, loudness
-normalization, microphone capture, or a second Windows PCM output stack.
+DSP 默认关闭，并且始终保留一个中性预设。本次不实现立体声升混环绕、房间
+校正、响度标准化、麦克风采集或第二套 Windows PCM 输出栈。
 
-## Architecture
+## 架构
 
-### Configuration model
+### 配置模型
 
-`src/MiruPlay.Windows/Models/AudioDspModels.cs` owns the versioned C# records
-and enums. Its field names and storage values match the Android model. The
-model provides normalization and validation for finite numeric values,
-frequency/gain/Q limits, duplicate ids, missing selected presets, and band
-limits.
+`src/MiruPlay.Windows/Models/AudioDspModels.cs` 负责版本化的 C# 记录类型和
+枚举。字段名与存储值对齐 Android 模型，并负责有限浮点数、频率/增益/Q 值
+范围、重复 id、缺失的选中预设和 band 数量限制的标准化与校验。
 
-`AppSettings` gains an `AudioDsp` property. Existing settings files deserialize
-with the neutral default. `AppSettingsStore.Load` normalizes malformed DSP
-data to the neutral configuration and records a recoverable warning for the
-runtime status; it never rejects an otherwise usable library configuration.
+`AppSettings` 增加 `AudioDsp` 属性。已有设置文件缺少该字段时反序列化为关闭的
+中性配置。`AppSettingsStore.Load` 会把格式错误的 DSP 数据标准化为中性配置，
+并为运行时状态保留可恢复的警告；不会因此拒绝整个媒体库设置。
 
-The full settings object remains protected by the existing one-megabyte
-settings bound and atomic save path. Secrets are not part of the DSP model.
+整个设置对象继续使用现有的一兆字节大小限制和原子保存流程。凭据不会进入
+DSP 模型。
 
-### Filter graph compiler
+### 滤镜图编译器
 
-`src/MiruPlay.Windows/Services/AudioDspFilterGraphCompiler.cs` is a pure
-mpv-facing compiler. It resolves the selected preset, validates it, and
-returns a structured graph containing:
+`src/MiruPlay.Windows/Services/AudioDspFilterGraphCompiler.cs` 是纯 mpv 适配
+编译器。它解析选中的预设、执行校验，并返回结构化滤镜图，内容包括：
 
-- the `--af` value;
-- forced PCM output arguments;
-- the effective output route;
-- sample-rate/layout warnings;
-- preview response data.
+- `--af` 参数值；
+- 强制 PCM 输出参数；
+- 实际生效的输出路由；
+- 采样率/声道布局警告；
+- 预览响应数据。
 
-Minimum-phase PEQ uses the FFmpeg/mpv biquad and shelf/pass/notch filters,
-with preamp, per-rule output gain, and the linked limiter applied in a stable
-order. Linear-phase mode samples the same validated PEQ magnitude response
-used by the Android design and emits `firequalizer` entries. FIR quality maps
-to the configured response resolution and group delay. The compiler preserves
-one delay across active channels, including flat channels.
+最小相位 PEQ 使用 FFmpeg/mpv 的 biquad、架式、通带/阻带滤镜，并以稳定顺序
+应用前级增益、每条规则的输出增益和联动限幅器。线性相位模式使用与 Android
+端相同的已校验 PEQ 幅频响应，采样后生成 `firequalizer` 参数。FIR 质量映射
+到响应分辨率和群延迟。所有有效声道使用相同延迟，包含没有 EQ 的平坦声道。
 
-Channel-specific rules are represented with a generated FFmpeg channel split,
-per-channel filter chains, and channel merge. Standard downmix emits the
-explicit ITU matrix used by Android. HRTF emits the FFmpeg headphone route.
-Unknown layouts only receive rules that are provably safe for all channels;
-otherwise the compiler returns a warning and refuses to claim that DSP is
-active.
+声道规则通过生成 FFmpeg 的声道拆分、逐声道滤镜链和声道合并来实现。标准降混
+输出 Android 端使用的显式 ITU 矩阵；HRTF 输出使用 FFmpeg headphone 路由。
+未知声道布局只应用能够证明对所有声道都安全的规则；否则编译器返回警告，
+不宣称 DSP 已生效。
 
-When DSP is enabled, the launch graph also requests float PCM, disables
-exclusive output, and disables encoded passthrough/offload behavior. When DSP
-is disabled, no DSP arguments are added and the existing mpv defaults remain.
+DSP 开启时，启动滤镜图还会请求 float PCM、关闭独占输出，并关闭编码直通/旁路
+行为。DSP 关闭时不添加任何 DSP 参数，继续使用现有 mpv 默认行为。
 
-### mpv integration
+### mpv 集成
 
-`MpvPlayerLauncher.CreateStartInfo` calls the compiler and appends its
-arguments only for MiruPlay-owned mpv playback. Headless playback uses the
-same graph so behavior is consistent in tests and diagnostics. The system
-player fallback path is not passed through the compiler.
+`MpvPlayerLauncher.CreateStartInfo` 调用编译器，并且只在 MiruPlay 自己启动
+mpv 时追加 DSP 参数。无窗口播放使用同一套滤镜图，以保证测试和诊断行为一致。
+系统播放器回退路径不会调用编译器。
 
-`MpvPlaybackSession` gains an audio DSP update operation that sends the
-compiled `af` value through the existing JSON IPC lock. The update is applied
-at an mpv audio-filter boundary; it does not restart the video process. The
-session publishes the effective route and warning/error state.
+`MpvPlaybackSession` 增加音频 DSP 更新操作，通过已有 JSON IPC 锁发送新的 `af`
+值。更新在 mpv 音频滤镜边界生效，不重启视频进程。会话发布实际输出路由和
+警告/错误状态。
 
-If mpv rejects a startup or runtime graph, the previous working graph remains
-active. A first-playback failure is surfaced as a playback error instead of
-silently playing unprocessed audio while reporting DSP as enabled.
+如果 mpv 拒绝启动或运行时滤镜，继续保留上一个可用滤镜图。首次播放没有可保留
+的旧滤镜时，直接报告播放错误，不允许在实际未处理音频的情况下显示 DSP 已开启。
 
-### Settings surfaces
+### 设置界面
 
-The native WPF settings page adds an Audio DSP summary with an enable toggle,
-preset selector, phase/output summary, and an editor dialog. The dialog uses
-standard WPF controls and edits the complete preset contract: preamp, phase,
-FIR quality, output mode, limiter, channel rules, and PEQ rows. Applying a
-valid edit first compiles and applies it to the active MiruPlay mpv session,
-then persists it. An invalid edit leaves both the active session and stored
-settings unchanged.
+原生 WPF 设置页增加 Audio DSP 摘要区域，包含启用开关、预设选择器、相位/输出
+摘要和编辑对话框。对话框使用标准 WPF 控件，编辑完整的预设契约：前级增益、
+相位、FIR 质量、输出模式、限幅器、通道规则和 PEQ 行。应用有效编辑时，先编译
+并应用到当前 MiruPlay mpv 会话，再持久化；无效编辑同时保持当前会话和已保存
+设置不变。
 
-The Web API adds:
+Web API 增加：
 
-- `GET /api/audio-dsp`: config, capabilities, effective route, and warnings.
-- `PUT /api/audio-dsp`: validate, apply atomically, and persist the config.
-- `POST /api/audio-dsp/preview`: return sampled magnitude and phase data for
-  one unsaved preset.
+- `GET /api/audio-dsp`：返回配置、能力、实际路由和警告。
+- `PUT /api/audio-dsp`：校验、原子应用并持久化配置。
+- `POST /api/audio-dsp/preview`：接收未保存的预设，返回幅频和相频采样数据。
 
-The existing playback-settings endpoint keeps its nullable backward-compatible
-shape and may expose only the DSP enabled/preset projection. Full DSP editing
-uses the dedicated endpoint. The existing WebUI gets a dedicated DSP editor
-view with preset CRUD, PEQ row editing, channel-rule selection, limiter and
-phase controls, response preview, and apply status.
+已有播放设置接口继续保持可空字段的向后兼容形状，可以只暴露 DSP 的启用/预设
+投影；完整 DSP 编辑使用专用接口。现有 WebUI 增加独立 DSP 编辑视图，支持预设
+增删改、PEQ 行编辑、通道规则选择、限幅与相位控制、响应预览和应用状态。
 
-## Data flow
+## 数据流
 
 ```text
-stored AudioDspConfig
-  -> normalize and validate
-  -> resolve selected preset
-  -> compile mpv filter graph and preview response
-  -> mpv startup arguments or JSON IPC af update
-  -> mpv decoded PCM -> FFmpeg filters -> Windows audio output
+已保存的 AudioDspConfig
+  -> 标准化和校验
+  -> 解析选中的预设
+  -> 编译 mpv 滤镜图和预览响应
+  -> mpv 启动参数或 JSON IPC af 更新
+  -> mpv 解码 PCM -> FFmpeg 滤镜 -> Windows 音频输出
 ```
 
-When DSP is enabled, encoded passthrough is not allowed. When it is disabled,
-the existing playback behavior is restored on the next launch or filter
-update. The system-player fallback never enters this flow.
+DSP 开启时不允许编码直通。DSP 关闭后，在下一次启动或滤镜更新时恢复已有播放
+行为。系统播放器回退永远不进入这条数据流。
 
-## Error handling and compatibility
+## 错误处理与兼容性
 
-- Missing or old DSP fields load as disabled neutral configuration.
-- Invalid API payloads return structured HTTP 400 field errors and do not
-  change stored settings or the active graph.
-- Unsupported HRTF or channel layout initialization keeps the previous graph
-  and reports the fallback/error reason.
-- The default path remains bitstream/passthrough-compatible because DSP is
-  off by default.
-- Filter strings are generated from validated numeric values only; user text
-  is limited to preset names and never interpolated into an executable
-  command without escaping.
-- DSP state is scoped to the current MiruPlay-owned mpv session and is not
-  applied to external applications or Windows' default media player.
+- 缺失或旧版本 DSP 字段加载为关闭的中性配置。
+- 无效 API 请求返回结构化 HTTP 400 字段错误，不修改已保存配置或当前滤镜图。
+- HRTF 或声道布局初始化失败时保留上一个滤镜图，并报告回退/错误原因。
+- DSP 默认关闭，因此现有播放路径继续兼容 bitstream/passthrough。
+- 所有滤镜字符串都由已校验的数值生成；预设名称等用户文本不能未经转义地
+  插入可执行命令。
+- DSP 状态只属于当前 MiruPlay 自己启动的 mpv 会话，不作用于其他应用或
+  Windows 默认媒体播放器。
 
-## Verification
+## 验证
 
-Add focused tests before implementation for:
+实现前先添加以下聚焦测试：
 
-1. model normalization, malformed recovery, enum/storage compatibility, and
-   validation boundaries;
-2. biquad response sampling, linear-phase response generation, FIR quality,
-   channel target routing, downmix output count, and limiter headroom;
-3. mpv argument generation for disabled/enabled DSP, minimum/linear phase,
-   multichannel routing, and no changes to the system-player fallback;
-4. runtime IPC update behavior and preservation of the previous graph on an
-   mpv rejection;
-5. Web API GET/PUT/preview round trips and invalid-payload atomicity;
-6. WPF settings apply behavior, including AutomationProperties and focus-safe
-   editor controls.
+1. 模型标准化、格式错误恢复、枚举/存储值兼容性和边界校验；
+2. biquad 响应采样、线性相位响应生成、FIR 质量、声道目标路由、降混输出数量
+   和限幅余量；
+3. DSP 关闭/开启、最小/线性相位、多声道路由的 mpv 参数生成，以及系统播放器
+   回退不受影响；
+4. 运行时 IPC 更新行为，以及 mpv 拒绝新滤镜时保留旧滤镜；
+5. Web API GET/PUT/preview 往返和无效请求的原子性；
+6. WPF 设置应用行为，包括 AutomationProperties 和编辑控件焦点稳定性。
 
-Run the focused tests, the full test suite, and a Release build. Where a
-packaged mpv executable is available, validate startup with a deterministic
-48 kHz sweep and inspect mpv's effective `af` property. Record whether the
-session used MiruPlay mpv or the system-player fallback.
+运行聚焦测试、完整测试套件和 Release 构建。若环境有打包的 mpv，可使用确定性
+的 48 kHz 扫频启动播放，并读取 mpv 实际 `af` 属性。记录会话使用的是 MiruPlay
+mpv 还是系统播放器回退。
