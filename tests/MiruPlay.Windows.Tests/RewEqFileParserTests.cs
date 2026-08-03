@@ -10,15 +10,15 @@ public sealed class RewEqFileParserTests
     {
         const string text = """
 Generic
-Number	Enabled	Control	Type	Frequency(Hz)	Gain(dB)	Q	Bandwidth(Hz)
-1	True	Auto	PK	70.00	-14.7	10.398	6.73
-2	False	Auto	PK	71.90	9.0	6.993	10.28
-3	True	Manual	LS	78.30	5.7		
-4	True	Auto	None				
+Number\tEnabled\tControl\tType\tFrequency(Hz)\tGain(dB)\tQ\tBandwidth(Hz)
+1\tTrue\tAuto\tPK\t70.00\t-14.7\t10.398\t6.73
+2\tFalse\tAuto\tPK\t71.90\t9.0\t6.993\t10.28
+3\tTrue\tManual\tLS\t78.30\t5.7
+4\tTrue\tAuto\tNone
 
 Compound_filters
-Number	Enabled	Control	Type
-1	True	Auto	None
+Number\tEnabled\tControl\tType
+1\tTrue\tAuto\tNone
 """;
 
         var result = RewEqFileParser.Parse(text);
