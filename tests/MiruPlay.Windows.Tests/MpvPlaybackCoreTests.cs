@@ -1,4 +1,3 @@
-using System.Text.Json;
 using MiruPlay.Windows.Models;
 using MiruPlay.Windows.Services;
 
@@ -41,27 +40,6 @@ public sealed class MpvPlaybackCoreTests
     }
 
     [Fact]
-    public void AudioParserIgnoresVideoAndPreservesSelectedExternalState()
-    {
-        using var document = JsonDocument.Parse("""
-            [
-              { "id": 1, "type": "video", "selected": true },
-              { "id": 2, "type": "audio", "lang": "jpn", "title": "日本語", "codec": "aac", "selected": true },
-              { "id": 3, "type": "audio", "lang": "eng", "codec": "opus", "external": true, "selected": false }
-            ]
-            """);
-
-        var tracks = MpvPlaybackSession.ParseAudioTracks(document.RootElement);
-
-        Assert.Equal(2, tracks.Count);
-        Assert.Equal(2, tracks[0].Id);
-        Assert.Equal("日本語", tracks[0].DisplayLabel);
-        Assert.True(tracks[0].IsSelected);
-        Assert.True(tracks[1].IsExternal);
-        Assert.Equal("eng", tracks[1].Language);
-    }
-
-    [Fact]
     public void VersionQueueGroupsLogicalEpisodesAndChoosesNearestVersion()
     {
         var episodes = new[]
@@ -82,32 +60,6 @@ public sealed class MpvPlaybackCoreTests
         Assert.Equal("s1e2-bd", queue.CurrentVersion!.ProgressKey);
         Assert.Equal("s2e1", queue.Next()!.ProgressKey);
         Assert.Null(queue.Next());
-    }
-
-    [Fact]
-    public void CreateStartInfoAddsNativeWindowIdOnlyForEmbeddedPlayback()
-    {
-        var episode = Episode("embedded.mkv", 1, 1, Path.Combine(Path.GetTempPath(), "embedded.mkv"));
-        var embedded = MpvPlayerLauncher.CreateStartInfo(
-            "mpv.exe",
-            "pipe",
-            episode,
-            new AppSettings(),
-            null,
-            windowHandle: new IntPtr(1234));
-        var headless = MpvPlayerLauncher.CreateStartInfo(
-            "mpv.exe",
-            "pipe",
-            episode,
-            new AppSettings(),
-            null,
-            headless: true,
-            windowHandle: new IntPtr(1234));
-
-        Assert.Contains("--wid=1234", embedded.ArgumentList);
-        Assert.Contains("--vo=gpu-next", embedded.ArgumentList);
-        Assert.DoesNotContain("--wid=1234", headless.ArgumentList);
-        Assert.Contains("--vo=null", headless.ArgumentList);
     }
 
     private static LibraryEpisode Episode(string key, int season, double number, string path) => new(

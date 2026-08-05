@@ -23,9 +23,11 @@
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <ItemGroup Condition="Exists('..\..\runtime\mpv\mpv.exe')">
-    <Content Include="..\..\runtime\mpv\mpv.exe" Link="runtime\mpv\mpv.exe" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\..\runtime\mpv\d3dcompiler_43.dll" Link="runtime\mpv\d3dcompiler_43.dll" CopyToOutputDirectory="PreserveNewest" />
+  <ItemGroup Condition="Exists('..\..\runtime\libmpv\libmpv-2.dll')">
+    <Content Include="..\..\runtime\libmpv\libmpv-2.dll"
+             Link="runtime\libmpv\libmpv-2.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

@@ -79,12 +79,12 @@ public sealed record MpvPlaybackInfo(
 
 public enum MpvFallbackMode
 {
-    Mpv,
+    LibMpvEmbedded,
     SystemPlayerDegraded,
 }
 
 public sealed record MpvPlaybackLaunchResult(
-    MpvPlaybackSession? Session,
+    IPlaybackSession? Session,
     MpvFallbackMode Mode,
     IReadOnlyList<string> DegradedCapabilities)
 {

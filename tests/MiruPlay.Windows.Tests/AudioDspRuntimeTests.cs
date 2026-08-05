@@ -10,34 +10,6 @@ public sealed class AudioDspRuntimeTests : IDisposable
     public AudioDspRuntimeTests() => Directory.CreateDirectory(_directory);
 
     [Fact]
-    public void CreateStartInfoAddsDspArgumentsOnlyWhenEnabled()
-    {
-        var mediaPath = Path.Combine(_directory, "episode.mkv");
-        File.WriteAllText(mediaPath, string.Empty);
-        var episode = new LibraryEpisode(
-            1,
-            "episode-uuid",
-            "episode-key",
-            1,
-            1,
-            1,
-            "Episode",
-            mediaPath,
-            TimeSpan.FromMinutes(24),
-            []);
-        var settings = new AppSettings(AudioDsp: new AudioDspConfig(
-            true,
-            AudioDspConfig.DefaultPresetId,
-            [AudioDspPreset.Neutral()]));
-
-        var startInfo = MpvPlayerLauncher.CreateStartInfo(
-            "mpv.exe", "pipe", episode, settings, null);
-
-        Assert.Contains("--audio-format=float", startInfo.ArgumentList);
-        Assert.Contains(startInfo.ArgumentList, argument => argument.StartsWith("--af=", StringComparison.Ordinal));
-    }
-
-    [Fact]
     public void MissingAudioDspFieldLoadsNeutralConfiguration()
     {
         var path = Path.Combine(_directory, "settings.json");
@@ -47,17 +19,6 @@ public sealed class AudioDspRuntimeTests : IDisposable
 
         Assert.False(settings.AudioDsp!.Enabled);
         Assert.Equal(AudioDspConfig.DefaultPresetId, settings.AudioDsp.SelectedPresetId);
-    }
-
-    [Fact]
-    public void AudioDspCommandClearsThePrivateMpvFilterChainWhenDisabled()
-    {
-        var command = MpvPlaybackSession.CreateAudioDspCommand(
-            new AudioDspFilterGraph("", [], "disabled", []));
-
-        Assert.Equal("set_property", command[0]);
-        Assert.Equal("af", command[1]);
-        Assert.Empty((object[])command[2]);
     }
 
     public void Dispose()

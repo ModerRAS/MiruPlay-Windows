@@ -623,19 +623,6 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <Separator Background="{StaticResource SubtleBorder}" />
-                    <TextBlock Text="播放器" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
-                    <Grid Margin="0,14,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <TextBlock Text="mpv.exe" FontWeight="SemiBold" />
-                            <TextBlock x:Name="PlayerPathValue" Text="自动检测；找不到时使用 Windows 默认播放器" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" TextWrapping="Wrap" />
-                        </StackPanel>
-                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="选择播放器" Click="ChoosePlayer_Click" />
-                    </Grid>
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />

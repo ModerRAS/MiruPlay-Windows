@@ -23,7 +23,6 @@ public sealed class WebControlServerTests : IDisposable
         File.WriteAllBytes(posterPath, [0x89, 0x50, 0x4E, 0x47]);
         var series = Series(episode) with { PosterPath = "https://webdav.test/private/poster.png" };
         var settings = new AppSettings(WebControlPort: port);
-        Action? beforeSettingsUpdate = null;
         string? requestedEpisode = null;
         long? requestedPosition = null;
         PlaybackControlCommand? requestedCommand = null;
@@ -142,7 +141,6 @@ public sealed class WebControlServerTests : IDisposable
             () => settings,
             update =>
             {
-                Interlocked.Exchange(ref beforeSettingsUpdate, null)?.Invoke();
                 settings = update(settings);
                 return Task.FromResult(settings);
             },
@@ -500,7 +498,6 @@ public sealed class WebControlServerTests : IDisposable
                 .EnumerateArray().Select(item => item.GetInt32()).ToArray());
         var invalidAutomaticScan = await client.PutAsJsonAsync("/api/settings/scan", new { autoScanIntervalHours = 2 });
         Assert.Equal(HttpStatusCode.BadRequest, invalidAutomaticScan.StatusCode);
-        beforeSettingsUpdate = () => settings = settings with { PlayerPath = @"C:\Players\mpv.exe" };
         var concurrentPlaybackUpdate = client.PutAsJsonAsync("/api/settings/playback", new
         {
             endAction = "return_to_detail",
@@ -512,7 +509,6 @@ public sealed class WebControlServerTests : IDisposable
         Assert.Equal("return_to_detail", settings.PlaybackEndAction);
         Assert.Equal("ja", settings.PreferredSubtitleLanguage);
         Assert.Equal("anime", settings.CurrentAppMode);
-        Assert.Equal(@"C:\Players\mpv.exe", settings.PlayerPath);
 
         using var queryClient = new HttpClient { BaseAddress = unauthorized.BaseAddress };
         Assert.Equal(HttpStatusCode.OK, (await queryClient.GetAsync($"/api/info?token={Uri.EscapeDataString(tokens.AccessToken)}")).StatusCode);

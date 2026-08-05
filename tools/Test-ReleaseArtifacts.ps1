@@ -65,12 +65,16 @@ try {
         'README.md',
         'THIRD-PARTY-NOTICES.md',
         'release-manifest.json',
-        'runtime\mpv\mpv.exe',
+        'runtime\libmpv\libmpv-2.dll',
         'licenses\NuGet-Packages.json',
         'licenses\Apache-2.0.txt',
         'licenses\mpv-Copyright.txt'
     )) {
         if (-not (Test-Path (Join-Path $portableDirectory $required))) { throw "Portable package is missing $required" }
+    }
+    $portableMpvFiles = @(Get-ChildItem $portableDirectory -Filter 'mpv.exe' -File -Recurse)
+    if ((Test-Path (Join-Path $portableDirectory 'runtime\mpv')) -or $portableMpvFiles.Count -gt 0) {
+        throw 'Portable package contains the removed external mpv runtime.'
     }
     Test-AppLaunch (Join-Path $portableDirectory 'MiruPlay.exe')
 
@@ -86,7 +90,11 @@ try {
         if ($installer.ExitCode -ne 0) { throw "Installer exited with code $($installer.ExitCode)." }
         $installedExecutable = Join-Path $installDirectory 'MiruPlay.exe'
         if (-not (Test-Path $installedExecutable)) { throw 'Silent installation did not install MiruPlay.exe.' }
-        if (-not (Test-Path (Join-Path $installDirectory 'runtime\mpv\mpv.exe'))) { throw 'Silent installation did not install the mpv runtime.' }
+        if (-not (Test-Path (Join-Path $installDirectory 'runtime\libmpv\libmpv-2.dll'))) { throw 'Silent installation did not install the libmpv runtime.' }
+        $installedMpvFiles = @(Get-ChildItem $installDirectory -Filter 'mpv.exe' -File -Recurse)
+        if ((Test-Path (Join-Path $installDirectory 'runtime\mpv')) -or $installedMpvFiles.Count -gt 0) {
+            throw 'Installed package contains the removed external mpv runtime.'
+        }
         if (-not (Test-Path (Join-Path $installDirectory 'licenses\NuGet-Packages.json'))) { throw 'Silent installation did not install third-party license metadata.' }
         Test-AppLaunch $installedExecutable
         $uninstallerPath = Join-Path $installDirectory 'unins000.exe'

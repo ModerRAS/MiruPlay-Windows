@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MiruPlay.Windows.Models;
 using MiruPlay.Windows.Services;
 
@@ -11,15 +12,66 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task RealMpvSupportsCommandsProgressNaturalEofAndImmediateStop()
+    public async Task RealLibMpvPlaysWithoutStartingAnExternalMpvProcess()
     {
-        var mpvPath = Environment.GetEnvironmentVariable("MIRUPLAY_MPV_PATH");
-        var mediaPath = Environment.GetEnvironmentVariable("MIRUPLAY_MPV_SMOKE_MEDIA");
-        if (mpvPath is null || mediaPath is null || !File.Exists(mpvPath) || !File.Exists(mediaPath))
+        var libMpvPath = Environment.GetEnvironmentVariable("MIRUPLAY_LIBMPV_PATH");
+        var mediaPath = Environment.GetEnvironmentVariable("MIRUPLAY_PLAYBACK_SMOKE_MEDIA");
+        var required = Environment.GetEnvironmentVariable("MIRUPLAY_REQUIRE_LIBMPV_SMOKE") == "1";
+        if (libMpvPath is null || mediaPath is null ||
+            !File.Exists(libMpvPath) || !File.Exists(mediaPath))
+        {
+            Assert.False(required, "The required libmpv smoke paths are missing.");
+            return;
+        }
+
+        var existingMpvProcesses = Process.GetProcessesByName("mpv")
+            .Select(process => process.Id)
+            .ToHashSet();
+        var subtitlePath = Path.Combine(_directory, "libmpv-smoke.en.srt");
+        await File.WriteAllTextAsync(subtitlePath, "1\n00:00:00,000 --> 00:00:10,000\nlibmpv subtitle smoke\n");
+        var episode = Episode(5, "libmpv-smoke-episode", "libmpv-smoke-progress", "libmpv smoke", mediaPath, subtitlePath);
+        var store = new PlaybackProgressStore(Path.Combine(_directory, "libmpv-state.db"));
+        MpvPlaybackLaunchResult? launch = null;
+        try
+        {
+            launch = await MpvPlayerLauncher.PlayDetailedAsync(
+                episode,
+                new AppSettings(LibMpvPath: libMpvPath),
+                store,
+                headless: true);
+
+            Assert.Equal(MpvFallbackMode.LibMpvEmbedded, launch.Mode);
+            var session = Assert.IsAssignableFrom<IPlaybackSession>(launch.Session);
+            Assert.DoesNotContain(Process.GetProcessesByName("mpv"), process => !existingMpvProcesses.Contains(process.Id));
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            Assert.Contains(session.SubtitleTracks, track => track.IsExternal && Path.GetFileName(track.ExternalFileName) == Path.GetFileName(subtitlePath));
+            var graph = new AudioDspFilterGraph("volume=3dB", [], "stereo", []);
+            await session.ApplyAudioDspAsync(graph);
+            var actualAudioFilter = await session.GetAudioFilterGraphAsync();
+            Assert.Contains("lavfi=graph=", actualAudioFilter, StringComparison.Ordinal);
+            Assert.Contains("volume=3dB", actualAudioFilter, StringComparison.Ordinal);
+            await session.ExecuteCommandAsync(new PlaybackControlCommand("speed", Speed: 8f));
+            await session.Completion.WaitAsync(TimeSpan.FromSeconds(20));
+            Assert.True(session.WasCompleted, session.LastError);
+            Assert.DoesNotContain(Process.GetProcessesByName("mpv"), process => !existingMpvProcesses.Contains(process.Id));
+        }
+        finally
+        {
+            if (launch?.Session is not null) await launch.Session.DisposeAsync();
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task RealLibMpvSupportsCommandsProgressNaturalEofAndImmediateStop()
+    {
+        var libMpvPath = Environment.GetEnvironmentVariable("MIRUPLAY_LIBMPV_PATH");
+        var mediaPath = Environment.GetEnvironmentVariable("MIRUPLAY_PLAYBACK_SMOKE_MEDIA");
+        if (libMpvPath is null || mediaPath is null || !File.Exists(libMpvPath) || !File.Exists(mediaPath))
         {
             Assert.False(
-                Environment.GetEnvironmentVariable("MIRUPLAY_REQUIRE_MPV_SMOKE") == "1",
-                "The required real-mpv smoke paths are missing.");
+                Environment.GetEnvironmentVariable("MIRUPLAY_REQUIRE_LIBMPV_SMOKE") == "1",
+                "The required libmpv smoke paths are missing.");
             return;
         }
 
@@ -44,7 +96,7 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
                 remoteEpisode);
             var remoteSession = await MpvPlayerLauncher.PlayAsync(
                 remoteEpisode,
-                new AppSettings(PlayerPath: mpvPath),
+                new AppSettings(LibMpvPath: libMpvPath),
                 remoteStore,
                 headless: true,
                 playbackProxy: playbackProxy);
@@ -73,7 +125,7 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
         var naturalEpisode = Episode(1, "smoke-episode", "smoke-progress", "IPC smoke", mediaPath, subtitlePath);
         var naturalSession = await MpvPlayerLauncher.PlayAsync(
             naturalEpisode,
-            new AppSettings(PlayerPath: mpvPath),
+            new AppSettings(LibMpvPath: libMpvPath),
             naturalStore,
             headless: true);
 
@@ -112,7 +164,7 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
         var stopEpisode = Episode(2, "stop-episode", "stop-progress", "IPC stop smoke", mediaPath);
         var stopSession = await MpvPlayerLauncher.PlayAsync(
             stopEpisode,
-            new AppSettings(PlayerPath: mpvPath),
+            new AppSettings(LibMpvPath: libMpvPath),
             stopStore,
             headless: true);
 
@@ -133,11 +185,11 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task RealMpvAcceptsPerChannelLinearPhaseDspThroughItsOwnIpcSession()
+    public async Task RealLibMpvAcceptsPerChannelLinearPhaseDspThroughItsOwnSession()
     {
-        var mpvPath = Environment.GetEnvironmentVariable("MIRUPLAY_MPV_PATH");
-        var mediaPath = Environment.GetEnvironmentVariable("MIRUPLAY_MPV_SMOKE_MEDIA");
-        if (mpvPath is null || mediaPath is null || !File.Exists(mpvPath) || !File.Exists(mediaPath))
+        var libMpvPath = Environment.GetEnvironmentVariable("MIRUPLAY_LIBMPV_PATH");
+        var mediaPath = Environment.GetEnvironmentVariable("MIRUPLAY_PLAYBACK_SMOKE_MEDIA");
+        if (libMpvPath is null || mediaPath is null || !File.Exists(libMpvPath) || !File.Exists(mediaPath))
         {
             Assert.False(
                 Environment.GetEnvironmentVariable("MIRUPLAY_REQUIRE_MPV_DSP_SMOKE") == "1",
@@ -147,7 +199,7 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
 
         var episode = Episode(4, "dsp-smoke-episode", "dsp-smoke-progress", "DSP IPC smoke", mediaPath);
         var settings = new AppSettings(
-            PlayerPath: mpvPath,
+            LibMpvPath: libMpvPath,
             AudioDsp: new AudioDspConfig(
                 true,
                 "linear-stereo",

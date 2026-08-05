@@ -15,5 +15,5 @@ artifacts/
 *.msix
 *.msixbundle
 *.appinstaller
-runtime/mpv/*
-!runtime/mpv/README.md
+runtime/libmpv/*
+!runtime/libmpv/README.md

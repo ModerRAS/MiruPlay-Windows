@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Win32;
 using MiruPlay.Windows.Models;
 using MiruPlay.Windows.Services;
 
@@ -35,7 +34,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     private List<LibrarySeries> _allSeries = [];
     private List<LibrarySeries> _filteredSeries = [];
     private readonly HashSet<string> _requestedPosterUrls = new(StringComparer.Ordinal);
-    private readonly HashSet<MpvPlaybackSession> _supersededSessions = [];
+    private readonly HashSet<IPlaybackSession> _supersededSessions = [];
     private readonly SemaphoreSlim _playbackStartLock = new(1, 1);
     private long _playbackGeneration;
     private int _visibleSeriesCount;
@@ -47,7 +46,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     private bool _shutdownStarted;
     private bool _shutdownComplete;
     private long? _editingRssId;
-    private MpvPlaybackSession? _activeSession;
+    private IPlaybackSession? _activeSession;
     private MpvPlaybackQueue? _activePlaybackQueue;
     private CancellationTokenSource? _scanCancellation;
     private bool _loadingAudioTracks;
@@ -495,7 +494,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             var series = _allSeries.FirstOrDefault(item => item.Episodes.Any(candidate => candidate.ProgressKey == episode.ProgressKey));
             _activePlaybackQueue = series is null ? null : new MpvPlaybackQueue(series.Episodes, episode.ProgressKey);
             IntPtr? windowHandle = null;
-            if (MpvPlayerLauncher.FindMpv(_settings.PlayerPath) is not null)
+            if (MpvPlayerLauncher.FindLibMpv(_settings.LibMpvPath) is not null)
             {
                 PlaybackSurface.Visibility = Visibility.Visible;
                 UpdateLayout();
@@ -545,7 +544,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
     }
 
-    private async Task RefreshAfterPlaybackAsync(MpvPlaybackSession session, LibraryEpisode playedEpisode, long launchGeneration)
+    private async Task RefreshAfterPlaybackAsync(IPlaybackSession session, LibraryEpisode playedEpisode, long launchGeneration)
     {
         await session.Completion;
         session.SubtitleTracksChanged -= ActiveSession_SubtitleTracksChanged;
@@ -756,7 +755,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
     private void ActiveSession_SubtitleTracksChanged(object? sender, EventArgs e)
     {
-        if (sender is not MpvPlaybackSession session) return;
+        if (sender is not IPlaybackSession session) return;
         _ = Dispatcher.InvokeAsync(() =>
         {
             if (ReferenceEquals(_activeSession, session)) UpdateActivePlaybackControls(session);
@@ -765,7 +764,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
     private void ActiveSession_AudioTracksChanged(object? sender, EventArgs e)
     {
-        if (sender is not MpvPlaybackSession session) return;
+        if (sender is not IPlaybackSession session) return;
         _ = Dispatcher.InvokeAsync(() =>
         {
             if (ReferenceEquals(_activeSession, session)) UpdateActivePlaybackControls(session);
@@ -774,7 +773,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
     private void ActiveSession_PlaybackInfoChanged(object? sender, EventArgs e)
     {
-        if (sender is not MpvPlaybackSession session) return;
+        if (sender is not IPlaybackSession session) return;
         _ = Dispatcher.InvokeAsync(() =>
         {
             if (!ReferenceEquals(_activeSession, session)) return;
@@ -791,7 +790,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             milliseconds >= 3_600_000 ? @"h\:mm\:ss" : @"m\:ss",
             System.Globalization.CultureInfo.InvariantCulture);
 
-    private void UpdateActivePlaybackControls(MpvPlaybackSession session)
+    private void UpdateActivePlaybackControls(IPlaybackSession session)
     {
         _loadingPlaybackTracks = true;
         _loadingAudioTracks = true;
@@ -1209,21 +1208,6 @@ public partial class MainWindow : Window, IAsyncDisposable
         SettingsNavButton.Tag = showSettings ? "Selected" : null;
     }
 
-    private void ChoosePlayer_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new OpenFileDialog
-        {
-            Title = "选择 mpv.exe",
-            Filter = "mpv 播放器 (mpv.exe)|mpv.exe|可执行文件 (*.exe)|*.exe",
-            CheckFileExists = true,
-        };
-        if (dialog.ShowDialog(this) != true) return;
-
-        _settings = _settings with { PlayerPath = dialog.FileName };
-        _settingsStore.Save(_settings);
-        ApplySettingsToView();
-    }
-
     private async void WebControlEnabled_Click(object sender, RoutedEventArgs e)
     {
         if (_loadingSettings) return;
@@ -1614,8 +1598,6 @@ public partial class MainWindow : Window, IAsyncDisposable
             UpdateCloudDriveCredentialStatus();
             RefreshRssSubscriptions();
             UpdateWebControlView();
-            PlayerPathValue.Text = MpvPlayerLauncher.FindMpv(_settings.PlayerPath)
-                ?? "自动检测；找不到时使用 Windows 默认播放器";
             var audioDsp = (_settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
             AudioDspEnabledCheckBox.IsChecked = audioDsp.Enabled;
             AudioDspSummaryText.Text = audioDsp.Enabled

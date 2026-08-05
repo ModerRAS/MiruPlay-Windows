@@ -49,7 +49,7 @@ const tokenResult = spawnSync('powershell.exe', ['-NoProfile', '-Command', token
 if (tokenResult.status !== 0) throw new Error('Could not decrypt the local WebControl token.');
 const token = tokenResult.stdout.trim();
 const database = fs.readFileSync(databasePath);
-const media = fs.readFileSync('runtime/mpv/ipc-smoke.mp4');
+const media = fs.readFileSync('tests/fixtures/mpv-smoke.mp4');
 const poster = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
 const requestStats = { database: 0, poster: 0, media: 0, unauthorized: 0, ranges: [] };
 

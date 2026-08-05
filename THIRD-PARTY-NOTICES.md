@@ -2,20 +2,21 @@
 
 MiruPlay Windows is distributed under GPL-3.0-or-later. The release package also contains third-party components governed by their own licenses.
 
-## mpv Windows build
+## mpv/libmpv Windows build
 
 - Project: mpv
 - Upstream source: https://github.com/mpv-player/mpv/tree/304426c39
 - Windows build source: https://github.com/shinchiro/mpv-winbuild-cmake
-- Pinned build: `mpv-x86_64-20260610-git-304426c`
-- Pinned archive SHA-256: `facac536baa73c7b925771af5e39a3c9cb16b8d75b59a6e9800de89799dffca7`
 - License information: https://github.com/mpv-player/mpv/blob/master/Copyright
 
-The pinned build includes FFmpeg and other libraries. Their exact configuration and corresponding source revisions are published by the Windows build project above. MiruPlay invokes `mpv.exe` as a separate process and does not modify it. The package's `licenses` directory includes the matching mpv copyright statement and GPL/LGPL texts plus FFmpeg's license summary and GPL/LGPL texts.
+The matching development archive also supplies the in-process library:
 
-## Microsoft DirectX runtime component
+- Asset: `mpv-dev-x86_64-20260610-git-304426c.7z`
+- Archive SHA-256: `8cbb25ea784f01afbb3f904217cab1317430a8bcfd5680fd827a866367f71cc9`
+- Packaged file: `runtime/libmpv/libmpv-2.dll`
+- DLL SHA-256: `5c876d79e070529128331591b48f87846fb30557f19c11280df9c6ee9b6dbafa`
 
-`d3dcompiler_43.dll` is redistributed with the pinned mpv build under the Microsoft DirectX End User Runtime redistribution terms.
+The pinned build includes FFmpeg and other libraries. Their exact configuration and corresponding source revisions are published by the Windows build project above. MiruPlay loads the matching `libmpv-2.dll` in-process. The package's `licenses` directory includes the matching mpv copyright statement and GPL/LGPL texts plus FFmpeg's license summary and GPL/LGPL texts.
 
 ## .NET and NuGet components
 

@@ -47,7 +47,7 @@ const sqliteResult = spawnSync(sqlite, [databasePath], { input: schema, encoding
 if (sqliteResult.status !== 0) throw new Error('Could not create the SMB MLIP smoke database.');
 fs.mkdirSync(mappedDirectory, { recursive: true });
 fs.copyFileSync(databasePath, path.join(mappedDirectory, 'library.db'));
-fs.copyFileSync('runtime/mpv/ipc-smoke.mp4', path.join(mappedDirectory, 'ipc-smoke.mp4'));
+fs.copyFileSync('tests/fixtures/mpv-smoke.mp4', path.join(mappedDirectory, 'ipc-smoke.mp4'));
 fs.writeFileSync(
   path.join(mappedDirectory, 'poster.png'),
   Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64'));

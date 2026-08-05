@@ -7,9 +7,9 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 管理 Local、HTTP(S) WebDAV 和 Windows SMB/UNC MLIP v1-v4 媒体源；远程凭据由 CurrentUser DPAPI 保护
 - 校验协议版本、必需表、capability 和不安全路径
 - 按 Anime/Drama 模式隔离媒体源，并提供海报墙、搜索、作品详情和剧集列表
-- 使用 mpv 或 Windows 默认播放器播放本地视频
-- 通过 mpv 枚举内封与 MLIP 外挂字幕，按语言偏好自动选择，并可在 WPF 或 WebUI 中手动切换/关闭
-- 通过 mpv 命名管道读取播放位置，并以 `%LOCALAPPDATA%\MiruPlay\state.db` 作为唯一续播状态源（禁用 mpv watch-later）
+- 使用内置 libmpv 或 Windows 默认播放器播放本地视频
+- 通过内置 libmpv 枚举内封与 MLIP 外挂字幕，按语言偏好自动选择，并可在 WPF 或 WebUI 中手动切换/关闭
+- 通过内置 libmpv 读取播放位置，并以 `%LOCALAPPDATA%\MiruPlay\state.db` 作为唯一续播状态源
 - 通过官方 .NET gRPC 客户端连接 CloudDrive2，验证登录或 API Token 成功后才写入 DPAPI 凭据
 - 提供默认端口 `9978` 的原生 WebUI 与 WebControl API，支持媒体库/详情/播放/字幕、来源 CRUD/测试/扫描、Anime/Drama 模式、CloudDrive2/RSS、Bangumi/TMDB、播放设置和令牌轮换，并使用 DPAPI 保护 WebControl、媒体源、Bangumi、TMDB 与 CloudDrive 凭据
 - 将客户端设置保存在 `%LOCALAPPDATA%\MiruPlay\settings.json`
@@ -24,9 +24,7 @@ dotnet test MiruPlay.Windows.slnx
 dotnet run --project src/MiruPlay.Windows
 ```
 
-播放器按以下顺序查找：设置中选择的 `mpv.exe`、应用目录下的 `runtime/mpv/mpv.exe`、`PATH`。未找到 mpv 时使用 Windows 默认视频应用。正式发布的便携包和安装包均内置已固定版本并校验 SHA-256 的 mpv，因此不要求用户单独安装播放器。
-
-开发机可运行 `tools/Get-MpvRuntime.ps1` 下载固定版本的 Windows x64 mpv。脚本会验证发布资产 SHA-256；二进制不会进入 Git，构建时会从本地 `runtime/mpv` 复制到输出目录。`tools/Test-WebDavPlayback.mjs` 可对运行中的客户端执行临时 WebDAV MLIP 导入、鉴权播放、停止、删除和本地库恢复 smoke；`tools/Test-SmbPlayback.mjs` 使用现有 Windows 网络映射执行等价的真实 SMB smoke。
+播放优先使用发布包内的 `runtime/libmpv/libmpv-2.dll`。如果内置运行时不可用，本地文件才会交给 Windows 默认视频应用；WebDAV 播放会明确提示内置播放器不可用。开发机可运行 `tools/Get-LibMpvRuntime.ps1` 获取固定版本的 libmpv。`tools/Test-WebDavPlayback.mjs` 可对运行中的客户端执行临时 WebDAV MLIP 导入、鉴权播放、停止、删除和本地库恢复 smoke；`tools/Test-SmbPlayback.mjs` 使用现有 Windows 网络映射执行等价的真实 SMB smoke。
 
 WebControl 默认监听 `9978`。在浏览器打开设置页显示的地址，输入访问令牌即可使用内嵌 WebUI；也可首次使用 `?token=<访问令牌>`，页面会立即移除 URL 参数并将令牌保存在浏览器本地。令牌通过当前 Windows 用户的 DPAPI 加密保存在 `%LOCALAPPDATA%\MiruPlay\web-control-token.bin`。
 
@@ -52,3 +50,6 @@ docs/                         功能兼容与发布说明
 ```
 
 功能一致性进度见 [docs/compatibility.md](docs/compatibility.md)。
+Playback uses the bundled in-process `runtime/libmpv/libmpv-2.dll`. If that
+native runtime is unavailable, local files use the Windows system player with
+degraded controls; WebDAV playback reports that the embedded player is unavailable.

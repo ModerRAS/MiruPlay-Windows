@@ -9,7 +9,7 @@ param(
     [string]$CertificatePassword,
     [string]$TimestampUrl = 'http://timestamp.digicert.com',
     [switch]$SkipInstaller,
-    [switch]$SkipMpvDownload
+    [switch]$SkipLibMpvDownload
 )
 
 $ErrorActionPreference = 'Stop'
@@ -19,8 +19,8 @@ $artifacts = [System.IO.Path]::GetFullPath($ArtifactsDirectory)
 $releaseDirectory = Join-Path $artifacts 'release'
 $publishDirectory = Join-Path $artifacts "publish\$RuntimeIdentifier\MiruPlay"
 $symbolsDirectory = Join-Path $artifacts "symbols\$RuntimeIdentifier"
-$mpvDirectory = Join-Path $root 'runtime\mpv'
-$mpvPath = Join-Path $mpvDirectory 'mpv.exe'
+$libMpvDirectory = Join-Path $root 'runtime\libmpv'
+$libMpvPath = Join-Path $libMpvDirectory 'libmpv-2.dll'
 $project = Join-Path $root 'src\MiruPlay.Windows\MiruPlay.Windows.csproj'
 $installerScript = Join-Path $root 'installer\MiruPlay.iss'
 
@@ -134,12 +134,14 @@ function Find-Iscc {
     return $match
 }
 
-if (-not (Test-Path $mpvPath)) {
-    if ($SkipMpvDownload) { throw "mpv runtime is missing: $mpvPath" }
-    Invoke-Checked { & (Join-Path $PSScriptRoot 'Get-MpvRuntime.ps1') -Destination $mpvDirectory } 'mpv runtime download failed'
+if (-not (Test-Path $libMpvPath)) {
+    if ($SkipLibMpvDownload) { throw "libmpv runtime is missing: $libMpvPath" }
+    Invoke-Checked { & (Join-Path $PSScriptRoot 'Get-LibMpvRuntime.ps1') -Destination $libMpvDirectory } 'libmpv runtime download failed'
 }
-if (-not (Test-Path (Join-Path $mpvDirectory 'd3dcompiler_43.dll'))) {
-    throw 'The pinned mpv runtime is incomplete: d3dcompiler_43.dll is missing.'
+$expectedLibMpvHash = '5c876d79e070529128331591b48f87846fb30557f19c11280df9c6ee9b6dbafa'
+$actualLibMpvHash = (Get-FileHash -Algorithm SHA256 $libMpvPath).Hash.ToLowerInvariant()
+if ($actualLibMpvHash -ne $expectedLibMpvHash) {
+    throw "libmpv runtime digest mismatch: $actualLibMpvHash"
 }
 
 Remove-Item $publishDirectory, $symbolsDirectory, $releaseDirectory -Recurse -Force -ErrorAction SilentlyContinue
@@ -165,7 +167,6 @@ if ($signed) {
     Sign-File (Join-Path $publishDirectory 'MiruPlay.dll') $signTool
 }
 
-$mpvVersion = ((& $mpvPath --version | Select-Object -First 1) -split ' Copyright', 2)[0].Trim()
 $sourceRevision = if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_SHA)) {
     $env:GITHUB_SHA
 } elseif (-not (Test-Path (Join-Path $root '.git'))) {
@@ -196,9 +197,10 @@ $manifest = [ordered]@{
     generatedAtUtc = [DateTimeOffset]::UtcNow.ToString('O')
     sourceRevision = $sourceRevision
     signing = if ($signed) { 'authenticode' } else { 'unsigned' }
-    mpv = [ordered]@{
-        version = $mpvVersion
-        executableSha256 = (Get-FileHash $mpvPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    libmpv = [ordered]@{
+        version = '20260610-git-304426c'
+        library = 'runtime/libmpv/libmpv-2.dll'
+        librarySha256 = $actualLibMpvHash
         distribution = 'shinchiro/mpv-winbuild-cmake'
     }
 }

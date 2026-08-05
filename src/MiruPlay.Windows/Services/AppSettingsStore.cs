@@ -6,7 +6,6 @@ namespace MiruPlay.Windows.Services;
 
 public sealed record AppSettings(
     string? LibraryRoot = null,
-    string? PlayerPath = null,
     string PreferredSubtitleLanguage = "auto",
     string PlaybackEndAction = "return_to_detail",
     string CurrentAppMode = "anime",
@@ -22,7 +21,8 @@ public sealed record AppSettings(
     string LogUploadStreamName = "miruplay",
     long LastLogUploadAt = 0,
     string? LastLogUploadStatus = null,
-    AudioDspConfig? AudioDsp = null);
+    AudioDspConfig? AudioDsp = null,
+    string? LibMpvPath = null);
 
 public sealed class AppSettingsStore
 {

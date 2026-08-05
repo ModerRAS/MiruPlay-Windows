@@ -10,28 +10,12 @@ public sealed class MpvPlayerLauncherTests : IDisposable
     public MpvPlayerLauncherTests() => Directory.CreateDirectory(_directory);
 
     [Fact]
-    public void CreateStartInfoRestoresProgressAndAddsSubtitles()
+    public void FindLibMpvUsesAnExistingConfiguredLibraryPath()
     {
-        var mediaPath = CreateFile("episode.mkv");
-        var subtitlePath = CreateFile("episode.zh-CN.srt");
-        var episode = CreateEpisode(mediaPath, subtitlePath);
-        var progress = new PlaybackProgress("key", 30_000, 100_000, 1, 0);
+        var path = Path.Combine(_directory, "libmpv-2.dll");
+        File.WriteAllBytes(path, []);
 
-        var startInfo = MpvPlayerLauncher.CreateStartInfo(
-            "mpv.exe",
-            "test-pipe",
-            episode,
-            new AppSettings(PreferredSubtitleLanguage: "zh_hans"),
-            progress);
-
-        Assert.Contains("--input-ipc-server=\\\\.\\pipe\\test-pipe", startInfo.ArgumentList);
-        Assert.Contains("--resume-playback=no", startInfo.ArgumentList);
-        Assert.Contains("--keep-open=yes", startInfo.ArgumentList);
-        Assert.DoesNotContain("--save-position-on-quit=yes", startInfo.ArgumentList);
-        Assert.Contains("--start=30", startInfo.ArgumentList);
-        Assert.Contains("--slang=zh-Hans,zh-CN,chs,sc,chi,zho", startInfo.ArgumentList);
-        Assert.Contains($"--sub-file={subtitlePath}", startInfo.ArgumentList);
-        Assert.Equal(mediaPath, startInfo.ArgumentList[^1]);
+        Assert.Equal(path, MpvPlayerLauncher.FindLibMpv(path));
     }
 
     [Fact]
@@ -44,7 +28,7 @@ public sealed class MpvPlayerLauncherTests : IDisposable
 
         var error = await Assert.ThrowsAsync<InvalidOperationException>(() => MpvPlayerLauncher.PlayAsync(
             episode,
-            new AppSettings(PlayerPath: "missing-mpv.exe"),
+            new AppSettings(),
             progress));
 
         Assert.Contains("shared endpoint consumer", error.Message, StringComparison.Ordinal);
@@ -73,36 +57,18 @@ public sealed class MpvPlayerLauncherTests : IDisposable
     }
 
     [Fact]
-    public void CreateStartInfoDoesNotResumeCompletedEpisode()
+    public void ReleaseScriptOnlyReferencesTheInProcessLibMpvRuntime()
     {
-        var mediaPath = CreateFile("episode.mkv");
-        var episode = CreateEpisode(mediaPath);
-        var progress = new PlaybackProgress("key", 100_000, 100_000, 1, 1);
+        var repositoryRoot = FindRepositoryRoot();
+        var script = File.ReadAllText(Path.Combine(repositoryRoot, "tools", "Publish-Release.ps1"));
 
-        var startInfo = MpvPlayerLauncher.CreateStartInfo(
-            "mpv.exe",
-            "test-pipe",
-            episode,
-            new AppSettings(),
-            progress);
-
-        Assert.DoesNotContain(startInfo.ArgumentList, argument => argument.StartsWith("--start=", StringComparison.Ordinal));
+        Assert.Contains("libmpv-2.dll", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Get-MpvRuntime", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("runtime\\mpv", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("$mpvPath", script, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void CreateStartInfoAppliesAssOverrideLastForEveryMpvPlaybackMode()
-    {
-        var episode = CreateEpisode(CreateFile("episode.mkv"), CreateFile("episode.ass"));
-
-        var embedded = MpvPlayerLauncher.CreateStartInfo("mpv.exe", "embedded-pipe", episode, new AppSettings(), null);
-        var headless = MpvPlayerLauncher.CreateStartInfo("mpv.exe", "headless-pipe", episode, new AppSettings(), null, headless: true);
-
-        Assert.All(
-            new[] { embedded, headless },
-            startInfo => Assert.Equal("--sub-ass-override=strip", startInfo.ArgumentList[^2]));
-    }
-
-    private static LibraryEpisode CreateEpisode(string mediaPath, params string[] subtitles) => new(
+    private static LibraryEpisode CreateEpisode(params string[] subtitles) => new(
         1,
         "episode-uuid",
         "episode-key",
@@ -110,15 +76,21 @@ public sealed class MpvPlayerLauncherTests : IDisposable
         1,
         1,
         "Episode",
-        mediaPath,
+        "https://example.com/dav/Anime/01.mkv",
         TimeSpan.FromMinutes(24),
         subtitles);
 
-    private string CreateFile(string name)
+    private static string FindRepositoryRoot()
     {
-        var path = Path.Combine(_directory, name);
-        File.WriteAllText(path, string.Empty);
-        return path;
+        for (var directory = new DirectoryInfo(AppContext.BaseDirectory);
+             directory is not null;
+             directory = directory.Parent)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "tools", "Publish-Release.ps1")))
+                return directory.FullName;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate the repository root.");
     }
 
     public void Dispose()
