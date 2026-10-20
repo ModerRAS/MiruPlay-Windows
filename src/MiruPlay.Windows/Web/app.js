@@ -13,6 +13,7 @@ const state = { token: '', view: 'library', info: null, sources: [], cloud: null
 const views = {
   'audio-dsp': ['nav.dsp', 'nav.dsp.sub'],
   library: ['nav.library', 'nav.library.sub'],
+  music: ['wpf.main.musicLib', 'nav.music.sub'],
   sources: ['nav.sources', 'nav.sources.sub'],
   automation: ['nav.automation', 'nav.automation.sub'],
   metadata: ['nav.metadata', 'nav.metadata.sub'],
@@ -123,6 +124,7 @@ async function renderView(view) {
   content.innerHTML = `<div class="empty">${t('common.loading')}</div>`
   try {
     if (view === 'library') await loadLibrary()
+    if (view === 'music') await loadMusic()
     if (view === 'sources') await loadSources()
     if (view === 'automation') await loadAutomation()
     if (view === 'metadata') await loadMetadata()
@@ -279,6 +281,31 @@ function renderPlayer(status) {
 }
 
 function sourceLocation(source) { return source.connectionInfo?.path || source.connectionInfo?.url || source.connectionInfo?.uncPath || '' }
+async function loadMusic() {
+  if (!state.sources.length) state.sources = await api('/api/sources')
+  const locals = state.sources.filter(item => item.type === 'LOCAL')
+  const selected = locals[0]?.id
+  content.innerHTML = `<div class="stack"><section class="panel"><div class="card-head"><h2>${t('wpf.main.musicLib')}</h2><select id="music-source" aria-label="${t('wpf.music.localSrc')}">${locals.map(item => `<option value="${item.id}" ${item.id === selected ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select></div><div id="music-albums" class="list"><p class="muted">${t('dsp.loading')}</p></div></section></div>`
+  const render = async () => {
+    const sourceId = Number($('#music-source').value)
+    const albums = await api(`/api/music/albums?sourceId=${sourceId}`)
+    $('#music-albums').innerHTML = albums.length ? albums.map((album, ai) => `<article class="list-item"><div class="card-head"><strong>${escapeHtml(album.title)}</strong><span class="muted">${t('wpf.music.albumCount', album.tracks.length)}</span></div>${album.tracks.map((track, ti) => `<div class="card-head"><span>${track.number}. ${escapeHtml(track.title)}${track.performer ? ` · ${escapeHtml(track.performer)}` : ''}</span><button data-music-play="${ai}:${ti}" type="button">${t('play.play')}</button></div>`).join('')}</div></article>`).join('') : `<p class="muted">${t('wpf.music.noAudio')}</p>`
+    $$('[data-music-play]', $('#music-albums')).forEach(button => button.onclick = () => playMusicTrack(sourceId, albums, button.dataset.musicPlay))
+  }
+  $('#music-source').onchange = () => render().catch(error => toast(error.message, true))
+  if (selected) await render().catch(error => { $('#music-albums').innerHTML = `<p class="muted">${escapeHtml(error.message)}</p>` })
+  else $('#music-albums').innerHTML = `<p class="muted">${t('wpf.music.noLocalSrc')}</p>`
+}
+async function playMusicTrack(sourceId, albums, index) {
+  try {
+    const [ai, ti] = index.split(':').map(Number)
+    const tracks = albums[ai].tracks.map(track => ({ sourceId, file: track.filePath, number: track.number, title: track.title, startMs: track.startMs, endMs: track.endMs }))
+    const current = tracks[ti]
+    await api('/api/music/play', { method: 'POST', body: JSON.stringify({ ...current, tracks }) })
+    toast(t('wpf.music.nowPlaying', current.title))
+    await refreshPlayback()
+  } catch (error) { toast(error.message, true) }
+}
 async function loadSources() {
   state.sources = await api('/api/sources')
   content.innerHTML = `<div class="grid"><section class="panel stack"><div class="card-head"><h2>${t('nav.sources')}</h2><button id="scan-all">${t('sources.scanAll')}</button></div>${state.sources.length ? `<div class="list">${state.sources.map(source => `<article class="list-item"><div class="card-head"><div><span class="badge ${source.isConnected ? 'ok' : 'warn'}">${escapeHtml(source.type)}</span> <strong>${escapeHtml(source.name)}</strong></div><span class="muted">${escapeHtml(source.contentMode)}</span></div><p class="break">${escapeHtml(sourceLocation(source))}</p><div class="actions"><button data-source-edit="${source.id}">${t('sources.edit')}</button><button data-source-scan="${source.id}">${t('sources.scan')}</button><button class="danger" data-source-delete="${source.id}">${t('sources.delete')}</button></div></article>`).join('')}</div>` : `<p class="muted">${t('sources.empty')}</p>`}</section><section class="panel"><h2 id="source-form-title">${t('sources.addTitle')}</h2>${sourceForm()}</section></div>`
@@ -579,7 +606,7 @@ async function loadPlaybackSettings() {
   content.innerHTML = `<section class="panel"><form id="playback-settings-form" class="form">
     <div class="form-grid"><label>${t('playback.appMode')}<select id="app-mode"><option value="anime" ${scan.currentAppMode === 'anime' ? 'selected' : ''}>${t('sources.anime')}</option><option value="drama" ${scan.currentAppMode === 'drama' ? 'selected' : ''}>${t('sources.drama')}</option></select></label>
     <label class="switch"><input id="auto-scan-enabled" type="checkbox" ${scan.autoScanEnabled ? 'checked' : ''}>${t('playback.autoScan')}</label></div>
-    <label>${t('playback.interval')}<select id="auto-scan-interval">${scan.autoScanIntervalOptionsHours.map(hours => `<option value="${hours}" ${scan.autoScanIntervalHours === hours ? 'selected' : ''}>${t('playback.everyHours', hours)}</option>`).join('')}</select></label>
+    <label>${t('playback.interval')}<select id="auto-scan-interval">${scan.autoScanIntervalOptionsHours.map(hours => `<option value="${hours}" ${scan.autoScanIntervalHours === hours ? 'selected' : ''}>${Number(hours) === 1 ? t('playback.everyHour') : t('playback.everyHours', hours)}</option>`).join('')}</select></label>
     <label class="switch"><input id="merge-same-anime" type="checkbox" ${scan.mergeSameAnimeEnabled ? 'checked' : ''}>${t('playback.merge')}</label>
     <label>${t('playback.poster')}<select id="poster-arrangement">${scan.posterWallArrangementOptions.map(value => `<option value="${value}" ${scan.posterWallArrangement === value ? 'selected' : ''}>${value === 'RELEASE_SEASON' ? t('playback.bySeason') : t('playback.byTitle')}</option>`).join('')}</select></label>
     <label>${t('playback.version')}<select id="version-selection-policy"><option value="auto_nearest" ${scan.episodeVersionSelectionPolicy !== 'manual' ? 'selected' : ''}>${t('playback.autoNearest')}</option><option value="manual" ${scan.episodeVersionSelectionPolicy === 'manual' ? 'selected' : ''}>${t('playback.manual')}</option></select></label>

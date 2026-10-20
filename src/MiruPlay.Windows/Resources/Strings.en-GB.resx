@@ -1178,4 +1178,6 @@
   <data name="onnx.noModel" xml:space="preserve"><value>AniFileBERT ONNX model missing.</value></data>
   <data name="onnx.badLength" xml:space="preserve"><value>AniFileBERT sequence length invalid.</value></data>
   <data name="onnx.emptyVocab" xml:space="preserve"><value>AniFileBERT vocabulary empty.</value></data>
+  <data name="playback.everyHour" xml:space="preserve"><value>Every hour</value></data>
+  <data name="nav.music.sub" xml:space="preserve"><value>Browse local audio and CUE tracks by album</value></data>
 </root>

@@ -1174,7 +1174,9 @@ const I18N = {
   "dsp.presetMissing": "找不到 DSP 预设: {0}",
   "onnx.noModel": "AniFileBERT ONNX 模型不存在。",
   "onnx.badLength": "AniFileBERT 序列长度无效。",
-  "onnx.emptyVocab": "AniFileBERT 词表为空。"
+  "onnx.emptyVocab": "AniFileBERT 词表为空。",
+  "playback.everyHour": "每小时",
+  "nav.music.sub": "按专辑浏览本地音频与 CUE 曲目"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -2350,7 +2352,9 @@ const I18N = {
   "dsp.presetMissing": "找不到 DSP 預設: {0}",
   "onnx.noModel": "AniFileBERT ONNX 模型不存在。",
   "onnx.badLength": "AniFileBERT 序列長度無效。",
-  "onnx.emptyVocab": "AniFileBERT 詞表為空。"
+  "onnx.emptyVocab": "AniFileBERT 詞表為空。",
+  "playback.everyHour": "每小時",
+  "nav.music.sub": "按專輯瀏覽本機音訊與 CUE 曲目"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -3526,7 +3530,9 @@ const I18N = {
   "dsp.presetMissing": "搵唔到 DSP 預設: {0}",
   "onnx.noModel": "AniFileBERT ONNX 模型不存在。",
   "onnx.badLength": "AniFileBERT 序列長度無效。",
-  "onnx.emptyVocab": "AniFileBERT 詞表為空。"
+  "onnx.emptyVocab": "AniFileBERT 詞表為空。",
+  "playback.everyHour": "每小時",
+  "nav.music.sub": "按專輯瀏覽本機音頻與 CUE 曲目"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -4702,7 +4708,9 @@ const I18N = {
   "dsp.presetMissing": "DSP preset not found: {0}",
   "onnx.noModel": "AniFileBERT ONNX model missing.",
   "onnx.badLength": "AniFileBERT sequence length invalid.",
-  "onnx.emptyVocab": "AniFileBERT vocabulary empty."
+  "onnx.emptyVocab": "AniFileBERT vocabulary empty.",
+  "playback.everyHour": "Every hour",
+  "nav.music.sub": "Browse local audio and CUE tracks by album"
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -5878,7 +5886,9 @@ const I18N = {
   "dsp.presetMissing": "DSP preset not found: {0}",
   "onnx.noModel": "AniFileBERT ONNX model missing.",
   "onnx.badLength": "AniFileBERT sequence length invalid.",
-  "onnx.emptyVocab": "AniFileBERT vocabulary empty."
+  "onnx.emptyVocab": "AniFileBERT vocabulary empty.",
+  "playback.everyHour": "Every hour",
+  "nav.music.sub": "Browse local audio and CUE tracks by album"
  }
 };
 let currentLocale = 'zh-CN';
