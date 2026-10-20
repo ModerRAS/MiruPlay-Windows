@@ -1,3 +1,5 @@
+using MiruPlay.Windows.Services;
+
 namespace MiruPlay.Windows.Models;
 
 public sealed record ExternalMetadataId(string Provider, string Value)
