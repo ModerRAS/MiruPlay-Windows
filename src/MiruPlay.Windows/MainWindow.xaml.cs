@@ -57,6 +57,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     private long? _editingRssId;
     private IPlaybackSession? _activeSession;
     private MpvPlaybackQueue? _activePlaybackQueue;
+    private MusicPlaybackQueue? _activeMusicQueue;
     private CancellationTokenSource? _scanCancellation;
     private readonly PlaybackNavigationState _playbackNavigation = new(PlaybackPageMode.Library, false);
     private LibrarySeries? _activePlaybackSeries;
@@ -700,6 +701,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 : null;
             var series = _allSeries.FirstOrDefault(item => item.Episodes.Any(candidate => candidate.ProgressKey == episode.ProgressKey));
             _activePlaybackQueue = series is null ? null : new MpvPlaybackQueue(series.Episodes, episode.ProgressKey);
+            if (!episode.ProgressKey.StartsWith("music:", StringComparison.Ordinal)) _activeMusicQueue = null;
             _activePlaybackSeries = series;
             _activePlaybackEpisode = episode;
             IntPtr? windowHandle = null;
@@ -814,6 +816,12 @@ public partial class MainWindow : Window, IAsyncDisposable
                     nextEpisode = queue.Next();
                 }
             }
+            if (nextEpisode is null &&
+                playedEpisode.ProgressKey.StartsWith("music:", StringComparison.Ordinal) &&
+                _activeMusicQueue?.Next() is { } nextMusic)
+            {
+                nextEpisode = nextMusic;
+            }
         }
 
         string? syncStatus = null;
@@ -849,7 +857,12 @@ public partial class MainWindow : Window, IAsyncDisposable
         if (!wasSuperseded) StatusText.Text = session.LastError is { } playbackError ? $"播放失败：{playbackError}" : syncStatus ?? "播放进度已保存";
         if (nextEpisode is not null && launchGeneration == Interlocked.Read(ref _playbackGeneration))
         {
-            await PlayEpisodeAsync(nextEpisode);
+            var isMusic = nextEpisode.ProgressKey.StartsWith("music:", StringComparison.Ordinal);
+            await PlayEpisodeAsync(
+                nextEpisode,
+                nextEpisode.CueStartMs,
+                showErrorDialog: !isMusic,
+                endPositionMs: nextEpisode.CueEndMs);
         }
         else if (completedPlaybackSeries is not null && _activeSession is null)
         {
@@ -1085,49 +1098,91 @@ public partial class MainWindow : Window, IAsyncDisposable
         return next is not null && await PlayEpisodeAsync(next, showErrorDialog: false);
     }
 
-    private async Task<bool> PlayMusicFromWebAsync(WebControlServer.MusicPlayRequest request)
+    private LibraryEpisode? TryBuildMusicEpisode(
+        long sourceId,
+        string file,
+        int number,
+        string title,
+        long startMs,
+        long endMs)
     {
-        var source = _mediaSourceRegistry.Get(request.SourceId);
-        if (source is null || source.Type != "LOCAL") return false;
+        var source = _mediaSourceRegistry.Get(sourceId);
+        if (source is null || source.Type != "LOCAL") return null;
         var root = Path.GetFullPath(source.Location);
         string full;
         try
         {
-            full = Path.GetFullPath(request.File);
+            full = Path.GetFullPath(file);
         }
         catch (Exception error) when (error is ArgumentException or NotSupportedException or PathTooLongException)
         {
-            return false;
+            return null;
         }
         if (!full.StartsWith(root.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
             !File.Exists(full) ||
             !MusicLibraryService.IsAudioFile(full))
-            return false;
+            return null;
         var relative = Path.GetRelativePath(root, full);
         var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
-            System.Text.Encoding.UTF8.GetBytes($"{request.SourceId}:{relative}:{request.StartMs}")))[..16];
-        var title = string.IsNullOrWhiteSpace(request.Title) ? Path.GetFileNameWithoutExtension(full) ?? full : request.Title;
-        var episode = new LibraryEpisode(
+            System.Text.Encoding.UTF8.GetBytes($"{sourceId}:{relative}:{startMs}")))[..16];
+        var display = string.IsNullOrWhiteSpace(title) ? Path.GetFileNameWithoutExtension(full) ?? full : title;
+        return new LibraryEpisode(
             0,
             $"music-{hash}",
-            $"music:{request.SourceId}:{relative}:{request.StartMs}",
+            $"music:{sourceId}:{relative}:{startMs}",
             1,
-            Math.Max(1, request.Number),
-            Math.Max(1, request.Number),
-            title,
+            Math.Max(1, number),
+            Math.Max(1, number),
+            display,
             full,
-            request.EndMs > request.StartMs
-                ? TimeSpan.FromMilliseconds(request.EndMs - request.StartMs)
+            endMs > startMs
+                ? TimeSpan.FromMilliseconds(endMs - startMs)
                 : TimeSpan.Zero,
             []) with
         {
-            SourceId = request.SourceId,
+            SourceId = sourceId,
+            CueStartMs = startMs > 0 ? startMs : null,
+            CueEndMs = endMs > startMs ? endMs : null,
         };
-        return await Dispatcher.InvokeAsync(() => PlayEpisodeAsync(
-            episode,
-            request.StartMs > 0 ? request.StartMs : null,
-            showErrorDialog: false,
-            endPositionMs: request.EndMs > request.StartMs ? request.EndMs : null)).Task.Unwrap();
+    }
+
+    private async Task<bool> PlayMusicQueueAsync(
+        IReadOnlyList<WebControlServer.MusicPlayRequest> tracks,
+        int startIndex)
+    {
+        if (tracks.Count == 0) return false;
+        var pairs = new List<(WebControlServer.MusicPlayRequest Request, LibraryEpisode Episode)>();
+        foreach (var track in tracks)
+        {
+            if (TryBuildMusicEpisode(track.SourceId, track.File, track.Number, track.Title, track.StartMs, track.EndMs) is { } episode)
+                pairs.Add((track, episode));
+        }
+        if (pairs.Count == 0) return false;
+        var index = Math.Clamp(startIndex, 0, pairs.Count - 1);
+        var (cue, current) = pairs[index];
+        _activeMusicQueue = new MusicPlaybackQueue(
+            pairs.Select(pair => pair.Episode).ToList(),
+            current.ProgressKey);
+        return await PlayEpisodeAsync(
+            current,
+            cue.StartMs > 0 ? cue.StartMs : null,
+            showErrorDialog: true,
+            endPositionMs: cue.EndMs > cue.StartMs ? cue.EndMs : null);
+    }
+
+    private async Task<bool> PlayMusicFromWebAsync(WebControlServer.MusicPlayRequest request)
+    {
+        var tracks = request.Tracks is { Count: > 0 } album ? album : new[] { request };
+        var startIndex = 0;
+        for (var i = 0; i < tracks.Count; i++)
+        {
+            if (tracks[i].File == request.File && tracks[i].StartMs == request.StartMs)
+            {
+                startIndex = i;
+                break;
+            }
+        }
+        return await Dispatcher.InvokeAsync(() => PlayMusicQueueAsync(tracks, startIndex)).Task.Unwrap();
     }
 
     private async Task<bool> PlayEpisodeFromWebAsync(string episodeId, long? startPositionMs)
@@ -1695,6 +1750,20 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         if (_activePlaybackEpisode is not null) await LeavePlaybackAsync();
         ShowPage(showSettings: true);
+    }
+
+    private void OpenMusicLibrary_Click(object sender, RoutedEventArgs e)
+    {
+        var localSources = (_settings.MediaSources ?? []).Where(source => source.Type == "LOCAL").ToList();
+        var dialog = new MusicLibraryWindow(
+            localSources,
+            _musicLibrary,
+            sourceId => _mediaSourceRegistry.Get(sourceId)?.Location,
+            (sourceId, tracks, index) => PlayMusicQueueAsync(tracks, index))
+        {
+            Owner = this,
+        };
+        dialog.ShowDialog();
     }
 
     private async void OpenAudioDsp_Click(object sender, RoutedEventArgs e)

@@ -47,6 +47,12 @@
                             <TextBlock Text="设置" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
+                    <Button x:Name="MusicNavButton" Style="{StaticResource NavButton}" AutomationProperties.Name="音乐库" Click="OpenMusicLibrary_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="♪" FontSize="17" Width="28" />
+                            <TextBlock Text="音乐" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
                     <TextBlock Text="应用模式" Style="{StaticResource SecondaryText}" Margin="12,22,0,7" />
                     <ComboBox x:Name="AppModeSelector" SelectionChanged="AppMode_SelectionChanged" AutomationProperties.Name="应用模式">
                         <ComboBoxItem Tag="anime"><TextBlock Text="动漫" Style="{StaticResource ComboItemText}" /></ComboBoxItem>

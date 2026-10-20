@@ -149,6 +149,8 @@ public sealed record LibraryEpisode(
 {
     public IReadOnlyList<ExternalMetadataId> ExternalIds { get; init; } = [];
     public IReadOnlyList<string> ExternalAudioPaths { get; init; } = [];
+    public long? CueStartMs { get; init; }
+    public long? CueEndMs { get; init; }
     public long SourceId { get; init; }
     public ExternalMetadataId? ExternalId(string provider) =>
         ExternalIds.FirstOrDefault(item => item.Provider.Equals(provider, StringComparison.OrdinalIgnoreCase));

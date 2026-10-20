@@ -1603,7 +1603,14 @@ public sealed class WebControlServer : IAsyncDisposable
 
     private sealed record ApiEnvelope<T>(bool Ok, T? Data, string? Error);
     private sealed record PlayEpisodeRequest(string EpisodeId, long? StartPositionMs = null);
-    public sealed record MusicPlayRequest(long SourceId, string File, int Number, string Title, long StartMs, long EndMs);
+    public sealed record MusicPlayRequest(
+        long SourceId,
+        string File,
+        int Number,
+        string Title,
+        long StartMs,
+        long EndMs,
+        IReadOnlyList<MusicPlayRequest>? Tracks = null);
     private sealed record LocaleSettingsRequest(string? Language = null);
     private sealed record ToppingVolumeRequest(double Db, bool Confirm = false, double? StepDb = null);
     private sealed record ToppingGainRequest(bool On);
