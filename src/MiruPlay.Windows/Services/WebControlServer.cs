@@ -96,6 +96,8 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly Func<IReadOnlyList<LibrarySeries>> _getSeries;
     private readonly Func<PlaybackRuntimeStatus> _getPlaybackStatus;
     private readonly Func<MpvNativeDiagnostics?> _getPlaybackDiagnostics;
+    private readonly ToppingController? _topping;
+    private readonly Func<string, AudioDspPreset?>? _findAudioPreset;
     private readonly Func<string, long?, Task<bool>> _playEpisode;
     private readonly Func<PlaybackControlCommand, Task<PlaybackRuntimeStatus>> _playbackCommand;
     private readonly Func<AppSettings> _getSettings;
@@ -163,13 +165,17 @@ public sealed class WebControlServer : IAsyncDisposable
         BangumiArchiveStore? bangumiArchive = null,
         TvMazeMetadataClient? tvMazeMetadata = null,
         MetadataSearchService? metadataSearch = null,
-        Func<MpvNativeDiagnostics?>? getPlaybackDiagnostics = null)
+        Func<MpvNativeDiagnostics?>? getPlaybackDiagnostics = null,
+        ToppingController? topping = null,
+        Func<string, AudioDspPreset?>? findAudioPreset = null)
     {
         _port = port;
         _tokens = tokens;
         _getSeries = getSeries;
         _getPlaybackStatus = getPlaybackStatus;
         _getPlaybackDiagnostics = getPlaybackDiagnostics ?? (() => null);
+        _topping = topping;
+        _findAudioPreset = findAudioPreset;
         _playEpisode = playEpisode;
         _playbackCommand = playbackCommand;
         _getSettings = getSettings;
@@ -1027,6 +1033,95 @@ public sealed class WebControlServer : IAsyncDisposable
             });
         });
 
+        app.MapGet("/api/topping/status", () => Success(RequireTopping().GetStatus()));
+        app.MapPost("/api/topping/volume", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<ToppingVolumeRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            try
+            {
+                return Success(await RequireTopping().SetVolumeAsync(
+                    body.Db, body.Confirm, body.StepDb ?? 0.5, request.HttpContext.RequestAborted).ConfigureAwait(false));
+            }
+            catch (ToppingController.ToppingCommandException error)
+            {
+                throw new BadHttpRequestException(error.Message);
+            }
+        });
+        app.MapPost("/api/topping/gain", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<ToppingGainRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            try
+            {
+                return Success(await RequireTopping().SetGainAsync(body.On, request.HttpContext.RequestAborted).ConfigureAwait(false));
+            }
+            catch (ToppingController.ToppingCommandException error)
+            {
+                throw new BadHttpRequestException(error.Message);
+            }
+        });
+        app.MapPost("/api/topping/power", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<ToppingPowerRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            try
+            {
+                return Success(await RequireTopping().SetPowerAsync(body.On, request.HttpContext.RequestAborted).ConfigureAwait(false));
+            }
+            catch (ToppingController.ToppingCommandException error)
+            {
+                throw new BadHttpRequestException(error.Message);
+            }
+        });
+        app.MapPost("/api/topping/preamp", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<ToppingPreampRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            try
+            {
+                return Success(await RequireTopping().SetPreampAsync(body.Db, request.HttpContext.RequestAborted).ConfigureAwait(false));
+            }
+            catch (ToppingController.ToppingCommandException error)
+            {
+                throw new BadHttpRequestException(error.Message);
+            }
+        });
+        app.MapPost("/api/topping/flat", async (HttpRequest request) =>
+        {
+            try
+            {
+                return Success(await RequireTopping().FlatAsync(request.HttpContext.RequestAborted).ConfigureAwait(false));
+            }
+            catch (ToppingController.ToppingCommandException error)
+            {
+                throw new BadHttpRequestException(error.Message);
+            }
+        });
+        app.MapPost("/api/topping/preset", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<ToppingPresetRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            if (string.IsNullOrWhiteSpace(body.PresetId)) throw new BadHttpRequestException("presetId 不能为空。");
+            var preset = _findAudioPreset?.Invoke(body.PresetId.Trim());
+            if (preset is null) throw new BadHttpRequestException("预设不存在。", StatusCodes.Status404NotFound);
+            try
+            {
+                var mapping = await RequireTopping().ApplyPresetAsync(preset, request.HttpContext.RequestAborted).ConfigureAwait(false);
+                return Success(new
+                {
+                    warnings = mapping.Warnings,
+                    bands = mapping.Bands,
+                    preampDb = mapping.PreampDb,
+                    status = RequireTopping().GetStatus(),
+                });
+            }
+            catch (ToppingController.ToppingCommandException error)
+            {
+                throw new BadHttpRequestException(error.Message);
+            }
+        });
+
         app.MapGet("/api/web-control/access", () => Success(new
         {
             enabled = _getSettings().WebControlEnabled,
@@ -1422,6 +1517,9 @@ public sealed class WebControlServer : IAsyncDisposable
         }
     }
 
+    private ToppingController RequireTopping() => _topping
+        ?? throw new BadHttpRequestException("Windows 客户端未启用 Topping DAC 控制。", StatusCodes.Status501NotImplemented);
+
     private static IResult Success(object data) => Results.Json(new ApiEnvelope<object>(true, data, null), JsonOptions);
     private static IResult UnsupportedOnWindows() => Results.Json(
         Failure("此操作仅适用于 Android，Windows 客户端不支持。"),
@@ -1454,6 +1552,11 @@ public sealed class WebControlServer : IAsyncDisposable
 
     private sealed record ApiEnvelope<T>(bool Ok, T? Data, string? Error);
     private sealed record PlayEpisodeRequest(string EpisodeId, long? StartPositionMs = null);
+    private sealed record ToppingVolumeRequest(double Db, bool Confirm = false, double? StepDb = null);
+    private sealed record ToppingGainRequest(bool On);
+    private sealed record ToppingPowerRequest(bool On);
+    private sealed record ToppingPreampRequest(double Db);
+    private sealed record ToppingPresetRequest(string? PresetId);
     private sealed record PlaybackCommandRequest(
         string? Command,
         long? PositionMs = null,

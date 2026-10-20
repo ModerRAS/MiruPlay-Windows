@@ -33,6 +33,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     private readonly OpenObserveLogService _openObserveLogs;
     private readonly OpenObserveLogScheduler _openObserveLogScheduler;
     private readonly WindowsAppUpdater _appUpdater;
+    private readonly ToppingController _topping = new();
     private readonly HeadlessTaskScheduler _tasks = new();
     private readonly WebControlServer _webControlServer;
     private const int SeriesPageSize = 40;
@@ -153,7 +154,9 @@ public partial class MainWindow : Window, IAsyncDisposable
             metadataSearch: _metadataSearch,
             appControl: HandleAppControlAsync,
             installUpdate: HandleAppUpdateInstallAsync,
-            getPlaybackDiagnostics: GetPlaybackNativeDiagnostics);
+            getPlaybackDiagnostics: GetPlaybackNativeDiagnostics,
+            topping: _topping,
+            findAudioPreset: FindAudioPreset);
         ApplySettingsToView();
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
@@ -1003,6 +1006,9 @@ public partial class MainWindow : Window, IAsyncDisposable
             Close();
         }
     }
+
+    private AudioDspPreset? FindAudioPreset(string id) =>
+        _settings.AudioDsp?.Presets?.FirstOrDefault(preset => preset.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
 
     private MpvNativeDiagnostics? GetPlaybackNativeDiagnostics()
     {
