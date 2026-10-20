@@ -58,12 +58,12 @@
 | Android 更新 | Windows 当前状态 | 差距 |
 |---|---|---|
 | 通用只读 RSS 在线媒体源：虚拟剧集目录、直链播放、快照缓存 | `RSS` 来源已接入 registry、WPF/WebUI CRUD、测试、手动刷新、十分钟缓存和独立进度键；与 RSS 下载提交并存 | 对齐；默认 Feed 实测 53 集/52 部作品，HTTP 直链在 WPF/libmpv 中实际播放 |
-| 音乐模式：CUE/整轨播放及 SRC bypass | Windows 有视频队列和音频 DSP，没有音乐库、CUE 曲目或 SRC 模式 | 待实现 |
-| 五语言本地化与应用内语言切换 | WPF/WebUI 仍以中文为主，没有等价语言切换入口 | 待实现 |
-| 外置音轨发现与轨道选择 | libmpv 启用 `audio-file-auto=fuzzy`；真实集成测试验证 `.en.m4a` sidecar 发现、选择以及音量/静音，WPF 实机也确认两条 AAC 音轨 | 部分对齐；目前仅验证本地 sidecar，远程外置音轨需单独验证 |
-| 播放性能监测 | 播放页显示编解码器/分辨率等基本信息，没有帧率、缓冲和解码耗时诊断视图 | 待实现 |
-| 麦克风扫频、房间响应测量与自动校准 | 已有 PEQ/DSP 和 REW 导入，但没有测量、校准向导或 UMIK-1 流程 | 部分对齐 |
-| Topping DAC USB HID 音量、增益、电源与 PEQ 推送 | 没有专用 DAC 设备控制 | 待实现 |
+| 音乐模式：CUE/整轨播放及 SRC bypass | CUE 解析/虚拟曲目起止、目录音乐扫描（内存缓存）、libmpv start/end、SRC 输出策略（system/software/direct，direct 独占 WASAPI 且 DSP 启用时回退软件）、WebControl albums/play API 并复用统一播放入口 | 部分对齐；WPF 音乐库视图、整轨队列连播未做，无真实整轨录音验收 |
+| 五语言本地化与应用内语言切换 | AppLanguage 设置（system + zh-CN/zh-TW/zh-HK/en-US/en-GB）持久化/归一化、WebControl locale API、WPF 设置 combo 与 WebUI 选择器、启动与切换时应用 culture | 部分对齐；翻译字符串表未做，切换目前只影响数字/日期格式 |
+| 外置音轨发现与轨道选择 | 本地/DIRECTORY/WebDAV 扫描落自有索引、WebDAV 代理 scoped URL、播放时本地同级发现与 WebDAV 远端 depth-1 发现（fail-closed、15 秒超时），显式列表关闭 fuzzy | 部分对齐；SMB MLIP 播放时远端发现未做（UNC 跳过），远程音轨选择以认证 fixture 验证，非外部服务器账号验收 |
+| 播放性能监测 | libmpv warn 日志 80 条有界脱敏队列、白名单属性按需采集、`/api/playback/diagnostics`、WebUI 诊断按钮、WPF 状态 tooltip | 部分对齐；无持续帧率/缓冲曲线视图，按需读取不落盘 |
+| 麦克风扫频、房间响应测量与自动校准 | Farina sweep/正则反卷积/漂移搜索/双扫 tail gate/REW 平滑与目标曲线/cut-only 自动拟合/有效测量预设工厂已移植，合成数据测试覆盖 | 部分对齐；采集/播放/UMIK 下载/校准向导 UI 未做，无硬件与声学实测 |
+| Topping DAC USB HID 音量、增益、电源与 PEQ 推送 | 硬件确认协议移植（CRC/帧/11 寄存器/Q25）、原生 HID 传输（产品字符串匹配、仅确认型号可写）、写缓存控制器（确认门限/pace/commit）、WebControl 全套路由、WebUI 与 WPF DSP 对话框推送入口 | 部分对齐；无 DAC 硬件实测，未连接路径已测，不向未知 VID 相同设备写命令 |
 
 
 - Android 的 APK 安装授权、Media3/Exo、ijkplayer、Android Surface/字幕层和原生播放器诊断接口不会在 Windows 上返回假成功；不适用接口返回明确的 unsupported 结果。
@@ -105,6 +105,12 @@
 dotnet test MiruPlay.Windows.slnx
 dotnet build MiruPlay.Windows.slnx -c Release
 ```
+
+本次 Android 增量验证（2026-10-20）：
+
+- 必需真实 libmpv/DSP 环境下完整测试 **351/351 通过，0 跳过**；结果见 `artifacts/verification/android-additions-full-tests.log`。Release 构建 **0 警告、0 错误**；见 `artifacts/verification/android-additions-release-build.log`。`node --check Web/app.js` 与 `git diff --check` 通过。
+- 为构建新 Release，确认旧客户端 IDLE 后经主窗口 WM_CLOSE 优雅关闭（不强杀），构建完成后重新拉起可见客户端并核对：IDLE、来源 1（LOCAL）、344 部/7681 集→333 部/7689 集（单真实来源、零测试标题，计数变化来自真实库本身）、`settings.json` 18→25 键且全部为新增默认键（`AudioSrcBypass`、`AudioOutputSampleRate`、`AppLanguage` 等）、原值零改动。新客户端 `/api/topping/status` 报告未连接（无硬件）、`/api/settings/locale` 报告 `system`。
+- 本轮 7 个阶段已逐个提交并推送到 `origin/master`（`dde9a01..294f231` 起始 5 个阶段，外加远端 sidecar、Topping 核心/API/UI、音乐/SRC、校准 DSP、语言设置）。仍未做：WPF 音乐库视图与队列连播、翻译字符串表、测量采集/播放/UMIK/向导 UI、SMB MLIP 播放时远端发现；未执行真实安装、发布、Task Scheduler 注册。
 
 涉及真实播放、WebDAV 或发布产物时，还需分别运行固定 mpv 集成测试、真实 Local/WebDAV/SMB smoke 和 `tools/Test-ReleaseArtifacts.ps1`；仅有单元测试不能把这些场景升级为“对齐”。
 # In-process libmpv playback
