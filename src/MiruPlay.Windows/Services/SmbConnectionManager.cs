@@ -19,7 +19,7 @@ public sealed class SmbConnectionManager : IDisposable
         var uncPath = SmbPath.ToUncPath(location);
         if (credential is { IsEmpty: false } && string.IsNullOrWhiteSpace(credential.Username))
         {
-            throw new InvalidDataException("SMB 密码需要对应的用户名。");
+            throw new InvalidDataException(AppStrings.Get("smb.needUser"));
         }
 
         var shareRoot = SmbPath.ShareRoot(location);
@@ -38,12 +38,12 @@ public sealed class SmbConnectionManager : IDisposable
                     var cancelResult = WNetCancelConnection2(shareRoot, 0, true);
                     if (cancelResult is not (0 or ErrorNotConnected))
                     {
-                        throw new IOException("无法替换 SMB 凭据。", new Win32Exception(cancelResult));
+                        throw new IOException(AppStrings.Get("smb.replaceFailed"), new Win32Exception(cancelResult));
                     }
                 }
                 else if (Directory.Exists(uncPath))
                 {
-                    throw new InvalidOperationException("Windows 已使用其他凭据连接该 SMB 共享，且连接不由 MiruPlay 所有。请先在 Windows 中断开该共享。");
+                    throw new InvalidOperationException(AppStrings.Get("smb.conflictOwned"));
                 }
             }
             if (Directory.Exists(uncPath)) return;
@@ -52,9 +52,9 @@ public sealed class SmbConnectionManager : IDisposable
             if (result != 0)
             {
                 var detail = result == ErrorSessionCredentialConflict
-                    ? "Windows 已使用不同凭据连接到该 SMB 服务器。请先断开现有连接。"
+                    ? AppStrings.Get("smb.conflictServer")
                     : new Win32Exception(result).Message;
-                throw new IOException($"无法连接 SMB 共享：{detail}", new Win32Exception(result));
+                throw new IOException(AppStrings.Get("smb.connectFailed", detail), new Win32Exception(result));
             }
             _ownedShares.Add(shareRoot);
         }
@@ -62,7 +62,7 @@ public sealed class SmbConnectionManager : IDisposable
         if (!Directory.Exists(uncPath))
         {
             Disconnect(location);
-            throw new DirectoryNotFoundException("SMB 目录不存在或当前账户无权访问。");
+            throw new DirectoryNotFoundException(AppStrings.Get("smb.noAccess"));
         }
     }
 

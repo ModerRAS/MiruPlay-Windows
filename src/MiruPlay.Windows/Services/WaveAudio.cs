@@ -89,10 +89,10 @@ public sealed class WaveAudio
         try
         {
             FailIfError(WaveInOpen(out waveIn, (IntPtr)deviceId, ref format,
-                Marshal.GetFunctionPointerForDelegate(callback), IntPtr.Zero, CallbackFunction), "打开麦克风失败");
-            FailIfError(WaveInPrepareHeader(waveIn, headerHandle.AddrOfPinnedObject(), (uint)Marshal.SizeOf<WaveHeader>()), "准备录音缓冲失败");
-            FailIfError(WaveInAddBuffer(waveIn, headerHandle.AddrOfPinnedObject(), (uint)Marshal.SizeOf<WaveHeader>()), "提交录音缓冲失败");
-            FailIfError(WaveInStart(waveIn), "开始录音失败");
+                Marshal.GetFunctionPointerForDelegate(callback), IntPtr.Zero, CallbackFunction), AppStrings.Get("wave.openMic"));
+            FailIfError(WaveInPrepareHeader(waveIn, headerHandle.AddrOfPinnedObject(), (uint)Marshal.SizeOf<WaveHeader>()), AppStrings.Get("wave.prepareCap"));
+            FailIfError(WaveInAddBuffer(waveIn, headerHandle.AddrOfPinnedObject(), (uint)Marshal.SizeOf<WaveHeader>()), AppStrings.Get("wave.queueCap"));
+            FailIfError(WaveInStart(waveIn), AppStrings.Get("wave.startCap"));
             var deadline = DateTimeOffset.UtcNow + duration + TimeSpan.FromSeconds(5);
             while (Volatile.Read(ref completed) < buffer.Length)
             {
@@ -118,7 +118,7 @@ public sealed class WaveAudio
             callbackHandle.Free();
             handle.Free();
         }
-        if (Volatile.Read(ref failed) != 0) throw new TimeoutException("录音超时：麦克风没有返回数据。");
+        if (Volatile.Read(ref failed) != 0) throw new TimeoutException(AppStrings.Get("wave.capTimeout"));
         var recorded = Math.Min(Volatile.Read(ref completed) / 2, totalFrames);
         var samples = new double[recorded];
         for (var i = 0; i < recorded; i++)
@@ -130,7 +130,7 @@ public sealed class WaveAudio
     public static void Play(int deviceId, short[] stereoInterleaved, int sampleRateHz, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(stereoInterleaved);
-        if (stereoInterleaved.Length % 2 != 0) throw new ArgumentException("立体声缓冲长度必须为偶数。");
+        if (stereoInterleaved.Length % 2 != 0) throw new ArgumentException(AppStrings.Get("wave.evenBuffer"));
         var format = new WaveFormatEx
         {
             FormatTag = 1,
@@ -161,9 +161,9 @@ public sealed class WaveAudio
         try
         {
             FailIfError(WaveOutOpen(out waveOut, (IntPtr)deviceId, ref format,
-                Marshal.GetFunctionPointerForDelegate(callback), IntPtr.Zero, CallbackFunction), "打开音频输出失败");
-            FailIfError(WaveOutPrepareHeader(waveOut, headerHandle.AddrOfPinnedObject(), (uint)Marshal.SizeOf<WaveHeader>()), "准备播放缓冲失败");
-            FailIfError(WaveOutWrite(waveOut, headerHandle.AddrOfPinnedObject(), (uint)Marshal.SizeOf<WaveHeader>()), "写入播放缓冲失败");
+                Marshal.GetFunctionPointerForDelegate(callback), IntPtr.Zero, CallbackFunction), AppStrings.Get("wave.openOutput"));
+            FailIfError(WaveOutPrepareHeader(waveOut, headerHandle.AddrOfPinnedObject(), (uint)Marshal.SizeOf<WaveHeader>()), AppStrings.Get("wave.preparePlay"));
+            FailIfError(WaveOutWrite(waveOut, headerHandle.AddrOfPinnedObject(), (uint)Marshal.SizeOf<WaveHeader>()), AppStrings.Get("wave.writePlay"));
             while (!finished.Wait(TimeSpan.FromMilliseconds(50), cancellationToken))
                 cancellationToken.ThrowIfCancellationRequested();
         }
@@ -184,7 +184,7 @@ public sealed class WaveAudio
 
     private static void FailIfError(int result, string message)
     {
-        if (result != 0) throw new InvalidOperationException($"{message} (MMRESULT={result})");
+        if (result != 0) throw new InvalidOperationException(AppStrings.Get("wave.mmresult", message, result));
     }
 
     private delegate void WaveCallback(IntPtr device, int message, IntPtr instance, IntPtr param1, IntPtr param2);

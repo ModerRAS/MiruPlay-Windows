@@ -189,12 +189,12 @@ public static class ToppingProtocol
             };
             if (code is null)
             {
-                warnings.Add($"滤波类型 {band.Type} @ {(int)band.FrequencyHz} Hz 设备不支持，已跳过");
+                warnings.Add(AppStrings.Get("top.filterSkipped", band.Type, (int)band.FrequencyHz));
                 continue;
             }
             if (usable.Count >= 10)
             {
-                warnings.Add("预设超过 10 段，多余的滤波被忽略");
+                warnings.Add(AppStrings.Get("top.tooManyBands"));
                 break;
             }
             usable.Add(new PeqBand(code.Value, (int)band.FrequencyHz, band.GainDb, band.Q, true));
@@ -212,10 +212,10 @@ public static class ToppingProtocol
         for (var i = 0; i < bands.Count; i++)
         {
             var band = bands[i];
-            if (band.TypeCode is not (TypePk or TypeLs or TypeHs)) errors.Add($"滤波 {i + 1}: 不支持的类型代码 {band.TypeCode}");
-            if (band.FreqHz is < 10 or > 22_000) errors.Add($"滤波 {i + 1}: 频率 {band.FreqHz} Hz 超出范围");
-            if (band.GainDb is < -40 or > 40) errors.Add($"滤波 {i + 1}: 增益 {band.GainDb} dB 超出范围");
-            if (band.Q is < 0.01 or > 100) errors.Add($"滤波 {i + 1}: Q {band.Q} 超出范围");
+            if (band.TypeCode is not (TypePk or TypeLs or TypeHs)) errors.Add(AppStrings.Get("top.badType", i + 1, band.TypeCode));
+            if (band.FreqHz is < 10 or > 22_000) errors.Add(AppStrings.Get("top.badFreq", i + 1, band.FreqHz));
+            if (band.GainDb is < -40 or > 40) errors.Add(AppStrings.Get("top.badGain", i + 1, band.GainDb));
+            if (band.Q is < 0.01 or > 100) errors.Add(AppStrings.Get("top.badQ", i + 1, band.Q));
         }
         return errors;
     }

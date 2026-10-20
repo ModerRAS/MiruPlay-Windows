@@ -56,7 +56,7 @@ public sealed class WebDavMlipClient : IDisposable
         ThrowForAuthentication(response);
         response.EnsureSuccessStatusCode();
         if (response.Content.Headers.ContentLength is > MaximumDatabaseBytes)
-            throw new InvalidDataException("远程 library.db 超过 256 MiB 限制。");
+            throw new InvalidDataException(AppStrings.Get("dav.dbTooLarge"));
 
         var key = CacheKey(normalizedRoot);
         var targetDirectory = Path.Combine(_cacheRoot, key);
@@ -76,7 +76,7 @@ public sealed class WebDavMlipClient : IDisposable
                 81_920,
                 FileOptions.Asynchronous | FileOptions.SequentialScan))
             {
-                await CopyBoundedAsync(input, output, MaximumDatabaseBytes, "远程 library.db 超过 256 MiB 限制。", cancellationToken).ConfigureAwait(false);
+                await CopyBoundedAsync(input, output, MaximumDatabaseBytes, AppStrings.Get("dav.dbTooLarge"), cancellationToken).ConfigureAwait(false);
             }
 
             catalog = MlipLibraryReader.LoadRemote(stagingPath, normalizedRoot.AbsoluteUri);
@@ -128,7 +128,7 @@ public sealed class WebDavMlipClient : IDisposable
             artworkUri.Scheme is not ("http" or "https") ||
             !normalizedRoot.IsBaseOf(artworkUri))
         {
-            throw new InvalidDataException("远程海报地址不属于当前 WebDAV 媒体源。");
+            throw new InvalidDataException(AppStrings.Get("dav.posterOutside"));
         }
 
         var artworkDirectory = Path.Combine(_cacheRoot, CacheKey(normalizedRoot), "artwork");
@@ -188,9 +188,9 @@ public sealed class WebDavMlipClient : IDisposable
     public static Uri NormalizeRoot(string rootUrl)
     {
         if (!Uri.TryCreate(rootUrl.Trim(), UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https"))
-            throw new ArgumentException("WebDAV 地址必须是绝对 HTTP 或 HTTPS URL。", nameof(rootUrl));
+            throw new ArgumentException(AppStrings.Get("dav.absoluteUrl"), nameof(rootUrl));
         if (!string.IsNullOrEmpty(uri.UserInfo) || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
-            throw new ArgumentException("WebDAV 地址不能包含嵌入凭据、查询或片段。", nameof(rootUrl));
+            throw new ArgumentException(AppStrings.Get("dav.cleanUrl"), nameof(rootUrl));
         var builder = new UriBuilder(uri) { Path = $"{uri.AbsolutePath.TrimEnd('/')}/" };
         return builder.Uri;
     }
@@ -278,7 +278,7 @@ public sealed class WebDavMlipClient : IDisposable
         ThrowForAuthentication(lease.Response);
         lease.Response.EnsureSuccessStatusCode();
         if (lease.Response.Content.Headers.ContentLength is > MaximumArtworkBytes)
-            throw new InvalidDataException("远程海报超过 20 MiB 限制。");
+            throw new InvalidDataException(AppStrings.Get("dav.posterTooLarge"));
 
         var stagingPath = Path.Combine(Path.GetDirectoryName(cachePath)!, $".{key}-{Guid.NewGuid():N}.tmp");
         try
@@ -292,7 +292,7 @@ public sealed class WebDavMlipClient : IDisposable
                 81_920,
                 FileOptions.Asynchronous | FileOptions.SequentialScan))
             {
-                await CopyBoundedAsync(input, output, MaximumArtworkBytes, "远程海报超过 20 MiB 限制。", cancellationToken).ConfigureAwait(false);
+                await CopyBoundedAsync(input, output, MaximumArtworkBytes, AppStrings.Get("dav.posterTooLarge"), cancellationToken).ConfigureAwait(false);
             }
             if (File.Exists(cachePath)) File.Delete(stagingPath);
             else File.Move(stagingPath, cachePath);
@@ -327,7 +327,7 @@ public sealed class WebDavMlipClient : IDisposable
     private static void ThrowForAuthentication(HttpResponseMessage response)
     {
         if (response.StatusCode == HttpStatusCode.Unauthorized)
-            throw new UnauthorizedAccessException("WebDAV 用户名或密码不正确。");
+            throw new UnauthorizedAccessException(AppStrings.Get("dav.badAuth2"));
     }
 
     private static string CacheKey(Uri normalizedRoot) =>

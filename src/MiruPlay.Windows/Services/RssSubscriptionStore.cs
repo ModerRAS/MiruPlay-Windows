@@ -60,7 +60,7 @@ public sealed class RssSubscriptionStore
         {
             var values = Load();
             var index = values.FindIndex(item => item.Id == id);
-            if (index < 0) throw new KeyNotFoundException("RSS 订阅不存在。");
+            if (index < 0) throw new KeyNotFoundException(AppStrings.Get("rss.notFound"));
             var value = values[index] with
             {
                 Name = validated.Name,
@@ -81,7 +81,7 @@ public sealed class RssSubscriptionStore
         {
             var values = Load();
             var index = values.FindIndex(item => item.Id == id);
-            if (index < 0) throw new KeyNotFoundException("RSS 订阅不存在。");
+            if (index < 0) throw new KeyNotFoundException(AppStrings.Get("rss.notFound"));
             values[index] = values[index] with { LastCheckedAt = Math.Max(0, timestamp) };
             Save(values);
         }
@@ -93,7 +93,7 @@ public sealed class RssSubscriptionStore
         lock (_lock)
         {
             var values = Load();
-            if (values.RemoveAll(item => item.Id == id) == 0) throw new KeyNotFoundException("RSS 订阅不存在。");
+            if (values.RemoveAll(item => item.Id == id) == 0) throw new KeyNotFoundException(AppStrings.Get("rss.notFound"));
             Save(values);
         }
     }
@@ -101,13 +101,13 @@ public sealed class RssSubscriptionStore
     private static RssSubscriptionRequest Validate(RssSubscriptionRequest request)
     {
         var name = request.Name.Trim();
-        if (name.Length is 0 or > 100) throw new ArgumentException("RSS 名称长度必须为 1 到 100 个字符。", nameof(request));
+        if (name.Length is 0 or > 100) throw new ArgumentException(AppStrings.Get("rss.nameLength"), nameof(request));
         var url = request.Url.Trim();
         if (url.Length > 2_048 || !Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
             uri.Scheme is not ("http" or "https") || !string.IsNullOrEmpty(uri.UserInfo))
-            throw new ArgumentException("RSS 地址必须是不含嵌入凭据的 HTTP(S) URL。", nameof(request));
+            throw new ArgumentException(AppStrings.Get("rss.badUrl"), nameof(request));
         var filter = string.IsNullOrWhiteSpace(request.FilterRegex) ? null : request.FilterRegex.Trim();
-        if (filter?.Length > 500) throw new ArgumentException("RSS 过滤正则不能超过 500 个字符。", nameof(request));
+        if (filter?.Length > 500) throw new ArgumentException(AppStrings.Get("rss.filterLong"), nameof(request));
         if (filter is not null)
         {
             try
@@ -116,7 +116,7 @@ public sealed class RssSubscriptionStore
             }
             catch (RegexParseException error)
             {
-                throw new ArgumentException("RSS 过滤正则无效。", nameof(request), error);
+                throw new ArgumentException(AppStrings.Get("rss.badFilter"), nameof(request), error);
             }
         }
         return request with { Name = name, Url = uri.AbsoluteUri, FilterRegex = filter };
@@ -131,7 +131,7 @@ public sealed class RssSubscriptionStore
         }
         catch (JsonException error)
         {
-            throw new InvalidDataException("RSS 订阅存储损坏。", error);
+            throw new InvalidDataException(AppStrings.Get("rss.storeCorrupt"), error);
         }
     }
 

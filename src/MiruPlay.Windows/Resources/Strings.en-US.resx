@@ -1012,4 +1012,99 @@
   <data name="nfo.tooLarge" xml:space="preserve"><value>NFO file too large.</value></data>
   <data name="nfo.badXml" xml:space="preserve"><value>NFO is not a valid safe XML document.</value></data>
   <data name="nfo.noSymlink" xml:space="preserve"><value>NFO paths must not pass through symlinks or junctions.</value></data>
+  <data name="detail.rewatch" xml:space="preserve"><value>Rewatch</value></data>
+  <data name="detail.continueWatch" xml:space="preserve"><value>Continue watching</value></data>
+  <data name="detail.playFirst" xml:space="preserve"><value>Play first episode</value></data>
+  <data name="detail.playExtra2" xml:space="preserve"><value>Play extra {0}</value></data>
+  <data name="detail.noEpisodes" xml:space="preserve"><value>This series has no playable episodes yet.</value></data>
+  <data name="detail.watchedUp" xml:space="preserve"><value>Watched</value></data>
+  <data name="detail.unwatched" xml:space="preserve"><value>Not watched</value></data>
+  <data name="play.speedLabel" xml:space="preserve"><value>{0}×</value></data>
+  <data name="wave.mmresult" xml:space="preserve"><value>{0} (MMRESULT={1})</value></data>
+  <data name="wave.openMic" xml:space="preserve"><value>Failed to open microphone</value></data>
+  <data name="wave.prepareCap" xml:space="preserve"><value>Failed to prepare capture buffer</value></data>
+  <data name="wave.queueCap" xml:space="preserve"><value>Failed to queue capture buffer</value></data>
+  <data name="wave.startCap" xml:space="preserve"><value>Failed to start capture</value></data>
+  <data name="wave.capTimeout" xml:space="preserve"><value>Capture timed out: the microphone returned no data.</value></data>
+  <data name="wave.evenBuffer" xml:space="preserve"><value>Stereo buffer length must be even.</value></data>
+  <data name="wave.openOutput" xml:space="preserve"><value>Failed to open audio output</value></data>
+  <data name="wave.preparePlay" xml:space="preserve"><value>Failed to prepare playback buffer</value></data>
+  <data name="wave.writePlay" xml:space="preserve"><value>Failed to write playback buffer</value></data>
+  <data name="top.noDevice" xml:space="preserve"><value>No confirmed Topping DAC detected (DX5 II or D90 III Discrete required)</value></data>
+  <data name="top.volRange" xml:space="preserve"><value>Volume {0} dB out of range (-99..0)</value></data>
+  <data name="top.loudConfirm" xml:space="preserve"><value>{0} dB is loud; confirm again to proceed</value></data>
+  <data name="top.noHidVolume" xml:space="preserve"><value>{0} volume is not on USB HID (front panel/remote only)</value></data>
+  <data name="top.noBands" xml:space="preserve"><value>Preset has no usable filters for the device</value></data>
+  <data name="top.preampRange" xml:space="preserve"><value>preamp {0} dB out of range (-40..+10)</value></data>
+  <data name="top.notFound" xml:space="preserve"><value>{0} not found</value></data>
+  <data name="top.noConfirmedModel" xml:space="preserve"><value>confirmed Topping DAC</value></data>
+  <data name="top.unconfirmed" xml:space="preserve"><value>{0} register map unconfirmed on hardware (models share PID with possibly conflicting registers); refusing to write</value></data>
+  <data name="smb.scheme" xml:space="preserve"><value>SMB addresses must use the smb:// scheme.</value></data>
+  <data name="smb.unsafe" xml:space="preserve"><value>SMB address has unsafe path segments.</value></data>
+  <data name="smb.shape" xml:space="preserve"><value>SMB address must be smb://server/share or a UNC path.</value></data>
+  <data name="smb.needShare" xml:space="preserve"><value>SMB address must include a share.</value></data>
+  <data name="smb.emptyPath" xml:space="preserve"><value>MLIP path must not be empty.</value></data>
+  <data name="smb.absolutePath" xml:space="preserve"><value>MLIP path must not be absolute.</value></data>
+  <data name="smb.unsafePath" xml:space="preserve"><value>MLIP path has unsafe segments.</value></data>
+  <data name="smb.escaped" xml:space="preserve"><value>MLIP path escapes the SMB source root.</value></data>
+  <data name="cd2.badConfig" xml:space="preserve"><value>CloudDrive configuration corrupt.</value></data>
+  <data name="cd2.badEndpoint" xml:space="preserve"><value>CloudDrive2 endpoint must be an HTTP(S) service root without path, query, fragment or embedded credentials.</value></data>
+  <data name="cd2.userLong" xml:space="preserve"><value>CloudDrive2 username must not exceed 100 characters.</value></data>
+  <data name="cd2.inboxLabel" xml:space="preserve"><value>Offline download directory</value></data>
+  <data name="cd2.libLabel" xml:space="preserve"><value>Library directory</value></data>
+  <data name="cd2.proxyLong" xml:space="preserve"><value>RSS proxy hostname too long.</value></data>
+  <data name="cd2.needDirs" xml:space="preserve"><value>Set the offline download and library directories before enabling CloudDrive/RSS.</value></data>
+  <data name="cd2.tooLong" xml:space="preserve"><value>{0} must not exceed 1024 characters.</value></data>
+  <data name="cal.needPoints" xml:space="preserve"><value>Calibration file needs at least 2 valid data points.</value></data>
+  <data name="cal.colMismatch" xml:space="preserve"><value>Calibration column count mismatch.</value></data>
+  <data name="cal.badFreq" xml:space="preserve"><value>Calibration frequencies must be positive.</value></data>
+  <data name="cal.notIncreasing" xml:space="preserve"><value>Calibration frequencies must strictly increase.</value></data>
+  <data name="cal.truncated" xml:space="preserve"><value>Calibration only covers {0}–{1} Hz with nothing above 5 kHz calibrated; the file looks truncated, download the full calibration</value></data>
+  <data name="cal.tooLarge" xml:space="preserve"><value>Calibration file too large.</value></data>
+  <data name="cal.noPoints" xml:space="preserve"><value>Calibration file lacks valid data points (frequency + dB columns; UMIK uses frequency/0°/90°).</value></data>
+  <data name="runner.syncRunning" xml:space="preserve"><value>CloudDrive/RSS sync already running.</value></data>
+  <data name="runner.enableFirst" xml:space="preserve"><value>Enable CloudDrive/RSS sync first.</value></data>
+  <data name="runner.authExpired" xml:space="preserve"><value>CloudDrive2 auth expired with no saved credentials to log in again.</value></data>
+  <data name="dav.dbTooLarge" xml:space="preserve"><value>Remote library.db exceeds the 256 MiB limit.</value></data>
+  <data name="dav.posterOutside" xml:space="preserve"><value>Remote poster address is outside the current WebDAV source.</value></data>
+  <data name="dav.absoluteUrl" xml:space="preserve"><value>WebDAV address must be an absolute HTTP or HTTPS URL.</value></data>
+  <data name="dav.cleanUrl" xml:space="preserve"><value>WebDAV address must not embed credentials, query or fragment.</value></data>
+  <data name="dav.posterTooLarge" xml:space="preserve"><value>Remote poster exceeds the 20 MiB limit.</value></data>
+  <data name="dav.badAuth2" xml:space="preserve"><value>WebDAV username or password incorrect.</value></data>
+  <data name="top.filterSkipped" xml:space="preserve"><value>Filter type {0} @ {1} Hz unsupported by device, skipped</value></data>
+  <data name="top.tooManyBands" xml:space="preserve"><value>Preset exceeds 10 bands; extra filters ignored</value></data>
+  <data name="top.badType" xml:space="preserve"><value>Filter {0}: unsupported type code {1}</value></data>
+  <data name="top.badFreq" xml:space="preserve"><value>Filter {0}: frequency {1} Hz out of range</value></data>
+  <data name="top.badGain" xml:space="preserve"><value>Filter {0}: gain {1} dB out of range</value></data>
+  <data name="top.badQ" xml:space="preserve"><value>Filter {0}: Q {1} out of range</value></data>
+  <data name="tmdb.queryEmpty" xml:space="preserve"><value>TMDB query must not be empty.</value></data>
+  <data name="tmdb.queryLong" xml:space="preserve"><value>TMDB query must not exceed 100 characters.</value></data>
+  <data name="tmdb.noToken" xml:space="preserve"><value>TMDB read access token not configured.</value></data>
+  <data name="tmdb.badYear" xml:space="preserve"><value>First-air year invalid.</value></data>
+  <data name="tmdb.searchFailed" xml:space="preserve"><value>TMDB search failed (HTTP {0}).</value></data>
+  <data name="tmdb.emptyResponse" xml:space="preserve"><value>TMDB search returned an empty response.</value></data>
+  <data name="smb.needUser" xml:space="preserve"><value>SMB password needs a username.</value></data>
+  <data name="smb.replaceFailed" xml:space="preserve"><value>Cannot replace SMB credentials.</value></data>
+  <data name="smb.conflictOwned" xml:space="preserve"><value>Windows already connects to this SMB share with different credentials not owned by MiruPlay. Disconnect it in Windows first.</value></data>
+  <data name="smb.conflictServer" xml:space="preserve"><value>Windows already connects to this SMB server with different credentials. Disconnect first.</value></data>
+  <data name="smb.connectFailed" xml:space="preserve"><value>Cannot connect SMB share: {0}</value></data>
+  <data name="smb.noAccess" xml:space="preserve"><value>SMB directory missing or access denied for the current account.</value></data>
+  <data name="rss.notFound" xml:space="preserve"><value>RSS subscription not found.</value></data>
+  <data name="rss.nameLength" xml:space="preserve"><value>RSS name must be 1 to 100 characters.</value></data>
+  <data name="rss.badUrl" xml:space="preserve"><value>RSS address must be a credential-free HTTP(S) URL.</value></data>
+  <data name="rss.filterLong" xml:space="preserve"><value>RSS filter regex must not exceed 500 characters.</value></data>
+  <data name="rss.badFilter" xml:space="preserve"><value>RSS filter regex invalid.</value></data>
+  <data name="rss.storeCorrupt" xml:space="preserve"><value>RSS subscription store corrupt.</value></data>
+  <data name="idx.emptyOverride" xml:space="preserve"><value>Local metadata override empty.</value></data>
+  <data name="detail.accessName" xml:space="preserve"><value>Ep {0:0.##} {1} {2}, </value></data>
+  <data name="idx.noRoot3" xml:space="preserve"><value>Media directory missing: {0}</value></data>
+  <data name="idx.notReparse" xml:space="preserve"><value>Media directory root must not be a reparse point.</value></data>
+  <data name="idx.escaped" xml:space="preserve"><value>Media index path escapes the source root.</value></data>
+  <data name="idx.dupPath" xml:space="preserve"><value>Directory scan found duplicate media paths.</value></data>
+  <data name="runner.inboxOutside" xml:space="preserve"><value>CloudDrive2 offline download directory escapes or is the token root.</value></data>
+  <data name="idx.tooMany" xml:space="preserve"><value>Directory scan exceeds the {0}-entry limit.</value></data>
+  <data name="idx.badNfoMeta" xml:space="preserve"><value>Directory index NFO metadata malformed.</value></data>
+  <data name="idx.unsafeSegment" xml:space="preserve"><value>Directory index path has unsafe segments.</value></data>
+  <data name="idx.noAbsolute" xml:space="preserve"><value>Directory index path must not be absolute.</value></data>
+  <data name="idx.badSubPath" xml:space="preserve"><value>Directory index subtitle path malformed.</value></data>
 </root>

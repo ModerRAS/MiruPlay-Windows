@@ -42,10 +42,10 @@ public sealed class TmdbMetadataClient : IDisposable
     {
         var keyword = query.Trim();
         var token = accessToken.Trim();
-        if (keyword.Length == 0) throw new ArgumentException("TMDB 搜索词不能为空。", nameof(query));
-        if (keyword.Length > 100) throw new ArgumentException("TMDB 搜索词不能超过 100 个字符。", nameof(query));
-        if (token.Length == 0) throw new InvalidOperationException("尚未配置 TMDB Read Access Token。");
-        if (year is < 1900 or > 2200) throw new ArgumentOutOfRangeException(nameof(year), "首播年份无效。");
+        if (keyword.Length == 0) throw new ArgumentException(AppStrings.Get("tmdb.queryEmpty"), nameof(query));
+        if (keyword.Length > 100) throw new ArgumentException(AppStrings.Get("tmdb.queryLong"), nameof(query));
+        if (token.Length == 0) throw new InvalidOperationException(AppStrings.Get("tmdb.noToken"));
+        if (year is < 1900 or > 2200) throw new ArgumentOutOfRangeException(nameof(year), AppStrings.Get("tmdb.badYear"));
         var boundedLimit = Math.Clamp(limit, 1, 20);
         var url = $"search/tv?query={Uri.EscapeDataString(keyword)}&language=zh-CN&include_adult=false&page=1";
         if (year is not null) url += $"&first_air_date_year={year.Value}";
@@ -55,13 +55,13 @@ public sealed class TmdbMetadataClient : IDisposable
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
-                $"TMDB 搜索失败 (HTTP {(int)response.StatusCode})。",
+                AppStrings.Get("tmdb.searchFailed", (int)response.StatusCode),
                 null,
                 response.StatusCode);
         }
         var payload = await response.Content.ReadFromJsonAsync<TmdbSearchResponse>(
             cancellationToken: cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidDataException("TMDB 搜索返回了空响应。");
+            ?? throw new InvalidDataException(AppStrings.Get("tmdb.emptyResponse"));
         return payload.Results
             .Where(item => item.Id > 0 && !string.IsNullOrWhiteSpace(item.Name))
             .Select(item => new TmdbSearchCandidate(

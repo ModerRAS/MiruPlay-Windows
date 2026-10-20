@@ -1012,4 +1012,99 @@
   <data name="nfo.tooLarge" xml:space="preserve"><value>NFO 文件过大。</value></data>
   <data name="nfo.badXml" xml:space="preserve"><value>NFO 不是有效的安全 XML 文档。</value></data>
   <data name="nfo.noSymlink" xml:space="preserve"><value>NFO 路径不能经过符号链接或联接点。</value></data>
+  <data name="detail.rewatch" xml:space="preserve"><value>重新观看</value></data>
+  <data name="detail.continueWatch" xml:space="preserve"><value>继续观看</value></data>
+  <data name="detail.playFirst" xml:space="preserve"><value>播放第一集</value></data>
+  <data name="detail.playExtra2" xml:space="preserve"><value>播放特典 {0}</value></data>
+  <data name="detail.noEpisodes" xml:space="preserve"><value>这个系列暂时没有可播放的剧集。</value></data>
+  <data name="detail.watchedUp" xml:space="preserve"><value>已看完</value></data>
+  <data name="detail.unwatched" xml:space="preserve"><value>未观看</value></data>
+  <data name="play.speedLabel" xml:space="preserve"><value>{0} 倍</value></data>
+  <data name="wave.mmresult" xml:space="preserve"><value>{0} (MMRESULT={1})</value></data>
+  <data name="wave.openMic" xml:space="preserve"><value>打开麦克风失败</value></data>
+  <data name="wave.prepareCap" xml:space="preserve"><value>准备录音缓冲失败</value></data>
+  <data name="wave.queueCap" xml:space="preserve"><value>提交录音缓冲失败</value></data>
+  <data name="wave.startCap" xml:space="preserve"><value>开始录音失败</value></data>
+  <data name="wave.capTimeout" xml:space="preserve"><value>录音超时：麦克风没有返回数据。</value></data>
+  <data name="wave.evenBuffer" xml:space="preserve"><value>立体声缓冲长度必须为偶数。</value></data>
+  <data name="wave.openOutput" xml:space="preserve"><value>打开音频输出失败</value></data>
+  <data name="wave.preparePlay" xml:space="preserve"><value>准备播放缓冲失败</value></data>
+  <data name="wave.writePlay" xml:space="preserve"><value>写入播放缓冲失败</value></data>
+  <data name="top.noDevice" xml:space="preserve"><value>未检测到已确认型号的 Topping DAC（需 DX5 II 或 D90 III Discrete）</value></data>
+  <data name="top.volRange" xml:space="preserve"><value>音量 {0} dB 超出范围（-99..0）</value></data>
+  <data name="top.loudConfirm" xml:space="preserve"><value>{0} dB 音量过大，请二次确认后再执行</value></data>
+  <data name="top.noHidVolume" xml:space="preserve"><value>{0} 的音量不在 USB HID 接口上（仅面板/遥控可调）</value></data>
+  <data name="top.noBands" xml:space="preserve"><value>预设中没有可写入设备的有效滤波</value></data>
+  <data name="top.preampRange" xml:space="preserve"><value>preamp {0} dB 超出范围（-40..+10）</value></data>
+  <data name="top.notFound" xml:space="preserve"><value>未找到 {0}</value></data>
+  <data name="top.noConfirmedModel" xml:space="preserve"><value>已确认型号的 Topping DAC</value></data>
+  <data name="top.unconfirmed" xml:space="preserve"><value>{0} 的寄存器映射未在实机确认（多个 Topping 型号共用 PID，寄存器含义可能冲突），拒绝写入</value></data>
+  <data name="smb.scheme" xml:space="preserve"><value>SMB 地址必须使用 smb:// scheme。</value></data>
+  <data name="smb.unsafe" xml:space="preserve"><value>SMB 地址包含不安全的目录段。</value></data>
+  <data name="smb.shape" xml:space="preserve"><value>SMB 地址必须是 smb://服务器/共享目录 或 UNC 路径。</value></data>
+  <data name="smb.needShare" xml:space="preserve"><value>SMB 地址必须包含共享目录。</value></data>
+  <data name="smb.emptyPath" xml:space="preserve"><value>MLIP 路径不能为空。</value></data>
+  <data name="smb.absolutePath" xml:space="preserve"><value>MLIP 路径不能是绝对地址。</value></data>
+  <data name="smb.unsafePath" xml:space="preserve"><value>MLIP 路径包含不安全的目录段。</value></data>
+  <data name="smb.escaped" xml:space="preserve"><value>MLIP 路径越过了 SMB 媒体源根目录。</value></data>
+  <data name="cd2.badConfig" xml:space="preserve"><value>CloudDrive 配置损坏。</value></data>
+  <data name="cd2.badEndpoint" xml:space="preserve"><value>CloudDrive2 地址必须是无路径、查询、片段或嵌入凭据的 HTTP(S) 服务根地址。</value></data>
+  <data name="cd2.userLong" xml:space="preserve"><value>CloudDrive2 用户名不能超过 100 个字符。</value></data>
+  <data name="cd2.inboxLabel" xml:space="preserve"><value>离线下载目录</value></data>
+  <data name="cd2.libLabel" xml:space="preserve"><value>媒体库目录</value></data>
+  <data name="cd2.proxyLong" xml:space="preserve"><value>RSS 代理主机名过长。</value></data>
+  <data name="cd2.needDirs" xml:space="preserve"><value>启用 CloudDrive/RSS 前必须设置离线下载目录和媒体库目录。</value></data>
+  <data name="cd2.tooLong" xml:space="preserve"><value>{0}不能超过 1024 个字符。</value></data>
+  <data name="cal.needPoints" xml:space="preserve"><value>校准文件至少需要 2 个有效数据点。</value></data>
+  <data name="cal.colMismatch" xml:space="preserve"><value>校准数据列数不匹配。</value></data>
+  <data name="cal.badFreq" xml:space="preserve"><value>校准频率必须为正。</value></data>
+  <data name="cal.notIncreasing" xml:space="preserve"><value>校准频率必须严格递增。</value></data>
+  <data name="cal.truncated" xml:space="preserve"><value>校准文件仅覆盖 {0}–{1} Hz，高频段（5 kHz 以上）没有被校准；看起来文件不完整，建议重新下载完整校准</value></data>
+  <data name="cal.tooLarge" xml:space="preserve"><value>校准文件过大。</value></data>
+  <data name="cal.noPoints" xml:space="preserve"><value>校准文件没有足够的有效数据点（需要频率 + dB 两列，UMIK 为 频率/0°/90° 三列）。</value></data>
+  <data name="runner.syncRunning" xml:space="preserve"><value>CloudDrive/RSS 同步已在运行。</value></data>
+  <data name="runner.enableFirst" xml:space="preserve"><value>请先启用 CloudDrive/RSS 同步。</value></data>
+  <data name="runner.authExpired" xml:space="preserve"><value>CloudDrive2 认证已过期，且没有可用于重新登录的已保存凭据。</value></data>
+  <data name="dav.dbTooLarge" xml:space="preserve"><value>远程 library.db 超过 256 MiB 限制。</value></data>
+  <data name="dav.posterOutside" xml:space="preserve"><value>远程海报地址不属于当前 WebDAV 媒体源。</value></data>
+  <data name="dav.absoluteUrl" xml:space="preserve"><value>WebDAV 地址必须是绝对 HTTP 或 HTTPS URL。</value></data>
+  <data name="dav.cleanUrl" xml:space="preserve"><value>WebDAV 地址不能包含嵌入凭据、查询或片段。</value></data>
+  <data name="dav.posterTooLarge" xml:space="preserve"><value>远程海报超过 20 MiB 限制。</value></data>
+  <data name="dav.badAuth2" xml:space="preserve"><value>WebDAV 用户名或密码不正确。</value></data>
+  <data name="top.filterSkipped" xml:space="preserve"><value>滤波类型 {0} @ {1} Hz 设备不支持，已跳过</value></data>
+  <data name="top.tooManyBands" xml:space="preserve"><value>预设超过 10 段，多余的滤波被忽略</value></data>
+  <data name="top.badType" xml:space="preserve"><value>滤波 {0}: 不支持的类型代码 {1}</value></data>
+  <data name="top.badFreq" xml:space="preserve"><value>滤波 {0}: 频率 {1} Hz 超出范围</value></data>
+  <data name="top.badGain" xml:space="preserve"><value>滤波 {0}: 增益 {1} dB 超出范围</value></data>
+  <data name="top.badQ" xml:space="preserve"><value>滤波 {0}: Q {1} 超出范围</value></data>
+  <data name="tmdb.queryEmpty" xml:space="preserve"><value>TMDB 搜索词不能为空。</value></data>
+  <data name="tmdb.queryLong" xml:space="preserve"><value>TMDB 搜索词不能超过 100 个字符。</value></data>
+  <data name="tmdb.noToken" xml:space="preserve"><value>尚未配置 TMDB Read Access Token。</value></data>
+  <data name="tmdb.badYear" xml:space="preserve"><value>首播年份无效。</value></data>
+  <data name="tmdb.searchFailed" xml:space="preserve"><value>TMDB 搜索失败 (HTTP {0})。</value></data>
+  <data name="tmdb.emptyResponse" xml:space="preserve"><value>TMDB 搜索返回了空响应。</value></data>
+  <data name="smb.needUser" xml:space="preserve"><value>SMB 密码需要对应的用户名。</value></data>
+  <data name="smb.replaceFailed" xml:space="preserve"><value>无法替换 SMB 凭据。</value></data>
+  <data name="smb.conflictOwned" xml:space="preserve"><value>Windows 已使用其他凭据连接该 SMB 共享，且连接不由 MiruPlay 所有。请先在 Windows 中断开该共享。</value></data>
+  <data name="smb.conflictServer" xml:space="preserve"><value>Windows 已使用不同凭据连接到该 SMB 服务器。请先断开现有连接。</value></data>
+  <data name="smb.connectFailed" xml:space="preserve"><value>无法连接 SMB 共享：{0}</value></data>
+  <data name="smb.noAccess" xml:space="preserve"><value>SMB 目录不存在或当前账户无权访问。</value></data>
+  <data name="rss.notFound" xml:space="preserve"><value>RSS 订阅不存在。</value></data>
+  <data name="rss.nameLength" xml:space="preserve"><value>RSS 名称长度必须为 1 到 100 个字符。</value></data>
+  <data name="rss.badUrl" xml:space="preserve"><value>RSS 地址必须是不含嵌入凭据的 HTTP(S) URL。</value></data>
+  <data name="rss.filterLong" xml:space="preserve"><value>RSS 过滤正则不能超过 500 个字符。</value></data>
+  <data name="rss.badFilter" xml:space="preserve"><value>RSS 过滤正则无效。</value></data>
+  <data name="rss.storeCorrupt" xml:space="preserve"><value>RSS 订阅存储损坏。</value></data>
+  <data name="idx.emptyOverride" xml:space="preserve"><value>本地元数据覆盖为空。</value></data>
+  <data name="detail.accessName" xml:space="preserve"><value>第 {0:0.##} 集 {1} {2}，</value></data>
+  <data name="idx.noRoot3" xml:space="preserve"><value>媒体目录不存在：{0}</value></data>
+  <data name="idx.notReparse" xml:space="preserve"><value>媒体目录根不能是重解析点。</value></data>
+  <data name="idx.escaped" xml:space="preserve"><value>媒体索引路径超出来源根目录。</value></data>
+  <data name="idx.dupPath" xml:space="preserve"><value>目录扫描发现重复的媒体路径。</value></data>
+  <data name="runner.inboxOutside" xml:space="preserve"><value>CloudDrive2 离线下载目录超出 Token 根目录或指向根目录。</value></data>
+  <data name="idx.tooMany" xml:space="preserve"><value>目录扫描条目数超过 {0} 限制。</value></data>
+  <data name="idx.badNfoMeta" xml:space="preserve"><value>目录索引 NFO 元数据格式无效。</value></data>
+  <data name="idx.unsafeSegment" xml:space="preserve"><value>目录索引路径包含不安全的目录段。</value></data>
+  <data name="idx.noAbsolute" xml:space="preserve"><value>目录索引路径不能是绝对路径。</value></data>
+  <data name="idx.badSubPath" xml:space="preserve"><value>目录索引字幕路径格式无效。</value></data>
 </root>

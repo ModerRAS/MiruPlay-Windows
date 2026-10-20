@@ -114,10 +114,10 @@ public static class SeriesDetailPresentation
         var primaryLabel = primaryEpisode is null
             ? null
             : allLogicalEpisodesCompleted
-                ? "重新观看"
+                ? AppStrings.Get("detail.rewatch")
                 : primaryEpisode.IsInProgress || hasHistory
-                    ? "继续观看"
-                    : "播放第一集";
+                    ? AppStrings.Get("detail.continueWatch")
+                    : AppStrings.Get("detail.playFirst");
 
         var extras = series.Extras
             .OrderBy(extra => extra.SortOrder)
@@ -126,7 +126,7 @@ public static class SeriesDetailPresentation
             .Select(extra => new SeriesDetailExtraViewState(
                 extra,
                 extra.DisplayTitle,
-                $"播放特典 {extra.DisplayTitle}"))
+                AppStrings.Get("detail.playExtra2", extra.DisplayTitle)))
             .ToList();
 
         return new(
@@ -136,7 +136,7 @@ public static class SeriesDetailPresentation
             primaryEpisode is null || primaryLabel is null
                 ? null
                 : new(primaryEpisode, primaryLabel, $"{primaryLabel} {primaryEpisode.DisplayNumber} {primaryEpisode.DisplayTitle}"),
-            episodes.Count == 0 ? "这个系列暂时没有可播放的剧集。" : null);
+            episodes.Count == 0 ? AppStrings.Get("detail.noEpisodes") : null);
     }
 
     public static IReadOnlyList<SeriesDetailEpisodeOption> BuildEpisodeOptions(LibrarySeries series)
@@ -157,5 +157,5 @@ public static class SeriesDetailPresentation
     }
 
     private static string BuildAccessibleName(int season, double number, LibraryEpisode episode) =>
-        $"{(season <= 1 ? "第 1 季" : $"第 {season} 季")} 第 {number:0.##} 集 {episode.DisplayTitle} {episode.VersionLabel}，{(episode.IsInProgress ? "继续观看" : episode.IsCompleted ? "已看完" : "未观看")}";
+        (season <= 1 ? AppStrings.Get("lib.season1") : AppStrings.Get("lib.seasonN", season)) + " " + AppStrings.Get("detail.accessName", number, episode.DisplayTitle, episode.VersionLabel) + (episode.IsInProgress ? AppStrings.Get("detail.continueWatch") : episode.IsCompleted ? AppStrings.Get("detail.watchedUp") : AppStrings.Get("detail.unwatched"));
 }

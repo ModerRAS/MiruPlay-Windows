@@ -7055,6 +7055,671 @@ const I18N = {
   "zh-HK": "NFO 路徑不能經過符號連結或連結點。",
   "en-US": "NFO paths must not pass through symlinks or junctions.",
   "en-GB": "NFO paths must not pass through symlinks or junctions."
+ },
+ "detail.rewatch": {
+  "zh-CN": "重新观看",
+  "zh-TW": "重新觀看",
+  "zh-HK": "重新觀看",
+  "en-US": "Rewatch",
+  "en-GB": "Rewatch"
+ },
+ "detail.continueWatch": {
+  "zh-CN": "继续观看",
+  "zh-TW": "繼續觀看",
+  "zh-HK": "繼續觀看",
+  "en-US": "Continue watching",
+  "en-GB": "Continue watching"
+ },
+ "detail.playFirst": {
+  "zh-CN": "播放第一集",
+  "zh-TW": "播放第一集",
+  "zh-HK": "播放第一集",
+  "en-US": "Play first episode",
+  "en-GB": "Play first episode"
+ },
+ "detail.playExtra2": {
+  "zh-CN": "播放特典 {0}",
+  "zh-TW": "播放特典 {0}",
+  "zh-HK": "播放特典 {0}",
+  "en-US": "Play extra {0}",
+  "en-GB": "Play extra {0}"
+ },
+ "detail.noEpisodes": {
+  "zh-CN": "这个系列暂时没有可播放的剧集。",
+  "zh-TW": "這個系列暫時沒有可播放的劇集。",
+  "zh-HK": "呢個系列暫時冇可播放嘅劇集。",
+  "en-US": "This series has no playable episodes yet.",
+  "en-GB": "This series has no playable episodes yet."
+ },
+ "detail.watchedUp": {
+  "zh-CN": "已看完",
+  "zh-TW": "已看完",
+  "zh-HK": "已睇完",
+  "en-US": "Watched",
+  "en-GB": "Watched"
+ },
+ "detail.unwatched": {
+  "zh-CN": "未观看",
+  "zh-TW": "未觀看",
+  "zh-HK": "未睇",
+  "en-US": "Not watched",
+  "en-GB": "Not watched"
+ },
+ "play.speedLabel": {
+  "zh-CN": "{0} 倍",
+  "zh-TW": "{0} 倍",
+  "zh-HK": "{0} 倍",
+  "en-US": "{0}×",
+  "en-GB": "{0}×"
+ },
+ "wave.mmresult": {
+  "zh-CN": "{0} (MMRESULT={1})",
+  "zh-TW": "{0} (MMRESULT={1})",
+  "zh-HK": "{0} (MMRESULT={1})",
+  "en-US": "{0} (MMRESULT={1})",
+  "en-GB": "{0} (MMRESULT={1})"
+ },
+ "wave.openMic": {
+  "zh-CN": "打开麦克风失败",
+  "zh-TW": "開啟麥克風失敗",
+  "zh-HK": "開啟麥克風失敗",
+  "en-US": "Failed to open microphone",
+  "en-GB": "Failed to open microphone"
+ },
+ "wave.prepareCap": {
+  "zh-CN": "准备录音缓冲失败",
+  "zh-TW": "準備錄音緩衝失敗",
+  "zh-HK": "準備錄音緩衝失敗",
+  "en-US": "Failed to prepare capture buffer",
+  "en-GB": "Failed to prepare capture buffer"
+ },
+ "wave.queueCap": {
+  "zh-CN": "提交录音缓冲失败",
+  "zh-TW": "提交錄音緩衝失敗",
+  "zh-HK": "提交錄音緩衝失敗",
+  "en-US": "Failed to queue capture buffer",
+  "en-GB": "Failed to queue capture buffer"
+ },
+ "wave.startCap": {
+  "zh-CN": "开始录音失败",
+  "zh-TW": "開始錄音失敗",
+  "zh-HK": "開始錄音失敗",
+  "en-US": "Failed to start capture",
+  "en-GB": "Failed to start capture"
+ },
+ "wave.capTimeout": {
+  "zh-CN": "录音超时：麦克风没有返回数据。",
+  "zh-TW": "錄音逾時：麥克風沒有返回資料。",
+  "zh-HK": "錄音逾時：麥克風冇返回資料。",
+  "en-US": "Capture timed out: the microphone returned no data.",
+  "en-GB": "Capture timed out: the microphone returned no data."
+ },
+ "wave.evenBuffer": {
+  "zh-CN": "立体声缓冲长度必须为偶数。",
+  "zh-TW": "立體聲緩衝長度必須為偶數。",
+  "zh-HK": "立體聲緩衝長度必須為偶數。",
+  "en-US": "Stereo buffer length must be even.",
+  "en-GB": "Stereo buffer length must be even."
+ },
+ "wave.openOutput": {
+  "zh-CN": "打开音频输出失败",
+  "zh-TW": "開啟音訊輸出失敗",
+  "zh-HK": "開啟音頻輸出失敗",
+  "en-US": "Failed to open audio output",
+  "en-GB": "Failed to open audio output"
+ },
+ "wave.preparePlay": {
+  "zh-CN": "准备播放缓冲失败",
+  "zh-TW": "準備播放緩衝失敗",
+  "zh-HK": "準備播放緩衝失敗",
+  "en-US": "Failed to prepare playback buffer",
+  "en-GB": "Failed to prepare playback buffer"
+ },
+ "wave.writePlay": {
+  "zh-CN": "写入播放缓冲失败",
+  "zh-TW": "寫入播放緩衝失敗",
+  "zh-HK": "寫入播放緩衝失敗",
+  "en-US": "Failed to write playback buffer",
+  "en-GB": "Failed to write playback buffer"
+ },
+ "top.noDevice": {
+  "zh-CN": "未检测到已确认型号的 Topping DAC（需 DX5 II 或 D90 III Discrete）",
+  "zh-TW": "未偵測到已確認型號的 Topping DAC（需 DX5 II 或 D90 III Discrete）",
+  "zh-HK": "未偵測到已確認型號嘅 Topping DAC（需 DX5 II 或 D90 III Discrete）",
+  "en-US": "No confirmed Topping DAC detected (DX5 II or D90 III Discrete required)",
+  "en-GB": "No confirmed Topping DAC detected (DX5 II or D90 III Discrete required)"
+ },
+ "top.volRange": {
+  "zh-CN": "音量 {0} dB 超出范围（-99..0）",
+  "zh-TW": "音量 {0} dB 超出範圍（-99..0）",
+  "zh-HK": "音量 {0} dB 超出範圍（-99..0）",
+  "en-US": "Volume {0} dB out of range (-99..0)",
+  "en-GB": "Volume {0} dB out of range (-99..0)"
+ },
+ "top.loudConfirm": {
+  "zh-CN": "{0} dB 音量过大，请二次确认后再执行",
+  "zh-TW": "{0} dB 音量過大，請二次確認後再執行",
+  "zh-HK": "{0} dB 音量過大，請二次確認後再執行",
+  "en-US": "{0} dB is loud; confirm again to proceed",
+  "en-GB": "{0} dB is loud; confirm again to proceed"
+ },
+ "top.noHidVolume": {
+  "zh-CN": "{0} 的音量不在 USB HID 接口上（仅面板/遥控可调）",
+  "zh-TW": "{0} 的音量不在 USB HID 介面上（僅面板/遙控可調）",
+  "zh-HK": "{0} 嘅音量唔喺 USB HID 介面上（僅面板/遙控可調）",
+  "en-US": "{0} volume is not on USB HID (front panel/remote only)",
+  "en-GB": "{0} volume is not on USB HID (front panel/remote only)"
+ },
+ "top.noBands": {
+  "zh-CN": "预设中没有可写入设备的有效滤波",
+  "zh-TW": "預設中沒有可寫入裝置的有效濾波",
+  "zh-HK": "預設中冇可寫入裝置嘅有效濾波",
+  "en-US": "Preset has no usable filters for the device",
+  "en-GB": "Preset has no usable filters for the device"
+ },
+ "top.preampRange": {
+  "zh-CN": "preamp {0} dB 超出范围（-40..+10）",
+  "zh-TW": "preamp {0} dB 超出範圍（-40..+10）",
+  "zh-HK": "preamp {0} dB 超出範圍（-40..+10）",
+  "en-US": "preamp {0} dB out of range (-40..+10)",
+  "en-GB": "preamp {0} dB out of range (-40..+10)"
+ },
+ "top.notFound": {
+  "zh-CN": "未找到 {0}",
+  "zh-TW": "未找到 {0}",
+  "zh-HK": "未找到 {0}",
+  "en-US": "{0} not found",
+  "en-GB": "{0} not found"
+ },
+ "top.noConfirmedModel": {
+  "zh-CN": "已确认型号的 Topping DAC",
+  "zh-TW": "已確認型號的 Topping DAC",
+  "zh-HK": "已確認型號嘅 Topping DAC",
+  "en-US": "confirmed Topping DAC",
+  "en-GB": "confirmed Topping DAC"
+ },
+ "top.unconfirmed": {
+  "zh-CN": "{0} 的寄存器映射未在实机确认（多个 Topping 型号共用 PID，寄存器含义可能冲突），拒绝写入",
+  "zh-TW": "{0} 的暫存器映射未在實機確認（多個 Topping 型號共用 PID，暫存器含義可能衝突），拒絕寫入",
+  "zh-HK": "{0} 嘅暫存器映射未在實機確認（多個 Topping 型號共用 PID，暫存器含義可能衝突），拒絕寫入",
+  "en-US": "{0} register map unconfirmed on hardware (models share PID with possibly conflicting registers); refusing to write",
+  "en-GB": "{0} register map unconfirmed on hardware (models share PID with possibly conflicting registers); refusing to write"
+ },
+ "smb.scheme": {
+  "zh-CN": "SMB 地址必须使用 smb:// scheme。",
+  "zh-TW": "SMB 位址必須使用 smb:// scheme。",
+  "zh-HK": "SMB 位址必須使用 smb:// scheme。",
+  "en-US": "SMB addresses must use the smb:// scheme.",
+  "en-GB": "SMB addresses must use the smb:// scheme."
+ },
+ "smb.unsafe": {
+  "zh-CN": "SMB 地址包含不安全的目录段。",
+  "zh-TW": "SMB 位址包含不安全的目錄段。",
+  "zh-HK": "SMB 位址包含唔安全嘅目錄段。",
+  "en-US": "SMB address has unsafe path segments.",
+  "en-GB": "SMB address has unsafe path segments."
+ },
+ "smb.shape": {
+  "zh-CN": "SMB 地址必须是 smb://服务器/共享目录 或 UNC 路径。",
+  "zh-TW": "SMB 位址必須是 smb://伺服器/共用目錄 或 UNC 路徑。",
+  "zh-HK": "SMB 位址必須係 smb://伺服器/共用目錄 或 UNC 路徑。",
+  "en-US": "SMB address must be smb://server/share or a UNC path.",
+  "en-GB": "SMB address must be smb://server/share or a UNC path."
+ },
+ "smb.needShare": {
+  "zh-CN": "SMB 地址必须包含共享目录。",
+  "zh-TW": "SMB 位址必須包含共用目錄。",
+  "zh-HK": "SMB 位址必須包含共用目錄。",
+  "en-US": "SMB address must include a share.",
+  "en-GB": "SMB address must include a share."
+ },
+ "smb.emptyPath": {
+  "zh-CN": "MLIP 路径不能为空。",
+  "zh-TW": "MLIP 路徑不能為空。",
+  "zh-HK": "MLIP 路徑不能為空。",
+  "en-US": "MLIP path must not be empty.",
+  "en-GB": "MLIP path must not be empty."
+ },
+ "smb.absolutePath": {
+  "zh-CN": "MLIP 路径不能是绝对地址。",
+  "zh-TW": "MLIP 路徑不能是絕對位址。",
+  "zh-HK": "MLIP 路徑不能係絕對位址。",
+  "en-US": "MLIP path must not be absolute.",
+  "en-GB": "MLIP path must not be absolute."
+ },
+ "smb.unsafePath": {
+  "zh-CN": "MLIP 路径包含不安全的目录段。",
+  "zh-TW": "MLIP 路徑包含不安全的目錄段。",
+  "zh-HK": "MLIP 路徑包含唔安全嘅目錄段。",
+  "en-US": "MLIP path has unsafe segments.",
+  "en-GB": "MLIP path has unsafe segments."
+ },
+ "smb.escaped": {
+  "zh-CN": "MLIP 路径越过了 SMB 媒体源根目录。",
+  "zh-TW": "MLIP 路徑越過了 SMB 媒體來源根目錄。",
+  "zh-HK": "MLIP 路徑越過咗 SMB 媒體來源根目錄。",
+  "en-US": "MLIP path escapes the SMB source root.",
+  "en-GB": "MLIP path escapes the SMB source root."
+ },
+ "cd2.badConfig": {
+  "zh-CN": "CloudDrive 配置损坏。",
+  "zh-TW": "CloudDrive 設定損毀。",
+  "zh-HK": "CloudDrive 設定損毀。",
+  "en-US": "CloudDrive configuration corrupt.",
+  "en-GB": "CloudDrive configuration corrupt."
+ },
+ "cd2.badEndpoint": {
+  "zh-CN": "CloudDrive2 地址必须是无路径、查询、片段或嵌入凭据的 HTTP(S) 服务根地址。",
+  "zh-TW": "CloudDrive2 位址必須是無路徑、查詢、片段或嵌入憑證的 HTTP(S) 服務根位址。",
+  "zh-HK": "CloudDrive2 位址必須係無路徑、查詢、片段或嵌入憑證嘅 HTTP(S) 服務根位址。",
+  "en-US": "CloudDrive2 endpoint must be an HTTP(S) service root without path, query, fragment or embedded credentials.",
+  "en-GB": "CloudDrive2 endpoint must be an HTTP(S) service root without path, query, fragment or embedded credentials."
+ },
+ "cd2.userLong": {
+  "zh-CN": "CloudDrive2 用户名不能超过 100 个字符。",
+  "zh-TW": "CloudDrive2 使用者名稱不能超過 100 個字元。",
+  "zh-HK": "CloudDrive2 用戶名不能超過 100 個字元。",
+  "en-US": "CloudDrive2 username must not exceed 100 characters.",
+  "en-GB": "CloudDrive2 username must not exceed 100 characters."
+ },
+ "cd2.inboxLabel": {
+  "zh-CN": "离线下载目录",
+  "zh-TW": "離線下載目錄",
+  "zh-HK": "離線下載目錄",
+  "en-US": "Offline download directory",
+  "en-GB": "Offline download directory"
+ },
+ "cd2.libLabel": {
+  "zh-CN": "媒体库目录",
+  "zh-TW": "媒體庫目錄",
+  "zh-HK": "媒體庫目錄",
+  "en-US": "Library directory",
+  "en-GB": "Library directory"
+ },
+ "cd2.proxyLong": {
+  "zh-CN": "RSS 代理主机名过长。",
+  "zh-TW": "RSS 代理主機名過長。",
+  "zh-HK": "RSS 代理主機名過長。",
+  "en-US": "RSS proxy hostname too long.",
+  "en-GB": "RSS proxy hostname too long."
+ },
+ "cd2.needDirs": {
+  "zh-CN": "启用 CloudDrive/RSS 前必须设置离线下载目录和媒体库目录。",
+  "zh-TW": "啟用 CloudDrive/RSS 前必須設定離線下載目錄和媒體庫目錄。",
+  "zh-HK": "啟用 CloudDrive/RSS 前必須設定離線下載目錄同媒體庫目錄。",
+  "en-US": "Set the offline download and library directories before enabling CloudDrive/RSS.",
+  "en-GB": "Set the offline download and library directories before enabling CloudDrive/RSS."
+ },
+ "cd2.tooLong": {
+  "zh-CN": "{0}不能超过 1024 个字符。",
+  "zh-TW": "{0}不能超過 1024 個字元。",
+  "zh-HK": "{0}不能超過 1024 個字元。",
+  "en-US": "{0} must not exceed 1024 characters.",
+  "en-GB": "{0} must not exceed 1024 characters."
+ },
+ "cal.needPoints": {
+  "zh-CN": "校准文件至少需要 2 个有效数据点。",
+  "zh-TW": "校準檔至少需要 2 個有效數據點。",
+  "zh-HK": "校準檔至少需要 2 個有效數據點。",
+  "en-US": "Calibration file needs at least 2 valid data points.",
+  "en-GB": "Calibration file needs at least 2 valid data points."
+ },
+ "cal.colMismatch": {
+  "zh-CN": "校准数据列数不匹配。",
+  "zh-TW": "校準資料行數不匹配。",
+  "zh-HK": "校準資料行數不匹配。",
+  "en-US": "Calibration column count mismatch.",
+  "en-GB": "Calibration column count mismatch."
+ },
+ "cal.badFreq": {
+  "zh-CN": "校准频率必须为正。",
+  "zh-TW": "校準頻率必須為正。",
+  "zh-HK": "校準頻率必須為正。",
+  "en-US": "Calibration frequencies must be positive.",
+  "en-GB": "Calibration frequencies must be positive."
+ },
+ "cal.notIncreasing": {
+  "zh-CN": "校准频率必须严格递增。",
+  "zh-TW": "校準頻率必須嚴格遞增。",
+  "zh-HK": "校準頻率必須嚴格遞增。",
+  "en-US": "Calibration frequencies must strictly increase.",
+  "en-GB": "Calibration frequencies must strictly increase."
+ },
+ "cal.truncated": {
+  "zh-CN": "校准文件仅覆盖 {0}–{1} Hz，高频段（5 kHz 以上）没有被校准；看起来文件不完整，建议重新下载完整校准",
+  "zh-TW": "校準檔僅覆蓋 {0}–{1} Hz，高頻段（5 kHz 以上）沒有被校準；看起來檔案不完整，建議重新下載完整校準",
+  "zh-HK": "校準檔僅覆蓋 {0}–{1} Hz，高頻段（5 kHz 以上）沒有被校準；睇嚟檔案唔完整，建議重新下載完整校準",
+  "en-US": "Calibration only covers {0}–{1} Hz with nothing above 5 kHz calibrated; the file looks truncated, download the full calibration",
+  "en-GB": "Calibration only covers {0}–{1} Hz with nothing above 5 kHz calibrated; the file looks truncated, download the full calibration"
+ },
+ "cal.tooLarge": {
+  "zh-CN": "校准文件过大。",
+  "zh-TW": "校準檔過大。",
+  "zh-HK": "校準檔過大。",
+  "en-US": "Calibration file too large.",
+  "en-GB": "Calibration file too large."
+ },
+ "cal.noPoints": {
+  "zh-CN": "校准文件没有足够的有效数据点（需要频率 + dB 两列，UMIK 为 频率/0°/90° 三列）。",
+  "zh-TW": "校準檔沒有足夠的有效數據點（需要頻率 + dB 兩行，UMIK 為 頻率/0°/90° 三行）。",
+  "zh-HK": "校準檔冇足夠嘅有效數據點（需要頻率 + dB 兩行，UMIK 為 頻率/0°/90° 三行）。",
+  "en-US": "Calibration file lacks valid data points (frequency + dB columns; UMIK uses frequency/0°/90°).",
+  "en-GB": "Calibration file lacks valid data points (frequency + dB columns; UMIK uses frequency/0°/90°)."
+ },
+ "runner.syncRunning": {
+  "zh-CN": "CloudDrive/RSS 同步已在运行。",
+  "zh-TW": "CloudDrive/RSS 同步執行中。",
+  "zh-HK": "CloudDrive/RSS 同步執行中。",
+  "en-US": "CloudDrive/RSS sync already running.",
+  "en-GB": "CloudDrive/RSS sync already running."
+ },
+ "runner.enableFirst": {
+  "zh-CN": "请先启用 CloudDrive/RSS 同步。",
+  "zh-TW": "請先啟用 CloudDrive/RSS 同步。",
+  "zh-HK": "請先啟用 CloudDrive/RSS 同步。",
+  "en-US": "Enable CloudDrive/RSS sync first.",
+  "en-GB": "Enable CloudDrive/RSS sync first."
+ },
+ "runner.authExpired": {
+  "zh-CN": "CloudDrive2 认证已过期，且没有可用于重新登录的已保存凭据。",
+  "zh-TW": "CloudDrive2 驗證已過期，且沒有可用於重新登入的已儲存憑證。",
+  "zh-HK": "CloudDrive2 驗證已過期，且冇可用於重新登入嘅已儲存憑證。",
+  "en-US": "CloudDrive2 auth expired with no saved credentials to log in again.",
+  "en-GB": "CloudDrive2 auth expired with no saved credentials to log in again."
+ },
+ "dav.dbTooLarge": {
+  "zh-CN": "远程 library.db 超过 256 MiB 限制。",
+  "zh-TW": "遠端 library.db 超過 256 MiB 限制。",
+  "zh-HK": "遠端 library.db 超過 256 MiB 限制。",
+  "en-US": "Remote library.db exceeds the 256 MiB limit.",
+  "en-GB": "Remote library.db exceeds the 256 MiB limit."
+ },
+ "dav.posterOutside": {
+  "zh-CN": "远程海报地址不属于当前 WebDAV 媒体源。",
+  "zh-TW": "遠端海報位址不屬於目前 WebDAV 媒體來源。",
+  "zh-HK": "遠端海報位址唔屬於目前 WebDAV 媒體來源。",
+  "en-US": "Remote poster address is outside the current WebDAV source.",
+  "en-GB": "Remote poster address is outside the current WebDAV source."
+ },
+ "dav.absoluteUrl": {
+  "zh-CN": "WebDAV 地址必须是绝对 HTTP 或 HTTPS URL。",
+  "zh-TW": "WebDAV 位址必須是絕對 HTTP 或 HTTPS URL。",
+  "zh-HK": "WebDAV 位址必須係絕對 HTTP 或 HTTPS URL。",
+  "en-US": "WebDAV address must be an absolute HTTP or HTTPS URL.",
+  "en-GB": "WebDAV address must be an absolute HTTP or HTTPS URL."
+ },
+ "dav.cleanUrl": {
+  "zh-CN": "WebDAV 地址不能包含嵌入凭据、查询或片段。",
+  "zh-TW": "WebDAV 位址不能包含嵌入憑證、查詢或片段。",
+  "zh-HK": "WebDAV 位址不能包含嵌入憑證、查詢或片段。",
+  "en-US": "WebDAV address must not embed credentials, query or fragment.",
+  "en-GB": "WebDAV address must not embed credentials, query or fragment."
+ },
+ "dav.posterTooLarge": {
+  "zh-CN": "远程海报超过 20 MiB 限制。",
+  "zh-TW": "遠端海報超過 20 MiB 限制。",
+  "zh-HK": "遠端海報超過 20 MiB 限制。",
+  "en-US": "Remote poster exceeds the 20 MiB limit.",
+  "en-GB": "Remote poster exceeds the 20 MiB limit."
+ },
+ "dav.badAuth2": {
+  "zh-CN": "WebDAV 用户名或密码不正确。",
+  "zh-TW": "WebDAV 使用者名稱或密碼不正確。",
+  "zh-HK": "WebDAV 用戶名或密碼不正確。",
+  "en-US": "WebDAV username or password incorrect.",
+  "en-GB": "WebDAV username or password incorrect."
+ },
+ "top.filterSkipped": {
+  "zh-CN": "滤波类型 {0} @ {1} Hz 设备不支持，已跳过",
+  "zh-TW": "濾波類型 {0} @ {1} Hz 裝置不支援，已略過",
+  "zh-HK": "濾波類型 {0} @ {1} Hz 裝置不支援，已略過",
+  "en-US": "Filter type {0} @ {1} Hz unsupported by device, skipped",
+  "en-GB": "Filter type {0} @ {1} Hz unsupported by device, skipped"
+ },
+ "top.tooManyBands": {
+  "zh-CN": "预设超过 10 段，多余的滤波被忽略",
+  "zh-TW": "預設超過 10 段，多餘的濾波被忽略",
+  "zh-HK": "預設超過 10 段，多餘嘅濾波被忽略",
+  "en-US": "Preset exceeds 10 bands; extra filters ignored",
+  "en-GB": "Preset exceeds 10 bands; extra filters ignored"
+ },
+ "top.badType": {
+  "zh-CN": "滤波 {0}: 不支持的类型代码 {1}",
+  "zh-TW": "濾波 {0}: 不支援的類型代碼 {1}",
+  "zh-HK": "濾波 {0}: 不支援嘅類型代碼 {1}",
+  "en-US": "Filter {0}: unsupported type code {1}",
+  "en-GB": "Filter {0}: unsupported type code {1}"
+ },
+ "top.badFreq": {
+  "zh-CN": "滤波 {0}: 频率 {1} Hz 超出范围",
+  "zh-TW": "濾波 {0}: 頻率 {1} Hz 超出範圍",
+  "zh-HK": "濾波 {0}: 頻率 {1} Hz 超出範圍",
+  "en-US": "Filter {0}: frequency {1} Hz out of range",
+  "en-GB": "Filter {0}: frequency {1} Hz out of range"
+ },
+ "top.badGain": {
+  "zh-CN": "滤波 {0}: 增益 {1} dB 超出范围",
+  "zh-TW": "濾波 {0}: 增益 {1} dB 超出範圍",
+  "zh-HK": "濾波 {0}: 增益 {1} dB 超出範圍",
+  "en-US": "Filter {0}: gain {1} dB out of range",
+  "en-GB": "Filter {0}: gain {1} dB out of range"
+ },
+ "top.badQ": {
+  "zh-CN": "滤波 {0}: Q {1} 超出范围",
+  "zh-TW": "濾波 {0}: Q {1} 超出範圍",
+  "zh-HK": "濾波 {0}: Q {1} 超出範圍",
+  "en-US": "Filter {0}: Q {1} out of range",
+  "en-GB": "Filter {0}: Q {1} out of range"
+ },
+ "tmdb.queryEmpty": {
+  "zh-CN": "TMDB 搜索词不能为空。",
+  "zh-TW": "TMDB 搜尋詞不能為空。",
+  "zh-HK": "TMDB 搜尋詞不能為空。",
+  "en-US": "TMDB query must not be empty.",
+  "en-GB": "TMDB query must not be empty."
+ },
+ "tmdb.queryLong": {
+  "zh-CN": "TMDB 搜索词不能超过 100 个字符。",
+  "zh-TW": "TMDB 搜尋詞不能超過 100 個字元。",
+  "zh-HK": "TMDB 搜尋詞不能超過 100 個字元。",
+  "en-US": "TMDB query must not exceed 100 characters.",
+  "en-GB": "TMDB query must not exceed 100 characters."
+ },
+ "tmdb.noToken": {
+  "zh-CN": "尚未配置 TMDB Read Access Token。",
+  "zh-TW": "尚未設定 TMDB Read Access Token。",
+  "zh-HK": "尚未設定 TMDB Read Access Token。",
+  "en-US": "TMDB read access token not configured.",
+  "en-GB": "TMDB read access token not configured."
+ },
+ "tmdb.badYear": {
+  "zh-CN": "首播年份无效。",
+  "zh-TW": "首播年份無效。",
+  "zh-HK": "首播年份無效。",
+  "en-US": "First-air year invalid.",
+  "en-GB": "First-air year invalid."
+ },
+ "tmdb.searchFailed": {
+  "zh-CN": "TMDB 搜索失败 (HTTP {0})。",
+  "zh-TW": "TMDB 搜尋失敗 (HTTP {0})。",
+  "zh-HK": "TMDB 搜尋失敗 (HTTP {0})。",
+  "en-US": "TMDB search failed (HTTP {0}).",
+  "en-GB": "TMDB search failed (HTTP {0})."
+ },
+ "tmdb.emptyResponse": {
+  "zh-CN": "TMDB 搜索返回了空响应。",
+  "zh-TW": "TMDB 搜尋返回了空回應。",
+  "zh-HK": "TMDB 搜尋返回咗空回應。",
+  "en-US": "TMDB search returned an empty response.",
+  "en-GB": "TMDB search returned an empty response."
+ },
+ "smb.needUser": {
+  "zh-CN": "SMB 密码需要对应的用户名。",
+  "zh-TW": "SMB 密碼需要對應的使用者名稱。",
+  "zh-HK": "SMB 密碼需要對應嘅用戶名。",
+  "en-US": "SMB password needs a username.",
+  "en-GB": "SMB password needs a username."
+ },
+ "smb.replaceFailed": {
+  "zh-CN": "无法替换 SMB 凭据。",
+  "zh-TW": "無法取代 SMB 憑證。",
+  "zh-HK": "無法取代 SMB 憑證。",
+  "en-US": "Cannot replace SMB credentials.",
+  "en-GB": "Cannot replace SMB credentials."
+ },
+ "smb.conflictOwned": {
+  "zh-CN": "Windows 已使用其他凭据连接该 SMB 共享，且连接不由 MiruPlay 所有。请先在 Windows 中断开该共享。",
+  "zh-TW": "Windows 已使用其他憑證連接該 SMB 共用，且連接不由 MiruPlay 所有。請先在 Windows 中斷開該共用。",
+  "zh-HK": "Windows 已使用其他憑證連接該 SMB 共用，且連接唔由 MiruPlay 所有。請先喺 Windows 中斷開該共用。",
+  "en-US": "Windows already connects to this SMB share with different credentials not owned by MiruPlay. Disconnect it in Windows first.",
+  "en-GB": "Windows already connects to this SMB share with different credentials not owned by MiruPlay. Disconnect it in Windows first."
+ },
+ "smb.conflictServer": {
+  "zh-CN": "Windows 已使用不同凭据连接到该 SMB 服务器。请先断开现有连接。",
+  "zh-TW": "Windows 已使用不同憑證連接到該 SMB 伺服器。請先中斷現有連接。",
+  "zh-HK": "Windows 已使用唔同憑證連接到該 SMB 伺服器。請先中斷現有連接。",
+  "en-US": "Windows already connects to this SMB server with different credentials. Disconnect first.",
+  "en-GB": "Windows already connects to this SMB server with different credentials. Disconnect first."
+ },
+ "smb.connectFailed": {
+  "zh-CN": "无法连接 SMB 共享：{0}",
+  "zh-TW": "無法連接 SMB 共用：{0}",
+  "zh-HK": "無法連接 SMB 共用：{0}",
+  "en-US": "Cannot connect SMB share: {0}",
+  "en-GB": "Cannot connect SMB share: {0}"
+ },
+ "smb.noAccess": {
+  "zh-CN": "SMB 目录不存在或当前账户无权访问。",
+  "zh-TW": "SMB 目錄不存在或目前帳戶無權存取。",
+  "zh-HK": "SMB 目錄不存在或目前帳戶無權存取。",
+  "en-US": "SMB directory missing or access denied for the current account.",
+  "en-GB": "SMB directory missing or access denied for the current account."
+ },
+ "rss.notFound": {
+  "zh-CN": "RSS 订阅不存在。",
+  "zh-TW": "RSS 訂閱不存在。",
+  "zh-HK": "RSS 訂閱不存在。",
+  "en-US": "RSS subscription not found.",
+  "en-GB": "RSS subscription not found."
+ },
+ "rss.nameLength": {
+  "zh-CN": "RSS 名称长度必须为 1 到 100 个字符。",
+  "zh-TW": "RSS 名稱長度必須為 1 到 100 個字元。",
+  "zh-HK": "RSS 名稱長度必須為 1 到 100 個字元。",
+  "en-US": "RSS name must be 1 to 100 characters.",
+  "en-GB": "RSS name must be 1 to 100 characters."
+ },
+ "rss.badUrl": {
+  "zh-CN": "RSS 地址必须是不含嵌入凭据的 HTTP(S) URL。",
+  "zh-TW": "RSS 位址必須是不含嵌入憑證的 HTTP(S) URL。",
+  "zh-HK": "RSS 位址必須係不含嵌入憑證嘅 HTTP(S) URL。",
+  "en-US": "RSS address must be a credential-free HTTP(S) URL.",
+  "en-GB": "RSS address must be a credential-free HTTP(S) URL."
+ },
+ "rss.filterLong": {
+  "zh-CN": "RSS 过滤正则不能超过 500 个字符。",
+  "zh-TW": "RSS 過濾正則不能超過 500 個字元。",
+  "zh-HK": "RSS 過濾正則不能超過 500 個字元。",
+  "en-US": "RSS filter regex must not exceed 500 characters.",
+  "en-GB": "RSS filter regex must not exceed 500 characters."
+ },
+ "rss.badFilter": {
+  "zh-CN": "RSS 过滤正则无效。",
+  "zh-TW": "RSS 過濾正則無效。",
+  "zh-HK": "RSS 過濾正則無效。",
+  "en-US": "RSS filter regex invalid.",
+  "en-GB": "RSS filter regex invalid."
+ },
+ "rss.storeCorrupt": {
+  "zh-CN": "RSS 订阅存储损坏。",
+  "zh-TW": "RSS 訂閱存放區損毀。",
+  "zh-HK": "RSS 訂閱存放區損毀。",
+  "en-US": "RSS subscription store corrupt.",
+  "en-GB": "RSS subscription store corrupt."
+ },
+ "idx.emptyOverride": {
+  "zh-CN": "本地元数据覆盖为空。",
+  "zh-TW": "本機元數據覆蓋為空。",
+  "zh-HK": "本機元數據覆蓋為空。",
+  "en-US": "Local metadata override empty.",
+  "en-GB": "Local metadata override empty."
+ },
+ "detail.accessName": {
+  "zh-CN": "第 {0:0.##} 集 {1} {2}，",
+  "zh-TW": "第 {0:0.##} 集 {1} {2}，",
+  "zh-HK": "第 {0:0.##} 集 {1} {2}，",
+  "en-US": "Ep {0:0.##} {1} {2}, ",
+  "en-GB": "Ep {0:0.##} {1} {2}, "
+ },
+ "idx.noRoot3": {
+  "zh-CN": "媒体目录不存在：{0}",
+  "zh-TW": "媒體目錄不存在：{0}",
+  "zh-HK": "媒體目錄不存在：{0}",
+  "en-US": "Media directory missing: {0}",
+  "en-GB": "Media directory missing: {0}"
+ },
+ "idx.notReparse": {
+  "zh-CN": "媒体目录根不能是重解析点。",
+  "zh-TW": "媒體目錄根不能是重解析點。",
+  "zh-HK": "媒體目錄根不能是重解析點。",
+  "en-US": "Media directory root must not be a reparse point.",
+  "en-GB": "Media directory root must not be a reparse point."
+ },
+ "idx.escaped": {
+  "zh-CN": "媒体索引路径超出来源根目录。",
+  "zh-TW": "媒體索引路徑超出來源根目錄。",
+  "zh-HK": "媒體索引路徑超出來源根目錄。",
+  "en-US": "Media index path escapes the source root.",
+  "en-GB": "Media index path escapes the source root."
+ },
+ "idx.dupPath": {
+  "zh-CN": "目录扫描发现重复的媒体路径。",
+  "zh-TW": "目錄掃描發現重複的媒體路徑。",
+  "zh-HK": "目錄掃描發現重複嘅媒體路徑。",
+  "en-US": "Directory scan found duplicate media paths.",
+  "en-GB": "Directory scan found duplicate media paths."
+ },
+ "runner.inboxOutside": {
+  "zh-CN": "CloudDrive2 离线下载目录超出 Token 根目录或指向根目录。",
+  "zh-TW": "CloudDrive2 離線下載目錄超出 Token 根目錄或指向根目錄。",
+  "zh-HK": "CloudDrive2 離線下載目錄超出 Token 根目錄或指向根目錄。",
+  "en-US": "CloudDrive2 offline download directory escapes or is the token root.",
+  "en-GB": "CloudDrive2 offline download directory escapes or is the token root."
+ },
+ "idx.tooMany": {
+  "zh-CN": "目录扫描条目数超过 {0} 限制。",
+  "zh-TW": "目錄掃描條目數超過 {0} 限制。",
+  "zh-HK": "目錄掃描條目數超過 {0} 限制。",
+  "en-US": "Directory scan exceeds the {0}-entry limit.",
+  "en-GB": "Directory scan exceeds the {0}-entry limit."
+ },
+ "idx.badNfoMeta": {
+  "zh-CN": "目录索引 NFO 元数据格式无效。",
+  "zh-TW": "目錄索引 NFO 元數據格式無效。",
+  "zh-HK": "目錄索引 NFO 元數據格式無效。",
+  "en-US": "Directory index NFO metadata malformed.",
+  "en-GB": "Directory index NFO metadata malformed."
+ },
+ "idx.unsafeSegment": {
+  "zh-CN": "目录索引路径包含不安全的目录段。",
+  "zh-TW": "目錄索引路徑包含不安全的目錄段。",
+  "zh-HK": "目錄索引路徑包含唔安全嘅目錄段。",
+  "en-US": "Directory index path has unsafe segments.",
+  "en-GB": "Directory index path has unsafe segments."
+ },
+ "idx.noAbsolute": {
+  "zh-CN": "目录索引路径不能是绝对路径。",
+  "zh-TW": "目錄索引路徑不能是絕對路徑。",
+  "zh-HK": "目錄索引路徑不能係絕對路徑。",
+  "en-US": "Directory index path must not be absolute.",
+  "en-GB": "Directory index path must not be absolute."
+ },
+ "idx.badSubPath": {
+  "zh-CN": "目录索引字幕路径格式无效。",
+  "zh-TW": "目錄索引字幕路徑格式無效。",
+  "zh-HK": "目錄索引字幕路徑格式無效。",
+  "en-US": "Directory index subtitle path malformed.",
+  "en-GB": "Directory index subtitle path malformed."
  }
 };
 let currentLocale = 'zh-CN';

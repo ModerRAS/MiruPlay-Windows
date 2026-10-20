@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace MiruPlay.Windows.Services;
@@ -27,13 +28,13 @@ public sealed class MicCalibration
     {
         ArgumentNullException.ThrowIfNull(frequenciesHz);
         ArgumentNullException.ThrowIfNull(gainDb);
-        if (frequenciesHz.Length < 2) throw new ArgumentException("校准文件至少需要 2 个有效数据点。");
-        if (frequenciesHz.Length != gainDb.Length) throw new ArgumentException("校准数据列数不匹配。");
-        if (frequenciesHz[0] <= 0) throw new ArgumentException("校准频率必须为正。");
+        if (frequenciesHz.Length < 2) throw new ArgumentException(AppStrings.Get("cal.needPoints"));
+        if (frequenciesHz.Length != gainDb.Length) throw new ArgumentException(AppStrings.Get("cal.colMismatch"));
+        if (frequenciesHz[0] <= 0) throw new ArgumentException(AppStrings.Get("cal.badFreq"));
         for (var i = 1; i < frequenciesHz.Length; i++)
         {
             if (frequenciesHz[i] <= frequenciesHz[i - 1])
-                throw new ArgumentException("校准频率必须严格递增。");
+                throw new ArgumentException(AppStrings.Get("cal.notIncreasing"));
         }
         FrequenciesHz = frequenciesHz;
         GainDb = gainDb;
@@ -50,7 +51,7 @@ public sealed class MicCalibration
     public double CoverageHiHz => FrequenciesHz[^1];
 
     public string? CoverageWarning() => CoverageHiHz < 5_000
-        ? $"校准文件仅覆盖 {CoverageLoHz:0}–{CoverageHiHz:0} Hz，高频段（5 kHz 以上）没有被校准；看起来文件不完整，建议重新下载完整校准"
+        ? AppStrings.Get("cal.truncated", CoverageLoHz.ToString("0", System.Globalization.CultureInfo.CurrentCulture), CoverageHiHz.ToString("0", System.Globalization.CultureInfo.CurrentCulture))
         : null;
 
     private double Interpolate(double frequency)
@@ -76,7 +77,7 @@ public sealed class MicCalibration
     public static Parsed Parse(string text, Incidence incidence = Incidence.ZeroDeg)
     {
         ArgumentNullException.ThrowIfNull(text);
-        if (text.Length > MaxTextChars) throw new ArgumentException("校准文件过大。");
+        if (text.Length > MaxTextChars) throw new ArgumentException(AppStrings.Get("cal.tooLarge"));
         var rows = new List<(int Columns, double Freq, double Gain)>();
         foreach (var raw in text.Split(['\r', '\n']))
         {
@@ -97,7 +98,7 @@ public sealed class MicCalibration
             if (rows.Count >= MaxPoints) break;
         }
         if (rows.Count < 2)
-            throw new ArgumentException("校准文件没有足够的有效数据点（需要频率 + dB 两列，UMIK 为 频率/0°/90° 三列）。");
+            throw new ArgumentException(AppStrings.Get("cal.noPoints"));
         var dominant = rows.GroupBy(row => row.Columns).MaxBy(group => group.Count())!.Key;
         var picked = rows.Where(row => row.Columns == dominant).ToList();
         return new Parsed(

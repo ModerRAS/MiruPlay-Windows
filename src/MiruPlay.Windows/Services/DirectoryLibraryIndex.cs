@@ -179,7 +179,7 @@ public sealed partial class DirectoryLibraryIndex
             })
             .ToList();
         series = series.Select(item => ReadOverride(connection, null, sourceId, item.Uuid) is string json
-            ? WithMetadata(item, ReadMetadata<NfoTvShowMetadata>(json) ?? throw new InvalidDataException("本地元数据覆盖为空。"))
+            ? WithMetadata(item, ReadMetadata<NfoTvShowMetadata>(json) ?? throw new InvalidDataException(AppStrings.Get("meta.batchSize")))
             : item).ToList();
         return new LibraryCatalog(1, normalizedRoot, series);
     }
@@ -209,7 +209,7 @@ public sealed partial class DirectoryLibraryIndex
         CancellationToken cancellationToken)
     {
         if (entries.Count > MaximumEntries)
-            throw new InvalidDataException($"目录扫描条目数超过 {MaximumEntries} 限制。");
+            throw new InvalidDataException(AppStrings.Get("idx.tooMany", MaximumEntries));
         var scanned = new Dictionary<string, IndexedEpisode>(StringComparer.OrdinalIgnoreCase);
         var fallbackNumber = 0;
         foreach (var entry in entries)
@@ -218,7 +218,7 @@ public sealed partial class DirectoryLibraryIndex
             var normalized = NormalizeEntry(entry, catalogRoot);
             if (!IsVideoFile(normalized.RelativePath)) continue;
             if (!scanned.TryAdd(normalized.RelativePath, Classify(normalized, ref fallbackNumber)))
-                throw new InvalidDataException("目录扫描发现重复的媒体路径。");
+                throw new InvalidDataException(AppStrings.Get("idx.dupPath"));
             progress?.Report(new DirectoryScanProgress(scanned.Count, scanned.Count, scanned.Count));
         }
 
@@ -412,7 +412,7 @@ public sealed partial class DirectoryLibraryIndex
             cancellationToken.ThrowIfCancellationRequested();
             if (!IsVideoFile(path) && !IsSubtitleFile(path) && !IsExternalAudioFile(path)) continue;
             if (relevantPaths.Count >= MaximumEntries)
-                throw new InvalidDataException($"目录扫描条目数超过 {MaximumEntries} 限制。");
+                throw new InvalidDataException(AppStrings.Get("idx.tooMany", MaximumEntries));
             relevantPaths.Add(path);
         }
         var files = relevantPaths
@@ -469,7 +469,7 @@ public sealed partial class DirectoryLibraryIndex
     private static T? ReadMetadata<T>(string json)
     {
         try { return JsonSerializer.Deserialize<T>(json); }
-        catch (JsonException error) { throw new InvalidDataException("目录索引 NFO 元数据格式无效。", error); }
+        catch (JsonException error) { throw new InvalidDataException(AppStrings.Get("idx.badNfoMeta"), error); }
     }
 
     private static List<ExternalMetadataId> MetadataIds(IReadOnlyList<NfoUniqueId>? ids) =>
@@ -511,8 +511,8 @@ public sealed partial class DirectoryLibraryIndex
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
         var fullPath = Path.GetFullPath(root.Trim());
         if (Directory.Exists(fullPath) && (File.GetAttributes(fullPath) & FileAttributes.ReparsePoint) != 0)
-            throw new InvalidDataException("媒体目录根不能是重解析点。");
-        if (!Directory.Exists(fullPath)) throw new DirectoryNotFoundException($"媒体目录不存在：{fullPath}");
+            throw new InvalidDataException(AppStrings.Get("idx.notReparse"));
+        if (!Directory.Exists(fullPath)) throw new DirectoryNotFoundException(AppStrings.Get("idx.noRoot3", fullPath));
         _ = Directory.EnumerateFileSystemEntries(fullPath).Take(1).ToList();
         return TrimDirectorySeparator(fullPath);
     }
@@ -541,7 +541,7 @@ public sealed partial class DirectoryLibraryIndex
         var fullPath = Path.GetFullPath(Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar)));
         var relativeCheck = Path.GetRelativePath(root, fullPath);
         if (relativeCheck == ".." || relativeCheck.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            throw new InvalidDataException("媒体索引路径超出来源根目录。");
+            throw new InvalidDataException(AppStrings.Get("idx.escaped"));
         return fullPath;
     }
 
@@ -551,7 +551,7 @@ public sealed partial class DirectoryLibraryIndex
         if (segments.Length == 0 || segments.Any(segment =>
                 segment is "." or ".." ||
                 segment.IndexOfAny(['/', '\\', '\0', ':']) >= 0))
-            throw new InvalidDataException("目录索引路径包含不安全的目录段。");
+            throw new InvalidDataException(AppStrings.Get("idx.unsafeSegment"));
         return segments;
     }
 
@@ -559,7 +559,7 @@ public sealed partial class DirectoryLibraryIndex
     {
         var clean = path.Trim().Replace('\\', '/');
         if (clean.StartsWith('/'))
-            throw new InvalidDataException("目录索引路径不能是绝对路径。");
+            throw new InvalidDataException(AppStrings.Get("idx.noAbsolute"));
         _ = SafeRelativeSegments(clean);
         return string.Join('/', clean.Split('/', StringSplitOptions.RemoveEmptyEntries));
     }
@@ -583,7 +583,7 @@ public sealed partial class DirectoryLibraryIndex
         }
         catch (JsonException error)
         {
-            throw new InvalidDataException("目录索引字幕路径格式无效。", error);
+            throw new InvalidDataException(AppStrings.Get("idx.badSubPath"), error);
         }
     }
 

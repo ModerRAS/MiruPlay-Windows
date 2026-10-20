@@ -136,12 +136,12 @@ public static class PlaybackPagePresentation
 {
     public static IReadOnlyList<PlaybackSpeedOption> SpeedOptions { get; } =
     [
-        new(0.5f, "0.5 倍"),
-        new(0.75f, "0.75 倍"),
-        new(1f, "1 倍"),
-        new(1.25f, "1.25 倍"),
-        new(1.5f, "1.5 倍"),
-        new(2f, "2 倍"),
+        new(0.5f, AppStrings.Get("play.speedLabel", "0.5")),
+        new(0.75f, AppStrings.Get("play.speedLabel", "0.75")),
+        new(1f, AppStrings.Get("play.speedLabel", "1")),
+        new(1.25f, AppStrings.Get("play.speedLabel", "1.25")),
+        new(1.5f, AppStrings.Get("play.speedLabel", "1.5")),
+        new(2f, AppStrings.Get("play.speedLabel", "2")),
     ];
 
     public static string FormatTime(long milliseconds) => TimeSpan

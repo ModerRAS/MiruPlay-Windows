@@ -60,7 +60,7 @@ public sealed class CloudDriveAutomationStore
         }
         catch (JsonException error)
         {
-            throw new InvalidDataException("CloudDrive 配置损坏。", error);
+            throw new InvalidDataException(AppStrings.Get("cd2.badConfig"), error);
         }
     }
 
@@ -79,16 +79,16 @@ public sealed class CloudDriveAutomationStore
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
             string.IsNullOrEmpty(uri.Host) || !string.IsNullOrEmpty(uri.UserInfo) ||
             (uri.AbsolutePath is not ("" or "/")) || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
-            throw new ArgumentException("CloudDrive2 地址必须是无路径、查询、片段或嵌入凭据的 HTTP(S) 服务根地址。", nameof(config));
+            throw new ArgumentException(AppStrings.Get("cd2.badEndpoint"), nameof(config));
         var username = config.Username.Trim();
-        if (username.Length > 100) throw new ArgumentException("CloudDrive2 用户名不能超过 100 个字符。", nameof(config));
-        var inbox = NormalizePath(config.InboxPath, "离线下载目录");
-        var library = NormalizePath(config.LibraryPath, "媒体库目录");
+        if (username.Length > 100) throw new ArgumentException(AppStrings.Get("cd2.userLong"), nameof(config));
+        var inbox = NormalizePath(config.InboxPath, AppStrings.Get("cd2.inboxLabel"));
+        var library = NormalizePath(config.LibraryPath, AppStrings.Get("cd2.libLabel"));
         var proxyHost = config.RssProxyHost.Trim();
-        if (proxyHost.Length > 253) throw new ArgumentException("RSS 代理主机名过长。", nameof(config));
+        if (proxyHost.Length > 253) throw new ArgumentException(AppStrings.Get("cd2.proxyLong"), nameof(config));
         if (config.RssProxyEnabled) _ = OutboundHttpProxy.ValidateUri(proxyHost, config.RssProxyPort);
         if (config.Enabled && (inbox.Length == 0 || library.Length == 0))
-            throw new ArgumentException("启用 CloudDrive/RSS 前必须设置离线下载目录和媒体库目录。", nameof(config));
+            throw new ArgumentException(AppStrings.Get("cd2.needDirs"), nameof(config));
         return config with
         {
             EndpointUrl = uri.GetLeftPart(UriPartial.Authority),
@@ -105,7 +105,7 @@ public sealed class CloudDriveAutomationStore
     private static string NormalizePath(string value, string label)
     {
         var path = value.Trim();
-        if (path.Length > 1_024) throw new ArgumentException($"{label}不能超过 1024 个字符。", nameof(value));
+        if (path.Length > 1_024) throw new ArgumentException(AppStrings.Get("cd2.tooLong", label), nameof(value));
         return path;
     }
 }

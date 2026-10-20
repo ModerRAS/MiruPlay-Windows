@@ -65,7 +65,7 @@ public sealed class CloudDriveRssRunner
     public async Task<CloudDriveRunStatus> RunAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (Interlocked.Exchange(ref _running, 1) != 0) throw new InvalidOperationException("CloudDrive/RSS 同步已在运行。");
+        if (Interlocked.Exchange(ref _running, 1) != 0) throw new InvalidOperationException(AppStrings.Get("runner.syncRunning"));
         var startedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         _status = new CloudDriveRunStatus("RUNNING", true, startedAt);
         _localLogs?.Write("INFO", "CloudDrive/RSS run started");
@@ -112,10 +112,10 @@ public sealed class CloudDriveRssRunner
     private async Task<CloudDriveRunSummary> RunCoreAsync(CancellationToken cancellationToken)
     {
         var config = _config.Load();
-        if (!config.Enabled) throw new InvalidOperationException("请先启用 CloudDrive/RSS 同步。");
+        if (!config.Enabled) throw new InvalidOperationException(AppStrings.Get("runner.enableFirst"));
         var savedCredentials = _credentials.LoadForEndpoint(config.EndpointUrl);
         var token = savedCredentials.Token;
-        if (string.IsNullOrEmpty(token)) throw new InvalidOperationException("请先登录或验证 CloudDrive2 API Token。");
+        if (string.IsNullOrEmpty(token)) throw new InvalidOperationException(AppStrings.Get("api.errCdLogin"));
         CloudDriveTokenInfo info;
         try
         {
@@ -125,10 +125,10 @@ public sealed class CloudDriveRssRunner
         {
             (token, info) = await RefreshAuthenticationAsync(config, savedCredentials.Password, cancellationToken).ConfigureAwait(false);
         }
-        if (!info.AllowAddOfflineDownload) throw new InvalidOperationException("CloudDrive2 API Token 没有离线下载权限。");
+        if (!info.AllowAddOfflineDownload) throw new InvalidOperationException(AppStrings.Get("api.errCdNoOffline"));
         var root = NormalizePath(info.RootDir);
         var inbox = NormalizePath(config.InboxPath);
-        if (inbox == "/" || !IsWithinRoot(inbox, root)) throw new InvalidOperationException("CloudDrive2 离线下载目录超出 Token 根目录或指向根目录。");
+        if (inbox == "/" || !IsWithinRoot(inbox, root)) throw new InvalidOperationException(AppStrings.Get("runner.inboxOutside"));
         var submitted = 0;
         var skipped = 0;
         var failed = 0;
@@ -233,7 +233,7 @@ public sealed class CloudDriveRssRunner
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(config.Username) || string.IsNullOrWhiteSpace(password))
-            throw new InvalidOperationException("CloudDrive2 认证已过期，且没有可用于重新登录的已保存凭据。");
+            throw new InvalidOperationException(AppStrings.Get("runner.authExpired"));
         var login = await _cloudDrive.LoginAsync(config.EndpointUrl, config.Username, password, cancellationToken).ConfigureAwait(false);
         var info = await _cloudDrive.GetApiTokenInfoAsync(config.EndpointUrl, login.Token, cancellationToken).ConfigureAwait(false);
         _credentials.SaveToken(config.EndpointUrl, login.Token);
@@ -253,7 +253,7 @@ public sealed class CloudDriveRssRunner
     private static string NormalizePath(string path)
     {
         var segments = path.Trim().Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (segments.Any(segment => segment is "." or "..")) throw new InvalidOperationException("CloudDrive2 目录包含路径遍历。");
+        if (segments.Any(segment => segment is "." or "..")) throw new InvalidOperationException(AppStrings.Get("api.errTraversal"));
         return segments.Length == 0 ? "/" : $"/{string.Join('/', segments)}";
     }
 

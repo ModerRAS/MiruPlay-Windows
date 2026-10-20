@@ -34,7 +34,7 @@ public sealed class ToppingController
     {
         var attached = _transport.ListDevices();
         if (attached.Count == 0)
-            return new Status(false, null, null, false, false, "未检测到已确认型号的 Topping DAC（需 DX5 II 或 D90 III Discrete）");
+            return new Status(false, null, null, false, false, AppStrings.Get("top.noDevice"));
         var device = attached[0];
         var cached = Volatile.Read(ref _lastState);
         return new Status(
@@ -47,12 +47,12 @@ public sealed class ToppingController
     public async Task<Status> SetVolumeAsync(double db, bool confirmed = false, double stepDb = 0.5, CancellationToken cancellationToken = default)
     {
         if (db is < ToppingProtocol.VolumeMinDb or > ToppingProtocol.VolumeMaxDb)
-            throw new ToppingCommandException($"音量 {db} dB 超出范围（-99..0）");
+            throw new ToppingCommandException(AppStrings.Get("top.volRange", db));
         if (db > ToppingProtocol.VolumeWarnDb && !confirmed)
-            throw new ToppingCommandException($"{db} dB 音量过大，请二次确认后再执行");
+            throw new ToppingCommandException(AppStrings.Get("top.loudConfirm", db));
         var device = Resolve();
         if (!device.Spec.HidVolume)
-            throw new ToppingCommandException($"{device.Spec.Name} 的音量不在 USB HID 接口上（仅面板/遥控可调）");
+            throw new ToppingCommandException(AppStrings.Get("top.noHidVolume", device.Spec.Name));
         await SendAllAsync(device, ToppingProtocol.VolumeFrames(db, stepDb), cancellationToken).ConfigureAwait(false);
         return Remember(status => status with { VolumeDb = db });
     }
@@ -91,7 +91,7 @@ public sealed class ToppingController
             }
         }
         if (!hasUsableBand)
-            throw new ToppingCommandException("预设中没有可写入设备的有效滤波");
+            throw new ToppingCommandException(AppStrings.Get("top.noBands"));
         var frames = new List<byte[]>();
         if (mapping.PreampDb is { } preamp) frames.AddRange(ToppingProtocol.PreampFrames(preamp));
         for (var i = 0; i < mapping.Bands.Count; i++) frames.AddRange(ToppingProtocol.BandFrames(i, mapping.Bands[i]));
@@ -117,7 +117,7 @@ public sealed class ToppingController
     public async Task<Status> SetPreampAsync(double db, CancellationToken cancellationToken = default)
     {
         if (db is < ToppingProtocol.PreampMinDb or > ToppingProtocol.PreampMaxDb)
-            throw new ToppingCommandException($"preamp {db} dB 超出范围（-40..+10）");
+            throw new ToppingCommandException(AppStrings.Get("top.preampRange", db));
         var device = Resolve();
         await SendAllAsync(device, ToppingProtocol.PreampFrames(db), cancellationToken).ConfigureAwait(false);
         return Remember(status => status with { PreampDb = db });
@@ -136,9 +136,9 @@ public sealed class ToppingController
             }
         }
         if (device is null)
-            throw new ToppingCommandException($"未找到 {(deviceKey is null ? "已确认型号的 Topping DAC" : deviceKey)}");
+            throw new ToppingCommandException(AppStrings.Get("top.notFound", deviceKey ?? AppStrings.Get("top.noConfirmedModel")));
         if (!device.Spec.Confirmed)
-            throw new ToppingCommandException($"{device.Spec.Name} 的寄存器映射未在实机确认（多个 Topping 型号共用 PID，寄存器含义可能冲突），拒绝写入");
+            throw new ToppingCommandException(AppStrings.Get("top.unconfirmed", device.Spec.Name));
         return device;
     }
 

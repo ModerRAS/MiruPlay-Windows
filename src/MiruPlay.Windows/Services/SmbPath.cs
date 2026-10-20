@@ -9,13 +9,13 @@ public static class SmbPath
         if (value.Contains("://", StringComparison.Ordinal) &&
             !value.StartsWith("smb://", StringComparison.OrdinalIgnoreCase))
         {
-            throw new ArgumentException("SMB 地址必须使用 smb:// scheme。", nameof(location));
+            throw new ArgumentException(AppStrings.Get("smb.scheme"), nameof(location));
         }
         if (value.StartsWith("//", StringComparison.Ordinal)) value = $"smb:{value}";
         else if (!value.StartsWith("smb://", StringComparison.OrdinalIgnoreCase)) value = $"smb://{value}";
         if (ContainsUnsafeRawPathSegment(value))
         {
-            throw new ArgumentException("SMB 地址包含不安全的目录段。", nameof(location));
+            throw new ArgumentException(AppStrings.Get("smb.unsafe"), nameof(location));
         }
 
         if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) ||
@@ -26,11 +26,11 @@ public static class SmbPath
             !string.IsNullOrEmpty(uri.Fragment) ||
             !uri.IsDefaultPort)
         {
-            throw new ArgumentException("SMB 地址必须是 smb://服务器/共享目录 或 UNC 路径。", nameof(location));
+            throw new ArgumentException(AppStrings.Get("smb.shape"), nameof(location));
         }
 
         var segments = ParseUriSegments(uri);
-        if (segments.Count == 0) throw new ArgumentException("SMB 地址必须包含共享目录。", nameof(location));
+        if (segments.Count == 0) throw new ArgumentException(AppStrings.Get("smb.needShare"), nameof(location));
         return $"smb://{uri.IdnHost}/{string.Join('/', segments.Select(Uri.EscapeDataString))}";
     }
 
@@ -50,17 +50,17 @@ public static class SmbPath
 
     public static string ResolveIndexPath(string location, string indexPath)
     {
-        if (string.IsNullOrWhiteSpace(indexPath)) throw new InvalidDataException("MLIP 路径不能为空。");
+        if (string.IsNullOrWhiteSpace(indexPath)) throw new InvalidDataException(AppStrings.Get("smb.emptyPath"));
         var clean = indexPath.Trim().Replace('\\', '/');
         if (clean.StartsWith("//", StringComparison.Ordinal) ||
             Uri.TryCreate(clean, UriKind.Absolute, out _))
         {
-            throw new InvalidDataException("MLIP 路径不能是绝对地址。");
+            throw new InvalidDataException(AppStrings.Get("smb.absolutePath"));
         }
         var segments = clean.TrimStart('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (segments.Length == 0 || segments.Any(IsUnsafeSegment))
         {
-            throw new InvalidDataException("MLIP 路径包含不安全的目录段。");
+            throw new InvalidDataException(AppStrings.Get("smb.unsafePath"));
         }
 
         var root = ToUncPath(location);
@@ -68,7 +68,7 @@ public static class SmbPath
         var prefix = root.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         if (!resolved.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidDataException("MLIP 路径越过了 SMB 媒体源根目录。");
+            throw new InvalidDataException(AppStrings.Get("smb.escaped"));
         }
         return resolved;
     }
@@ -80,7 +80,7 @@ public static class SmbPath
             .ToList();
         if (segments.Any(IsUnsafeSegment))
         {
-            throw new ArgumentException("SMB 地址包含不安全的目录段。", nameof(uri));
+            throw new ArgumentException(AppStrings.Get("smb.unsafe"), nameof(uri));
         }
         return segments;
     }
