@@ -54,8 +54,8 @@ public sealed class BangumiMetadataClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         var keyword = query.Trim();
-        if (keyword.Length == 0) throw new ArgumentException("Bangumi 搜索词不能为空。", nameof(query));
-        if (keyword.Length > 100) throw new ArgumentException("Bangumi 搜索词不能超过 100 个字符。", nameof(query));
+        if (keyword.Length == 0) throw new ArgumentException(AppStrings.Get("bgm.queryEmpty"), nameof(query));
+        if (keyword.Length > 100) throw new ArgumentException(AppStrings.Get("bgm.queryLong"), nameof(query));
         var boundedLimit = Math.Clamp(limit, 1, 20);
         using var response = await _httpClient.PostAsJsonAsync(
             $"search/subjects?limit={boundedLimit}",
@@ -64,13 +64,13 @@ public sealed class BangumiMetadataClient : IDisposable
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
-                $"Bangumi 搜索失败 (HTTP {(int)response.StatusCode})。",
+                AppStrings.Get("bgm.searchFailed", (int)response.StatusCode),
                 null,
                 response.StatusCode);
         }
         var payload = await response.Content.ReadFromJsonAsync<BangumiSearchResponse>(
             cancellationToken: cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidDataException("Bangumi 搜索返回了空响应。");
+            ?? throw new InvalidDataException(AppStrings.Get("bgm.emptyResponse"));
         return payload.Data
             .Where(item => item.SubjectType == 2 && item.Id > 0 && !string.IsNullOrWhiteSpace(item.Name))
             .Select(item => new BangumiSearchCandidate(
@@ -89,19 +89,19 @@ public sealed class BangumiMetadataClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         var token = accessToken.Trim();
-        if (token.Length == 0) throw new InvalidOperationException("尚未配置 Bangumi Access Token。");
+        if (token.Length == 0) throw new InvalidOperationException(AppStrings.Get("bgm.noToken"));
         using var request = new HttpRequestMessage(HttpMethod.Get, "me");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
-                $"Bangumi 身份验证失败 (HTTP {(int)response.StatusCode})。",
+                AppStrings.Get("bgm.authFailed", (int)response.StatusCode),
                 null,
                 response.StatusCode);
         }
         return await response.Content.ReadFromJsonAsync<BangumiUser>(cancellationToken: cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidDataException("Bangumi 身份验证返回了空响应。");
+            ?? throw new InvalidDataException(AppStrings.Get("bgm.authEmpty"));
     }
 
     public async Task<BangumiSubjectCollectionState?> GetSubjectCollectionAsync(
@@ -111,7 +111,7 @@ public sealed class BangumiMetadataClient : IDisposable
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(subjectId);
         var token = accessToken.Trim();
-        if (token.Length == 0) throw new InvalidOperationException("尚未配置 Bangumi Access Token。");
+        if (token.Length == 0) throw new InvalidOperationException(AppStrings.Get("bgm.noToken"));
         using var request = new HttpRequestMessage(HttpMethod.Get, $"users/-/collections/{subjectId}");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -119,13 +119,13 @@ public sealed class BangumiMetadataClient : IDisposable
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
-                $"Bangumi 收藏读取失败 (HTTP {(int)response.StatusCode})。",
+                AppStrings.Get("bgm.collectionFailed", (int)response.StatusCode),
                 null,
                 response.StatusCode);
         }
         var value = await response.Content.ReadFromJsonAsync<BangumiSubjectCollectionResponse>(
             cancellationToken: cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidDataException("Bangumi 收藏返回了空响应。");
+            ?? throw new InvalidDataException(AppStrings.Get("bgm.collectionEmpty"));
         return new BangumiSubjectCollectionState(value.SubjectId, value.Type, value.Rate, value.EpisodeStatus, value.UpdatedAt);
     }
 
@@ -138,7 +138,7 @@ public sealed class BangumiMetadataClient : IDisposable
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(subjectId);
         if (type is < 1 or > 5) throw new ArgumentOutOfRangeException(nameof(type));
         var token = accessToken.Trim();
-        if (token.Length == 0) throw new InvalidOperationException("尚未配置 Bangumi Access Token。");
+        if (token.Length == 0) throw new InvalidOperationException(AppStrings.Get("bgm.noToken"));
         using var request = new HttpRequestMessage(HttpMethod.Post, $"users/-/collections/{subjectId}")
         {
             Content = JsonContent.Create(new { type })
@@ -148,7 +148,7 @@ public sealed class BangumiMetadataClient : IDisposable
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpRequestException(
-                $"Bangumi 收藏更新失败 (HTTP {(int)response.StatusCode})。",
+                AppStrings.Get("bgm.updateFailed", (int)response.StatusCode),
                 null,
                 response.StatusCode);
         }
@@ -163,7 +163,7 @@ public sealed class BangumiMetadataClient : IDisposable
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(episodeId);
         if (type is < 0 or > 3) throw new ArgumentOutOfRangeException(nameof(type));
         var token = accessToken.Trim();
-        if (token.Length == 0) throw new InvalidOperationException("尚未配置 Bangumi Access Token。");
+        if (token.Length == 0) throw new InvalidOperationException(AppStrings.Get("bgm.noToken"));
         using var request = new HttpRequestMessage(HttpMethod.Put, $"users/-/collections/-/episodes/{episodeId}")
         {
             Content = JsonContent.Create(new { type })
@@ -171,7 +171,7 @@ public sealed class BangumiMetadataClient : IDisposable
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"Bangumi 分集状态更新失败 (HTTP {(int)response.StatusCode})。", null, response.StatusCode);
+            throw new HttpRequestException(AppStrings.Get("bgm.episodeUpdateFailed", (int)response.StatusCode), null, response.StatusCode);
     }
 
     public async Task<IReadOnlyList<BangumiEpisodeCollectionState>> GetEpisodeCollectionsAsync(
@@ -181,7 +181,7 @@ public sealed class BangumiMetadataClient : IDisposable
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(subjectId);
         var token = accessToken.Trim();
-        if (token.Length == 0) throw new InvalidOperationException("尚未配置 Bangumi Access Token。");
+        if (token.Length == 0) throw new InvalidOperationException(AppStrings.Get("bgm.noToken"));
         const int pageSize = 1_000;
         var values = new List<BangumiEpisodeCollectionState>();
         var offset = 0;
@@ -193,9 +193,9 @@ public sealed class BangumiMetadataClient : IDisposable
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException($"Bangumi 分集状态读取失败 (HTTP {(int)response.StatusCode})。", null, response.StatusCode);
+                throw new HttpRequestException(AppStrings.Get("bgm.episodeReadFailed", (int)response.StatusCode), null, response.StatusCode);
             var page = await response.Content.ReadFromJsonAsync<BangumiEpisodeCollectionPage>(cancellationToken: cancellationToken).ConfigureAwait(false)
-                ?? throw new InvalidDataException("Bangumi 分集状态返回了空响应。");
+                ?? throw new InvalidDataException(AppStrings.Get("bgm.episodeEmpty"));
             values.AddRange(page.Data);
             offset += page.Data.Count;
             if (page.Data.Count == 0 || offset >= page.Total) break;

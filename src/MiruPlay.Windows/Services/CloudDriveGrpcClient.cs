@@ -481,12 +481,12 @@ public sealed class CloudDriveGrpcClient
             }
             catch (RpcException retryError)
             {
-                throw new HttpRequestException($"CloudDrive2 {name} ({retryError.StatusCode})。", retryError);
+                throw new HttpRequestException(AppStrings.Get("cd2.opFailed", name, retryError.StatusCode), retryError);
             }
         }
         catch (RpcException error)
         {
-            throw new HttpRequestException($"CloudDrive2 {name} ({error.StatusCode})。", error);
+            throw new HttpRequestException(AppStrings.Get("cd2.opFailed", name, error.StatusCode), error);
         }
     }
 

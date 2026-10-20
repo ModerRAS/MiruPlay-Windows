@@ -41,7 +41,7 @@ public sealed class RoomMeasureRunner
     public static string NormalizeUmikSerial(string input)
     {
         var digits = new string((input ?? "").Where(char.IsDigit).ToArray());
-        if (digits.Length != 7) throw new MeasureException("序列号需要恰好 7 位数字（如 700-1234）。");
+        if (digits.Length != 7) throw new MeasureException(AppStrings.Get("measure.badSerial"));
         return digits;
     }
 
@@ -67,16 +67,16 @@ public sealed class RoomMeasureRunner
         {
             using var response = await _http.GetAsync(url, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
-                throw new MeasureException($"下载校准文件失败（HTTP {(int)response.StatusCode}）。");
+                throw new MeasureException(AppStrings.Get("measure.downloadFailed", (int)response.StatusCode));
             text = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (HttpRequestException error)
         {
-            throw new MeasureException($"下载校准文件失败：{error.Message}");
+            throw new MeasureException(AppStrings.Get("measure.downloadError", error.Message));
         }
-        if (text.Length > MicCalibration.MaxTextChars) throw new MeasureException("校准文件过大。");
+        if (text.Length > MicCalibration.MaxTextChars) throw new MeasureException(AppStrings.Get("measure.calTooLarge"));
         if (IsUmikErrorBody(text))
-            throw new MeasureException($"miniDSP 上没有找到该序列号（{serial}）的校准数据，请核对序列号。");
+            throw new MeasureException(AppStrings.Get("measure.noUmikData", serial));
         var parsed = MicCalibration.Parse(text, incidence);
         if (parsed.Calibration.CoverageWarning() is { } warning) throw new MeasureException(warning);
         return text;
@@ -91,10 +91,10 @@ public sealed class RoomMeasureRunner
         }
         catch (Exception error) when (error is InvalidOperationException or DllNotFoundException or EntryPointNotFoundException)
         {
-            return new Capabilities(false, $"枚举麦克风失败：{error.Message}", null, []);
+            return new Capabilities(false, AppStrings.Get("measure.enumFailed", error.Message), null, []);
         }
         if (mics.Count == 0)
-            return new Capabilities(false, "未找到可用的麦克风输入设备", null, []);
+            return new Capabilities(false, AppStrings.Get("measure.noMic"), null, []);
         var preferred = PickPreferredMicrophone(mics);
         return new Capabilities(true, null, preferred.Name, mics);
     }
@@ -182,10 +182,10 @@ public sealed class RoomMeasureRunner
         for (var i = 0; i < sweeps.Count; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            onProgress?.Invoke($"播放扫频 {i + 1}/{sweeps.Count}（{SweepDurationsS[i]}s）…");
+            onProgress?.Invoke(AppStrings.Get("measure.sweepProgress", i + 1, sweeps.Count, SweepDurationsS[i]));
             recordings.Add(await PlayAndCaptureAsync(sweeps[i].Sweep, micId, cancellationToken).ConfigureAwait(false));
         }
-        onProgress?.Invoke("分析房间响应…");
+        onProgress?.Invoke(AppStrings.Get("measure.analyzing"));
         var measurement = await Task.Run(() => RoomMeasurePipeline.Measure(
             recordings, sweeps, SampleRateHz, irLengthS: IrLengthS, calibration: calibration),
             cancellationToken).ConfigureAwait(false);
@@ -199,13 +199,13 @@ public sealed class RoomMeasureRunner
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(wavBytes);
-        onProgress?.Invoke("解析 WAV…");
+        onProgress?.Invoke(AppStrings.Get("measure.parsingWav"));
         var (samples, fs) = await Task.Run(() => WavFile.Read16BitMono(wavBytes), cancellationToken).ConfigureAwait(false);
         var calibration = calibrationText is null ? null : MicCalibration.Parse(calibrationText).Calibration;
         var candidates = SweepDurationsS.Where(duration => samples.Length >= (duration + 0.5) * fs).ToList();
         if (candidates.Count == 0)
-            throw new MeasureException($"WAV 太短：需要 ≥ {(int)SweepDurationsS[0] + 1} 秒的标准扫频录音（含房间尾音）。");
-        onProgress?.Invoke("分析房间响应…");
+            throw new MeasureException(AppStrings.Get("measure.wavTooShort", (int)SweepDurationsS[0] + 1));
+        onProgress?.Invoke(AppStrings.Get("measure.analyzing"));
         RoomMeasurePipeline.Measurement? best = null;
         var bestSharpness = -1.0;
         foreach (var duration in candidates)
@@ -223,7 +223,7 @@ public sealed class RoomMeasureRunner
                 best = measurement;
             }
         }
-        if (best is null) throw new MeasureException("WAV 分析失败。");
+        if (best is null) throw new MeasureException(AppStrings.Get("measure.wavFailed"));
         return new MeasureOutcome(best, new Capabilities(true, null, "shared-clock import", []));
     }
 
