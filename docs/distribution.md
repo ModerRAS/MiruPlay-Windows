@@ -42,4 +42,8 @@ A public production release should be treated as unsigned unless the manifest sa
 
 Pull requests and branch pushes run restore, warning-as-error Release build, tests, dependency audit, and a mandatory real-mpv integration job using the pinned runtime and tracked smoke fixture. A `v<major>.<minor>.<patch>` tag or manual workflow dispatch also builds and validates release artifacts. Tag builds upload the verified files to the matching GitHub Release; manual runs keep them as Actions artifacts without creating a tag or release.
 
+## Release history
+
+- **v0.1.5** (2026-10-20, `Latest`): portable-only release, built locally from `2c715a6` via `Publish-Release.ps1 -Version 0.1.5 -SkipInstaller` and verified with `Test-ReleaseArtifacts.ps1 -SkipInstaller` (3 hashes, portable launch test). Assets: portable ZIP, symbols ZIP, `SHA256SUMS.txt`, `release-manifest.json`; unsigned. No installer/`windows-update.json` in this release (installer deferred: no Inno Setup on the build machine, no code-signing certificate).
+
 `tools/Test-ReleaseArtifacts.ps1` verifies every checksum, expands and launches the portable package, silently installs and launches the installer, closes the application through its normal WPF lifecycle, and silently uninstalls it. GitHub-hosted Windows runners provide the clean-user validation lane.
