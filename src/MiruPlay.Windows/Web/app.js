@@ -109,8 +109,8 @@ async function switchView(view) {
   $('#view-subtitle').textContent = t(subtitleKey)
   $$('#nav button').forEach(button => button.setAttribute('aria-current', button.dataset.view === view ? 'page' : 'false'))
   toolbarActions.innerHTML = view === 'library'
-    ? '<input id="library-search" type="search" placeholder="搜索标题" aria-label="搜索片库"><button id="refresh-library" class="icon-button" title="刷新" aria-label="刷新">↻</button>'
-    : '<button id="refresh-view" class="icon-button" title="刷新" aria-label="刷新">↻</button>'
+    ? `<input id="library-search" type="search" placeholder="${t('toolbar.searchTitle')}" aria-label="${t('toolbar.searchLibrary')}"><button id="refresh-library" class="icon-button" title="${t('toolbar.refresh')}" aria-label="${t('toolbar.refresh')}">↻</button>`
+    : `<button id="refresh-view" class="icon-button" title="${t('toolbar.refresh')}" aria-label="${t('toolbar.refresh')}">↻</button>`
   if (view === 'library') {
     let timer
     $('#library-search').addEventListener('input', event => { clearTimeout(timer); timer = setTimeout(() => loadLibrary(event.target.value), 250) })
@@ -120,7 +120,7 @@ async function switchView(view) {
   content.focus()
 }
 async function renderView(view) {
-  content.innerHTML = '<div class="empty">正在读取…</div>'
+  content.innerHTML = `<div class="empty">${t('common.loading')}</div>`
   try {
     if (view === 'library') await loadLibrary()
     if (view === 'sources') await loadSources()
@@ -140,19 +140,19 @@ async function loadLibrary(query = '') {
   const continuing = data.continueWatching || []
   const all = data.allAnime || []
   const sections = data.sections?.length ? data.sections : [{ title: null, anime: all }]
-  continuing.forEach(item => state.episodeTitles.set(item.episode.id, `第 ${item.episode.episodeNumber} 集 · ${item.episode.title || item.anime.titleCn || item.anime.title}`))
+  continuing.forEach(item => state.episodeTitles.set(item.episode.id, t('lib.episodeTitle', item.episode.episodeNumber, item.episode.title || item.anime.titleCn || item.anime.title)))
   content.innerHTML = `<div class="stack">
-    ${continuing.length ? `<section><div class="section-head"><h2>继续观看</h2><span class="muted">${continuing.length} 项</span></div><div class="continue-grid">${continuing.map(item => `<button class="continue-card" data-play="${escapeHtml(item.episode.id)}" data-position="${Number(item.positionMs || 0)}"><strong>${escapeHtml(item.anime.titleCn || item.anime.title)}</strong><span class="muted">第 ${item.episode.episodeNumber} 集 · ${formatTime(item.positionMs)}</span><progress max="${Math.max(1, Number(item.episode.duration || 1))}" value="${Number(item.positionMs || 0)}"></progress></button>`).join('')}</div></section>` : ''}
-    ${sections.map(section => `<section><div class="section-head"><h2>${escapeHtml(section.title || '全部内容')}</h2><span class="muted">${section.anime.length} 部</span></div>
-    ${section.anime.length ? `<div class="poster-grid">${section.anime.map(anime => posterCard(anime)).join('')}</div>` : '<div class="empty panel">当前媒体源没有可显示内容。</div>'}</section>`).join('')}
+    ${continuing.length ? `<section><div class="section-head"><h2>${t('lib.continue')}</h2><span class="muted">${t('lib.items', continuing.length)}</span></div><div class="continue-grid">${continuing.map(item => `<button class="continue-card" data-play="${escapeHtml(item.episode.id)}" data-position="${Number(item.positionMs || 0)}"><strong>${escapeHtml(item.anime.titleCn || item.anime.title)}</strong><span class="muted">${t('lib.episodeTitle', item.episode.episodeNumber, formatTime(item.positionMs))}</span><progress max="${Math.max(1, Number(item.episode.duration || 1))}" value="${Number(item.positionMs || 0)}"></progress></button>`).join('')}</div></section>` : ''}
+    ${sections.map(section => `<section><div class="section-head"><h2>${escapeHtml(section.title || t('lib.all'))}</h2><span class="muted">${t('lib.seriesCount', section.anime.length)}</span></div>
+    ${section.anime.length ? `<div class="poster-grid">${section.anime.map(anime => posterCard(anime)).join('')}</div>` : `<div class="empty panel">${t('lib.empty')}</div>`}</section>`).join('')}
   </div>`
   $$('[data-anime]').forEach(button => button.onclick = () => openAnime(button.dataset.anime))
   $$('[data-play]').forEach(button => button.onclick = () => playEpisode(button.dataset.play, Number(button.dataset.position)))
 }
 function posterCard(anime) {
   const title = anime.titleCn || anime.title || anime.id
-  const poster = anime.posterUrl ? `<img class="poster" src="${escapeHtml(withToken(anime.posterUrl))}" alt="${escapeHtml(title)} 海报" loading="lazy">` : `<div class="poster">${escapeHtml(title.slice(0, 1))}</div>`
-  return `<button class="poster-card" data-anime="${escapeHtml(anime.id)}">${poster}<span class="poster-copy"><strong>${escapeHtml(title)}</strong>${anime.titleCn && anime.title !== anime.titleCn ? `<span class="muted">${escapeHtml(anime.title)}</span>` : ''}<small>${Number(anime.episodeCount || 0)} 集</small></span></button>`
+  const poster = anime.posterUrl ? `<img class="poster" src="${escapeHtml(withToken(anime.posterUrl))}" alt="${escapeHtml(t('lib.posterAlt', title))}" loading="lazy">` : `<div class="poster">${escapeHtml(title.slice(0, 1))}</div>`
+  return `<button class="poster-card" data-anime="${escapeHtml(anime.id)}">${poster}<span class="poster-copy"><strong>${escapeHtml(title)}</strong>${anime.titleCn && anime.title !== anime.titleCn ? `<span class="muted">${escapeHtml(anime.title)}</span>` : ''}<small>${t('lib.episodeCount', Number(anime.episodeCount || 0))}</small></span></button>`
 }
 function withToken(url) {
   if (!url?.startsWith('/api/')) return url
@@ -162,7 +162,7 @@ async function openAnime(id) {
   try {
     const detail = await api(`/api/anime/${encodeURIComponent(id)}`)
     const anime = detail.anime
-    detail.episodes.forEach(item => state.episodeTitles.set(item.episode.id, `第 ${item.episode.episodeNumber} 集 · ${item.episode.title || anime.titleCn || anime.title}`))
+    detail.episodes.forEach(item => state.episodeTitles.set(item.episode.id, t('lib.episodeTitle', item.episode.episodeNumber, item.episode.title || anime.titleCn || anime.title)))
     const bangumiId = Number(anime.bangumiId || anime.externalIds?.find(id => id.provider === 'Bangumi')?.value || 0)
     let subjectCollection = null, episodeCollections = []
     if (bangumiId > 0) {
@@ -175,11 +175,11 @@ async function openAnime(id) {
         episodeCollections = episodes
       } catch (error) { toast(error.message, true) }
     }
-    const subjectControls = bangumiId > 0 ? `<section class="panel"><div class="form-grid"><label>Bangumi 收藏状态<select id="subject-collection">${[['1','想看'],['2','看过'],['3','在看'],['4','搁置'],['5','抛弃']].map(([value,label]) => `<option value="${value}" ${Number(subjectCollection?.type || 1) === Number(value) ? 'selected' : ''}>${label}</option>`).join('')}</select></label><div class="actions"><button id="save-subject-collection" class="secondary" type="button">更新收藏</button></div></div></section>` : ''
+    const subjectControls = bangumiId > 0 ? `<section class="panel"><div class="form-grid"><label>${t('bangumi.subjectStatus')}<select id="subject-collection">${[['1',t('bangumi.want')],['2',t('bangumi.done')],['3',t('bangumi.watching')],['4',t('bangumi.onHold')],['5',t('bangumi.dropped')]].map(([value,label]) => `<option value="${value}" ${Number(subjectCollection?.type || 1) === Number(value) ? 'selected' : ''}>${label}</option>`).join('')}</select></label><div class="actions"><button id="save-subject-collection" class="secondary" type="button">${t('bangumi.updateCollection')}</button></div></div></section>` : ''
     const episodeStatus = new Map(episodeCollections.map(item => [Number(item.episodeId), Number(item.type)]))
-    modalContent.innerHTML = `<section class="modal-hero"><h2>${escapeHtml(anime.titleCn || anime.title)}</h2>${anime.titleCn && anime.title !== anime.titleCn ? `<p class="muted">${escapeHtml(anime.title)}</p>` : ''}<p>${escapeHtml(anime.summary || '暂无简介')}</p><div class="actions">${(anime.genres || []).map(item => `<span class="badge">${escapeHtml(item)}</span>`).join('')}</div></section>${subjectControls}<section class="episode-list">${detail.episodes.map(item => { const bangumiEpisodeId = Number(item.episode.bangumiEpisodeId || item.episode.externalIds?.find(id => id.provider === 'Bangumi')?.value || 0); return `<article class="episode panel"><div><strong>第 ${item.episode.episodeNumber} 集 · ${escapeHtml(item.episode.title || '')}</strong><p class="muted">${item.progressMs ? `已观看 ${formatTime(item.progressMs)}` : '未观看'} · ${formatTime(item.episode.duration)}</p>${bangumiEpisodeId > 0 ? `<label>Bangumi 状态<select data-episode-collection="${bangumiEpisodeId}">${[['0','未标记'],['1','想看'],['2','看过'],['3','抛弃']].map(([value,label]) => `<option value="${value}" ${Number(episodeStatus.get(bangumiEpisodeId) || 0) === Number(value) ? 'selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}</div><div class="actions">${bangumiEpisodeId > 0 ? `<button class="secondary" data-save-episode-collection="${bangumiEpisodeId}" type="button">更新状态</button>` : ''}<button class="primary" data-modal-play="${escapeHtml(item.episode.id)}" data-position="${Number(item.progressMs || 0)}">播放</button></div></article>` }).join('')}</section>`
-    $('#save-subject-collection', modalContent)?.addEventListener('click', async () => { try { await api(`/api/metadata/bangumi/subjects/${bangumiId}/collection`, { method: 'PUT', body: JSON.stringify({ type: Number($('#subject-collection', modalContent).value) }) }); toast('Bangumi 收藏已更新') } catch (error) { toast(error.message, true) } })
-    $$('[data-save-episode-collection]', modalContent).forEach(button => button.onclick = async () => { const id = button.dataset.saveEpisodeCollection, type = Number($(`[data-episode-collection="${id}"]`, modalContent).value); try { await api(`/api/metadata/bangumi/episodes/${id}/collection`, { method: 'PUT', body: JSON.stringify({ type }) }); toast('Bangumi 分集状态已更新') } catch (error) { toast(error.message, true) } })
+    modalContent.innerHTML = `<section class="modal-hero"><h2>${escapeHtml(anime.titleCn || anime.title)}</h2>${anime.titleCn && anime.title !== anime.titleCn ? `<p class="muted">${escapeHtml(anime.title)}</p>` : ''}<p>${escapeHtml(anime.summary || t('bangumi.noSummary'))}</p><div class="actions">${(anime.genres || []).map(item => `<span class="badge">${escapeHtml(item)}</span>`).join('')}</div></section>${subjectControls}<section class="episode-list">${detail.episodes.map(item => { const bangumiEpisodeId = Number(item.episode.bangumiEpisodeId || item.episode.externalIds?.find(id => id.provider === 'Bangumi')?.value || 0); return `<article class="episode panel"><div><strong>${escapeHtml(t('lib.episodeTitle', item.episode.episodeNumber, item.episode.title || ''))}</strong><p class="muted">${item.progressMs ? t('bangumi.watched', formatTime(item.progressMs)) : t('bangumi.unwatched')} · ${formatTime(item.episode.duration)}</p>${bangumiEpisodeId > 0 ? `<label>${t('bangumi.episodeStatus')}<select data-episode-collection="${bangumiEpisodeId}">${[['0',t('bangumi.unmarked')],['1',t('bangumi.want')],['2',t('bangumi.done')],['3',t('bangumi.dropped')]].map(([value,label]) => `<option value="${value}" ${Number(episodeStatus.get(bangumiEpisodeId) || 0) === Number(value) ? 'selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}</div><div class="actions">${bangumiEpisodeId > 0 ? `<button class="secondary" data-save-episode-collection="${bangumiEpisodeId}" type="button">${t('bangumi.updateStatus')}</button>` : ''}<button class="primary" data-modal-play="${escapeHtml(item.episode.id)}" data-position="${Number(item.progressMs || 0)}">${t('play.play')}</button></div></article>` }).join('')}</section>`
+    $('#save-subject-collection', modalContent)?.addEventListener('click', async () => { try { await api(`/api/metadata/bangumi/subjects/${bangumiId}/collection`, { method: 'PUT', body: JSON.stringify({ type: Number($('#subject-collection', modalContent).value) }) }); toast(t('bangumi.subjectUpdated')) } catch (error) { toast(error.message, true) } })
+    $$('[data-save-episode-collection]', modalContent).forEach(button => button.onclick = async () => { const id = button.dataset.saveEpisodeCollection, type = Number($(`[data-episode-collection="${id}"]`, modalContent).value); try { await api(`/api/metadata/bangumi/episodes/${id}/collection`, { method: 'PUT', body: JSON.stringify({ type }) }); toast(t('bangumi.episodeUpdated')) } catch (error) { toast(error.message, true) } })
     $$('[data-modal-play]', modalContent).forEach(button => button.onclick = () => { modal.close(); playEpisode(button.dataset.modalPlay, Number(button.dataset.position)) })
     modal.showModal()
   } catch (error) { toast(error.message, true) }
@@ -187,14 +187,14 @@ async function openAnime(id) {
 async function playEpisode(episodeId, startPositionMs = 0) {
   try {
     await api('/api/playback/play', { method: 'POST', body: JSON.stringify({ episodeId, startPositionMs }) })
-    toast('已开始播放')
+    toast(t('play.started'))
     await refreshPlayback()
   } catch (error) { toast(error.message, true) }
 }
 function chooseNextVersion(versions) {
   return new Promise(resolve => {
     let selected = null
-    modalContent.innerHTML = `<h2>选择下一集版本</h2><div class="list">${versions.map(item => `<button type="button" class="list-item" data-next-version="${escapeHtml(item.episodeId)}">${escapeHtml(item.versionLabel)}</button>`).join('')}</div>`
+    modalContent.innerHTML = `<h2>${t('version.nextTitle')}</h2><div class="list">${versions.map(item => `<button type="button" class="list-item" data-next-version="${escapeHtml(item.episodeId)}">${escapeHtml(item.versionLabel)}</button>`).join('')}</div>`
     modal.addEventListener('close', () => resolve(selected), { once: true })
     $$('[data-next-version]', modalContent).forEach(button => button.onclick = () => { selected = button.dataset.nextVersion; modal.close() })
     modal.showModal()
@@ -218,14 +218,14 @@ async function refreshPlayback() {
 async function showPlaybackDiagnostics() {
   try {
     const result = await api('/api/playback/diagnostics')
-    if (!result || !result.available || !result.diagnostics) { toast('当前没有可用的播放诊断'); return }
+    if (!result || !result.available || !result.diagnostics) { toast(t('diag.unavailable')); return }
     const properties = (result.diagnostics.properties || []).map(property => `${property.name}=${property.value}`).join(' · ')
     const logs = result.diagnostics.recentLogs || []
-    toast(`诊断 ${properties || '无属性'} · 日志 ${logs.length} 条${logs.length ? ` · ${logs[logs.length - 1].text}` : ''}`)
+    toast(t('diag.summary', properties || t('diag.noProps'), logs.length, logs.length ? ` · ${logs[logs.length - 1].text}` : ''))
   } catch (error) { toast(error.message, true) }
 }
 function playbackTitle(episodeId) {
-  return state.episodeTitles.get(episodeId) || episodeId || '当前媒体'
+  return state.episodeTitles.get(episodeId) || episodeId || t('player.current')
 }
 function renderPlayer(status) {
   const bar = $('#player-bar')
@@ -252,7 +252,7 @@ function renderPlayer(status) {
   audio.value = status.selectedAudioTrackId == null ? '' : String(status.selectedAudioTrackId)
   const tracks = status.subtitleTracks || []
   const subtitle = $('[data-subtitle]', bar)
-  const subtitleOptions = [{ id: null, label: '关闭字幕' }, ...tracks.map(track => ({ id: track.id, label: track.displayLabel }))]
+  const subtitleOptions = [{ id: null, label: t('player.noSubs') }, ...tracks.map(track => ({ id: track.id, label: track.displayLabel }))]
   const optionSignature = JSON.stringify(subtitleOptions)
   if (subtitle.dataset.options !== optionSignature) {
     subtitle.innerHTML = subtitleOptions.map(option => `<option value="${option.id ?? ''}">${escapeHtml(option.label)}</option>`).join('')
@@ -274,14 +274,14 @@ function renderPlayer(status) {
   const volume = $('[data-volume]', bar)
   if (document.activeElement !== volume) volume.value = String(status.volumePercent ?? 100)
   $('[data-mute]', bar).setAttribute('aria-pressed', String(!!status.isMuted))
-  $('[data-mute]', bar).textContent = status.isMuted ? '取消静音' : '静音'
+  $('[data-mute]', bar).textContent = status.isMuted ? t('player.unmute') : t('player.mute')
   bar.hidden = false
 }
 
 function sourceLocation(source) { return source.connectionInfo?.path || source.connectionInfo?.url || source.connectionInfo?.uncPath || '' }
 async function loadSources() {
   state.sources = await api('/api/sources')
-  content.innerHTML = `<div class="grid"><section class="panel stack"><div class="card-head"><h2>媒体源</h2><button id="scan-all">扫描全部</button></div>${state.sources.length ? `<div class="list">${state.sources.map(source => `<article class="list-item"><div class="card-head"><div><span class="badge ${source.isConnected ? 'ok' : 'warn'}">${escapeHtml(source.type)}</span> <strong>${escapeHtml(source.name)}</strong></div><span class="muted">${escapeHtml(source.contentMode)}</span></div><p class="break">${escapeHtml(sourceLocation(source))}</p><div class="actions"><button data-source-edit="${source.id}">编辑</button><button data-source-scan="${source.id}">扫描</button><button class="danger" data-source-delete="${source.id}">删除</button></div></article>`).join('')}</div>` : '<p class="muted">尚未添加媒体源。</p>'}</section><section class="panel"><h2 id="source-form-title">添加媒体源</h2>${sourceForm()}</section></div>`
+  content.innerHTML = `<div class="grid"><section class="panel stack"><div class="card-head"><h2>${t('nav.sources')}</h2><button id="scan-all">${t('sources.scanAll')}</button></div>${state.sources.length ? `<div class="list">${state.sources.map(source => `<article class="list-item"><div class="card-head"><div><span class="badge ${source.isConnected ? 'ok' : 'warn'}">${escapeHtml(source.type)}</span> <strong>${escapeHtml(source.name)}</strong></div><span class="muted">${escapeHtml(source.contentMode)}</span></div><p class="break">${escapeHtml(sourceLocation(source))}</p><div class="actions"><button data-source-edit="${source.id}">${t('sources.edit')}</button><button data-source-scan="${source.id}">${t('sources.scan')}</button><button class="danger" data-source-delete="${source.id}">${t('sources.delete')}</button></div></article>`).join('')}</div>` : `<p class="muted">${t('sources.empty')}</p>`}</section><section class="panel"><h2 id="source-form-title">${t('sources.addTitle')}</h2>${sourceForm()}</section></div>`
   bindSourceForm()
   $$('[data-source-edit]').forEach(button => button.onclick = () => editSource(Number(button.dataset.sourceEdit)))
   $$('[data-source-scan]').forEach(button => button.onclick = () => scanSource(Number(button.dataset.sourceScan)))
@@ -289,7 +289,7 @@ async function loadSources() {
   $('#scan-all').onclick = scanAllSources
 }
 function sourceForm() {
-  return `<form id="source-form" class="form"><input id="source-id" type="hidden"><div class="form-grid"><label>类型<select id="source-type"><option>LOCAL</option><option>WEBDAV</option><option>SMB</option><option value="RSS">RSS 在线源</option></select></label><label>内容类型<select id="source-mode"><option value="ANIME">动漫</option><option value="DRAMA">电视剧</option></select></label></div><label>显示名称<input id="source-name" required maxlength="100"></label><label>位置<div class="actions"><input id="source-location" required placeholder="本地目录、HTTP(S) WebDAV、SMB 或 RSS Feed URL"><button id="browse-local" type="button">浏览</button></div></label><div id="source-credentials" class="form-grid"><label>用户名<input id="source-username" autocomplete="username"></label><label>密码<input id="source-password" type="password" autocomplete="new-password" placeholder="编辑时留空保留"></label><label id="source-domain-label">域（可选）<input id="source-domain"></label></div><label id="source-recognition-label">识别方式<select id="source-recognition"><option value="MLIP">MLIP library.db</option><option value="DIRECTORY">普通目录扫描</option></select></label><div class="actions"><button id="source-test" type="button">测试连接</button><button class="primary" type="submit">保存</button><button id="source-reset" type="button">清空</button></div></form>`
+  return `<form id="source-form" class="form"><input id="source-id" type="hidden"><div class="form-grid"><label>${t('sources.type')}<select id="source-type"><option>LOCAL</option><option>WEBDAV</option><option>SMB</option><option value="RSS">${t('sources.rss')}</option></select></label><label>${t('sources.mode')}<select id="source-mode"><option value="ANIME">${t('sources.anime')}</option><option value="DRAMA">${t('sources.drama')}</option></select></label></div><label>${t('sources.name')}<input id="source-name" required maxlength="100"></label><label>${t('sources.location')}<div class="actions"><input id="source-location" required placeholder="${t('sources.locationPh')}"><button id="browse-local" type="button">${t('sources.browse')}</button></div></label><div id="source-credentials" class="form-grid"><label>${t('sources.username')}<input id="source-username" autocomplete="username"></label><label>${t('sources.password')}<input id="source-password" type="password" autocomplete="new-password" placeholder="${t('sources.passwordPh')}"></label><label id="source-domain-label">${t('sources.domain')}<input id="source-domain"></label></div><label id="source-recognition-label">${t('sources.recognition')}<select id="source-recognition"><option value="MLIP">MLIP library.db</option><option value="DIRECTORY">${t('sources.directory')}</option></select></label><div class="actions"><button id="source-test" type="button">${t('sources.test')}</button><button class="primary" type="submit">${t('sources.save')}</button><button id="source-reset" type="button">${t('sources.clear')}</button></div></form>`
 }
 function bindSourceForm() {
   $('#source-form').onsubmit = saveSource
@@ -306,7 +306,7 @@ function updateSourceFields() {
   $('#source-domain-label').hidden = type !== 'SMB'
   $('#browse-local').hidden = type !== 'LOCAL'
   $('#source-recognition-label').hidden = isRss
-  $('#source-location').placeholder = isRss ? 'HTTP(S) RSS Feed URL' : '本地目录、HTTP(S) WebDAV 或 smb://'
+  $('#source-location').placeholder = isRss ? 'HTTP(S) RSS Feed URL' : t('sources.locationPhLocal')
 }
 function sourcePayload() {
   const type = $('#source-type').value
@@ -321,17 +321,17 @@ function editSource(id) {
   $('#source-name').value = source.name
   $('#source-location').value = sourceLocation(source)
   $('#source-recognition').value = source.connectionInfo?.recognitionMode || 'MLIP'
-  $('#source-form-title').textContent = '编辑媒体源'
+  $('#source-form-title').textContent = t('sources.editTitle')
   updateSourceFields()
   $('#source-form').scrollIntoView({ behavior: 'smooth' })
 }
-function resetSourceForm() { $('#source-form').reset(); $('#source-id').value = ''; $('#source-form-title').textContent = '添加媒体源'; updateSourceFields() }
+function resetSourceForm() { $('#source-form').reset(); $('#source-id').value = ''; $('#source-form-title').textContent = t('sources.addTitle'); updateSourceFields() }
 async function saveSource(event) {
   event.preventDefault()
   const id = $('#source-id').value
   try {
     await api(id ? `/api/sources/${id}` : '/api/sources', { method: id ? 'PUT' : 'POST', body: JSON.stringify(sourcePayload()) })
-    toast('媒体源已保存')
+    toast(t('sources.saved'))
     await loadSources()
   } catch (error) { toast(error.message, true) }
 }
@@ -339,24 +339,24 @@ async function testSource() {
   try { const result = await api('/api/sources/test', { method: 'POST', body: JSON.stringify(sourcePayload()) }); toast(result.message) } catch (error) { toast(error.message, true) }
 }
 async function scanSource(id) {
-  try { const response = await api(`/api/sources/${id}/scan`, { method: 'POST' }); const result = response.result; toast(response.accepted ? `扫描完成：${result.episodesFound} 集` : '该来源已有扫描任务运行'); await loadSources() } catch (error) { toast(error.message, true) }
+  try { const response = await api(`/api/sources/${id}/scan`, { method: 'POST' }); const result = response.result; toast(response.accepted ? t('sources.scanned', result.episodesFound) : t('sources.scanRunning')); await loadSources() } catch (error) { toast(error.message, true) }
 }
 async function scanAllSources() {
   try {
     const response = await api('/api/sources/scan-all', { method: 'POST' })
     const results = response.results
-    toast(response.accepted ? `扫描完成：${results.reduce((sum, result) => sum + result.episodesFound, 0)} 集${results.some(result => result.error) ? '，部分媒体源失败' : ''}` : '扫描任务已在运行')
+    toast(response.accepted ? `${t('sources.scanned', results.reduce((sum, result) => sum + result.episodesFound, 0))}${results.some(result => result.error) ? t('sources.partialFail') : ''}` : t('sources.scanAllRunning'))
     await loadSources()
   } catch (error) { toast(error.message, true) }
 }
 async function deleteSource(id) {
-  if (!confirm('删除媒体源及其本机加密凭据？')) return
-  try { await api(`/api/sources/${id}`, { method: 'DELETE' }); toast('媒体源已删除'); await loadSources() } catch (error) { toast(error.message, true) }
+  if (!confirm(t('sources.confirmDelete'))) return
+  try { await api(`/api/sources/${id}`, { method: 'DELETE' }); toast(t('sources.deleted')); await loadSources() } catch (error) { toast(error.message, true) }
 }
 async function browseLocal(path = '') {
   try {
     const data = await api(`/api/local-directories${path ? `?path=${encodeURIComponent(path)}` : ''}`)
-    modalContent.innerHTML = `<h2>选择本地目录</h2><p class="break muted">${escapeHtml(data.displayPath)}</p><div class="actions">${data.parentPath !== null ? '<button id="folder-up">上一级</button>' : ''}<button id="folder-select" class="primary">选择当前目录</button></div><div class="folder-list">${data.entries.map(item => `<button data-folder="${escapeHtml(item.path)}" ${item.canRead ? '' : 'disabled'}>${escapeHtml(item.name)}</button>`).join('')}</div>`
+    modalContent.innerHTML = `<h2>${t('folder.title')}</h2><p class="break muted">${escapeHtml(data.displayPath)}</p><div class="actions">${data.parentPath !== null ? '<button id="folder-up">${t('folder.up')}</button>' : ''}<button id="folder-select" class="primary">${t('folder.select')}</button></div><div class="folder-list">${data.entries.map(item => `<button data-folder="${escapeHtml(item.path)}" ${item.canRead ? '' : 'disabled'}>${escapeHtml(item.name)}</button>`).join('')}</div>`
     if ($('#folder-up', modalContent)) $('#folder-up', modalContent).onclick = () => browseLocal(data.parentPath || '')
     $('#folder-select', modalContent).onclick = () => { $('#source-location').value = data.path; modal.close() }
     $$('[data-folder]', modalContent).forEach(button => button.onclick = () => browseLocal(button.dataset.folder))
@@ -369,7 +369,7 @@ async function loadAutomation() {
   state.cloud = cloud
   state.sources = await api('/api/sources')
   const config = cloud.config
-  content.innerHTML = `<div class="stack"><section class="panel"><div class="card-head"><h2>CloudDrive2</h2><span class="badge ${cloud.tokenConfigured ? 'ok' : 'warn'}">${cloud.tokenConfigured ? 'Key 已验证' : '未配置 Key'}</span></div><form id="cloud-form" class="form"><label class="switch"><input id="cloud-enabled" type="checkbox" ${config.enabled ? 'checked' : ''}>启用周期执行</label><div class="form-grid"><label>服务地址<input id="cloud-endpoint" value="${escapeHtml(config.endpointUrl)}" required></label><label>用户名<input id="cloud-username" value="${escapeHtml(config.username)}" autocomplete="username"></label></div><div class="form-grid"><label>密码<input id="cloud-password" type="password" autocomplete="new-password"></label><label>API Token / Key<input id="cloud-token" type="password" autocomplete="off"></label></div><label>入库模式<select id="cloud-mode"><option value="ORGANIZED_LIBRARY" ${config.libraryMode === 'ORGANIZED_LIBRARY' ? 'selected' : ''}>整理入库</option><option value="SINGLE_DIRECTORY" ${config.libraryMode === 'SINGLE_DIRECTORY' ? 'selected' : ''}>单目录入库</option></select></label><label>下载目录 A<div class="actions"><input id="cloud-inbox" value="${escapeHtml(config.inboxPath)}"><button data-cloud-browse="inbox" type="button">浏览</button></div></label><label>媒体库目录 B<div class="actions"><input id="cloud-library" value="${escapeHtml(config.libraryPath)}"><button data-cloud-browse="library" type="button">浏览</button></div></label><div class="form-grid"><label>入库后回扫 WebDAV<select id="cloud-source"><option value="">不回扫</option>${state.sources.filter(item => item.type === 'WEBDAV').map(item => `<option value="${item.id}" ${config.webDavSourceId === item.id ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select></label><label>间隔（分钟）<input id="cloud-interval" type="number" min="5" value="${Number(config.intervalMinutes)}"></label></div><label class="switch"><input id="cloud-proxy-enabled" type="checkbox" ${config.rssProxyEnabled ? 'checked' : ''}>RSS 与在线元数据使用 HTTP 代理</label><div class="form-grid"><label>代理主机<input id="cloud-proxy-host" value="${escapeHtml(config.rssProxyHost)}"></label><label>代理端口<input id="cloud-proxy-port" type="number" min="1" max="65535" value="${Number(config.rssProxyPort)}"></label></div><div class="actions"><button class="primary" type="submit">保存配置</button><button id="cloud-login" type="button">登录并保存</button><button id="cloud-save-token" type="button">验证 Key</button><button id="cloud-run" type="button">立即运行</button></div></form></section><section class="panel"><div class="card-head"><h2>运行状态</h2><span class="badge ${run.status === 'SUCCEEDED' ? 'ok' : run.status === 'FAILED' ? 'warn' : ''}">${escapeHtml(run.status)}</span></div>${run.error ? `<p class="error">${escapeHtml(run.error)}</p>` : ''}<div class="status-tiles">${summaryTiles(run.summary)}</div></section><section class="panel"><div class="card-head"><h2>RSS 订阅</h2><span class="muted">${cloud.subscriptions.length} 个</span></div><form id="rss-form" class="form"><input id="rss-id" type="hidden"><div class="form-grid"><label>名称<input id="rss-name" required></label><label>地址<input id="rss-url" type="url" required></label></div><label>标题过滤正则<input id="rss-filter"></label><label class="switch"><input id="rss-enabled" type="checkbox" checked>启用</label><div class="actions"><button class="primary" type="submit">保存订阅</button><button id="rss-reset" type="button">清空</button></div></form><hr><div class="list">${cloud.subscriptions.map(rssItem).join('') || '<p class="muted">尚未添加 RSS 订阅。</p>'}</div></section></div>`
+  content.innerHTML = `<div class="stack"><section class="panel"><div class="card-head"><h2>CloudDrive2</h2><span class="badge ${cloud.tokenConfigured ? 'ok' : 'warn'}">${cloud.tokenConfigured ? t('cloud.keyOk') : t('cloud.noKey')}</span></div><form id="cloud-form" class="form"><label class="switch"><input id="cloud-enabled" type="checkbox" ${config.enabled ? 'checked' : ''}>${t('cloud.periodic')}</label><div class="form-grid"><label>${t('cloud.endpoint')}<input id="cloud-endpoint" value="${escapeHtml(config.endpointUrl)}" required></label><label>用户名<input id="cloud-username" value="${escapeHtml(config.username)}" autocomplete="username"></label></div><div class="form-grid"><label>${t('sources.password')}<input id="cloud-password" type="password" autocomplete="new-password"></label><label>${t('cloud.tokenLabel')}<input id="cloud-token" type="password" autocomplete="off"></label></div><label>${t('cloud.mode')}<select id="cloud-mode"><option value="ORGANIZED_LIBRARY" ${config.libraryMode === 'ORGANIZED_LIBRARY' ? 'selected' : ''}>${t('cloud.organized')}</option><option value="SINGLE_DIRECTORY" ${config.libraryMode === 'SINGLE_DIRECTORY' ? 'selected' : ''}>${t('cloud.single')}</option></select></label><label>${t('cloud.inbox')}<div class="actions"><input id="cloud-inbox" value="${escapeHtml(config.inboxPath)}"><button data-cloud-browse="inbox" type="button">${t('sources.browse')}</button></div></label><label>${t('cloud.library')}<div class="actions"><input id="cloud-library" value="${escapeHtml(config.libraryPath)}"><button data-cloud-browse="library" type="button">${t('sources.browse')}</button></div></label><div class="form-grid"><label>${t('cloud.rescan')}<select id="cloud-source"><option value="">${t('cloud.noRescan')}</option>${state.sources.filter(item => item.type === 'WEBDAV').map(item => `<option value="${item.id}" ${config.webDavSourceId === item.id ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select></label><label>${t('cloud.interval')}<input id="cloud-interval" type="number" min="5" value="${Number(config.intervalMinutes)}"></label></div><label class="switch"><input id="cloud-proxy-enabled" type="checkbox" ${config.rssProxyEnabled ? 'checked' : ''}>${t('cloud.proxy')}</label><div class="form-grid"><label>${t('cloud.proxyHost')}<input id="cloud-proxy-host" value="${escapeHtml(config.rssProxyHost)}"></label><label>${t('cloud.proxyPort')}<input id="cloud-proxy-port" type="number" min="1" max="65535" value="${Number(config.rssProxyPort)}"></label></div><div class="actions"><button class="primary" type="submit">${t('cloud.saveConfig')}</button><button id="cloud-login" type="button">${t('cloud.login')}</button><button id="cloud-save-token" type="button">${t('cloud.verifyKey')}</button><button id="cloud-run" type="button">${t('cloud.run')}</button></div></form></section><section class="panel"><div class="card-head"><h2>${t('cloud.runStatus')}</h2><span class="badge ${run.status === 'SUCCEEDED' ? 'ok' : run.status === 'FAILED' ? 'warn' : ''}">${escapeHtml(run.status)}</span></div>${run.error ? `<p class="error">${escapeHtml(run.error)}</p>` : ''}<div class="status-tiles">${summaryTiles(run.summary)}</div></section><section class="panel"><div class="card-head"><h2>${t('cloud.rssTitle')}</h2><span class="muted">${t('cloud.subCount', cloud.subscriptions.length)}</span></div><form id="rss-form" class="form"><input id="rss-id" type="hidden"><div class="form-grid"><label>${t('cloud.rssName')}<input id="rss-name" required></label><label>${t('cloud.address')}<input id="rss-url" type="url" required></label></div><label>${t('cloud.filter')}<input id="rss-filter"></label><label class="switch"><input id="rss-enabled" type="checkbox" checked>${t('cloud.enabled')}</label><div class="actions"><button class="primary" type="submit">${t('cloud.saveSub')}</button><button id="rss-reset" type="button">${t('sources.clear')}</button></div></form><hr><div class="list">${cloud.subscriptions.map(rssItem).join('') || `<p class="muted">${t('cloud.noSubs')}</p>`}</div></section></div>`
   $('#cloud-form').onsubmit = saveCloudConfig
   $('#cloud-login').onclick = loginCloud
   $('#cloud-save-token').onclick = saveCloudToken
@@ -383,24 +383,24 @@ async function loadAutomation() {
   $$('[data-rss-delete]').forEach(button => button.onclick = () => deleteRss(Number(button.dataset.rssDelete)))
 }
 function summaryTiles(summary) {
-  if (!summary) return '<div class="status-tile"><span>结果</span><strong>尚未运行</strong></div>'
+  if (!summary) return `<div class="status-tile"><span>${t('common.result')}</span><strong>${t('common.notRun')}</strong></div>`
   return Object.entries(summary).filter(([, value]) => typeof value === 'number').map(([key, value]) => `<div class="status-tile"><span>${escapeHtml(key)}</span><strong>${value}</strong></div>`).join('')
 }
 function cloudPayload() {
   return { endpointUrl: $('#cloud-endpoint').value.trim(), username: $('#cloud-username').value.trim(), webDavSourceId: $('#cloud-source').value ? Number($('#cloud-source').value) : null, inboxPath: $('#cloud-inbox').value.trim(), libraryPath: $('#cloud-library').value.trim(), libraryMode: $('#cloud-mode').value, intervalMinutes: Number($('#cloud-interval').value), enabled: $('#cloud-enabled').checked, rssProxyEnabled: $('#cloud-proxy-enabled').checked, rssProxyHost: $('#cloud-proxy-host').value.trim(), rssProxyPort: Number($('#cloud-proxy-port').value) }
 }
-async function saveCloudConfig(event) { event?.preventDefault(); try { await api('/api/cloud-drive/config', { method: 'PUT', body: JSON.stringify(cloudPayload()) }); toast('CloudDrive 配置已保存'); await loadAutomation(); return true } catch (error) { toast(error.message, true); return false } }
-async function loginCloud() { try { const payload = cloudPayload(); await api('/api/cloud-drive/login', { method: 'POST', body: JSON.stringify({ endpointUrl: payload.endpointUrl, username: payload.username, password: $('#cloud-password').value }) }); toast('登录凭据已验证并保存'); await loadAutomation() } catch (error) { toast(error.message, true) } }
-async function saveCloudToken() { try { await api('/api/cloud-drive/token', { method: 'POST', body: JSON.stringify({ endpointUrl: $('#cloud-endpoint').value.trim(), token: $('#cloud-token').value }) }); toast('API Token 已验证并保存'); await loadAutomation() } catch (error) { toast(error.message, true) } }
-async function runCloud() { try { if (!await saveCloudConfig()) return; const result = await api('/api/cloud-drive/run', { method: 'POST' }); toast(`运行结束：${result.status}`); await loadAutomation() } catch (error) { toast(error.message, true) } }
-async function browseCloud(target, path = '') { try { const data = await api(`/api/cloud-drive/directories?endpointUrl=${encodeURIComponent($('#cloud-endpoint').value.trim())}${path ? `&path=${encodeURIComponent(path)}` : ''}`); modalContent.innerHTML = `<h2>选择 CloudDrive2 目录</h2><p class="muted break">${escapeHtml(data.displayPath)}</p><div class="actions">${data.parentPath ? '<button id="cloud-up">上一级</button>' : ''}<button id="cloud-select" class="primary">选择当前目录</button></div><div class="folder-list">${data.entries.map(item => `<button data-cloud-folder="${escapeHtml(item.path)}">${escapeHtml(item.name)}</button>`).join('')}</div>`; if ($('#cloud-up', modalContent)) $('#cloud-up', modalContent).onclick = () => browseCloud(target, data.parentPath); $('#cloud-select', modalContent).onclick = () => { $(`#cloud-${target}`).value = data.path; modal.close() }; $$('[data-cloud-folder]', modalContent).forEach(button => button.onclick = () => browseCloud(target, button.dataset.cloudFolder)); if (!modal.open) modal.showModal() } catch (error) { toast(error.message, true) } }
-function rssItem(item) { return `<article class="list-item"><div class="card-head"><strong>${escapeHtml(item.name)}</strong><span class="badge ${item.enabled ? 'ok' : ''}">${item.enabled ? '启用' : '停用'}</span></div><p class="break">${escapeHtml(item.url)}</p>${item.filterRegex ? `<p>过滤：${escapeHtml(item.filterRegex)}</p>` : ''}<small>上次检查：${formatDate(item.lastCheckedAt)}</small><div class="actions"><button data-rss-edit="${item.id}">编辑</button><button data-rss-preview="${item.id}">预览</button><button data-rss-toggle="${item.id}">${item.enabled ? '停用' : '启用'}</button><button class="danger" data-rss-delete="${item.id}">删除</button></div></article>` }
+async function saveCloudConfig(event) { event?.preventDefault(); try { await api('/api/cloud-drive/config', { method: 'PUT', body: JSON.stringify(cloudPayload()) }); toast(t('cloud.saved')); await loadAutomation(); return true } catch (error) { toast(error.message, true); return false } }
+async function loginCloud() { try { const payload = cloudPayload(); await api('/api/cloud-drive/login', { method: 'POST', body: JSON.stringify({ endpointUrl: payload.endpointUrl, username: payload.username, password: $('#cloud-password').value }) }); toast(t('cloud.loginOk')); await loadAutomation() } catch (error) { toast(error.message, true) } }
+async function saveCloudToken() { try { await api('/api/cloud-drive/token', { method: 'POST', body: JSON.stringify({ endpointUrl: $('#cloud-endpoint').value.trim(), token: $('#cloud-token').value }) }); toast(t('cloud.tokenOk')); await loadAutomation() } catch (error) { toast(error.message, true) } }
+async function runCloud() { try { if (!await saveCloudConfig()) return; const result = await api('/api/cloud-drive/run', { method: 'POST' }); toast(t('cloud.runDone', result.status)); await loadAutomation() } catch (error) { toast(error.message, true) } }
+async function browseCloud(target, path = '') { try { const data = await api(`/api/cloud-drive/directories?endpointUrl=${encodeURIComponent($('#cloud-endpoint').value.trim())}${path ? `&path=${encodeURIComponent(path)}` : ''}`); modalContent.innerHTML = `<h2>${t('cloud.chooseDir')}</h2><p class="muted break">${escapeHtml(data.displayPath)}</p><div class="actions">${data.parentPath ? '<button id="cloud-up">${t('folder.up')}</button>' : ''}<button id="cloud-select" class="primary">${t('folder.select')}</button></div><div class="folder-list">${data.entries.map(item => `<button data-cloud-folder="${escapeHtml(item.path)}">${escapeHtml(item.name)}</button>`).join('')}</div>`; if ($('#cloud-up', modalContent)) $('#cloud-up', modalContent).onclick = () => browseCloud(target, data.parentPath); $('#cloud-select', modalContent).onclick = () => { $(`#cloud-${target}`).value = data.path; modal.close() }; $$('[data-cloud-folder]', modalContent).forEach(button => button.onclick = () => browseCloud(target, button.dataset.cloudFolder)); if (!modal.open) modal.showModal() } catch (error) { toast(error.message, true) } }
+function rssItem(item) { return `<article class="list-item"><div class="card-head"><strong>${escapeHtml(item.name)}</strong><span class="badge ${item.enabled ? 'ok' : ''}">${item.enabled ? t('cloud.enabled') : t('cloud.disabled')}</span></div><p class="break">${escapeHtml(item.url)}</p>${item.filterRegex ? `<p>${t('cloud.filterLabel', escapeHtml(item.filterRegex))}</p>` : ''}<small>${t('cloud.lastChecked', formatDate(item.lastCheckedAt))}</small><div class="actions"><button data-rss-edit="${item.id}">${t('sources.edit')}</button><button data-rss-preview="${item.id}">${t('cloud.preview')}</button><button data-rss-toggle="${item.id}">${item.enabled ? t('cloud.disabled') : t('cloud.enabled')}</button><button class="danger" data-rss-delete="${item.id}">${t('sources.delete')}</button></div></article>` }
 function editRss(id) { const item = state.cloud.subscriptions.find(value => value.id === id); if (!item) return; $('#rss-id').value = item.id; $('#rss-name').value = item.name; $('#rss-url').value = item.url; $('#rss-filter').value = item.filterRegex || ''; $('#rss-enabled').checked = item.enabled; $('#rss-form').scrollIntoView({ behavior: 'smooth' }) }
 function resetRss() { $('#rss-form').reset(); $('#rss-id').value = ''; $('#rss-enabled').checked = true }
-async function saveRss(event) { event.preventDefault(); const id = $('#rss-id').value; const payload = { id: Number(id || 0), name: $('#rss-name').value.trim(), url: $('#rss-url').value.trim(), filterRegex: $('#rss-filter').value.trim() || null, enabled: $('#rss-enabled').checked }; try { await api(id ? `/api/cloud-drive/rss/${id}` : '/api/cloud-drive/rss', { method: id ? 'PUT' : 'POST', body: JSON.stringify(payload) }); toast('RSS 订阅已保存'); await loadAutomation() } catch (error) { toast(error.message, true) } }
+async function saveRss(event) { event.preventDefault(); const id = $('#rss-id').value; const payload = { id: Number(id || 0), name: $('#rss-name').value.trim(), url: $('#rss-url').value.trim(), filterRegex: $('#rss-filter').value.trim() || null, enabled: $('#rss-enabled').checked }; try { await api(id ? `/api/cloud-drive/rss/${id}` : '/api/cloud-drive/rss', { method: id ? 'PUT' : 'POST', body: JSON.stringify(payload) }); toast(t('cloud.rssSaved')); await loadAutomation() } catch (error) { toast(error.message, true) } }
 async function toggleRss(id) { const item = state.cloud.subscriptions.find(value => value.id === id); if (!item) return; try { await api(`/api/cloud-drive/rss/${id}`, { method: 'PUT', body: JSON.stringify({ ...item, enabled: !item.enabled }) }); await loadAutomation() } catch (error) { toast(error.message, true) } }
-async function deleteRss(id) { if (!confirm('删除这个 RSS 订阅？已处理记录会保留用于去重。')) return; try { await api(`/api/cloud-drive/rss/${id}`, { method: 'DELETE' }); toast('RSS 订阅已删除'); await loadAutomation() } catch (error) { toast(error.message, true) } }
-async function previewRss(id) { try { const result = await api(`/api/cloud-drive/rss/${id}/preview`, { method: 'POST' }); modalContent.innerHTML = `<h2>RSS 预览</h2><p>${result.total} 项 · 可提交 ${result.wouldSubmit} · 已跳过 ${result.skipped} · 缺少链接 ${result.missing}</p><table class="preview-table"><thead><tr><th>标题</th><th>链接</th><th>状态</th></tr></thead><tbody>${result.items.map(item => `<tr><td>${escapeHtml(item.title)}</td><td>${escapeHtml(item.submissionUrl || '')}</td><td><span class="badge ${item.processed ? 'ok' : ''}">${item.processed ? '已处理' : escapeHtml(item.status)}</span></td></tr>`).join('')}</tbody></table>`; modal.showModal() } catch (error) { toast(error.message, true) } }
+async function deleteRss(id) { if (!confirm(t('cloud.confirmDeleteRss'))) return; try { await api(`/api/cloud-drive/rss/${id}`, { method: 'DELETE' }); toast(t('cloud.rssDeleted')); await loadAutomation() } catch (error) { toast(error.message, true) } }
+async function previewRss(id) { try { const result = await api(`/api/cloud-drive/rss/${id}/preview`, { method: 'POST' }); modalContent.innerHTML = `<h2>${t('cloud.previewTitle')}</h2><p>${t('cloud.previewStats', result.total, result.wouldSubmit, result.skipped, result.missing)}</p><table class="preview-table"><thead><tr><th>${t('cloud.colTitle')}</th><th>${t('cloud.colLink')}</th><th>${t('cloud.colStatus')}</th></tr></thead><tbody>${result.items.map(item => `<tr><td>${escapeHtml(item.title)}</td><td>${escapeHtml(item.submissionUrl || '')}</td><td><span class="badge ${item.processed ? 'ok' : ''}">${item.processed ? t('cloud.processed') : escapeHtml(item.status)}</span></td></tr>`).join('')}</tbody></table>`; modal.showModal() } catch (error) { toast(error.message, true) } }
 
 async function loadOperations() {
   const [upload, update, tasks, logs, info] = await Promise.all([api('/api/log-upload'), api('/api/app-update'), api('/api/tasks'), api('/api/logs?limit=100'), api('/api/info')])
