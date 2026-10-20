@@ -1175,4 +1175,7 @@
   <data name="lib.unknownDate" xml:space="preserve"><value>Unrecognized air date</value></data>
   <data name="dsp.emptyPresets" xml:space="preserve"><value>DSP preset list empty.</value></data>
   <data name="dsp.presetMissing" xml:space="preserve"><value>DSP preset not found: {0}</value></data>
+  <data name="onnx.noModel" xml:space="preserve"><value>AniFileBERT ONNX model missing.</value></data>
+  <data name="onnx.badLength" xml:space="preserve"><value>AniFileBERT sequence length invalid.</value></data>
+  <data name="onnx.emptyVocab" xml:space="preserve"><value>AniFileBERT vocabulary empty.</value></data>
 </root>

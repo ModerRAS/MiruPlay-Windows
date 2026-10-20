@@ -8196,6 +8196,27 @@ const I18N = {
   "zh-HK": "搵唔到 DSP 預設: {0}",
   "en-US": "DSP preset not found: {0}",
   "en-GB": "DSP preset not found: {0}"
+ },
+ "onnx.noModel": {
+  "zh-CN": "AniFileBERT ONNX 模型不存在。",
+  "zh-TW": "AniFileBERT ONNX 模型不存在。",
+  "zh-HK": "AniFileBERT ONNX 模型不存在。",
+  "en-US": "AniFileBERT ONNX model missing.",
+  "en-GB": "AniFileBERT ONNX model missing."
+ },
+ "onnx.badLength": {
+  "zh-CN": "AniFileBERT 序列长度无效。",
+  "zh-TW": "AniFileBERT 序列長度無效。",
+  "zh-HK": "AniFileBERT 序列長度無效。",
+  "en-US": "AniFileBERT sequence length invalid.",
+  "en-GB": "AniFileBERT sequence length invalid."
+ },
+ "onnx.emptyVocab": {
+  "zh-CN": "AniFileBERT 词表为空。",
+  "zh-TW": "AniFileBERT 詞表為空。",
+  "zh-HK": "AniFileBERT 詞表為空。",
+  "en-US": "AniFileBERT vocabulary empty.",
+  "en-GB": "AniFileBERT vocabulary empty."
  }
 };
 let currentLocale = 'zh-CN';

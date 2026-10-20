@@ -1174,5 +1174,8 @@
   "lib.seasonBucket": { "zh-CN": "{0}年{1}月新番", "zh-TW": "{0}年{1}月新番", "zh-HK": "{0}年{1}月新番", "en-US": "{0}/{1} new season", "en-GB": "{0}/{1} new season" },
   "lib.unknownDate": { "zh-CN": "未识别播出日期", "zh-TW": "未識別播出日期", "zh-HK": "未識別播出日期", "en-US": "Unrecognized air date", "en-GB": "Unrecognised air date" },
   "dsp.emptyPresets": { "zh-CN": "DSP 预设列表为空。", "zh-TW": "DSP 預設列表為空。", "zh-HK": "DSP 預設列表為空。", "en-US": "DSP preset list empty.", "en-GB": "DSP preset list empty." },
-  "dsp.presetMissing": { "zh-CN": "找不到 DSP 预设: {0}", "zh-TW": "找不到 DSP 預設: {0}", "zh-HK": "搵唔到 DSP 預設: {0}", "en-US": "DSP preset not found: {0}", "en-GB": "DSP preset not found: {0}" }
+  "dsp.presetMissing": { "zh-CN": "找不到 DSP 预设: {0}", "zh-TW": "找不到 DSP 預設: {0}", "zh-HK": "搵唔到 DSP 預設: {0}", "en-US": "DSP preset not found: {0}", "en-GB": "DSP preset not found: {0}" },
+  "onnx.noModel": { "zh-CN": "AniFileBERT ONNX 模型不存在。", "zh-TW": "AniFileBERT ONNX 模型不存在。", "zh-HK": "AniFileBERT ONNX 模型不存在。", "en-US": "AniFileBERT ONNX model missing.", "en-GB": "AniFileBERT ONNX model missing." },
+  "onnx.badLength": { "zh-CN": "AniFileBERT 序列长度无效。", "zh-TW": "AniFileBERT 序列長度無效。", "zh-HK": "AniFileBERT 序列長度無效。", "en-US": "AniFileBERT sequence length invalid.", "en-GB": "AniFileBERT sequence length invalid." },
+  "onnx.emptyVocab": { "zh-CN": "AniFileBERT 词表为空。", "zh-TW": "AniFileBERT 詞表為空。", "zh-HK": "AniFileBERT 詞表為空。", "en-US": "AniFileBERT vocabulary empty.", "en-GB": "AniFileBERT vocabulary empty." }
 }

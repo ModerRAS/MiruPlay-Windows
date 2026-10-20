@@ -17,14 +17,14 @@ public sealed class OnnxAnimeFilenameParser : IAnimeFilenameParser, IDisposable
 
     public OnnxAnimeFilenameParser(string modelPath, string vocabularyPath, string configPath)
     {
-        if (!File.Exists(modelPath)) throw new FileNotFoundException("AniFileBERT ONNX 模型不存在。", modelPath);
+        if (!File.Exists(modelPath)) throw new FileNotFoundException(AppStrings.Get("onnx.noModel"), modelPath);
         _vocabulary = ReadVocabulary(vocabularyPath);
         (_labels, _graphLength) = ReadConfig(configPath);
         _padTokenId = _vocabulary.GetValueOrDefault("[PAD]", 0);
         _unknownTokenId = _vocabulary.GetValueOrDefault("[UNK]", 1);
         _classTokenId = _vocabulary.GetValueOrDefault("[CLS]", 2);
         _separatorTokenId = _vocabulary.GetValueOrDefault("[SEP]", 3);
-        if (_graphLength is < 4 or > 512) throw new InvalidDataException("AniFileBERT 序列长度无效。");
+        if (_graphLength is < 4 or > 512) throw new InvalidDataException(AppStrings.Get("onnx.badLength"));
         _session = new InferenceSession(modelPath);
     }
 
@@ -197,7 +197,7 @@ public sealed class OnnxAnimeFilenameParser : IAnimeFilenameParser, IDisposable
 
     private static Dictionary<string, int> ReadVocabulary(string path) =>
         JsonSerializer.Deserialize<Dictionary<string, int>>(File.ReadAllText(path))
-        ?? throw new InvalidDataException("AniFileBERT 词表为空。");
+        ?? throw new InvalidDataException(AppStrings.Get("onnx.emptyVocab"));
 
     private static (Dictionary<int, string> Labels, int Length) ReadConfig(string path)
     {

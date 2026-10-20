@@ -1175,4 +1175,7 @@
   <data name="lib.unknownDate" xml:space="preserve"><value>未識別播出日期</value></data>
   <data name="dsp.emptyPresets" xml:space="preserve"><value>DSP 預設列表為空。</value></data>
   <data name="dsp.presetMissing" xml:space="preserve"><value>找不到 DSP 預設: {0}</value></data>
+  <data name="onnx.noModel" xml:space="preserve"><value>AniFileBERT ONNX 模型不存在。</value></data>
+  <data name="onnx.badLength" xml:space="preserve"><value>AniFileBERT 序列長度無效。</value></data>
+  <data name="onnx.emptyVocab" xml:space="preserve"><value>AniFileBERT 詞表為空。</value></data>
 </root>
