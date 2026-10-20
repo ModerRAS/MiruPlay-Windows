@@ -119,7 +119,7 @@
                         <TextBlock x:Name="StatusText" Text="{services:Loc wpf.play.ready}" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis" />
                         <StackPanel x:Name="ErrorPanel" Orientation="Horizontal" HorizontalAlignment="Right" Visibility="Collapsed">
                             <TextBlock x:Name="ErrorText" Foreground="{StaticResource ErrorBrush}" TextTrimming="CharacterEllipsis" MaxWidth="440" VerticalAlignment="Center" />
-                            <Button Style="{StaticResource SecondaryButton}" Margin="10,0,0,0" Padding="10,5" Click="Retry_Click" AutomationProperties.Name="{services:Loc wpf.play.retry}">重试</Button>
+                            <Button Style="{StaticResource SecondaryButton}" Margin="10,0,0,0" Padding="10,5" Click="Retry_Click" Content="{services:Loc wpf.play.retry}" AutomationProperties.Name="{services:Loc wpf.play.retry}" />
                         </StackPanel>
                     </Grid>
                 </Grid>
