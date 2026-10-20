@@ -1179,5 +1179,6 @@
   "onnx.badLength": { "zh-CN": "AniFileBERT 序列长度无效。", "zh-TW": "AniFileBERT 序列長度無效。", "zh-HK": "AniFileBERT 序列長度無效。", "en-US": "AniFileBERT sequence length invalid.", "en-GB": "AniFileBERT sequence length invalid." },
   "onnx.emptyVocab": { "zh-CN": "AniFileBERT 词表为空。", "zh-TW": "AniFileBERT 詞表為空。", "zh-HK": "AniFileBERT 詞表為空。", "en-US": "AniFileBERT vocabulary empty.", "en-GB": "AniFileBERT vocabulary empty." },
   "playback.everyHour": { "zh-CN": "每小时", "zh-TW": "每小時", "zh-HK": "每小時", "en-US": "Every hour", "en-GB": "Every hour" },
-  "nav.music.sub": { "zh-CN": "按专辑浏览本地音频与 CUE 曲目", "zh-TW": "按專輯瀏覽本機音訊與 CUE 曲目", "zh-HK": "按專輯瀏覽本機音頻與 CUE 曲目", "en-US": "Browse local audio and CUE tracks by album", "en-GB": "Browse local audio and CUE tracks by album" }
+  "nav.music.sub": { "zh-CN": "按专辑浏览本地音频与 CUE 曲目", "zh-TW": "按專輯瀏覽本機音訊與 CUE 曲目", "zh-HK": "按專輯瀏覽本機音頻與 CUE 曲目", "en-US": "Browse local audio and CUE tracks by album", "en-GB": "Browse local audio and CUE tracks by album" },
+  "wpf.music.scanTimeout": { "zh-CN": "音乐扫描超时（60 秒），请缩小来源目录或稍后重试。", "zh-TW": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。", "zh-HK": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。", "en-US": "Music scan timed out (60 s); narrow the source directory or retry later.", "en-GB": "Music scan timed out (60 s); narrow the source directory or retry later." }
 }

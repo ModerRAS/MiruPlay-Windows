@@ -1147,11 +1147,21 @@ public sealed class WebControlServer : IAsyncDisposable
             }
         });
 
-        app.MapGet("/api/music/albums", (long sourceId) =>
+        app.MapGet("/api/music/albums", async (long sourceId, HttpRequest request) =>
         {
             var root = RequireLocalSourceRoot(sourceId);
             var library = _musicLibrary ?? throw new BadHttpRequestException(AppStrings.Get("api.errNoMusic"), StatusCodes.Status501NotImplemented);
-            return Success(library.Scan(root));
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(
+                request.HttpContext.RequestAborted, timeout.Token);
+            try
+            {
+                return Success(await Task.Run(() => library.Scan(root, linked.Token), linked.Token).ConfigureAwait(false));
+            }
+            catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+            {
+                throw new InvalidOperationException(AppStrings.Get("wpf.music.scanTimeout"));
+            }
         });
         app.MapPost("/api/music/play", async (HttpRequest request) =>
         {

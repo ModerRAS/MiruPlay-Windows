@@ -1180,4 +1180,5 @@
   <data name="onnx.emptyVocab" xml:space="preserve"><value>AniFileBERT vocabulary empty.</value></data>
   <data name="playback.everyHour" xml:space="preserve"><value>Every hour</value></data>
   <data name="nav.music.sub" xml:space="preserve"><value>Browse local audio and CUE tracks by album</value></data>
+  <data name="wpf.music.scanTimeout" xml:space="preserve"><value>Music scan timed out (60 s); narrow the source directory or retry later.</value></data>
 </root>
