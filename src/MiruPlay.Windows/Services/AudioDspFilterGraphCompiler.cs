@@ -27,7 +27,7 @@ public static class AudioDspFilterGraphCompiler
         var normalized = config.Normalize();
         var errors = normalized.Validate();
         if (errors.Count > 0)
-            throw new InvalidOperationException($"音频 DSP 配置无效: {string.Join("; ", errors)}");
+            throw new InvalidOperationException(AppStrings.Get("dsp.configInvalid", string.Join("; ", errors)));
         if (!normalized.Enabled)
             return new AudioDspFilterGraph("", [], "disabled", []);
 
@@ -182,11 +182,11 @@ public static class AudioDspFilterGraphCompiler
             if (rule.Target != AudioDspChannelTarget.All &&
                 AudioDspSignalMath.ResolveTarget(rule.Target, layout).Count == 0)
             {
-                warnings.Add($"布局 {layout.Id} 不包含目标声道 {rule.Target}，该规则已忽略。");
+                warnings.Add(AppStrings.Get("dsp.routeIgnored", layout.Id, rule.Target));
             }
         }
         if (preset.OutputMode == AudioDspOutputMode.HrtfBinaural)
-            warnings.Add("HRTF 使用 FFmpeg headphone 默认 HRIR；未提供外部 HRIR 文件。");
+            warnings.Add(AppStrings.Get("dsp.hrtfDefault"));
         return warnings;
     }
 

@@ -1,5 +1,6 @@
 using System.Windows;
 using Microsoft.Win32;
+using MiruPlay.Windows.Services;
 
 namespace MiruPlay.Windows;
 
@@ -22,13 +23,13 @@ public partial class LocalSourceDialog : Window
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "选择媒体目录",
+            Title = AppStrings.Get("wpf.src.pickDir"),
             InitialDirectory = Directory.Exists(SourceLocation) ? SourceLocation : null,
         };
         if (dialog.ShowDialog(this) == true)
         {
             LocationBox.Text = dialog.FolderName;
-            if (string.IsNullOrWhiteSpace(SourceName) || SourceName == "本地媒体")
+            if (string.IsNullOrWhiteSpace(SourceName) || SourceName == AppStrings.Get("wpf.src.localMedia"))
                 SourceNameBox.Text = Path.GetFileName(dialog.FolderName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
         }
     }
@@ -37,12 +38,12 @@ public partial class LocalSourceDialog : Window
     {
         if (SourceName.Length == 0)
         {
-            MessageBox.Show(this, "请输入媒体源名称。", "本地媒体源", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, AppStrings.Get("wpf.src.enterName"), AppStrings.Get("wpf.src.localTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         if (SourceLocation.Length == 0 || !Directory.Exists(SourceLocation))
         {
-            MessageBox.Show(this, "请选择存在的媒体目录。", "本地媒体源", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, AppStrings.Get("wpf.src.pickExistingDir"), AppStrings.Get("wpf.src.localTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         DialogResult = true;

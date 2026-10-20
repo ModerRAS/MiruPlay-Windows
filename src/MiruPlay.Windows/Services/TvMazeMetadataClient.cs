@@ -37,12 +37,12 @@ public sealed partial class TvMazeMetadataClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         var keyword = query.Trim();
-        if (keyword.Length is 0 or > 100) throw new ArgumentException("TVMaze 搜索词必须为 1 至 100 个字符。", nameof(query));
+        if (keyword.Length is 0 or > 100) throw new ArgumentException(AppStrings.Get("tvmaze.queryLong"), nameof(query));
         using var response = await _httpClient.GetAsync($"search/shows?q={Uri.EscapeDataString(keyword)}", cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"TVMaze 搜索失败 (HTTP {(int)response.StatusCode})。", null, response.StatusCode);
+            throw new HttpRequestException(AppStrings.Get("tvmaze.searchFailed", (int)response.StatusCode), null, response.StatusCode);
         var payload = await response.Content.ReadFromJsonAsync<IReadOnlyList<SearchResult>>(cancellationToken: cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidDataException("TVMaze 搜索返回了空响应。");
+            ?? throw new InvalidDataException(AppStrings.Get("tvmaze.emptyResponse"));
         return payload.Select(item => item.Show)
             .Where(item => item.Id > 0 && !string.IsNullOrWhiteSpace(item.Name))
             .Take(Math.Clamp(limit, 1, 20))

@@ -31,7 +31,7 @@ public sealed class MetadataTokenStore
         }
         catch (Exception error) when (error is CryptographicException or JsonException)
         {
-            throw new InvalidDataException("元数据令牌无法解密。", error);
+            throw new InvalidDataException(AppStrings.Get("meta.tokenBroken"), error);
         }
     }
 
@@ -54,8 +54,8 @@ public sealed class MetadataTokenStore
     private static string ValidateToken(string token, string label)
     {
         var value = token.Trim();
-        if (value.Length == 0) throw new ArgumentException($"{label} 不能为空。", nameof(token));
-        if (value.Length > 4_096) throw new ArgumentException($"{label} 长度无效。", nameof(token));
+        if (value.Length == 0) throw new ArgumentException(AppStrings.Get("meta.tokenEmpty", label), nameof(token));
+        if (value.Length > 4_096) throw new ArgumentException(AppStrings.Get("meta.tokenLength", label), nameof(token));
         return value;
     }
 

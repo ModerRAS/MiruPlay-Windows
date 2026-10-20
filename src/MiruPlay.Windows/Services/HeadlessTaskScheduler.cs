@@ -39,7 +39,7 @@ public sealed class HeadlessTaskScheduler : IDisposable, IAsyncDisposable
                 foreach (var task in restored.OrderByDescending(item => item.StartedAt).Take(_maxRetainedTasks).Reverse())
                 {
                     var recovered = task.State == "RUNNING"
-                        ? task with { State = "FAILED", FinishedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), Error = "应用关闭时任务中断。" }
+                        ? task with { State = "FAILED", FinishedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), Error = AppStrings.Get("task.interrupted") }
                         : task;
                     _tasks[recovered.Id] = recovered;
                 }
@@ -74,8 +74,8 @@ public sealed class HeadlessTaskScheduler : IDisposable, IAsyncDisposable
         Func<CancellationToken, Task> operation,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(id)) throw new ArgumentException("任务 ID 不能为空。", nameof(id));
-        if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("任务标题不能为空。", nameof(title));
+        if (string.IsNullOrWhiteSpace(id)) throw new ArgumentException(AppStrings.Get("task.idEmpty"), nameof(id));
+        if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException(AppStrings.Get("task.titleEmpty"), nameof(title));
         lock (_lifecycleLock)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
@@ -92,11 +92,11 @@ public sealed class HeadlessTaskScheduler : IDisposable, IAsyncDisposable
                 {
                     State = "FAILED",
                     FinishedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                    Error = "无法持久化任务状态。",
+                    Error = AppStrings.Get("task.persistFailed"),
                 };
                 _running.TryRemove(id, out _);
                 completion.TrySetResult();
-                throw new InvalidOperationException("无法持久化任务状态，任务未启动。", error);
+                throw new InvalidOperationException(AppStrings.Get("task.notStarted"), error);
             }
 
             var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -249,7 +249,7 @@ public sealed class HeadlessTaskScheduler : IDisposable, IAsyncDisposable
                 {
                     State = "FAILED",
                     FinishedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                    Error = "无法持久化任务终态。",
+                    Error = AppStrings.Get("task.finalFailed"),
                 });
             }
         }

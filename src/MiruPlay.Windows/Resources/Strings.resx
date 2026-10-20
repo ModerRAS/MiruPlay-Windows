@@ -1107,4 +1107,35 @@
   <data name="idx.unsafeSegment" xml:space="preserve"><value>目录索引路径包含不安全的目录段。</value></data>
   <data name="idx.noAbsolute" xml:space="preserve"><value>目录索引路径不能是绝对路径。</value></data>
   <data name="idx.badSubPath" xml:space="preserve"><value>目录索引字幕路径格式无效。</value></data>
+  <data name="rss.fetchFailed" xml:space="preserve"><value>RSS 拉取失败 (HTTP {0})。</value></data>
+  <data name="rss.tooLarge" xml:space="preserve"><value>RSS 响应超过 5 MiB。</value></data>
+  <data name="rss.badXml" xml:space="preserve"><value>RSS 响应不是有效的 XML Feed。</value></data>
+  <data name="rss.untitled" xml:space="preserve"><value>未命名条目</value></data>
+  <data name="task.interrupted" xml:space="preserve"><value>应用关闭时任务中断。</value></data>
+  <data name="task.idEmpty" xml:space="preserve"><value>任务 ID 不能为空。</value></data>
+  <data name="task.titleEmpty" xml:space="preserve"><value>任务标题不能为空。</value></data>
+  <data name="task.persistFailed" xml:space="preserve"><value>无法持久化任务状态。</value></data>
+  <data name="task.notStarted" xml:space="preserve"><value>无法持久化任务状态，任务未启动。</value></data>
+  <data name="task.finalFailed" xml:space="preserve"><value>无法持久化任务终态。</value></data>
+  <data name="rss.noPlayable" xml:space="preserve"><value>RSS Feed 中没有可播放的 HTTP(S) 视频条目。</value></data>
+  <data name="rss.cleanUrl" xml:space="preserve"><value>RSS 地址必须是不含凭据或片段的 HTTP(S) URL。</value></data>
+  <data name="wpf.src.pickDir" xml:space="preserve"><value>选择媒体目录</value></data>
+  <data name="wpf.src.enterName" xml:space="preserve"><value>请输入媒体源名称。</value></data>
+  <data name="wpf.src.pickExistingDir" xml:space="preserve"><value>请选择存在的媒体目录。</value></data>
+  <data name="store.credBroken" xml:space="preserve"><value>CloudDrive 凭据无法解密。</value></data>
+  <data name="store.unverifiedEndpoint" xml:space="preserve"><value>CloudDrive2 凭据未在当前服务地址验证；请重新登录或验证 Token。</value></data>
+  <data name="store.tokenLength" xml:space="preserve"><value>CloudDrive2 API Token 长度无效。</value></data>
+  <data name="store.passLength" xml:space="preserve"><value>CloudDrive2 密码长度无效。</value></data>
+  <data name="wpf.version.title" xml:space="preserve"><value>选择下一集版本</value></data>
+  <data name="wpf.version.label" xml:space="preserve"><value>下一集版本</value></data>
+  <data name="meta.tokenEmpty" xml:space="preserve"><value>{0} 不能为空。</value></data>
+  <data name="meta.tokenLength" xml:space="preserve"><value>{0} 长度无效。</value></data>
+  <data name="meta.tokenBroken" xml:space="preserve"><value>元数据令牌无法解密。</value></data>
+  <data name="dsp.configInvalid" xml:space="preserve"><value>音频 DSP 配置无效: {0}</value></data>
+  <data name="dsp.routeIgnored" xml:space="preserve"><value>布局 {0} 不包含目标声道 {1}，该规则已忽略。</value></data>
+  <data name="dsp.hrtfDefault" xml:space="preserve"><value>HRTF 使用 FFmpeg headphone 默认 HRIR；未提供外部 HRIR 文件。</value></data>
+  <data name="wpf.src.enterFeed" xml:space="preserve"><value>请输入 RSS Feed 地址。</value></data>
+  <data name="tvmaze.queryLong" xml:space="preserve"><value>TVMaze 搜索词必须为 1 至 100 个字符。</value></data>
+  <data name="tvmaze.searchFailed" xml:space="preserve"><value>TVMaze 搜索失败 (HTTP {0})。</value></data>
+  <data name="tvmaze.emptyResponse" xml:space="preserve"><value>TVMaze 搜索返回了空响应。</value></data>
 </root>

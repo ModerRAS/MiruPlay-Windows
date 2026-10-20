@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using MiruPlay.Windows.Models;
+using MiruPlay.Windows.Services;
 
 namespace MiruPlay.Windows;
 
@@ -9,7 +10,7 @@ public sealed class EpisodeVersionSelectionWindow : Window
 {
     public EpisodeVersionSelectionWindow(IReadOnlyList<LibraryEpisode> versions)
     {
-        Title = "选择下一集版本";
+        Title = AppStrings.Get("version.nextTitle");
         Width = 460;
         Height = 300;
         MinWidth = 360;
@@ -24,10 +25,10 @@ public sealed class EpisodeVersionSelectionWindow : Window
             SelectedIndex = 0,
             Margin = new Thickness(16),
         };
-        AutomationProperties.SetName(list, "下一集版本");
+        AutomationProperties.SetName(list, AppStrings.Get("wpf.version.label"));
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(16, 0, 16, 16) };
-        var cancel = new Button { Content = "取消", MinWidth = 88, Margin = new Thickness(0, 0, 8, 0), IsCancel = true };
-        var play = new Button { Content = "播放", MinWidth = 88, IsDefault = true };
+        var cancel = new Button { Content = AppStrings.Get("wpf.cancel"), MinWidth = 88, Margin = new Thickness(0, 0, 8, 0), IsCancel = true };
+        var play = new Button { Content = AppStrings.Get("wpf.play.play"), MinWidth = 88, IsDefault = true };
         play.Click += (_, _) =>
         {
             if (list.SelectedItem is not LibraryEpisode) return;

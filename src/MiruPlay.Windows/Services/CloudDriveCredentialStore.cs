@@ -31,7 +31,7 @@ public sealed class CloudDriveCredentialStore
         }
         catch (Exception error) when (error is CryptographicException or JsonException)
         {
-            throw new InvalidDataException("CloudDrive 凭据无法解密。", error);
+            throw new InvalidDataException(AppStrings.Get("store.credBroken"), error);
         }
     }
 
@@ -41,7 +41,7 @@ public sealed class CloudDriveCredentialStore
         var credentials = Load();
         if (!string.Equals(credentials.EndpointUrl, normalizedEndpoint, StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("CloudDrive2 凭据未在当前服务地址验证；请重新登录或验证 Token。");
+            throw new InvalidOperationException(AppStrings.Get("store.unverifiedEndpoint"));
         }
         return credentials;
     }
@@ -74,13 +74,13 @@ public sealed class CloudDriveCredentialStore
     private static string ValidateToken(string value)
     {
         var normalized = value.Trim();
-        if (normalized.Length is 0 or > 4_096) throw new ArgumentException("CloudDrive2 API Token 长度无效。", nameof(value));
+        if (normalized.Length is 0 or > 4_096) throw new ArgumentException(AppStrings.Get("store.tokenLength"), nameof(value));
         return normalized;
     }
 
     private static string ValidatePassword(string value)
     {
-        if (value.Length is 0 or > 4_096) throw new ArgumentException("CloudDrive2 密码长度无效。", nameof(value));
+        if (value.Length is 0 or > 4_096) throw new ArgumentException(AppStrings.Get("store.passLength"), nameof(value));
         return value;
     }
 

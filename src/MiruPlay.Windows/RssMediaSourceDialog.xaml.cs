@@ -1,4 +1,5 @@
 using System.Windows;
+using MiruPlay.Windows.Services;
 
 namespace MiruPlay.Windows;
 
@@ -18,12 +19,12 @@ public partial class RssMediaSourceDialog : Window
     {
         if (SourceName.Length == 0)
         {
-            MessageBox.Show(this, "请输入媒体源名称。", "RSS 在线源", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, AppStrings.Get("wpf.src.enterName"), AppStrings.Get("sources.rss"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         if (SourceLocation.Length == 0)
         {
-            MessageBox.Show(this, "请输入 RSS Feed 地址。", "RSS 在线源", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, AppStrings.Get("wpf.src.enterFeed"), AppStrings.Get("sources.rss"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         DialogResult = true;

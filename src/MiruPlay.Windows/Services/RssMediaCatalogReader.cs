@@ -48,7 +48,7 @@ public sealed class RssMediaCatalogReader
             proxy?.RssProxyPort ?? 1080,
             cancellationToken).ConfigureAwait(false);
         var catalog = BuildCatalog(feedUri.AbsoluteUri, items);
-        if (catalog.Series.Count == 0) throw new InvalidDataException("RSS Feed 中没有可播放的 HTTP(S) 视频条目。");
+        if (catalog.Series.Count == 0) throw new InvalidDataException(AppStrings.Get("rss.noPlayable"));
         lock (_cacheLock) _cache[feedUri.AbsoluteUri] = (DateTimeOffset.UtcNow + SnapshotTtl, catalog);
         return catalog;
     }
@@ -179,7 +179,7 @@ public sealed class RssMediaCatalogReader
     {
         if (!Uri.TryCreate(feedUrl.Trim(), UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
             !string.IsNullOrEmpty(uri.UserInfo) || !string.IsNullOrEmpty(uri.Fragment))
-            throw new ArgumentException("RSS 地址必须是不含凭据或片段的 HTTP(S) URL。", nameof(feedUrl));
+            throw new ArgumentException(AppStrings.Get("rss.cleanUrl"), nameof(feedUrl));
         return uri;
     }
 

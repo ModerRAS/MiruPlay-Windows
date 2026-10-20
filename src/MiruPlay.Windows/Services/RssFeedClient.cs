@@ -52,8 +52,8 @@ public sealed class RssFeedClient
         using var client = new HttpClient(_handler ?? ownedHandler!, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(30) };
         using var response = await client.GetAsync(feedUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
-            throw new HttpRequestException($"RSS 拉取失败 (HTTP {(int)response.StatusCode})。", null, response.StatusCode);
-        if (response.Content.Headers.ContentLength > MaximumFeedBytes) throw new InvalidDataException("RSS 响应超过 5 MiB。");
+            throw new HttpRequestException(AppStrings.Get("rss.fetchFailed", (int)response.StatusCode), null, response.StatusCode);
+        if (response.Content.Headers.ContentLength > MaximumFeedBytes) throw new InvalidDataException(AppStrings.Get("rss.tooLarge"));
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         using var limited = new LimitedReadStream(stream, MaximumFeedBytes);
         try
@@ -62,7 +62,7 @@ public sealed class RssFeedClient
         }
         catch (XmlException error)
         {
-            throw new InvalidDataException("RSS 响应不是有效的 XML Feed。", error);
+            throw new InvalidDataException(AppStrings.Get("rss.badXml"), error);
         }
     }
 
@@ -88,7 +88,7 @@ public sealed class RssFeedClient
     {
         var atom = element.Name.LocalName == "entry";
         var title = ChildText(element, "title");
-        if (title.Length == 0) title = "未命名条目";
+        if (title.Length == 0) title = AppStrings.Get("rss.untitled");
         var linkElements = element.Elements().Where(child => child.Name.LocalName == "link").ToList();
         var link = atom
             ? linkElements
@@ -115,7 +115,7 @@ public sealed class RssFeedClient
                 out var enclosureLength))
             size = Math.Max(0, enclosureLength);
         return new RssFeedItem(
-            Clean(title, 1_000) ?? "未命名条目",
+            Clean(title, 1_000) ?? AppStrings.Get("rss.untitled"),
             Clean(ChildText(element, atom ? "id" : "guid"), 4_096),
             link,
             enclosure,
@@ -155,7 +155,7 @@ public sealed class RssFeedClient
     {
         var value = url.Trim();
         if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") || !string.IsNullOrEmpty(uri.UserInfo))
-            throw new ArgumentException("RSS 地址必须是不含嵌入凭据的 HTTP(S) URL。", nameof(url));
+            throw new ArgumentException(AppStrings.Get("rss.badUrl"), nameof(url));
         return uri;
     }
 
@@ -181,7 +181,7 @@ public sealed class RssFeedClient
         private int Track(int count)
         {
             _read += count;
-            if (_read > maximumBytes) throw new InvalidDataException("RSS 响应超过 5 MiB。");
+            if (_read > maximumBytes) throw new InvalidDataException(AppStrings.Get("rss.tooLarge"));
             return count;
         }
     }
@@ -200,7 +200,7 @@ public static class RssSubmissionPlanner
             }
             catch (RegexParseException error)
             {
-                throw new ArgumentException("RSS 过滤正则无效。", nameof(filterRegex), error);
+                throw new ArgumentException(AppStrings.Get("rss.badFilter"), nameof(filterRegex), error);
             }
         }
         return items.Select(item =>

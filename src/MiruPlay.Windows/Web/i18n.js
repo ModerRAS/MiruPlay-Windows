@@ -7720,6 +7720,223 @@ const I18N = {
   "zh-HK": "目錄索引字幕路徑格式無效。",
   "en-US": "Directory index subtitle path malformed.",
   "en-GB": "Directory index subtitle path malformed."
+ },
+ "rss.fetchFailed": {
+  "zh-CN": "RSS 拉取失败 (HTTP {0})。",
+  "zh-TW": "RSS 拉取失敗 (HTTP {0})。",
+  "zh-HK": "RSS 拉取失敗 (HTTP {0})。",
+  "en-US": "RSS fetch failed (HTTP {0}).",
+  "en-GB": "RSS fetch failed (HTTP {0})."
+ },
+ "rss.tooLarge": {
+  "zh-CN": "RSS 响应超过 5 MiB。",
+  "zh-TW": "RSS 回應超過 5 MiB。",
+  "zh-HK": "RSS 回應超過 5 MiB。",
+  "en-US": "RSS response exceeds 5 MiB.",
+  "en-GB": "RSS response exceeds 5 MiB."
+ },
+ "rss.badXml": {
+  "zh-CN": "RSS 响应不是有效的 XML Feed。",
+  "zh-TW": "RSS 回應不是有效的 XML Feed。",
+  "zh-HK": "RSS 回應唔係有效嘅 XML Feed。",
+  "en-US": "RSS response is not a valid XML feed.",
+  "en-GB": "RSS response is not a valid XML feed."
+ },
+ "rss.untitled": {
+  "zh-CN": "未命名条目",
+  "zh-TW": "未命名條目",
+  "zh-HK": "未命名條目",
+  "en-US": "Untitled entry",
+  "en-GB": "Untitled entry"
+ },
+ "task.interrupted": {
+  "zh-CN": "应用关闭时任务中断。",
+  "zh-TW": "應用關閉時工作中斷。",
+  "zh-HK": "應用關閉時工作中斷。",
+  "en-US": "Task interrupted by app shutdown.",
+  "en-GB": "Task interrupted by app shutdown."
+ },
+ "task.idEmpty": {
+  "zh-CN": "任务 ID 不能为空。",
+  "zh-TW": "工作 ID 不能為空。",
+  "zh-HK": "工作 ID 不能為空。",
+  "en-US": "Task ID must not be empty.",
+  "en-GB": "Task ID must not be empty."
+ },
+ "task.titleEmpty": {
+  "zh-CN": "任务标题不能为空。",
+  "zh-TW": "工作標題不能為空。",
+  "zh-HK": "工作標題不能為空。",
+  "en-US": "Task title must not be empty.",
+  "en-GB": "Task title must not be empty."
+ },
+ "task.persistFailed": {
+  "zh-CN": "无法持久化任务状态。",
+  "zh-TW": "無法持久化工作狀態。",
+  "zh-HK": "無法持久化工作狀態。",
+  "en-US": "Cannot persist task state.",
+  "en-GB": "Cannot persist task state."
+ },
+ "task.notStarted": {
+  "zh-CN": "无法持久化任务状态，任务未启动。",
+  "zh-TW": "無法持久化工作狀態，工作未啟動。",
+  "zh-HK": "無法持久化工作狀態，工作未啟動。",
+  "en-US": "Cannot persist task state; task not started.",
+  "en-GB": "Cannot persist task state; task not started."
+ },
+ "task.finalFailed": {
+  "zh-CN": "无法持久化任务终态。",
+  "zh-TW": "無法持久化工作終態。",
+  "zh-HK": "無法持久化工作終態。",
+  "en-US": "Cannot persist task final state.",
+  "en-GB": "Cannot persist task final state."
+ },
+ "rss.noPlayable": {
+  "zh-CN": "RSS Feed 中没有可播放的 HTTP(S) 视频条目。",
+  "zh-TW": "RSS Feed 中沒有可播放的 HTTP(S) 影片條目。",
+  "zh-HK": "RSS Feed 中冇可播放嘅 HTTP(S) 影片條目。",
+  "en-US": "RSS feed has no playable HTTP(S) video entries.",
+  "en-GB": "RSS feed has no playable HTTP(S) video entries."
+ },
+ "rss.cleanUrl": {
+  "zh-CN": "RSS 地址必须是不含凭据或片段的 HTTP(S) URL。",
+  "zh-TW": "RSS 位址必須是不含憑證或片段的 HTTP(S) URL。",
+  "zh-HK": "RSS 位址必須係不含憑證或片段嘅 HTTP(S) URL。",
+  "en-US": "RSS address must be an HTTP(S) URL without credentials or fragment.",
+  "en-GB": "RSS address must be an HTTP(S) URL without credentials or fragment."
+ },
+ "wpf.src.pickDir": {
+  "zh-CN": "选择媒体目录",
+  "zh-TW": "選擇媒體目錄",
+  "zh-HK": "選擇媒體目錄",
+  "en-US": "Choose media directory",
+  "en-GB": "Choose media directory"
+ },
+ "wpf.src.enterName": {
+  "zh-CN": "请输入媒体源名称。",
+  "zh-TW": "請輸入媒體來源名稱。",
+  "zh-HK": "請輸入媒體來源名稱。",
+  "en-US": "Enter a media source name.",
+  "en-GB": "Enter a media source name."
+ },
+ "wpf.src.pickExistingDir": {
+  "zh-CN": "请选择存在的媒体目录。",
+  "zh-TW": "請選擇存在的媒體目錄。",
+  "zh-HK": "請選擇存在嘅媒體目錄。",
+  "en-US": "Choose an existing media directory.",
+  "en-GB": "Choose an existing media directory."
+ },
+ "store.credBroken": {
+  "zh-CN": "CloudDrive 凭据无法解密。",
+  "zh-TW": "CloudDrive 憑證無法解密。",
+  "zh-HK": "CloudDrive 憑證無法解密。",
+  "en-US": "CloudDrive credentials undecryptable.",
+  "en-GB": "CloudDrive credentials undecryptable."
+ },
+ "store.unverifiedEndpoint": {
+  "zh-CN": "CloudDrive2 凭据未在当前服务地址验证；请重新登录或验证 Token。",
+  "zh-TW": "CloudDrive2 憑證未在目前服務位址驗證；請重新登入或驗證 Token。",
+  "zh-HK": "CloudDrive2 憑證未喺目前服務位址驗證；請重新登入或驗證 Token。",
+  "en-US": "CloudDrive2 credentials unverified at the current endpoint; log in or verify the token again.",
+  "en-GB": "CloudDrive2 credentials unverified at the current endpoint; log in or verify the token again."
+ },
+ "store.tokenLength": {
+  "zh-CN": "CloudDrive2 API Token 长度无效。",
+  "zh-TW": "CloudDrive2 API Token 長度無效。",
+  "zh-HK": "CloudDrive2 API Token 長度無效。",
+  "en-US": "CloudDrive2 API token length invalid.",
+  "en-GB": "CloudDrive2 API token length invalid."
+ },
+ "store.passLength": {
+  "zh-CN": "CloudDrive2 密码长度无效。",
+  "zh-TW": "CloudDrive2 密碼長度無效。",
+  "zh-HK": "CloudDrive2 密碼長度無效。",
+  "en-US": "CloudDrive2 password length invalid.",
+  "en-GB": "CloudDrive2 password length invalid."
+ },
+ "wpf.version.title": {
+  "zh-CN": "选择下一集版本",
+  "zh-TW": "選擇下一集版本",
+  "zh-HK": "選擇下一集版本",
+  "en-US": "Choose next episode version",
+  "en-GB": "Choose next episode version"
+ },
+ "wpf.version.label": {
+  "zh-CN": "下一集版本",
+  "zh-TW": "下一集版本",
+  "zh-HK": "下一集版本",
+  "en-US": "Next episode version",
+  "en-GB": "Next episode version"
+ },
+ "meta.tokenEmpty": {
+  "zh-CN": "{0} 不能为空。",
+  "zh-TW": "{0} 不能為空。",
+  "zh-HK": "{0} 不能為空。",
+  "en-US": "{0} must not be empty.",
+  "en-GB": "{0} must not be empty."
+ },
+ "meta.tokenLength": {
+  "zh-CN": "{0} 长度无效。",
+  "zh-TW": "{0} 長度無效。",
+  "zh-HK": "{0} 長度無效。",
+  "en-US": "{0} length invalid.",
+  "en-GB": "{0} length invalid."
+ },
+ "meta.tokenBroken": {
+  "zh-CN": "元数据令牌无法解密。",
+  "zh-TW": "元數據權杖無法解密。",
+  "zh-HK": "元數據權杖無法解密。",
+  "en-US": "Metadata token undecryptable.",
+  "en-GB": "Metadata token undecryptable."
+ },
+ "dsp.configInvalid": {
+  "zh-CN": "音频 DSP 配置无效: {0}",
+  "zh-TW": "音訊 DSP 設定無效: {0}",
+  "zh-HK": "音頻 DSP 設定無效: {0}",
+  "en-US": "Audio DSP configuration invalid: {0}",
+  "en-GB": "Audio DSP configuration invalid: {0}"
+ },
+ "dsp.routeIgnored": {
+  "zh-CN": "布局 {0} 不包含目标声道 {1}，该规则已忽略。",
+  "zh-TW": "佈局 {0} 不包含目標聲道 {1}，該規則已忽略。",
+  "zh-HK": "佈局 {0} 不包含目標聲道 {1}，該規則已忽略。",
+  "en-US": "Layout {0} lacks target channel {1}; rule ignored.",
+  "en-GB": "Layout {0} lacks target channel {1}; rule ignored."
+ },
+ "dsp.hrtfDefault": {
+  "zh-CN": "HRTF 使用 FFmpeg headphone 默认 HRIR；未提供外部 HRIR 文件。",
+  "zh-TW": "HRTF 使用 FFmpeg headphone 預設 HRIR；未提供外部 HRIR 檔案。",
+  "zh-HK": "HRTF 使用 FFmpeg headphone 預設 HRIR；未提供外部 HRIR 檔案。",
+  "en-US": "HRTF uses the FFmpeg headphone default HRIR; no external HRIR file given.",
+  "en-GB": "HRTF uses the FFmpeg headphone default HRIR; no external HRIR file given."
+ },
+ "wpf.src.enterFeed": {
+  "zh-CN": "请输入 RSS Feed 地址。",
+  "zh-TW": "請輸入 RSS Feed 位址。",
+  "zh-HK": "請輸入 RSS Feed 位址。",
+  "en-US": "Enter an RSS feed address.",
+  "en-GB": "Enter an RSS feed address."
+ },
+ "tvmaze.queryLong": {
+  "zh-CN": "TVMaze 搜索词必须为 1 至 100 个字符。",
+  "zh-TW": "TVMaze 搜尋詞必須為 1 至 100 個字元。",
+  "zh-HK": "TVMaze 搜尋詞必須為 1 至 100 個字元。",
+  "en-US": "TVMaze query must be 1 to 100 characters.",
+  "en-GB": "TVMaze query must be 1 to 100 characters."
+ },
+ "tvmaze.searchFailed": {
+  "zh-CN": "TVMaze 搜索失败 (HTTP {0})。",
+  "zh-TW": "TVMaze 搜尋失敗 (HTTP {0})。",
+  "zh-HK": "TVMaze 搜尋失敗 (HTTP {0})。",
+  "en-US": "TVMaze search failed (HTTP {0}).",
+  "en-GB": "TVMaze search failed (HTTP {0})."
+ },
+ "tvmaze.emptyResponse": {
+  "zh-CN": "TVMaze 搜索返回了空响应。",
+  "zh-TW": "TVMaze 搜尋返回了空回應。",
+  "zh-HK": "TVMaze 搜尋返回咗空回應。",
+  "en-US": "TVMaze search returned an empty response.",
+  "en-GB": "TVMaze search returned an empty response."
  }
 };
 let currentLocale = 'zh-CN';
