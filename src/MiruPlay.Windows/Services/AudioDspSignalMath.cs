@@ -58,6 +58,10 @@ public static class AudioDspSignalMath
     private const double MinimumMagnitude = 1e-12;
     private static readonly double Minus3DbAmplitude = Math.Sqrt(0.5);
 
+    /// <summary>Magnitude response (dB) of one band at one frequency, reusing the playback coefficient path.</summary>
+    public static double BandMagnitudeDb(AudioDspBand band, double frequencyHz, int sampleRateHz) =>
+        MagnitudeDb(DesignBiquad(band, sampleRateHz), frequencyHz, sampleRateHz);
+
     public static BiquadCoefficients DesignBiquad(AudioDspBand band, int sampleRateHz)
     {
         ArgumentNullException.ThrowIfNull(band);
