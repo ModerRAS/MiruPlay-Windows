@@ -21,7 +21,7 @@ public sealed class MlipLibraryReader
         var databasePath = Path.Combine(root, "library.db");
         if (!File.Exists(databasePath))
         {
-            throw new FileNotFoundException("所选目录中没有 library.db。", databasePath);
+            throw new FileNotFoundException(AppStrings.Get("mlip.noDb"), databasePath);
         }
 
         var cacheDirectory = FileSourceCacheDirectory(root);
@@ -35,7 +35,7 @@ public sealed class MlipLibraryReader
 
     public static LibraryCatalog LoadRemote(string databasePath, string rootUrl)
     {
-        if (!File.Exists(databasePath)) throw new FileNotFoundException("WebDAV MLIP 缓存不存在。", databasePath);
+        if (!File.Exists(databasePath)) throw new FileNotFoundException(AppStrings.Get("mlip.noDavCache"), databasePath);
         var normalizedRoot = WebDavMlipClient.NormalizeRoot(rootUrl).AbsoluteUri.TrimEnd('/');
         var artworkDirectory = Path.Combine(Path.GetDirectoryName(databasePath)!, "artwork");
         return LoadDatabase(
@@ -53,7 +53,7 @@ public sealed class MlipLibraryReader
     {
         var normalizedRoot = SmbPath.NormalizeRoot(rootUrl);
         var databasePath = Path.Combine(SmbPath.ToUncPath(normalizedRoot), "library.db");
-        if (!File.Exists(databasePath)) throw new FileNotFoundException("SMB 目录中没有 library.db。", databasePath);
+        if (!File.Exists(databasePath)) throw new FileNotFoundException(AppStrings.Get("mlip.noSmbDb"), databasePath);
         var cacheDirectory = FileSourceCacheDirectory(normalizedRoot);
         var catalog = LoadDatabase(
             databasePath,
@@ -171,7 +171,7 @@ public sealed class MlipLibraryReader
         var schemaVersion = Convert.ToInt32(ExecuteScalar(connection, "PRAGMA user_version") ?? 0, CultureInfo.InvariantCulture);
         if (schemaVersion is < 1 or > 4)
         {
-            throw new InvalidDataException($"不支持 MLIP v{schemaVersion}，当前支持 v1-v4。");
+            throw new InvalidDataException(AppStrings.Get("mlip.badVersion", schemaVersion));
         }
 
         var expected = new HashSet<string>(RequiredTables, StringComparer.OrdinalIgnoreCase);
@@ -195,26 +195,26 @@ public sealed class MlipLibraryReader
         }
         if (expected.Count > 0)
         {
-            throw new InvalidDataException($"MLIP 缺少数据表：{string.Join(", ", expected.Order())}");
+            throw new InvalidDataException(AppStrings.Get("mlip.missingTables", string.Join(", ", expected.Order())));
         }
 
         var protocol = ReadMeta(connection, "protocol");
         var schema = ReadMeta(connection, "schema");
         if (!string.Equals(protocol, "MLIP", StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidDataException("library.db 不是 MLIP 媒体库。");
+            throw new InvalidDataException(AppStrings.Get("mlip.notLibrary"));
         }
         if (schema != schemaVersion.ToString(CultureInfo.InvariantCulture))
         {
-            throw new InvalidDataException($"meta.schema 与 PRAGMA user_version ({schemaVersion}) 不一致。");
+            throw new InvalidDataException(AppStrings.Get("mlip.schemaMismatch", schemaVersion));
         }
         if (schemaVersion >= 3 && ReadCapability(connection, "extra") != 1)
         {
-            throw new InvalidDataException("MLIP v3+ 要求 capability.extra = 1。");
+            throw new InvalidDataException(AppStrings.Get("mlip.needExtra"));
         }
         if (schemaVersion >= 4 && ReadCapability(connection, "artwork_pack") != 1)
         {
-            throw new InvalidDataException("MLIP v4 要求 capability.artwork_pack = 1。");
+            throw new InvalidDataException(AppStrings.Get("mlip.needArtwork"));
         }
 
         return schemaVersion;
@@ -434,10 +434,10 @@ public sealed class MlipLibraryReader
                 1 => "Bangumi",
                 2 => "TMDB",
                 3 => "AniDB",
-                _ => throw new InvalidDataException($"未知的 MLIP external_id provider：{providerValue}"),
+                _ => throw new InvalidDataException(AppStrings.Get("mlip.badProvider", providerValue)),
             };
             var value = reader.GetString(2).Trim();
-            if (value.Length == 0) throw new InvalidDataException("MLIP external_id 不能为空。");
+            if (value.Length == 0) throw new InvalidDataException(AppStrings.Get("mlip.emptyExternalId"));
             var parentId = reader.GetInt64(0);
             if (!result.TryGetValue(parentId, out var values)) result[parentId] = values = [];
             values.Add(new ExternalMetadataId(provider, value));
@@ -504,9 +504,9 @@ public sealed class MlipLibraryReader
         {
             var seriesId = reader.GetInt64(1);
             var kind = reader.GetInt32(2);
-            if (kind is < 1 or > 5) throw new InvalidDataException($"未知的 MLIP extra_kind：{kind}");
+            if (kind is < 1 or > 5) throw new InvalidDataException(AppStrings.Get("mlip.badExtraKind", kind));
             var mediaPath = resolvePath(reader.GetString(6));
-            if (!IsVideo(mediaPath)) throw new InvalidDataException($"MLIP 特典不是视频文件：{reader.GetString(6)}");
+            if (!IsVideo(mediaPath)) throw new InvalidDataException(AppStrings.Get("mlip.extraNotVideo", reader.GetString(6)));
             if (!result.TryGetValue(seriesId, out var values)) result[seriesId] = values = [];
             values.Add(new LibraryExtra(
                 reader.GetInt64(0),

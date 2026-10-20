@@ -25,15 +25,15 @@ public sealed class TorrentFileDownloader
     {
         if (!Uri.TryCreate(url.Trim(), UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
             !string.IsNullOrEmpty(uri.UserInfo))
-            throw new ArgumentException("torrent 地址必须是无嵌入凭据的 HTTP(S) URL。", nameof(url));
+            throw new ArgumentException(AppStrings.Get("torrent.urlShape"), nameof(url));
         using var ownedHandler = _handler is null ? CreateHandler(proxyEnabled, proxyHost, proxyPort) : null;
         using var client = new HttpClient(_handler ?? ownedHandler!, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(60) };
         using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         var finalUri = response.RequestMessage?.RequestUri;
         if (finalUri is null || finalUri.Scheme is not ("http" or "https") || !string.IsNullOrEmpty(finalUri.UserInfo))
-            throw new InvalidDataException("torrent 重定向目标必须是无嵌入凭据的 HTTP(S) URL。");
-        if (response.Content.Headers.ContentLength is > MaxBytes) throw new InvalidDataException("torrent 文件超过 16 MiB。");
+            throw new InvalidDataException(AppStrings.Get("torrent.redirectShape"));
+        if (response.Content.Headers.ContentLength is > MaxBytes) throw new InvalidDataException(AppStrings.Get("torrent.tooLarge"));
         await using var input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         using var output = new MemoryStream();
         var buffer = new byte[32 * 1024];
@@ -41,10 +41,10 @@ public sealed class TorrentFileDownloader
         {
             var read = await input.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
             if (read == 0) break;
-            if (output.Length + read > MaxBytes) throw new InvalidDataException("torrent 文件超过 16 MiB。");
+            if (output.Length + read > MaxBytes) throw new InvalidDataException(AppStrings.Get("torrent.tooLarge"));
             output.Write(buffer, 0, read);
         }
-        if (output.Length == 0) throw new InvalidDataException("torrent 文件为空。");
+        if (output.Length == 0) throw new InvalidDataException(AppStrings.Get("torrent.empty"));
         return new DownloadedTorrent(output.ToArray(), TorrentFileName(title, finalUri, keyPrefix));
     }
 
@@ -75,8 +75,8 @@ public static class TorrentMagnetParser
     public static string Parse(ReadOnlySpan<byte> content)
     {
         var parser = new BencodeParser(content.ToArray());
-        var root = parser.Parse() as BDictionary ?? throw new InvalidDataException("torrent 根节点不是字典。");
-        var info = root.Get("info") as BDictionary ?? throw new InvalidDataException("torrent 缺少 info 字典。");
+        var root = parser.Parse() as BDictionary ?? throw new InvalidDataException(AppStrings.Get("torrent.notDict"));
+        var info = root.Get("info") as BDictionary ?? throw new InvalidDataException(AppStrings.Get("torrent.noInfo"));
         var query = new List<string> { $"xt=urn:btih:{RssSubmissionPlanner.Sha1Hex(content[info.Start..info.End])}" };
         var name = (info.Get("name.utf-8") ?? info.Get("name"))?.AsString();
         if (!string.IsNullOrWhiteSpace(name)) query.Add($"dn={Uri.EscapeDataString(name[..Math.Min(name.Length, 1024)])}");
@@ -126,21 +126,21 @@ public static class TorrentMagnetParser
         public BValue Parse()
         {
             var value = ParseValue(0);
-            if (_index != content.Length) throw new InvalidDataException($"torrent 在字节 {_index} 后包含多余数据。");
+            if (_index != content.Length) throw new InvalidDataException(AppStrings.Get("torrent.trailing", _index));
             return value;
         }
 
         private BValue ParseValue(int depth)
         {
-            if (depth > 128 || ++_nodes > 100_000) throw new InvalidDataException("torrent bencode 结构过于复杂。");
-            if (_index >= content.Length) throw new InvalidDataException("torrent bencode 意外结束。");
+            if (depth > 128 || ++_nodes > 100_000) throw new InvalidDataException(AppStrings.Get("torrent.tooComplex"));
+            if (_index >= content.Length) throw new InvalidDataException(AppStrings.Get("torrent.truncated"));
             return content[_index] switch
             {
                 (byte)'i' => ParseInteger(),
                 (byte)'l' => ParseList(depth),
                 (byte)'d' => ParseDictionary(depth),
                 >= (byte)'0' and <= (byte)'9' => ParseBytes(),
-                _ => throw new InvalidDataException($"torrent bencode 类型无效：{_index}。"),
+                _ => throw new InvalidDataException(AppStrings.Get("torrent.badType", _index)),
             };
         }
 
@@ -150,7 +150,7 @@ public static class TorrentMagnetParser
             var valueStart = _index;
             while (_index < content.Length && content[_index] != (byte)'e') _index++;
             if (_index >= content.Length || !long.TryParse(Encoding.ASCII.GetString(content, valueStart, _index - valueStart), NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var value))
-                throw new InvalidDataException("torrent bencode 整数无效。");
+                throw new InvalidDataException(AppStrings.Get("torrent.badInt"));
             return new BInteger(value, start, ++_index);
         }
 
@@ -159,7 +159,7 @@ public static class TorrentMagnetParser
             var start = _index++;
             var values = new List<BValue>();
             while (_index < content.Length && content[_index] != (byte)'e') values.Add(ParseValue(depth + 1));
-            if (_index >= content.Length) throw new InvalidDataException("torrent bencode 列表未结束。");
+            if (_index >= content.Length) throw new InvalidDataException(AppStrings.Get("torrent.unclosedList"));
             return new BList(values, start, ++_index);
         }
 
@@ -172,7 +172,7 @@ public static class TorrentMagnetParser
                 var key = ParseBytes().AsString();
                 values.Add(new KeyValuePair<string, BValue>(key, ParseValue(depth + 1)));
             }
-            if (_index >= content.Length) throw new InvalidDataException("torrent bencode 字典未结束。");
+            if (_index >= content.Length) throw new InvalidDataException(AppStrings.Get("torrent.unclosedDict"));
             return new BDictionary(values, start, ++_index);
         }
 
@@ -182,9 +182,9 @@ public static class TorrentMagnetParser
             var separator = Array.IndexOf(content, (byte)':', _index);
             if (separator < 0 || separator - _index is < 1 or > 10 ||
                 !int.TryParse(Encoding.ASCII.GetString(content, _index, separator - _index), NumberStyles.None, CultureInfo.InvariantCulture, out var length) || length < 0)
-                throw new InvalidDataException("torrent bencode 字符串长度无效。");
+                throw new InvalidDataException(AppStrings.Get("torrent.badStrLen"));
             _index = separator + 1;
-            if (length > content.Length - _index) throw new InvalidDataException("torrent bencode 字符串越界。");
+            if (length > content.Length - _index) throw new InvalidDataException(AppStrings.Get("torrent.strOverflow"));
             var value = content.AsSpan(_index, length).ToArray();
             _index += length;
             return new BBytes(value, start, _index);
@@ -205,9 +205,9 @@ public sealed class TorrentSubmissionPreparer(
         RssSubmissionDecision decision,
         CancellationToken cancellationToken = default)
     {
-        if (decision.SubmissionUrl is null || decision.ItemKey is null) throw new ArgumentException("RSS torrent 条目缺少提交信息。", nameof(decision));
+        if (decision.SubmissionUrl is null || decision.ItemKey is null) throw new ArgumentException(AppStrings.Get("torrent.noSubmitInfo"), nameof(decision));
         if (!tokenInfo.AllowList || !tokenInfo.AllowCreateFolder || !tokenInfo.AllowCreateFile || !tokenInfo.AllowWrite)
-            throw new InvalidOperationException("CloudDrive2 API Token 缺少 torrent staging 所需的目录、创建或写入权限。");
+            throw new InvalidOperationException(AppStrings.Get("torrent.noPerms"));
         var downloaded = await _downloader.DownloadAsync(
             decision.SubmissionUrl,
             decision.Item.Title,

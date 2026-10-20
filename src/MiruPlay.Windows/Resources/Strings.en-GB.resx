@@ -879,4 +879,81 @@
   <data name="search.yearClose" xml:space="preserve"><value>Year close</value></data>
   <data name="search.converge" xml:space="preserve"><value>Multiple sources converge</value></data>
   <data name="search.complete" xml:space="preserve"><value>Richer metadata</value></data>
+  <data name="torrent.urlShape" xml:space="preserve"><value>torrent addresses must be credential-free HTTP(S) URLs.</value></data>
+  <data name="torrent.redirectShape" xml:space="preserve"><value>torrent redirect targets must be credential-free HTTP(S) URLs.</value></data>
+  <data name="torrent.tooLarge" xml:space="preserve"><value>torrent file exceeds 16 MiB.</value></data>
+  <data name="torrent.empty" xml:space="preserve"><value>torrent file empty.</value></data>
+  <data name="torrent.notDict" xml:space="preserve"><value>torrent root node is not a dict.</value></data>
+  <data name="torrent.noInfo" xml:space="preserve"><value>torrent misses the info dict.</value></data>
+  <data name="torrent.trailing" xml:space="preserve"><value>torrent has trailing data after byte {0}.</value></data>
+  <data name="torrent.tooComplex" xml:space="preserve"><value>torrent bencode structure too complex.</value></data>
+  <data name="torrent.truncated" xml:space="preserve"><value>torrent bencode truncated.</value></data>
+  <data name="torrent.badType" xml:space="preserve"><value>torrent bencode invalid type: {0}.</value></data>
+  <data name="torrent.badInt" xml:space="preserve"><value>torrent bencode invalid integer.</value></data>
+  <data name="torrent.unclosedList" xml:space="preserve"><value>torrent bencode unterminated list.</value></data>
+  <data name="torrent.unclosedDict" xml:space="preserve"><value>torrent bencode unterminated dict.</value></data>
+  <data name="torrent.badStrLen" xml:space="preserve"><value>torrent bencode invalid string length.</value></data>
+  <data name="torrent.strOverflow" xml:space="preserve"><value>torrent bencode string overflow.</value></data>
+  <data name="torrent.noSubmitInfo" xml:space="preserve"><value>RSS torrent entry misses submission info.</value></data>
+  <data name="torrent.noPerms" xml:space="preserve"><value>CloudDrive2 API token lacks the directory/create/write permissions for torrent staging.</value></data>
+  <data name="mpv.initFailed" xml:space="preserve"><value>Failed to initialise libmpv</value></data>
+  <data name="mpv.loadFailed" xml:space="preserve"><value>Failed to load media into libmpv</value></data>
+  <data name="mpv.afFailed" xml:space="preserve"><value>Failed to set libmpv audio filter</value></data>
+  <data name="mpv.toggleFailed" xml:space="preserve"><value>Failed to toggle libmpv pause</value></data>
+  <data name="mpv.noVolume" xml:space="preserve"><value>Missing volume value.</value></data>
+  <data name="mpv.noMute" xml:space="preserve"><value>Missing mute state.</value></data>
+  <data name="mpv.unknownCommand" xml:space="preserve"><value>Unknown playback command: {0}</value></data>
+  <data name="mpv.closedEarly" xml:space="preserve"><value>libmpv closed the session before media finished loading.</value></data>
+  <data name="mpv.loadTimeout" xml:space="preserve"><value>libmpv did not finish loading media within 30 seconds.</value></data>
+  <data name="mpv.sidecarFailed" xml:space="preserve"><value>Failed to load external audio: {0}</value></data>
+  <data name="mpv.subAddFailed" xml:space="preserve"><value>Failed to load external subtitles into libmpv</value></data>
+  <data name="mpv.optionFailed" xml:space="preserve"><value>Failed to set libmpv option {0}</value></data>
+  <data name="mpv.seekFailed" xml:space="preserve"><value>Failed to seek libmpv</value></data>
+  <data name="mpv.propFailed" xml:space="preserve"><value>Failed to set libmpv property {0}</value></data>
+  <data name="mpv.progressFailed" xml:space="preserve"><value>Failed to save playback progress: {0}</value></data>
+  <data name="mpv.noSession" xml:space="preserve"><value>No controllable libmpv session.</value></data>
+  <data name="mpv.endFile" xml:space="preserve"><value>{0} (error {1}).</value></data>
+  <data name="mlip.noDb" xml:space="preserve"><value>Selected directory has no library.db.</value></data>
+  <data name="mlip.noDavCache" xml:space="preserve"><value>WebDAV MLIP cache missing.</value></data>
+  <data name="mlip.noSmbDb" xml:space="preserve"><value>SMB directory has no library.db.</value></data>
+  <data name="mlip.badVersion" xml:space="preserve"><value>MLIP v{0} unsupported; v1-v4 supported.</value></data>
+  <data name="mlip.missingTables" xml:space="preserve"><value>MLIP misses tables: {0}</value></data>
+  <data name="mlip.notLibrary" xml:space="preserve"><value>library.db is not an MLIP library.</value></data>
+  <data name="mlip.schemaMismatch" xml:space="preserve"><value>meta.schema disagrees with PRAGMA user_version ({0}).</value></data>
+  <data name="mlip.needExtra" xml:space="preserve"><value>MLIP v3+ requires capability.extra = 1.</value></data>
+  <data name="mlip.needArtwork" xml:space="preserve"><value>MLIP v4 requires capability.artwork_pack = 1.</value></data>
+  <data name="mlip.badProvider" xml:space="preserve"><value>Unknown MLIP external_id provider: {0}</value></data>
+  <data name="mlip.emptyExternalId" xml:space="preserve"><value>MLIP external_id must not be empty.</value></data>
+  <data name="mlip.badExtraKind" xml:space="preserve"><value>Unknown MLIP extra_kind: {0}</value></data>
+  <data name="mlip.extraNotVideo" xml:space="preserve"><value>MLIP extra is not a video file: {0}</value></data>
+  <data name="cd2.noOrganizePerms" xml:space="preserve"><value>CloudDrive2 API token lacks the list/mkdir/move permissions for organising.</value></data>
+  <data name="cd2.dirsNotRoot" xml:space="preserve"><value>CloudDrive2 download and organise directories must not be the root.</value></data>
+  <data name="cd2.organizeOutside" xml:space="preserve"><value>CloudDrive2 organise directory escapes the token root.</value></data>
+  <data name="cd2.organizeInInbox" xml:space="preserve"><value>CloudDrive2 organise directory must not be inside the download directory.</value></data>
+  <data name="bgm.queryEmpty" xml:space="preserve"><value>Bangumi query must not be empty.</value></data>
+  <data name="bgm.queryLong" xml:space="preserve"><value>Bangumi query must not exceed 100 characters.</value></data>
+  <data name="bgm.searchFailed" xml:space="preserve"><value>Bangumi search failed (HTTP {0}).</value></data>
+  <data name="bgm.emptyResponse" xml:space="preserve"><value>Bangumi search returned an empty response.</value></data>
+  <data name="bgm.noToken" xml:space="preserve"><value>Bangumi access token not configured.</value></data>
+  <data name="bgm.authFailed" xml:space="preserve"><value>Bangumi authentication failed (HTTP {0}).</value></data>
+  <data name="bgm.authEmpty" xml:space="preserve"><value>Bangumi authentication returned an empty response.</value></data>
+  <data name="bgm.collectionFailed" xml:space="preserve"><value>Bangumi collection read failed (HTTP {0}).</value></data>
+  <data name="bgm.collectionEmpty" xml:space="preserve"><value>Bangumi collection returned an empty response.</value></data>
+  <data name="bgm.updateFailed" xml:space="preserve"><value>Bangumi collection update failed (HTTP {0}).</value></data>
+  <data name="bgm.episodeUpdateFailed" xml:space="preserve"><value>Bangumi episode status update failed (HTTP {0}).</value></data>
+  <data name="bgm.episodeReadFailed" xml:space="preserve"><value>Bangumi episode status read failed (HTTP {0}).</value></data>
+  <data name="bgm.episodeEmpty" xml:space="preserve"><value>Bangumi episode status returned an empty response.</value></data>
+  <data name="measure.badSerial" xml:space="preserve"><value>Serial needs exactly 7 digits (e.g. 700-1234).</value></data>
+  <data name="measure.downloadFailed" xml:space="preserve"><value>Calibration download failed (HTTP {0}).</value></data>
+  <data name="measure.downloadError" xml:space="preserve"><value>Calibration download failed: {0}</value></data>
+  <data name="measure.calTooLarge" xml:space="preserve"><value>Calibration file too large.</value></data>
+  <data name="measure.noUmikData" xml:space="preserve"><value>miniDSP has no calibration data for serial ({0}); check the serial.</value></data>
+  <data name="measure.enumFailed" xml:space="preserve"><value>Microphone enumeration failed: {0}</value></data>
+  <data name="measure.noMic" xml:space="preserve"><value>No usable microphone input found</value></data>
+  <data name="measure.sweepProgress" xml:space="preserve"><value>Playing sweep {0}/{1} ({2}s)…</value></data>
+  <data name="measure.analyzing" xml:space="preserve"><value>Analysing room response…</value></data>
+  <data name="measure.parsingWav" xml:space="preserve"><value>Parsing WAV…</value></data>
+  <data name="measure.wavTooShort" xml:space="preserve"><value>WAV too short: needs a ≥ {0} s standard sweep recording (with room tail).</value></data>
+  <data name="measure.wavFailed" xml:space="preserve"><value>WAV analysis failed.</value></data>
+  <data name="cd2.opFailed" xml:space="preserve"><value>CloudDrive2 {0} ({1}).</value></data>
 </root>

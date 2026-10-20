@@ -879,4 +879,81 @@
   <data name="search.yearClose" xml:space="preserve"><value>年份接近</value></data>
   <data name="search.converge" xml:space="preserve"><value>多个来源收敛</value></data>
   <data name="search.complete" xml:space="preserve"><value>元数据较完整</value></data>
+  <data name="torrent.urlShape" xml:space="preserve"><value>torrent 地址必须是无嵌入凭据的 HTTP(S) URL。</value></data>
+  <data name="torrent.redirectShape" xml:space="preserve"><value>torrent 重定向目标必须是无嵌入凭据的 HTTP(S) URL。</value></data>
+  <data name="torrent.tooLarge" xml:space="preserve"><value>torrent 文件超过 16 MiB。</value></data>
+  <data name="torrent.empty" xml:space="preserve"><value>torrent 文件为空。</value></data>
+  <data name="torrent.notDict" xml:space="preserve"><value>torrent 根节点不是字典。</value></data>
+  <data name="torrent.noInfo" xml:space="preserve"><value>torrent 缺少 info 字典。</value></data>
+  <data name="torrent.trailing" xml:space="preserve"><value>torrent 在字节 {0} 后包含多余数据。</value></data>
+  <data name="torrent.tooComplex" xml:space="preserve"><value>torrent bencode 结构过于复杂。</value></data>
+  <data name="torrent.truncated" xml:space="preserve"><value>torrent bencode 意外结束。</value></data>
+  <data name="torrent.badType" xml:space="preserve"><value>torrent bencode 类型无效：{0}。</value></data>
+  <data name="torrent.badInt" xml:space="preserve"><value>torrent bencode 整数无效。</value></data>
+  <data name="torrent.unclosedList" xml:space="preserve"><value>torrent bencode 列表未结束。</value></data>
+  <data name="torrent.unclosedDict" xml:space="preserve"><value>torrent bencode 字典未结束。</value></data>
+  <data name="torrent.badStrLen" xml:space="preserve"><value>torrent bencode 字符串长度无效。</value></data>
+  <data name="torrent.strOverflow" xml:space="preserve"><value>torrent bencode 字符串越界。</value></data>
+  <data name="torrent.noSubmitInfo" xml:space="preserve"><value>RSS torrent 条目缺少提交信息。</value></data>
+  <data name="torrent.noPerms" xml:space="preserve"><value>CloudDrive2 API Token 缺少 torrent staging 所需的目录、创建或写入权限。</value></data>
+  <data name="mpv.initFailed" xml:space="preserve"><value>初始化 libmpv 失败</value></data>
+  <data name="mpv.loadFailed" xml:space="preserve"><value>加载媒体到 libmpv 失败</value></data>
+  <data name="mpv.afFailed" xml:space="preserve"><value>设置 libmpv 音频滤镜失败</value></data>
+  <data name="mpv.toggleFailed" xml:space="preserve"><value>切换 libmpv 暂停状态失败</value></data>
+  <data name="mpv.noVolume" xml:space="preserve"><value>缺少音量值。</value></data>
+  <data name="mpv.noMute" xml:space="preserve"><value>缺少静音状态。</value></data>
+  <data name="mpv.unknownCommand" xml:space="preserve"><value>未知播放命令: {0}</value></data>
+  <data name="mpv.closedEarly" xml:space="preserve"><value>libmpv 在媒体加载完成前关闭了会话。</value></data>
+  <data name="mpv.loadTimeout" xml:space="preserve"><value>libmpv 在 30 秒内没有完成媒体加载。</value></data>
+  <data name="mpv.sidecarFailed" xml:space="preserve"><value>加载外挂音轨失败: {0}</value></data>
+  <data name="mpv.subAddFailed" xml:space="preserve"><value>加载外挂字幕到 libmpv 失败</value></data>
+  <data name="mpv.optionFailed" xml:space="preserve"><value>设置 libmpv 选项 {0} 失败</value></data>
+  <data name="mpv.seekFailed" xml:space="preserve"><value>跳转 libmpv 播放位置失败</value></data>
+  <data name="mpv.propFailed" xml:space="preserve"><value>设置 libmpv 属性 {0} 失败</value></data>
+  <data name="mpv.progressFailed" xml:space="preserve"><value>播放进度保存失败：{0}</value></data>
+  <data name="mpv.noSession" xml:space="preserve"><value>当前没有可控制的 libmpv 播放会话。</value></data>
+  <data name="mpv.endFile" xml:space="preserve"><value>{0}（错误码 {1}）。</value></data>
+  <data name="mlip.noDb" xml:space="preserve"><value>所选目录中没有 library.db。</value></data>
+  <data name="mlip.noDavCache" xml:space="preserve"><value>WebDAV MLIP 缓存不存在。</value></data>
+  <data name="mlip.noSmbDb" xml:space="preserve"><value>SMB 目录中没有 library.db。</value></data>
+  <data name="mlip.badVersion" xml:space="preserve"><value>不支持 MLIP v{0}，当前支持 v1-v4。</value></data>
+  <data name="mlip.missingTables" xml:space="preserve"><value>MLIP 缺少数据表：{0}</value></data>
+  <data name="mlip.notLibrary" xml:space="preserve"><value>library.db 不是 MLIP 媒体库。</value></data>
+  <data name="mlip.schemaMismatch" xml:space="preserve"><value>meta.schema 与 PRAGMA user_version ({0}) 不一致。</value></data>
+  <data name="mlip.needExtra" xml:space="preserve"><value>MLIP v3+ 要求 capability.extra = 1。</value></data>
+  <data name="mlip.needArtwork" xml:space="preserve"><value>MLIP v4 要求 capability.artwork_pack = 1。</value></data>
+  <data name="mlip.badProvider" xml:space="preserve"><value>未知的 MLIP external_id provider：{0}</value></data>
+  <data name="mlip.emptyExternalId" xml:space="preserve"><value>MLIP external_id 不能为空。</value></data>
+  <data name="mlip.badExtraKind" xml:space="preserve"><value>未知的 MLIP extra_kind：{0}</value></data>
+  <data name="mlip.extraNotVideo" xml:space="preserve"><value>MLIP 特典不是视频文件：{0}</value></data>
+  <data name="cd2.noOrganizePerms" xml:space="preserve"><value>CloudDrive2 API Token 缺少媒体整理所需的列表、建目录或移动权限。</value></data>
+  <data name="cd2.dirsNotRoot" xml:space="preserve"><value>CloudDrive2 下载目录和整理目录不能是根目录。</value></data>
+  <data name="cd2.organizeOutside" xml:space="preserve"><value>CloudDrive2 整理目录超出 Token 根目录。</value></data>
+  <data name="cd2.organizeInInbox" xml:space="preserve"><value>CloudDrive2 整理目录不能位于下载目录内部。</value></data>
+  <data name="bgm.queryEmpty" xml:space="preserve"><value>Bangumi 搜索词不能为空。</value></data>
+  <data name="bgm.queryLong" xml:space="preserve"><value>Bangumi 搜索词不能超过 100 个字符。</value></data>
+  <data name="bgm.searchFailed" xml:space="preserve"><value>Bangumi 搜索失败 (HTTP {0})。</value></data>
+  <data name="bgm.emptyResponse" xml:space="preserve"><value>Bangumi 搜索返回了空响应。</value></data>
+  <data name="bgm.noToken" xml:space="preserve"><value>尚未配置 Bangumi Access Token。</value></data>
+  <data name="bgm.authFailed" xml:space="preserve"><value>Bangumi 身份验证失败 (HTTP {0})。</value></data>
+  <data name="bgm.authEmpty" xml:space="preserve"><value>Bangumi 身份验证返回了空响应。</value></data>
+  <data name="bgm.collectionFailed" xml:space="preserve"><value>Bangumi 收藏读取失败 (HTTP {0})。</value></data>
+  <data name="bgm.collectionEmpty" xml:space="preserve"><value>Bangumi 收藏返回了空响应。</value></data>
+  <data name="bgm.updateFailed" xml:space="preserve"><value>Bangumi 收藏更新失败 (HTTP {0})。</value></data>
+  <data name="bgm.episodeUpdateFailed" xml:space="preserve"><value>Bangumi 分集状态更新失败 (HTTP {0})。</value></data>
+  <data name="bgm.episodeReadFailed" xml:space="preserve"><value>Bangumi 分集状态读取失败 (HTTP {0})。</value></data>
+  <data name="bgm.episodeEmpty" xml:space="preserve"><value>Bangumi 分集状态返回了空响应。</value></data>
+  <data name="measure.badSerial" xml:space="preserve"><value>序列号需要恰好 7 位数字（如 700-1234）。</value></data>
+  <data name="measure.downloadFailed" xml:space="preserve"><value>下载校准文件失败（HTTP {0}）。</value></data>
+  <data name="measure.downloadError" xml:space="preserve"><value>下载校准文件失败：{0}</value></data>
+  <data name="measure.calTooLarge" xml:space="preserve"><value>校准文件过大。</value></data>
+  <data name="measure.noUmikData" xml:space="preserve"><value>miniDSP 上没有找到该序列号（{0}）的校准数据，请核对序列号。</value></data>
+  <data name="measure.enumFailed" xml:space="preserve"><value>枚举麦克风失败：{0}</value></data>
+  <data name="measure.noMic" xml:space="preserve"><value>未找到可用的麦克风输入设备</value></data>
+  <data name="measure.sweepProgress" xml:space="preserve"><value>播放扫频 {0}/{1}（{2}s）…</value></data>
+  <data name="measure.analyzing" xml:space="preserve"><value>分析房间响应…</value></data>
+  <data name="measure.parsingWav" xml:space="preserve"><value>解析 WAV…</value></data>
+  <data name="measure.wavTooShort" xml:space="preserve"><value>WAV 太短：需要 ≥ {0} 秒的标准扫频录音（含房间尾音）。</value></data>
+  <data name="measure.wavFailed" xml:space="preserve"><value>WAV 分析失败。</value></data>
+  <data name="cd2.opFailed" xml:space="preserve"><value>CloudDrive2 {0} ({1})。</value></data>
 </root>

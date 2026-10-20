@@ -107,8 +107,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         {
             session.Configure(settings, headless, windowHandle, videoOptions, startPositionMs, endPositionMs);
             client.RequestLogMessages("warn");
-            EnsureNativeSuccess(client.Initialize(), "初始化 libmpv 失败");
-            EnsureNativeSuccess(client.Command(["loadfile", episode.MediaPath, "replace"]), "加载媒体到 libmpv 失败");
+            EnsureNativeSuccess(client.Initialize(), AppStrings.Get("mpv.initFailed"));
+            EnsureNativeSuccess(client.Command(["loadfile", episode.MediaPath, "replace"]), AppStrings.Get("mpv.loadFailed"));
             await session.WaitForFileLoadedAsync().ConfigureAwait(false);
             session.LoadExternalSubtitles(episode.SubtitlePaths, settings.PreferredSubtitleLanguage);
             session.LoadExternalAudio(episode.ExternalAudioPaths);
@@ -241,7 +241,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         ArgumentNullException.ThrowIfNull(graph);
         EnsureActive();
         var value = string.IsNullOrWhiteSpace(graph.AfValue) ? string.Empty : $"lavfi=[{graph.AfValue}]";
-        EnsureNativeSuccess(_client.SetPropertyString("af", value), "设置 libmpv 音频滤镜失败");
+        EnsureNativeSuccess(_client.SetPropertyString("af", value), AppStrings.Get("mpv.afFailed"));
         _appliedAudioDsp = graph;
         return Task.CompletedTask;
     }
@@ -288,7 +288,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 _paused = false;
                 break;
             case "toggle":
-                EnsureNativeSuccess(_client.Command(["cycle", "pause"]), "切换 libmpv 暂停状态失败");
+                EnsureNativeSuccess(_client.Command(["cycle", "pause"]), AppStrings.Get("mpv.toggleFailed"));
                 _paused = !_paused;
                 PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
                 break;
@@ -309,7 +309,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
                 break;
             case "set_volume":
-                var volumePercent = request.VolumePercent ?? throw new ArgumentException("缺少音量值。", nameof(request));
+                var volumePercent = request.VolumePercent ?? throw new ArgumentException(AppStrings.Get("mpv.noVolume"), nameof(request));
                 if (!double.IsFinite(volumePercent)) throw new ArgumentOutOfRangeException(nameof(request));
                 volumePercent = Math.Clamp(volumePercent, 0, 100);
                 SetProperty("volume", volumePercent.ToString("0.###", CultureInfo.InvariantCulture));
@@ -317,7 +317,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
                 break;
             case "set_mute":
-                var muted = request.IsMuted ?? throw new ArgumentException("缺少静音状态。", nameof(request));
+                var muted = request.IsMuted ?? throw new ArgumentException(AppStrings.Get("mpv.noMute"), nameof(request));
                 SetProperty("mute", muted ? "yes" : "no");
                 _muted = muted;
                 PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
@@ -356,7 +356,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 if (_monitorTask is null) Complete(false);
                 break;
             default:
-                throw new ArgumentException($"未知播放命令: {request.Command}", nameof(request));
+                throw new ArgumentException(AppStrings.Get("mpv.unknownCommand", request.Command), nameof(request));
         }
         return Task.CompletedTask;
     }
@@ -447,14 +447,14 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                     continue;
                 }
                 if (nativeEvent.EventId == MpvEventShutdown)
-                    throw new InvalidOperationException("libmpv 在媒体加载完成前关闭了会话。");
+                    throw new InvalidOperationException(AppStrings.Get("mpv.closedEarly"));
                 if (nativeEvent.EventId == MpvEventEndFile)
                 {
                     var error = nativeEvent.EndFile?.Error ?? nativeEvent.Error;
                     throw new InvalidOperationException($"libmpv media load ended before file-loaded (error code {error}).");
                 }
             }
-            throw new TimeoutException("libmpv 在 30 秒内没有完成媒体加载。");
+            throw new TimeoutException(AppStrings.Get("mpv.loadTimeout"));
         }).ConfigureAwait(false);
     }
 
@@ -604,7 +604,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         {
             if (!File.Exists(path) && !IsRemotePath(path)) continue;
             var result = _client.Command(["audio-add", path, "auto"]);
-            if (result < 0) LastError = $"加载外挂音轨失败: {Path.GetFileName(path)}";
+            if (result < 0) LastError = AppStrings.Get("mpv.sidecarFailed", Path.GetFileName(path));
         }
     }
 
@@ -613,7 +613,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         var paths = subtitlePaths.Where(path => File.Exists(path) || IsRemotePath(path)).ToArray();
         if (paths.Length == 0) return;
         var ordered = MpvPlayerLauncher.PrioritizeSubtitlePaths(paths, preference);
-        foreach (var path in ordered) EnsureNativeSuccess(_client.Command(["sub-add", path, "auto"]), "加载外挂字幕到 libmpv 失败");
+        foreach (var path in ordered) EnsureNativeSuccess(_client.Command(["sub-add", path, "auto"]), AppStrings.Get("mpv.subAddFailed"));
         var preferredTrackId = FindExternalSubtitleTrackId(ordered[0]);
         if (preferredTrackId is not null)
             SetProperty("sid", preferredTrackId.Value.ToString(CultureInfo.InvariantCulture));
@@ -630,7 +630,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     }
 
     private void SetOption(string name, string value) =>
-        EnsureNativeSuccess(_client.SetOptionString(name, value), $"设置 libmpv 选项 {name} 失败");
+        EnsureNativeSuccess(_client.SetOptionString(name, value), AppStrings.Get("mpv.optionFailed", name));
 
     private static bool IsRemotePath(string path) =>
         Uri.TryCreate(path, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https";
@@ -712,12 +712,12 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             "seek",
             seconds.ToString(CultureInfo.InvariantCulture),
             "absolute+exact",
-        ]), "跳转 libmpv 播放位置失败");
+        ]), AppStrings.Get("mpv.seekFailed"));
         Interlocked.Exchange(ref _positionMs, Math.Max(0, positionMs));
     }
 
     private void SetProperty(string name, string value) =>
-        EnsureNativeSuccess(_client.SetPropertyString(name, value), $"设置 libmpv 属性 {name} 失败");
+        EnsureNativeSuccess(_client.SetPropertyString(name, value), AppStrings.Get("mpv.propFailed", name));
 
     private void UpdateSelectedSubtitle(int? trackId)
     {
@@ -776,7 +776,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         }
         catch (Exception error)
         {
-            LastError = $"播放进度保存失败：{error.Message}";
+            LastError = AppStrings.Get("mpv.progressFailed", error.Message);
             return false;
         }
     }
@@ -814,12 +814,12 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
 
     private void EnsureActive()
     {
-        if (!IsActive) throw new InvalidOperationException("当前没有可控制的 libmpv 播放会话。");
+        if (!IsActive) throw new InvalidOperationException(AppStrings.Get("mpv.noSession"));
     }
 
     private static void EnsureNativeSuccess(int error, string message)
     {
-        if (error < 0) throw new InvalidOperationException($"{message}（错误码 {error}）。");
+        if (error < 0) throw new InvalidOperationException(AppStrings.Get("mpv.endFile", message, error));
     }
 
     private double? TryReadDouble(string property)
