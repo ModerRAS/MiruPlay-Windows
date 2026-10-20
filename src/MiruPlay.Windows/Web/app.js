@@ -1,3 +1,4 @@
+import { t, setLocale, getLocale } from './i18n.js'
 const TOKEN_KEY = 'miruplay_web_token'
 const $ = (selector, root = document) => root.querySelector(selector)
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)]
@@ -10,14 +11,14 @@ const modalContent = $('#modal-content')
 new ResizeObserver(([entry]) => document.documentElement.style.setProperty('--player-height', `${entry.target.offsetHeight}px`)).observe($('#player-bar'))
 const state = { token: '', view: 'library', info: null, sources: [], cloud: null, playbackTimer: null, episodeTitles: new Map(), dspConfig: null, dspData: null, metadataBatch: null, metadataSeries: [] }
 const views = {
-  'audio-dsp': ['音频 DSP', '逐声道 PEQ、REW 导入和线性相位 FIR'],
-  library: ['片库', '浏览并播放 MLIP 媒体库'],
-  sources: ['媒体源', '管理 Local、WebDAV、SMB 与 RSS 在线源'],
-  automation: ['自动化', 'CloudDrive2 入库与 RSS 提交'],
-  metadata: ['元数据', '管理凭据并搜索补充元数据'],
-  playback: ['播放设置', '设置结束动作和字幕语言优先级'],
-  operations: ['运维', '查看本地日志、后台任务和更新状态'],
-  access: ['WebUI 访问', '查看地址并轮换访问令牌'],
+  'audio-dsp': ['nav.dsp', 'nav.dsp.sub'],
+  library: ['nav.library', 'nav.library.sub'],
+  sources: ['nav.sources', 'nav.sources.sub'],
+  automation: ['nav.automation', 'nav.automation.sub'],
+  metadata: ['nav.metadata', 'nav.metadata.sub'],
+  playback: ['nav.playback', 'nav.playback.sub'],
+  operations: ['nav.operations', 'nav.operations.sub'],
+  access: ['nav.access', 'nav.access.sub'],
 }
 
 function escapeHtml(value) {
@@ -52,10 +53,24 @@ async function api(path, options = {}) {
   })
   const envelope = await response.json().catch(() => ({ ok: false, error: `HTTP ${response.status}` }))
   if (!response.ok || !envelope.ok) {
-    if (response.status === 401) showAccess('访问令牌无效或已轮换。')
+    if (response.status === 401) showAccess(t('access.invalid'))
     throw new Error(envelope.error || `HTTP ${response.status}`)
   }
   return envelope.data
+}
+function resolveBrowserLocale(language) {
+  if (language && language !== 'system') return language
+  const nav = (navigator.language || 'zh-CN').replace('_', '-')
+  if (nav === 'zh-TW' || nav === 'zh-HK') return nav
+  if (nav.startsWith('zh')) return 'zh-CN'
+  if (nav === 'en-GB') return 'en-GB'
+  return 'en-US'
+}
+function applyStaticStrings() {
+  document.title = t('web.title')
+  $$('[data-i18n]').forEach(node => { node.textContent = t(node.dataset.i18n) })
+  $$('[data-i18n-aria]').forEach(node => { node.setAttribute('aria-label', t(node.dataset.i18nAria)) })
+  $$('[data-i18n-title]').forEach(node => { node.title = t(node.dataset.i18nTitle) })
 }
 function showAccess(message = '') {
   app.hidden = true
@@ -69,6 +84,11 @@ async function connect(token) {
   if (!state.token) return
   try {
     state.info = await api('/api/info')
+    try {
+      const locale = await api('/api/settings/locale')
+      setLocale(resolveBrowserLocale(locale.language))
+    } catch { setLocale(resolveBrowserLocale('system')) }
+    applyStaticStrings()
     localStorage.setItem(TOKEN_KEY, state.token)
     access.hidden = true
     app.hidden = false
@@ -84,9 +104,9 @@ async function connect(token) {
 }
 async function switchView(view) {
   state.view = view
-  const [title, subtitle] = views[view]
-  $('#view-title').textContent = title
-  $('#view-subtitle').textContent = subtitle
+  const [titleKey, subtitleKey] = views[view]
+  $('#view-title').textContent = t(titleKey)
+  $('#view-subtitle').textContent = t(subtitleKey)
   $$('#nav button').forEach(button => button.setAttribute('aria-current', button.dataset.view === view ? 'page' : 'false'))
   toolbarActions.innerHTML = view === 'library'
     ? '<input id="library-search" type="search" placeholder="搜索标题" aria-label="搜索片库"><button id="refresh-library" class="icon-button" title="刷新" aria-label="刷新">↻</button>'

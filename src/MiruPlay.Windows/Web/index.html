@@ -12,11 +12,11 @@
   <section id="access" class="access" aria-labelledby="access-title">
     <form id="access-form" class="access-form">
       <div class="brand-mark" aria-hidden="true">M</div>
-      <h1 id="access-title">连接 MiruPlay</h1>
-      <p>输入 Windows 客户端设置页显示的 WebUI 访问令牌。</p>
+      <h1 id="access-title" data-i18n="access.title">连接 MiruPlay</h1>
+      <p data-i18n="access.hint">输入 Windows 客户端设置页显示的 WebUI 访问令牌。</p>
       <input name="username" autocomplete="username" value="MiruPlay" hidden>
-      <label>访问令牌<input id="access-token" type="password" autocomplete="current-password" required></label>
-      <button class="primary" type="submit">连接</button>
+      <label><span data-i18n="access.token">访问令牌</span><input id="access-token" type="password" autocomplete="current-password" required></label>
+      <button class="primary" type="submit" data-i18n="access.connect">连接</button>
       <output id="access-error" class="error" aria-live="polite"></output>
     </form>
   </section>
@@ -24,15 +24,15 @@
   <div id="app" class="app" hidden>
     <aside class="sidebar">
       <header class="brand"><div class="brand-mark">M</div><div><strong>MiruPlay</strong><span id="device-name">Windows</span></div></header>
-      <nav id="nav" aria-label="主导航">
-        <button data-view="library" aria-current="page">片库</button>
-        <button data-view="sources">媒体源</button>
-        <button data-view="automation">自动化</button>
-        <button data-view="metadata">元数据</button>
-        <button data-view="playback">播放设置</button>
-        <button data-view="operations">运维</button>
-        <button data-view="access">WebUI 访问</button>
-        <button data-view="audio-dsp">音频 DSP</button>
+      <nav id="nav" data-i18n-aria="nav.main" aria-label="主导航">
+        <button data-view="library" data-i18n="nav.library" aria-current="page">片库</button>
+        <button data-view="sources" data-i18n="nav.sources">媒体源</button>
+        <button data-view="automation" data-i18n="nav.automation">自动化</button>
+        <button data-view="metadata" data-i18n="nav.metadata">元数据</button>
+        <button data-view="playback" data-i18n="nav.playback">播放设置</button>
+        <button data-view="operations" data-i18n="nav.operations">运维</button>
+        <button data-view="access" data-i18n="nav.access">WebUI 访问</button>
+        <button data-view="audio-dsp" data-i18n="nav.dsp">音频 DSP</button>
       </nav>
       <small id="server-url"></small>
     </aside>
@@ -43,10 +43,10 @@
       </header>
       <main id="content" tabindex="-1"></main>
     </section>
-    <section id="player-bar" class="player-bar" aria-label="当前播放" hidden></section>
+    <section id="player-bar" class="player-bar" data-i18n-aria="player.now" aria-label="当前播放" hidden></section>
   </div>
 
-  <dialog id="modal"><div id="modal-content"></div><button id="modal-close" class="icon-button modal-close" title="关闭" aria-label="关闭">×</button></dialog>
+  <dialog id="modal"><div id="modal-content"></div><button id="modal-close" class="icon-button modal-close" data-i18n-title="modal.close" data-i18n-aria="modal.close" title="关闭" aria-label="关闭">×</button></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script type="module" src="/web/app.js"></script>
 </body>

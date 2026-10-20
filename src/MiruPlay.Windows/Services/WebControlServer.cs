@@ -1200,6 +1200,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapGet("/", () => EmbeddedWebResource("index.html", "text/html; charset=utf-8"));
         app.MapGet("/web/app.css", () => EmbeddedWebResource("app.css", "text/css; charset=utf-8"));
         app.MapGet("/web/app.js", () => EmbeddedWebResource("app.js", "text/javascript; charset=utf-8"));
+        app.MapGet("/web/i18n.js", () => EmbeddedWebResource("i18n.js", "text/javascript; charset=utf-8"));
     }
 
     private static IResult EmbeddedWebResource(string fileName, string contentType)
