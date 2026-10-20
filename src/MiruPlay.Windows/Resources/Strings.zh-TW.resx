@@ -1181,4 +1181,7 @@
   <data name="playback.everyHour" xml:space="preserve"><value>每小時</value></data>
   <data name="nav.music.sub" xml:space="preserve"><value>按專輯瀏覽本機音訊與 CUE 曲目</value></data>
   <data name="wpf.music.scanTimeout" xml:space="preserve"><value>音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。</value></data>
+  <data name="wpf.music.albumOne" xml:space="preserve"><value>共 {0} 張專輯。</value></data>
+  <data name="wpf.music.trackOne" xml:space="preserve"><value>共 {0} 首。</value></data>
+  <data name="wpf.music.trackCount" xml:space="preserve"><value>共 {0} 首。</value></data>
 </root>

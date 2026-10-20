@@ -1181,4 +1181,7 @@
   <data name="playback.everyHour" xml:space="preserve"><value>Every hour</value></data>
   <data name="nav.music.sub" xml:space="preserve"><value>Browse local audio and CUE tracks by album</value></data>
   <data name="wpf.music.scanTimeout" xml:space="preserve"><value>Music scan timed out (60 s); narrow the source directory or retry later.</value></data>
+  <data name="wpf.music.albumOne" xml:space="preserve"><value>{0} album.</value></data>
+  <data name="wpf.music.trackOne" xml:space="preserve"><value>{0} track.</value></data>
+  <data name="wpf.music.trackCount" xml:space="preserve"><value>{0} tracks.</value></data>
 </root>

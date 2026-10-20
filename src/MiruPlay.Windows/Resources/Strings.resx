@@ -1181,4 +1181,7 @@
   <data name="playback.everyHour" xml:space="preserve"><value>每小时</value></data>
   <data name="nav.music.sub" xml:space="preserve"><value>按专辑浏览本地音频与 CUE 曲目</value></data>
   <data name="wpf.music.scanTimeout" xml:space="preserve"><value>音乐扫描超时（60 秒），请缩小来源目录或稍后重试。</value></data>
+  <data name="wpf.music.albumOne" xml:space="preserve"><value>共 {0} 张专辑。</value></data>
+  <data name="wpf.music.trackOne" xml:space="preserve"><value>共 {0} 首。</value></data>
+  <data name="wpf.music.trackCount" xml:space="preserve"><value>共 {0} 首。</value></data>
 </root>

@@ -289,7 +289,7 @@ async function loadMusic() {
   const render = async () => {
     const sourceId = Number($('#music-source').value)
     const albums = await api(`/api/music/albums?sourceId=${sourceId}`)
-    $('#music-albums').innerHTML = albums.length ? albums.map((album, ai) => `<article class="list-item"><div class="card-head"><strong>${escapeHtml(album.title)}</strong><span class="muted">${t('wpf.music.albumCount', album.tracks.length)}</span></div>${album.tracks.map((track, ti) => `<div class="card-head"><span>${track.number}. ${escapeHtml(track.title)}${track.performer ? ` · ${escapeHtml(track.performer)}` : ''}</span><button data-music-play="${ai}:${ti}" type="button">${t('play.play')}</button></div>`).join('')}</div></article>`).join('') : `<p class="muted">${t('wpf.music.noAudio')}</p>`
+    $('#music-albums').innerHTML = albums.length ? albums.map((album, ai) => `<article class="list-item"><div class="card-head"><strong>${escapeHtml(album.title)}</strong><span class="muted">${album.tracks.length === 1 ? t('wpf.music.trackOne', 1) : t('wpf.music.trackCount', album.tracks.length)}</span></div>${album.tracks.map((track, ti) => `<div class="card-head"><span>${track.number}. ${escapeHtml(track.title)}${track.performer ? ` · ${escapeHtml(track.performer)}` : ''}</span><button data-music-play="${ai}:${ti}" type="button">${t('play.play')}</button></div>`).join('')}</div></article>`).join('') : `<p class="muted">${t('wpf.music.noAudio')}</p>`
     $$('[data-music-play]', $('#music-albums')).forEach(button => button.onclick = () => playMusicTrack(sourceId, albums, button.dataset.musicPlay))
   }
   $('#music-source').onchange = () => render().catch(error => toast(error.message, true))

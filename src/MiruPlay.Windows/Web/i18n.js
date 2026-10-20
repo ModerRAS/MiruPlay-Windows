@@ -1177,7 +1177,10 @@ const I18N = {
   "onnx.emptyVocab": "AniFileBERT 词表为空。",
   "playback.everyHour": "每小时",
   "nav.music.sub": "按专辑浏览本地音频与 CUE 曲目",
-  "wpf.music.scanTimeout": "音乐扫描超时（60 秒），请缩小来源目录或稍后重试。"
+  "wpf.music.scanTimeout": "音乐扫描超时（60 秒），请缩小来源目录或稍后重试。",
+  "wpf.music.albumOne": "共 {0} 张专辑。",
+  "wpf.music.trackOne": "共 {0} 首。",
+  "wpf.music.trackCount": "共 {0} 首。"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -2356,7 +2359,10 @@ const I18N = {
   "onnx.emptyVocab": "AniFileBERT 詞表為空。",
   "playback.everyHour": "每小時",
   "nav.music.sub": "按專輯瀏覽本機音訊與 CUE 曲目",
-  "wpf.music.scanTimeout": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。"
+  "wpf.music.scanTimeout": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。",
+  "wpf.music.albumOne": "共 {0} 張專輯。",
+  "wpf.music.trackOne": "共 {0} 首。",
+  "wpf.music.trackCount": "共 {0} 首。"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -3535,7 +3541,10 @@ const I18N = {
   "onnx.emptyVocab": "AniFileBERT 詞表為空。",
   "playback.everyHour": "每小時",
   "nav.music.sub": "按專輯瀏覽本機音頻與 CUE 曲目",
-  "wpf.music.scanTimeout": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。"
+  "wpf.music.scanTimeout": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。",
+  "wpf.music.albumOne": "共 {0} 張專輯。",
+  "wpf.music.trackOne": "共 {0} 首。",
+  "wpf.music.trackCount": "共 {0} 首。"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -4714,7 +4723,10 @@ const I18N = {
   "onnx.emptyVocab": "AniFileBERT vocabulary empty.",
   "playback.everyHour": "Every hour",
   "nav.music.sub": "Browse local audio and CUE tracks by album",
-  "wpf.music.scanTimeout": "Music scan timed out (60 s); narrow the source directory or retry later."
+  "wpf.music.scanTimeout": "Music scan timed out (60 s); narrow the source directory or retry later.",
+  "wpf.music.albumOne": "{0} album.",
+  "wpf.music.trackOne": "{0} track.",
+  "wpf.music.trackCount": "{0} tracks."
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -5893,7 +5905,10 @@ const I18N = {
   "onnx.emptyVocab": "AniFileBERT vocabulary empty.",
   "playback.everyHour": "Every hour",
   "nav.music.sub": "Browse local audio and CUE tracks by album",
-  "wpf.music.scanTimeout": "Music scan timed out (60 s); narrow the source directory or retry later."
+  "wpf.music.scanTimeout": "Music scan timed out (60 s); narrow the source directory or retry later.",
+  "wpf.music.albumOne": "{0} album.",
+  "wpf.music.trackOne": "{0} track.",
+  "wpf.music.trackCount": "{0} tracks."
  }
 };
 let currentLocale = 'zh-CN';
