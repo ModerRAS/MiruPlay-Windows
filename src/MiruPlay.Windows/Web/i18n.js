@@ -4255,6 +4255,608 @@ const I18N = {
   "zh-HK": "TMDB Token 已儲存在加密存放區。",
   "en-US": "TMDB token saved in encrypted storage.",
   "en-GB": "TMDB token saved in encrypted storage."
+ },
+ "wpf.edit.localWorks": {
+  "zh-CN": "本地目录作品",
+  "zh-TW": "本機目錄作品",
+  "zh-HK": "本機目錄作品",
+  "en-US": "Local directory works",
+  "en-GB": "Local directory works"
+ },
+ "wpf.edit.historyTitle": {
+  "zh-CN": "元数据历史",
+  "zh-TW": "元數據歷史",
+  "zh-HK": "元數據歷史",
+  "en-US": "Metadata history",
+  "en-GB": "Metadata history"
+ },
+ "wpf.edit.provider": {
+  "zh-CN": "元数据提供方",
+  "zh-TW": "元數據提供方",
+  "zh-HK": "元數據提供方",
+  "en-US": "Metadata provider",
+  "en-GB": "Metadata provider"
+ },
+ "wpf.edit.query": {
+  "zh-CN": "元数据搜索词",
+  "zh-TW": "元數據搜尋詞",
+  "zh-HK": "元數據搜尋詞",
+  "en-US": "Metadata search query",
+  "en-GB": "Metadata search query"
+ },
+ "wpf.edit.candidates": {
+  "zh-CN": "在线元数据候选",
+  "zh-TW": "線上元數據候選",
+  "zh-HK": "線上元數據候選",
+  "en-US": "Online metadata candidates",
+  "en-GB": "Online metadata candidates"
+ },
+ "wpf.edit.archiveQuery": {
+  "zh-CN": "Bangumi Archive 搜索词",
+  "zh-TW": "Bangumi Archive 搜尋詞",
+  "zh-HK": "Bangumi Archive 搜尋詞",
+  "en-US": "Bangumi Archive query",
+  "en-GB": "Bangumi Archive query"
+ },
+ "wpf.edit.archiveResults": {
+  "zh-CN": "Bangumi Archive 搜索结果",
+  "zh-TW": "Bangumi Archive 搜尋結果",
+  "zh-HK": "Bangumi Archive 搜尋結果",
+  "en-US": "Bangumi Archive results",
+  "en-GB": "Bangumi Archive results"
+ },
+ "wpf.edit.subjectCollection": {
+  "zh-CN": "Bangumi 作品收藏状态",
+  "zh-TW": "Bangumi 作品收藏狀態",
+  "zh-HK": "Bangumi 作品收藏狀態",
+  "en-US": "Bangumi work collection status",
+  "en-GB": "Bangumi work collection status"
+ },
+ "wpf.edit.episodeList": {
+  "zh-CN": "Bangumi 分集收藏状态列表",
+  "zh-TW": "Bangumi 分集收藏狀態列表",
+  "zh-HK": "Bangumi 分集收藏狀態列表",
+  "en-US": "Bangumi episode collection list",
+  "en-GB": "Bangumi episode collection list"
+ },
+ "wpf.edit.episodeId": {
+  "zh-CN": "Bangumi 分集 ID",
+  "zh-TW": "Bangumi 分集 ID",
+  "zh-HK": "Bangumi 分集 ID",
+  "en-US": "Bangumi episode ID",
+  "en-GB": "Bangumi episode ID"
+ },
+ "wpf.edit.episodeStatus": {
+  "zh-CN": "Bangumi 分集状态",
+  "zh-TW": "Bangumi 分集狀態",
+  "zh-HK": "Bangumi 分集狀態",
+  "en-US": "Bangumi episode status",
+  "en-GB": "Bangumi episode status"
+ },
+ "wpf.edit.title": {
+  "zh-CN": "编辑元数据 · {0}",
+  "zh-TW": "編輯元數據 · {0}",
+  "zh-HK": "編輯元數據 · {0}",
+  "en-US": "Edit metadata · {0}",
+  "en-GB": "Edit metadata · {0}"
+ },
+ "wpf.edit.batchNote": {
+  "zh-CN": "预览时会将相同元数据应用到所选作品。",
+  "zh-TW": "預覽時會將相同元數據套用到所選作品。",
+  "zh-HK": "預覽時會將相同元數據套用到所選作品。",
+  "en-US": "Preview applies the same metadata to the selected works.",
+  "en-GB": "Preview applies the same metadata to the selected works."
+ },
+ "wpf.edit.preview": {
+  "zh-CN": "预览",
+  "zh-TW": "預覽",
+  "zh-HK": "預覽",
+  "en-US": "Preview",
+  "en-GB": "Preview"
+ },
+ "wpf.edit.works": {
+  "zh-CN": "作品",
+  "zh-TW": "作品",
+  "zh-HK": "作品",
+  "en-US": "Works",
+  "en-GB": "Works"
+ },
+ "wpf.edit.downloadArchive": {
+  "zh-CN": "下载最新 Archive",
+  "zh-TW": "下載最新 Archive",
+  "zh-HK": "下載最新 Archive",
+  "en-US": "Download latest archive",
+  "en-GB": "Download latest archive"
+ },
+ "wpf.edit.importArchive": {
+  "zh-CN": "导入 Archive",
+  "zh-TW": "匯入 Archive",
+  "zh-HK": "匯入 Archive",
+  "en-US": "Import archive",
+  "en-GB": "Import archive"
+ },
+ "wpf.edit.subjectSection": {
+  "zh-CN": "Bangumi 收藏与分集状态",
+  "zh-TW": "Bangumi 收藏與分集狀態",
+  "zh-HK": "Bangumi 收藏與分集狀態",
+  "en-US": "Bangumi collections and episode statuses",
+  "en-GB": "Bangumi collections and episode statuses"
+ },
+ "wpf.edit.readCollection": {
+  "zh-CN": "读取收藏状态",
+  "zh-TW": "讀取收藏狀態",
+  "zh-HK": "讀取收藏狀態",
+  "en-US": "Load collection status",
+  "en-GB": "Load collection status"
+ },
+ "wpf.edit.saveSubject": {
+  "zh-CN": "保存作品收藏",
+  "zh-TW": "儲存作品收藏",
+  "zh-HK": "儲存作品收藏",
+  "en-US": "Save work collection",
+  "en-GB": "Save work collection"
+ },
+ "wpf.edit.saveEpisode": {
+  "zh-CN": "保存分集状态",
+  "zh-TW": "儲存分集狀態",
+  "zh-HK": "儲存分集狀態",
+  "en-US": "Save episode status",
+  "en-GB": "Save episode status"
+ },
+ "wpf.edit.undoHistory": {
+  "zh-CN": "撤销所选历史",
+  "zh-TW": "復原所選歷史",
+  "zh-HK": "復原所選歷史",
+  "en-US": "Revert selected history",
+  "en-GB": "Revert selected history"
+ },
+ "wpf.edit.contentChanged": {
+  "zh-CN": "内容已更改，请重新预览。",
+  "zh-TW": "內容已變更，請重新預覽。",
+  "zh-HK": "內容已變更，請重新預覽。",
+  "en-US": "Content changed; preview again.",
+  "en-GB": "Content changed; preview again."
+ },
+ "wpf.edit.noMatch": {
+  "zh-CN": "没有匹配结果。",
+  "zh-TW": "沒有比對結果。",
+  "zh-HK": "沒有比對結果。",
+  "en-US": "No matches.",
+  "en-GB": "No matches."
+ },
+ "wpf.edit.foundAggregate": {
+  "zh-CN": "找到 {0} 个聚合结果。",
+  "zh-TW": "找到 {0} 個聚合結果。",
+  "zh-HK": "找到 {0} 個聚合結果。",
+  "en-US": "Found {0} aggregated results.",
+  "en-GB": "Found {0} aggregated results."
+ },
+ "wpf.edit.needTmdb": {
+  "zh-CN": "请先在设置中配置 TMDB Token。",
+  "zh-TW": "請先在設定中設定 TMDB Token。",
+  "zh-HK": "請先在設定中設定 TMDB Token。",
+  "en-US": "Configure the TMDB token in settings first.",
+  "en-GB": "Configure the TMDB token in settings first."
+ },
+ "wpf.edit.archiveUpdated": {
+  "zh-CN": "Bangumi Archive 已更新：{0} 字节。",
+  "zh-TW": "Bangumi Archive 已更新：{0} 位元組。",
+  "zh-HK": "Bangumi Archive 已更新：{0} 位元組。",
+  "en-US": "Bangumi Archive updated: {0} bytes.",
+  "en-GB": "Bangumi Archive updated: {0} bytes."
+ },
+ "wpf.edit.archiveImported": {
+  "zh-CN": "Bangumi Archive 已导入：{0} 字节。",
+  "zh-TW": "Bangumi Archive 已匯入：{0} 位元組。",
+  "zh-HK": "Bangumi Archive 已匯入：{0} 位元組。",
+  "en-US": "Bangumi Archive imported: {0} bytes.",
+  "en-GB": "Bangumi Archive imported: {0} bytes."
+ },
+ "wpf.edit.archiveNoMatch": {
+  "zh-CN": "Archive 没有匹配结果。",
+  "zh-TW": "Archive 沒有比對結果。",
+  "zh-HK": "Archive 沒有比對結果。",
+  "en-US": "Archive has no matches.",
+  "en-GB": "Archive has no matches."
+ },
+ "wpf.edit.archiveFound": {
+  "zh-CN": "找到 {0} 个 Archive 结果。",
+  "zh-TW": "找到 {0} 個 Archive 結果。",
+  "zh-HK": "找到 {0} 個 Archive 結果。",
+  "en-US": "Found {0} archive results.",
+  "en-GB": "Found {0} archive results."
+ },
+ "wpf.edit.selectStatus": {
+  "zh-CN": "请选择 Bangumi 状态。",
+  "zh-TW": "請選擇 Bangumi 狀態。",
+  "zh-HK": "請選擇 Bangumi 狀態。",
+  "en-US": "Select a Bangumi status.",
+  "en-GB": "Select a Bangumi status."
+ },
+ "wpf.edit.needBangumiId": {
+  "zh-CN": "请先填写有效的 Bangumi ID。",
+  "zh-TW": "請先填寫有效的 Bangumi ID。",
+  "zh-HK": "請先填寫有效的 Bangumi ID。",
+  "en-US": "Enter a valid Bangumi ID first.",
+  "en-GB": "Enter a valid Bangumi ID first."
+ },
+ "wpf.edit.needBangumiToken": {
+  "zh-CN": "请先在设置中配置 Bangumi Access Token。",
+  "zh-TW": "請先在設定中設定 Bangumi Access Token。",
+  "zh-HK": "請先在設定中設定 Bangumi Access Token。",
+  "en-US": "Configure the Bangumi access token in settings first.",
+  "en-GB": "Configure the Bangumi access token in settings first."
+ },
+ "wpf.edit.notInCollection": {
+  "zh-CN": "该作品尚未加入 Bangumi 收藏。",
+  "zh-TW": "該作品尚未加入 Bangumi 收藏。",
+  "zh-HK": "該作品尚未加入 Bangumi 收藏。",
+  "en-US": "This work is not in the Bangumi collection.",
+  "en-GB": "This work is not in the Bangumi collection."
+ },
+ "wpf.edit.collectionLoaded": {
+  "zh-CN": "已读取 Bangumi 收藏和 {0} 条分集状态。",
+  "zh-TW": "已讀取 Bangumi 收藏和 {0} 條分集狀態。",
+  "zh-HK": "已讀取 Bangumi 收藏和 {0} 條分集狀態。",
+  "en-US": "Loaded Bangumi collection and {0} episode statuses.",
+  "en-GB": "Loaded Bangumi collection and {0} episode statuses."
+ },
+ "wpf.edit.subjectSaved": {
+  "zh-CN": "Bangumi 作品收藏已保存。",
+  "zh-TW": "Bangumi 作品收藏已儲存。",
+  "zh-HK": "Bangumi 作品收藏已儲存。",
+  "en-US": "Bangumi work collection saved.",
+  "en-GB": "Bangumi work collection saved."
+ },
+ "wpf.edit.needEpisodeId": {
+  "zh-CN": "请选择或填写有效的 Bangumi 分集 ID。",
+  "zh-TW": "請選擇或填寫有效的 Bangumi 分集 ID。",
+  "zh-HK": "請選擇或填寫有效的 Bangumi 分集 ID。",
+  "en-US": "Select or enter a valid Bangumi episode ID.",
+  "en-GB": "Select or enter a valid Bangumi episode ID."
+ },
+ "wpf.edit.episodeSaved": {
+  "zh-CN": "Bangumi 分集 {0} 状态已保存。",
+  "zh-TW": "Bangumi 分集 {0} 狀態已儲存。",
+  "zh-HK": "Bangumi 分集 {0} 狀態已儲存。",
+  "en-US": "Bangumi episode {0} status saved.",
+  "en-GB": "Bangumi episode {0} status saved."
+ },
+ "wpf.edit.archivePicked": {
+  "zh-CN": "已选择 Bangumi Archive 匹配：{0}。",
+  "zh-TW": "已選擇 Bangumi Archive 比對：{0}。",
+  "zh-HK": "已選擇 Bangumi Archive 比對：{0}。",
+  "en-US": "Selected Bangumi Archive match: {0}.",
+  "en-GB": "Selected Bangumi Archive match: {0}."
+ },
+ "wpf.edit.selectWorks": {
+  "zh-CN": "请至少选择一部本地目录作品。",
+  "zh-TW": "請至少選擇一部本機目錄作品。",
+  "zh-HK": "請至少選擇一部本機目錄作品。",
+  "en-US": "Select at least one local directory work.",
+  "en-GB": "Select at least one local directory work."
+ },
+ "wpf.edit.appliedMeta": {
+  "zh-CN": "元数据已应用到本地索引（{0} 部作品）。",
+  "zh-TW": "元數據已套用到本機索引（{0} 部作品）。",
+  "zh-HK": "元數據已套用到本機索引（{0} 部作品）。",
+  "en-US": "Metadata applied to local index ({0} works).",
+  "en-GB": "Metadata applied to local index ({0} works)."
+ },
+ "wpf.edit.selectBatch": {
+  "zh-CN": "请先从历史列表选择一批已应用的元数据。",
+  "zh-TW": "請先從歷史列表選擇一批已套用的元數據。",
+  "zh-HK": "請先從歷史列表選擇一批已套用嘅元數據。",
+  "en-US": "Select an applied metadata batch from history first.",
+  "en-GB": "Select an applied metadata batch from history first."
+ },
+ "wpf.edit.episodeLine": {
+  "zh-CN": "第 {0} 集 · ID {1} · 状态 {2}",
+  "zh-TW": "第 {0} 集 · ID {1} · 狀態 {2}",
+  "zh-HK": "第 {0} 集 · ID {1} · 狀態 {2}",
+  "en-US": "Ep {0} · ID {1} · {2}",
+  "en-GB": "Ep {0} · ID {1} · {2}"
+ },
+ "wpf.common.allFiles": {
+  "zh-CN": "所有文件",
+  "zh-TW": "所有檔案",
+  "zh-HK": "所有檔案",
+  "en-US": "All files",
+  "en-GB": "All files"
+ },
+ "wpf.measure.step1": {
+  "zh-CN": "步骤 1/4：选择麦克风",
+  "zh-TW": "步驟 1/4：選擇麥克風",
+  "zh-HK": "步驟 1/4：選擇麥克風",
+  "en-US": "Step 1/4: choose microphone",
+  "en-GB": "Step 1/4: choose microphone"
+ },
+ "wpf.measure.mic": {
+  "zh-CN": "麦克风",
+  "zh-TW": "麥克風",
+  "zh-HK": "麥克風",
+  "en-US": "Microphone",
+  "en-GB": "Microphone"
+ },
+ "wpf.measure.outputNote": {
+  "zh-CN": "输出将使用默认音频设备（{0}）。",
+  "zh-TW": "輸出將使用預設音訊裝置（{0}）。",
+  "zh-HK": "輸出將使用預設音頻裝置（{0}）。",
+  "en-US": "Output uses the default audio device ({0}).",
+  "en-GB": "Output uses the default audio device ({0})."
+ },
+ "wpf.measure.umikTitle": {
+  "zh-CN": "UMIK-1 校准（可选）",
+  "zh-TW": "UMIK-1 校準（選填）",
+  "zh-HK": "UMIK-1 校準（可選）",
+  "en-US": "UMIK-1 calibration (optional)",
+  "en-GB": "UMIK-1 calibration (optional)"
+ },
+ "wpf.measure.serial": {
+  "zh-CN": "序列号",
+  "zh-TW": "序號",
+  "zh-HK": "序號",
+  "en-US": "Serial number",
+  "en-GB": "Serial number"
+ },
+ "wpf.measure.serialName": {
+  "zh-CN": "UMIK 序列号",
+  "zh-TW": "UMIK 序號",
+  "zh-HK": "UMIK 序號",
+  "en-US": "UMIK serial number",
+  "en-GB": "UMIK serial number"
+ },
+ "wpf.measure.incidence": {
+  "zh-CN": "校准角度",
+  "zh-TW": "校準角度",
+  "zh-HK": "校準角度",
+  "en-US": "Calibration angle",
+  "en-GB": "Calibration angle"
+ },
+ "wpf.measure.download": {
+  "zh-CN": "下载校准文件",
+  "zh-TW": "下載校準檔",
+  "zh-HK": "下載校準檔",
+  "en-US": "Download calibration file",
+  "en-GB": "Download calibration file"
+ },
+ "wpf.measure.calPath": {
+  "zh-CN": "校准文件路径",
+  "zh-TW": "校準檔路徑",
+  "zh-HK": "校準檔路徑",
+  "en-US": "Calibration file path",
+  "en-GB": "Calibration file path"
+ },
+ "wpf.measure.browseFile": {
+  "zh-CN": "选择校准文件…",
+  "zh-TW": "選擇校準檔…",
+  "zh-HK": "選擇校準檔…",
+  "en-US": "Choose calibration file…",
+  "en-GB": "Choose calibration file…"
+ },
+ "wpf.measure.loadedCalibration": {
+  "zh-CN": "已载入校准：{0}",
+  "zh-TW": "已載入校準：{0}",
+  "zh-HK": "已載入校準：{0}",
+  "en-US": "Calibration loaded: {0}",
+  "en-GB": "Calibration loaded: {0}"
+ },
+ "wpf.measure.nextVolume": {
+  "zh-CN": "下一步：音量",
+  "zh-TW": "下一步：音量",
+  "zh-HK": "下一步：音量",
+  "en-US": "Next: volume",
+  "en-GB": "Next: volume"
+ },
+ "wpf.measure.selectMicFirst": {
+  "zh-CN": "请先选择麦克风。",
+  "zh-TW": "請先選擇麥克風。",
+  "zh-HK": "請先選擇麥克風。",
+  "en-US": "Select a microphone first.",
+  "en-GB": "Select a microphone first."
+ },
+ "wpf.measure.downloading": {
+  "zh-CN": "正在下载校准文件…",
+  "zh-TW": "正在下載校準檔…",
+  "zh-HK": "下載緊校準檔…",
+  "en-US": "Downloading calibration file…",
+  "en-GB": "Downloading calibration file…"
+ },
+ "wpf.measure.downloadedCalibration": {
+  "zh-CN": "已下载校准：{0}",
+  "zh-TW": "已下載校準：{0}",
+  "zh-HK": "已下載校準：{0}",
+  "en-US": "Calibration downloaded: {0}",
+  "en-GB": "Calibration downloaded: {0}"
+ },
+ "wpf.measure.step2": {
+  "zh-CN": "步骤 2/4：音量匹配",
+  "zh-TW": "步驟 2/4：音量匹配",
+  "zh-HK": "步驟 2/4：音量匹配",
+  "en-US": "Step 2/4: volume matching",
+  "en-GB": "Step 2/4: volume matching"
+ },
+ "wpf.measure.volumeNote": {
+  "zh-CN": "播放粉红噪声，把功放/系统音量调到平时听音的响度，然后继续。噪声从默认输出播放，不经过 DSP。",
+  "zh-TW": "播放粉紅噪音，把擴大機/系統音量調到平時聽音的響度，然後繼續。噪音從預設輸出播放，不經過 DSP。",
+  "zh-HK": "播放粉紅噪音，將擴音機/系統音量較到平時聽歌嘅響度，然後繼續。噪音從預設輸出播放，唔經過 DSP。",
+  "en-US": "Play pink noise and set amp/system volume to normal listening loudness, then continue. Noise plays from the default output, bypassing DSP.",
+  "en-GB": "Play pink noise and set amp/system volume to normal listening loudness, then continue. Noise plays from the default output, bypassing DSP."
+ },
+ "wpf.measure.playNoise": {
+  "zh-CN": "播放噪声",
+  "zh-TW": "播放噪音",
+  "zh-HK": "播放噪音",
+  "en-US": "Play noise",
+  "en-GB": "Play noise"
+ },
+ "wpf.measure.playPink": {
+  "zh-CN": "播放粉红噪声",
+  "zh-TW": "播放粉紅噪音",
+  "zh-HK": "播放粉紅噪音",
+  "en-US": "Play pink noise",
+  "en-GB": "Play pink noise"
+ },
+ "wpf.measure.noisePlaying": {
+  "zh-CN": "正在播放粉红噪声…",
+  "zh-TW": "正在播放粉紅噪音…",
+  "zh-HK": "播放緊粉紅噪音…",
+  "en-US": "Playing pink noise…",
+  "en-GB": "Playing pink noise…"
+ },
+ "wpf.measure.stop": {
+  "zh-CN": "停止",
+  "zh-TW": "停止",
+  "zh-HK": "停止",
+  "en-US": "Stop",
+  "en-GB": "Stop"
+ },
+ "wpf.measure.stopped": {
+  "zh-CN": "已停止。",
+  "zh-TW": "已停止。",
+  "zh-HK": "已停止。",
+  "en-US": "Stopped.",
+  "en-GB": "Stopped."
+ },
+ "wpf.measure.nextMeasure": {
+  "zh-CN": "下一步：测量",
+  "zh-TW": "下一步：測量",
+  "zh-HK": "下一步：測量",
+  "en-US": "Next: measure",
+  "en-GB": "Next: measure"
+ },
+ "wpf.measure.back": {
+  "zh-CN": "上一步",
+  "zh-TW": "上一步",
+  "zh-HK": "上一步",
+  "en-US": "Back",
+  "en-GB": "Back"
+ },
+ "wpf.measure.step3": {
+  "zh-CN": "步骤 3/4：双扫频测量",
+  "zh-TW": "步驟 3/4：雙掃頻測量",
+  "zh-HK": "步驟 3/4：雙掃頻測量",
+  "en-US": "Step 3/4: dual-sweep measurement",
+  "en-GB": "Step 3/4: dual-sweep measurement"
+ },
+ "wpf.measure.measureNote": {
+  "zh-CN": "保持安静。程序播放两次扫频并同时录音（约 12 秒），随后分析。",
+  "zh-TW": "保持安靜。程式播放兩次掃頻並同時錄音（約 12 秒），隨後分析。",
+  "zh-HK": "保持安靜。程式播放兩次掃頻並同時錄音（約 12 秒），隨後分析。",
+  "en-US": "Stay quiet. The app plays two sweeps while recording (~12 s), then analyzes.",
+  "en-GB": "Stay quiet. The app plays two sweeps while recording (~12 s), then analyses."
+ },
+ "wpf.measure.preparing": {
+  "zh-CN": "准备…",
+  "zh-TW": "準備…",
+  "zh-HK": "準備…",
+  "en-US": "Preparing…",
+  "en-GB": "Preparing…"
+ },
+ "wpf.measure.cancelled": {
+  "zh-CN": "已取消。",
+  "zh-TW": "已取消。",
+  "zh-HK": "已取消。",
+  "en-US": "Cancelled.",
+  "en-GB": "Cancelled."
+ },
+ "wpf.measure.return": {
+  "zh-CN": "返回",
+  "zh-TW": "返回",
+  "zh-HK": "返回",
+  "en-US": "Back",
+  "en-GB": "Back"
+ },
+ "wpf.measure.step4": {
+  "zh-CN": "步骤 4/4：结果",
+  "zh-TW": "步驟 4/4：結果",
+  "zh-HK": "步驟 4/4：結果",
+  "en-US": "Step 4/4: results",
+  "en-GB": "Step 4/4: results"
+ },
+ "wpf.measure.noResult": {
+  "zh-CN": "没有测量结果。",
+  "zh-TW": "沒有測量結果。",
+  "zh-HK": "沒有測量結果。",
+  "en-US": "No measurement result.",
+  "en-GB": "No measurement result."
+ },
+ "wpf.measure.validSummary": {
+  "zh-CN": "有效测量：漂移 {0} ppm（双扫差 {1}），拟合 {2} 段，残余 RMS {3} dB。",
+  "zh-TW": "有效測量：漂移 {0} ppm（雙掃差 {1}），擬合 {2} 段，殘餘 RMS {3} dB。",
+  "zh-HK": "有效測量：漂移 {0} ppm（雙掃差 {1}），擬合 {2} 段，殘餘 RMS {3} dB。",
+  "en-US": "Valid measurement: drift {0} ppm (dual-sweep spread {1}), {2} fitted bands, residual RMS {3} dB.",
+  "en-GB": "Valid measurement: drift {0} ppm (dual-sweep spread {1}), {2} fitted bands, residual RMS {3} dB."
+ },
+ "wpf.measure.invalidSummary": {
+  "zh-CN": "测量被拒绝：{0}（拟合结果不会被应用）",
+  "zh-TW": "測量被拒絕：{0}（擬合結果不會被套用）",
+  "zh-HK": "測量被拒絕：{0}（擬合結果不會被套用）",
+  "en-US": "Measurement rejected: {0} (fit will not be applied)",
+  "en-GB": "Measurement rejected: {0} (fit will not be applied)"
+ },
+ "wpf.measure.applyPreset": {
+  "zh-CN": "应用为 DSP 预设",
+  "zh-TW": "套用為 DSP 預設",
+  "zh-HK": "套用為 DSP 預設",
+  "en-US": "Apply as DSP preset",
+  "en-GB": "Apply as DSP preset"
+ },
+ "wpf.measure.applyPresetName": {
+  "zh-CN": "应用测量为 DSP 预设",
+  "zh-TW": "套用測量為 DSP 預設",
+  "zh-HK": "套用測量為 DSP 預設",
+  "en-US": "Apply measurement as DSP preset",
+  "en-GB": "Apply measurement as DSP preset"
+ },
+ "wpf.measure.presetApplied": {
+  "zh-CN": "已应用预设并选中：{0}",
+  "zh-TW": "已套用預設並選取：{0}",
+  "zh-HK": "已套用預設並選取：{0}",
+  "en-US": "Preset applied and selected: {0}",
+  "en-GB": "Preset applied and selected: {0}"
+ },
+ "wpf.measure.importWav": {
+  "zh-CN": "导入 WAV 分析…",
+  "zh-TW": "匯入 WAV 分析…",
+  "zh-HK": "匯入 WAV 分析…",
+  "en-US": "Import WAV for analysis…",
+  "en-GB": "Import WAV for analysis…"
+ },
+ "wpf.measure.wavFile": {
+  "zh-CN": "WAV 文件",
+  "zh-TW": "WAV 檔案",
+  "zh-HK": "WAV 檔案",
+  "en-US": "WAV file",
+  "en-GB": "WAV file"
+ },
+ "wpf.measure.analyzingWav": {
+  "zh-CN": "正在分析 WAV…",
+  "zh-TW": "正在分析 WAV…",
+  "zh-HK": "分析緊 WAV…",
+  "en-US": "Analyzing WAV…",
+  "en-GB": "Analysing WAV…"
+ },
+ "wpf.measure.close": {
+  "zh-CN": "关闭",
+  "zh-TW": "關閉",
+  "zh-HK": "關閉",
+  "en-US": "Close",
+  "en-GB": "Close"
+ },
+ "wpf.measure.calPoints": {
+  "zh-CN": "{0}（{1} 点）",
+  "zh-TW": "{0}（{1} 點）",
+  "zh-HK": "{0}（{1} 點）",
+  "en-US": "{0} ({1} points)",
+  "en-GB": "{0} ({1} points)"
+ },
+ "wpf.measure.calFilter": {
+  "zh-CN": "校准文件",
+  "zh-TW": "校準檔",
+  "zh-HK": "校準檔",
+  "en-US": "Calibration file",
+  "en-GB": "Calibration file"
  }
 };
 let currentLocale = 'zh-CN';

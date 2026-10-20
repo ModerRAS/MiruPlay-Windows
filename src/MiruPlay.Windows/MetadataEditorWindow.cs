@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Automation;
@@ -60,18 +61,18 @@ public sealed class MetadataEditorWindow : Window
         _metadataSearch = metadataSearch;
         _contentMode = contentMode.Equals("DRAMA", StringComparison.OrdinalIgnoreCase) ? "drama" : "anime";
         _refresh = refresh;
-        AutomationProperties.SetName(_seriesList, "本地目录作品");
-        AutomationProperties.SetName(_historyList, "元数据历史");
-        AutomationProperties.SetName(_provider, "元数据提供方");
-        AutomationProperties.SetName(_query, "元数据搜索词");
-        AutomationProperties.SetName(_candidates, "在线元数据候选");
-        AutomationProperties.SetName(_archiveQuery, "Bangumi Archive 搜索词");
-        AutomationProperties.SetName(_archiveResults, "Bangumi Archive 搜索结果");
-        AutomationProperties.SetName(_subjectCollectionType, "Bangumi 作品收藏状态");
-        AutomationProperties.SetName(_episodeCollections, "Bangumi 分集收藏状态列表");
-        AutomationProperties.SetName(_bangumiEpisodeId, "Bangumi 分集 ID");
-        AutomationProperties.SetName(_episodeCollectionType, "Bangumi 分集状态");
-        Title = $"编辑元数据 · {series.Title}";
+        AutomationProperties.SetName(_seriesList, AppStrings.Get("wpf.edit.localWorks"));
+        AutomationProperties.SetName(_historyList, AppStrings.Get("wpf.edit.historyTitle"));
+        AutomationProperties.SetName(_provider, AppStrings.Get("wpf.edit.provider"));
+        AutomationProperties.SetName(_query, AppStrings.Get("wpf.edit.query"));
+        AutomationProperties.SetName(_candidates, AppStrings.Get("wpf.edit.candidates"));
+        AutomationProperties.SetName(_archiveQuery, AppStrings.Get("wpf.edit.archiveQuery"));
+        AutomationProperties.SetName(_archiveResults, AppStrings.Get("wpf.edit.archiveResults"));
+        AutomationProperties.SetName(_subjectCollectionType, AppStrings.Get("wpf.edit.subjectCollection"));
+        AutomationProperties.SetName(_episodeCollections, AppStrings.Get("wpf.edit.episodeList"));
+        AutomationProperties.SetName(_bangumiEpisodeId, AppStrings.Get("wpf.edit.episodeId"));
+        AutomationProperties.SetName(_episodeCollectionType, AppStrings.Get("wpf.edit.episodeStatus"));
+        Title = AppStrings.Get("wpf.edit.title", series.Title);
         Width = 720;
         Height = 820;
         MinWidth = 560;
@@ -90,7 +91,7 @@ public sealed class MetadataEditorWindow : Window
         {
             _batch = null;
             if (_seriesList.SelectedItems.Count == 1) LoadSeriesValues();
-            _status.Text = _seriesList.SelectedItems.Count > 1 ? "预览时会将相同元数据应用到所选作品。" : string.Empty;
+            _status.Text = _seriesList.SelectedItems.Count > 1 ? AppStrings.Get("wpf.edit.batchNote") : string.Empty;
         };
         Content = BuildContent();
         LoadSeriesValues();
@@ -101,15 +102,15 @@ public sealed class MetadataEditorWindow : Window
     {
         var root = new DockPanel();
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(16) };
-        AddButton(buttons, "撤销", UndoAsync);
-        AddButton(buttons, "预览", PreviewAsync);
-        AddButton(buttons, "应用", ApplyAsync);
+        AddButton(buttons, AppStrings.Get("meta.undo"), UndoAsync);
+        AddButton(buttons, AppStrings.Get("wpf.edit.preview"), PreviewAsync);
+        AddButton(buttons, AppStrings.Get("wpf.apply"), ApplyAsync);
         DockPanel.SetDock(buttons, Dock.Bottom);
         root.Children.Add(buttons);
 
         var body = new StackPanel { Margin = new Thickness(20) };
         var online = new WrapPanel { Margin = new Thickness(0, 0, 0, 12) };
-        _provider.Items.Add(new ComboBoxItem { Content = "全部来源", Tag = "all" });
+        _provider.Items.Add(new ComboBoxItem { Content = AppStrings.Get("meta.allSources"), Tag = "all" });
         _provider.Items.Add(new ComboBoxItem { Content = "Bangumi", Tag = "bangumi" });
         _provider.Items.Add(new ComboBoxItem { Content = "TMDB", Tag = "tmdb" });
         _provider.Items.Add(new ComboBoxItem { Content = "TVMaze", Tag = "tvmaze" });
@@ -117,52 +118,52 @@ public sealed class MetadataEditorWindow : Window
         online.Children.Add(_provider);
         _query.Margin = new Thickness(8, 0, 8, 0);
         online.Children.Add(_query);
-        AddButton(online, "搜索", SearchAsync);
+        AddButton(online, AppStrings.Get("meta.search"), SearchAsync);
         body.Children.Add(online);
-        body.Children.Add(new TextBlock { Text = "作品", Margin = new Thickness(0, 4, 0, 4) });
+        body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.edit.works"), Margin = new Thickness(0, 4, 0, 4) });
         body.Children.Add(_seriesList);
         _candidates.SelectionChanged += CandidateSelected;
         body.Children.Add(_candidates);
         var archiveActions = new WrapPanel { Margin = new Thickness(0, 8, 0, 0) };
-        AddButton(archiveActions, "下载最新 Archive", DownloadArchiveAsync);
-        AddButton(archiveActions, "导入 Archive", ImportArchiveAsync);
+        AddButton(archiveActions, AppStrings.Get("wpf.edit.downloadArchive"), DownloadArchiveAsync);
+        AddButton(archiveActions, AppStrings.Get("wpf.edit.importArchive"), ImportArchiveAsync);
         body.Children.Add(archiveActions);
         var archiveSearch = new WrapPanel { Margin = new Thickness(0, 4, 0, 0) };
         archiveSearch.Children.Add(_archiveQuery);
-        AddButton(archiveSearch, "搜索 Archive", SearchArchive);
+        AddButton(archiveSearch, AppStrings.Get("meta.searchArchive"), SearchArchive);
         body.Children.Add(archiveSearch);
         _archiveResults.SelectionChanged += ArchiveCandidateSelected;
         body.Children.Add(_archiveResults);
-        body.Children.Add(new TextBlock { Text = "Bangumi 收藏与分集状态", Margin = new Thickness(0, 8, 0, 4) });
+        body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.edit.subjectSection"), Margin = new Thickness(0, 8, 0, 4) });
         AddCollectionOptions(_subjectCollectionType,
-            (1, "想看"), (2, "看过"), (3, "在看"), (4, "搁置"), (5, "抛弃"));
+            (1, AppStrings.Get("bangumi.want")), (2, AppStrings.Get("bangumi.done")), (3, AppStrings.Get("bangumi.watching")), (4, AppStrings.Get("bangumi.onHold")), (5, AppStrings.Get("bangumi.dropped")));
         var collectionActions = new WrapPanel();
         collectionActions.Children.Add(_subjectCollectionType);
-        AddButton(collectionActions, "读取收藏状态", LoadBangumiStatusAsync);
-        AddButton(collectionActions, "保存作品收藏", SaveSubjectCollectionAsync);
+        AddButton(collectionActions, AppStrings.Get("wpf.edit.readCollection"), LoadBangumiStatusAsync);
+        AddButton(collectionActions, AppStrings.Get("wpf.edit.saveSubject"), SaveSubjectCollectionAsync);
         body.Children.Add(collectionActions);
         _episodeCollections.SelectionChanged += EpisodeCollectionSelected;
         body.Children.Add(_episodeCollections);
         AddCollectionOptions(_episodeCollectionType,
-            (0, "未标记"), (1, "想看"), (2, "看过"), (3, "抛弃"));
+            (0, AppStrings.Get("bangumi.unmarked")), (1, AppStrings.Get("bangumi.want")), (2, AppStrings.Get("bangumi.done")), (3, AppStrings.Get("bangumi.dropped")));
         var episodeActions = new WrapPanel();
         _bangumiEpisodeId.Margin = new Thickness(0, 0, 8, 0);
         episodeActions.Children.Add(_bangumiEpisodeId);
         episodeActions.Children.Add(_episodeCollectionType);
-        AddButton(episodeActions, "保存分集状态", SaveEpisodeCollectionAsync);
+        AddButton(episodeActions, AppStrings.Get("wpf.edit.saveEpisode"), SaveEpisodeCollectionAsync);
         body.Children.Add(episodeActions);
         body.Children.Add(_status);
-        AddField(body, "标题", "title", 500);
-        AddField(body, "原名", "original", 500);
-        AddField(body, "简介", "plot", 20_000, multiline: true);
-        AddField(body, "首播日期", "premiered", 32);
-        AddField(body, "类型（逗号分隔）", "genres", 4_000);
+        AddField(body, AppStrings.Get("meta.title"), "title", 500);
+        AddField(body, AppStrings.Get("meta.original"), "original", 500);
+        AddField(body, AppStrings.Get("meta.summary"), "plot", 20_000, multiline: true);
+        AddField(body, AppStrings.Get("meta.premiered"), "premiered", 32);
+        AddField(body, AppStrings.Get("meta.genres"), "genres", 4_000);
         AddField(body, "Bangumi ID", "bangumi", 100);
         AddField(body, "TMDB ID", "tmdb", 100);
         AddField(body, "TVMaze ID", "tvmaze", 100);
-        body.Children.Add(new TextBlock { Text = "元数据历史", Margin = new Thickness(0, 8, 0, 4) });
+        body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.edit.historyTitle"), Margin = new Thickness(0, 8, 0, 4) });
         body.Children.Add(_historyList);
-        AddButton(body, "撤销所选历史", UndoAsync);
+        AddButton(body, AppStrings.Get("wpf.edit.undoHistory"), UndoAsync);
         var scroll = new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         root.Children.Add(scroll);
         return root;
@@ -183,7 +184,7 @@ public sealed class MetadataEditorWindow : Window
             }
             if (_batch is null) return;
             _batch = null;
-            _status.Text = "内容已更改，请重新预览。";
+            _status.Text = AppStrings.Get("wpf.edit.contentChanged");
         };
         parent.Children.Add(new TextBlock { Text = label, Margin = new Thickness(0, 5, 0, 0) });
         parent.Children.Add(box);
@@ -251,18 +252,18 @@ public sealed class MetadataEditorWindow : Window
                     0, item.LocalizedTitle ?? item.Title, item.OriginalTitle ?? item.Title, item.Summary, item.FirstAirDate, "aggregate", item)).ToList();
                 _status.Text = result.ProviderErrors.Count > 0
                     ? string.Join(" · ", result.ProviderErrors)
-                    : result.Candidates.Count == 0 ? "没有匹配结果。" : $"找到 {result.Candidates.Count} 个聚合结果。";
+                    : result.Candidates.Count == 0 ? AppStrings.Get("wpf.edit.noMatch") : AppStrings.Get("wpf.edit.foundAggregate", result.Candidates.Count);
                 return;
             }
             IReadOnlyList<Candidate> candidates = provider switch
             {
                 "bangumi" => (await _bangumi.SearchAsync(query)).Select(item => new Candidate(item.Id, item.TitleCn ?? item.Title, item.Title, item.Summary, item.AirDate, "bangumi")).ToList(),
-                "tmdb" => (await _tmdb.SearchAsync(query, _tokens.Load().Tmdb ?? throw new InvalidOperationException("请先在设置中配置 TMDB Token。"))).Select(item => new Candidate(item.Id, item.Title, item.OriginalTitle, item.Summary, item.FirstAirDate, "tmdb")).ToList(),
+                "tmdb" => (await _tmdb.SearchAsync(query, _tokens.Load().Tmdb ?? throw new InvalidOperationException(AppStrings.Get("wpf.edit.needTmdb")))).Select(item => new Candidate(item.Id, item.Title, item.OriginalTitle, item.Summary, item.FirstAirDate, "tmdb")).ToList(),
                 "tvmaze" => (await _tvMaze.SearchAsync(query)).Select(item => new Candidate(item.Id, item.Title, item.OriginalTitle, item.Summary, item.FirstAirDate, "tvmaze")).ToList(),
                 _ => [],
             };
             _candidates.ItemsSource = candidates;
-            if (candidates.Count == 0) _status.Text = "没有匹配结果。";
+            if (candidates.Count == 0) _status.Text = AppStrings.Get("wpf.edit.noMatch");
         }
         catch (Exception error) when (error is HttpRequestException or InvalidOperationException or ArgumentException or InvalidDataException)
         {
@@ -295,7 +296,7 @@ public sealed class MetadataEditorWindow : Window
         try
         {
             var snapshot = await _archive.DownloadLatestAsync();
-            _status.Text = $"Bangumi Archive 已更新：{snapshot.SubjectFileSizeBytes:N0} 字节。";
+            _status.Text = AppStrings.Get("wpf.edit.archiveUpdated", snapshot.SubjectFileSizeBytes.ToString("N0", CultureInfo.CurrentCulture));
         }
         catch (Exception error) when (error is HttpRequestException or IOException or InvalidDataException or OperationCanceledException)
         {
@@ -309,14 +310,14 @@ public sealed class MetadataEditorWindow : Window
         {
             CheckFileExists = true,
             Multiselect = false,
-            Filter = "Bangumi Archive (*.zip;*.jsonl)|*.zip;*.jsonl|所有文件 (*.*)|*.*",
+            Filter = "Bangumi Archive (*.zip;*.jsonl)|*.zip;*.jsonl|" + AppStrings.Get("wpf.common.allFiles") + " (*.*)|*.*",
         };
         if (dialog.ShowDialog(this) != true) return;
         try
         {
             await using var input = File.OpenRead(dialog.FileName);
             var snapshot = await _archive.ImportAsync(input, Path.GetFileName(dialog.FileName), input.Length);
-            _status.Text = $"Bangumi Archive 已导入：{snapshot.SubjectFileSizeBytes:N0} 字节。";
+            _status.Text = AppStrings.Get("wpf.edit.archiveImported", snapshot.SubjectFileSizeBytes.ToString("N0", CultureInfo.CurrentCulture));
         }
         catch (Exception error) when (error is IOException or InvalidDataException or OperationCanceledException)
         {
@@ -330,7 +331,7 @@ public sealed class MetadataEditorWindow : Window
         {
             var hits = _archive.Search(_archiveQuery.Text, 20);
             _archiveResults.ItemsSource = hits.Select(hit => new ArchiveHit(hit)).ToList();
-            _status.Text = hits.Count == 0 ? "Archive 没有匹配结果。" : $"找到 {hits.Count} 个 Archive 结果。";
+            _status.Text = hits.Count == 0 ? AppStrings.Get("wpf.edit.archiveNoMatch") : AppStrings.Get("wpf.edit.archiveFound", hits.Count);
         }
         catch (Exception error) when (error is ArgumentException or InvalidDataException or IOException)
         {
@@ -349,15 +350,15 @@ public sealed class MetadataEditorWindow : Window
     private static int SelectedCollectionType(ComboBox combo) =>
         (combo.SelectedItem as ComboBoxItem)?.Tag is int value
             ? value
-            : throw new InvalidOperationException("请选择 Bangumi 状态。");
+            : throw new InvalidOperationException(AppStrings.Get("wpf.edit.selectStatus"));
 
     private (int SubjectId, string Token) BangumiContext()
     {
         if (!int.TryParse(_fields["bangumi"].Text.Trim(), System.Globalization.NumberStyles.None,
                 System.Globalization.CultureInfo.InvariantCulture, out var subjectId) || subjectId <= 0)
-            throw new InvalidOperationException("请先填写有效的 Bangumi ID。");
+            throw new InvalidOperationException(AppStrings.Get("wpf.edit.needBangumiId"));
         var token = _tokens.Load().Bangumi?.Trim();
-        if (string.IsNullOrEmpty(token)) throw new InvalidOperationException("请先在设置中配置 Bangumi Access Token。");
+        if (string.IsNullOrEmpty(token)) throw new InvalidOperationException(AppStrings.Get("wpf.edit.needBangumiToken"));
         return (subjectId, token);
     }
 
@@ -370,13 +371,13 @@ public sealed class MetadataEditorWindow : Window
             if (subject is null)
             {
                 _episodeCollections.ItemsSource = Array.Empty<EpisodeCollectionItem>();
-                _status.Text = "该作品尚未加入 Bangumi 收藏。";
+                _status.Text = AppStrings.Get("wpf.edit.notInCollection");
                 return;
             }
             SelectCollectionType(_subjectCollectionType, subject.Type);
             var episodes = await _bangumi.GetEpisodeCollectionsAsync(subjectId, token);
             _episodeCollections.ItemsSource = episodes.Select(item => new EpisodeCollectionItem(item)).ToList();
-            _status.Text = $"已读取 Bangumi 收藏和 {episodes.Count} 条分集状态。";
+            _status.Text = AppStrings.Get("wpf.edit.collectionLoaded", episodes.Count);
         }
         catch (Exception error) when (error is HttpRequestException or InvalidOperationException or ArgumentException or InvalidDataException)
         {
@@ -390,7 +391,7 @@ public sealed class MetadataEditorWindow : Window
         {
             var (subjectId, token) = BangumiContext();
             await _bangumi.UpsertSubjectCollectionAsync(subjectId, SelectedCollectionType(_subjectCollectionType), token);
-            _status.Text = "Bangumi 作品收藏已保存。";
+            _status.Text = AppStrings.Get("wpf.edit.subjectSaved");
         }
         catch (Exception error) when (error is HttpRequestException or InvalidOperationException or ArgumentException)
         {
@@ -405,9 +406,9 @@ public sealed class MetadataEditorWindow : Window
             var (_, token) = BangumiContext();
             if (!int.TryParse(_bangumiEpisodeId.Text.Trim(), System.Globalization.NumberStyles.None,
                     System.Globalization.CultureInfo.InvariantCulture, out var episodeId) || episodeId <= 0)
-                throw new InvalidOperationException("请选择或填写有效的 Bangumi 分集 ID。");
+                throw new InvalidOperationException(AppStrings.Get("wpf.edit.needEpisodeId"));
             await _bangumi.UpdateEpisodeCollectionAsync(episodeId, SelectedCollectionType(_episodeCollectionType), token);
-            _status.Text = $"Bangumi 分集 {episodeId} 状态已保存。";
+            _status.Text = AppStrings.Get("wpf.edit.episodeSaved", episodeId);
         }
         catch (Exception error) when (error is HttpRequestException or InvalidOperationException or ArgumentException)
         {
@@ -436,7 +437,7 @@ public sealed class MetadataEditorWindow : Window
         _fields["plot"].Text = item.Hit.Summary ?? string.Empty;
         _fields["premiered"].Text = item.Hit.AirDate ?? string.Empty;
         _fields["bangumi"].Text = item.Hit.AnimeId;
-        _status.Text = $"已选择 Bangumi Archive 匹配：{item.Hit.AnimeId}。";
+        _status.Text = AppStrings.Get("wpf.edit.archivePicked", item.Hit.AnimeId);
     }
 
     private Task PreviewAsync()
@@ -455,7 +456,7 @@ public sealed class MetadataEditorWindow : Window
                 Premiered: _fields["premiered"].Text.Trim(),
                 UniqueIds: ids);
             var selected = _seriesList.SelectedItems.Cast<LibrarySeries>().ToList();
-            if (selected.Count == 0) throw new InvalidOperationException("请至少选择一部本地目录作品。");
+            if (selected.Count == 0) throw new InvalidOperationException(AppStrings.Get("wpf.edit.selectWorks"));
             _batch = _sources.PreviewMetadata(_sourceId,
                 selected.Select(item => new SeriesMetadataEdit(item.ApiId, metadata)).ToArray());
             _status.Text = string.Join(Environment.NewLine, _batch.Changes.Select(change => $"{change.BeforeTitle}  →  {change.Metadata.Title}"));
@@ -476,7 +477,7 @@ public sealed class MetadataEditorWindow : Window
             var selectedIds = SelectedSeriesIds();
             var applied = _sources.ApplyMetadata(_sourceId, _batch.Id);
             _batch = null;
-            _status.Text = $"元数据已应用到本地索引（{applied.Changes.Count} 部作品）。";
+            _status.Text = AppStrings.Get("wpf.edit.appliedMeta", applied.Changes.Count);
             LoadHistory();
             await _refresh(_sourceId);
             ReloadSeriesList(selectedIds);
@@ -492,7 +493,7 @@ public sealed class MetadataEditorWindow : Window
     {
         if (_historyList.SelectedItem is not HistoryItem selected)
         {
-            _status.Text = "请先从历史列表选择一批已应用的元数据。";
+            _status.Text = AppStrings.Get("wpf.edit.selectBatch");
             return;
         }
         try
@@ -504,7 +505,7 @@ public sealed class MetadataEditorWindow : Window
             await _refresh(_sourceId);
             ReloadSeriesList(selectedIds);
             LoadSeriesValues();
-            _status.Text = "本地元数据已撤销。";
+            _status.Text = AppStrings.Get("meta.undone");
         }
         catch (Exception error) when (error is ArgumentException or InvalidDataException or KeyNotFoundException or NotSupportedException or InvalidOperationException)
         {
@@ -514,7 +515,7 @@ public sealed class MetadataEditorWindow : Window
 
     private sealed record EpisodeCollectionItem(BangumiEpisodeCollectionState State)
     {
-        public string Label => $"第 {State.EpisodeNumber} 集 · ID {State.EpisodeId} · 状态 {State.Type}";
+        public string Label => AppStrings.Get("wpf.edit.episodeLine", State.EpisodeNumber, State.EpisodeId, State.Type);
     }
 
     private sealed record ArchiveHit(BangumiArchiveSearchHit Hit)
@@ -524,7 +525,7 @@ public sealed class MetadataEditorWindow : Window
 
     private sealed record HistoryItem(MetadataBatch Batch)
     {
-        public string Label => $"{Batch.State} · {Batch.Changes.Count} 部作品 · {DateTimeOffset.FromUnixTimeMilliseconds(Batch.CreatedAt).ToLocalTime():g}";
+        public string Label => Batch.State + " · " + AppStrings.Get("meta.historyWorks", Batch.Changes.Count) + " · " + DateTimeOffset.FromUnixTimeMilliseconds(Batch.CreatedAt).ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
     }
 
     private sealed record Candidate(int Id, string Title, string? OriginalTitle, string? Summary, string? Premiered, string Provider, AggregatedMetadataCandidate? Aggregate = null)

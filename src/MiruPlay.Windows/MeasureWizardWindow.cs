@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
@@ -29,7 +30,7 @@ public sealed class MeasureWizardWindow : Window, IDisposable
     {
         _config = config;
         _apply = apply;
-        Title = "房间校准向导";
+        Title = AppStrings.Get("wpf.measureWizard");
         Width = 640;
         Height = 560;
         MinWidth = 520;
@@ -59,52 +60,52 @@ public sealed class MeasureWizardWindow : Window, IDisposable
 
     private void BuildDeviceStep()
     {
-        _body.Children.Add(new TextBlock { Text = "步骤 1/4：选择麦克风", FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 8) });
+        _body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.measure.step1"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 8) });
         var capabilities = RoomMeasureRunner.Probe();
         _mics.ItemsSource = capabilities.Mics;
         _mics.DisplayMemberPath = nameof(WaveAudio.AudioDevice.Name);
         _mics.SelectedItem = capabilities.Mics.FirstOrDefault(mic =>
             mic.Name.Contains("UMIK", StringComparison.OrdinalIgnoreCase));
         if (_mics.SelectedItem is null && capabilities.Mics.Count > 0) _mics.SelectedIndex = 0;
-        AutomationProperties.SetName(_mics, "麦克风");
+        AutomationProperties.SetName(_mics, AppStrings.Get("wpf.measure.mic"));
         _body.Children.Add(_mics);
         _body.Children.Add(new TextBlock
         {
             Text = capabilities.Available
-                ? $"输出将使用默认音频设备（{RoomMeasureRunner.DescribeDefaultOutput() ?? "未知"}）。"
+                ? AppStrings.Get("wpf.measure.outputNote", RoomMeasureRunner.DescribeDefaultOutput() ?? AppStrings.Get("common.unknown"))
                 : capabilities.Reason,
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 8, 0, 8),
         });
-        _body.Children.Add(new TextBlock { Text = "UMIK-1 校准（可选）", FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 8, 0, 4) });
+        _body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.measure.umikTitle"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 8, 0, 4) });
         var serialRow = new StackPanel { Orientation = Orientation.Horizontal };
-        serialRow.Children.Add(new TextBlock { Text = "序列号", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
-        AutomationProperties.SetName(_serial, "UMIK 序列号");
+        serialRow.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.measure.serial"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
+        AutomationProperties.SetName(_serial, AppStrings.Get("wpf.measure.serialName"));
         serialRow.Children.Add(_serial);
         _incidence.ItemsSource = new[] { "0°", "90°" };
         _incidence.SelectedIndex = 0;
-        AutomationProperties.SetName(_incidence, "校准角度");
+        AutomationProperties.SetName(_incidence, AppStrings.Get("wpf.measure.incidence"));
         serialRow.Children.Add(_incidence);
-        var download = new Button { Content = "下载校准文件", Margin = new Thickness(8, 0, 0, 0) };
+        var download = new Button { Content = AppStrings.Get("wpf.measure.download"), Margin = new Thickness(8, 0, 0, 0) };
         download.Click += async (_, _) => await DownloadCalibrationAsync();
         serialRow.Children.Add(download);
         _body.Children.Add(serialRow);
         var fileRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
-        AutomationProperties.SetName(_calibrationPath, "校准文件路径");
+        AutomationProperties.SetName(_calibrationPath, AppStrings.Get("wpf.measure.calPath"));
         fileRow.Children.Add(_calibrationPath);
-        var browse = new Button { Content = "选择校准文件…", Margin = new Thickness(8, 0, 0, 0) };
+        var browse = new Button { Content = AppStrings.Get("wpf.measure.browseFile"), Margin = new Thickness(8, 0, 0, 0) };
         browse.Click += (_, _) =>
         {
-            var dialog = new OpenFileDialog { Filter = "校准文件 (*.txt;*.cal)|*.txt;*.cal|所有文件 (*.*)|*.*" };
+            var dialog = new OpenFileDialog { Filter = AppStrings.Get("wpf.measure.calFilter") + " (*.txt;*.cal)|*.txt;*.cal|" + AppStrings.Get("wpf.common.allFiles") + " (*.*)|*.*" };
             if (dialog.ShowDialog(this) != true) return;
             try
             {
                 var text = File.ReadAllText(dialog.FileName);
                 var parsed = MicCalibration.Parse(text);
                 _calibrationText = text;
-                _calibrationLabel = $"{Path.GetFileName(dialog.FileName)}（{parsed.Calibration.FrequenciesHz.Length} 点）";
+                _calibrationLabel = AppStrings.Get("wpf.measure.calPoints", Path.GetFileName(dialog.FileName), parsed.Calibration.FrequenciesHz.Length);
                 _calibrationPath.Text = _calibrationLabel;
-                _status.Text = $"已载入校准：{_calibrationLabel}";
+                _status.Text = AppStrings.Get("wpf.measure.loadedCalibration", _calibrationLabel);
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException)
             {
@@ -113,12 +114,12 @@ public sealed class MeasureWizardWindow : Window, IDisposable
         };
         fileRow.Children.Add(browse);
         _body.Children.Add(fileRow);
-        var next = new Button { Content = "下一步：音量", Margin = new Thickness(0, 12, 0, 0), HorizontalAlignment = HorizontalAlignment.Right };
+        var next = new Button { Content = AppStrings.Get("wpf.measure.nextVolume"), Margin = new Thickness(0, 12, 0, 0), HorizontalAlignment = HorizontalAlignment.Right };
         next.Click += (_, _) =>
         {
             if (_mics.SelectedItem is null)
             {
-                _status.Text = "请先选择麦克风。";
+                _status.Text = AppStrings.Get("wpf.measure.selectMicFirst");
                 return;
             }
             ShowStep(1);
@@ -130,14 +131,14 @@ public sealed class MeasureWizardWindow : Window, IDisposable
     {
         try
         {
-            _status.Text = "正在下载校准文件…";
+            _status.Text = AppStrings.Get("wpf.measure.downloading");
             var text = await _runner.DownloadUmikCalibrationAsync(
                 _serial.Text,
                 _incidence.SelectedIndex == 1 ? MicCalibration.Incidence.NinetyDeg : MicCalibration.Incidence.ZeroDeg);
             _calibrationText = text;
             _calibrationLabel = $"UMIK-{_serial.Text.Trim()}（{(_incidence.SelectedItem as string) ?? "0°"}）";
             _calibrationPath.Text = _calibrationLabel;
-            _status.Text = $"已下载校准：{_calibrationLabel}";
+            _status.Text = AppStrings.Get("wpf.measure.downloadedCalibration", _calibrationLabel);
         }
         catch (Exception error) when (error is RoomMeasureRunner.MeasureException or HttpRequestException or TaskCanceledException or InvalidDataException)
         {
@@ -147,16 +148,16 @@ public sealed class MeasureWizardWindow : Window, IDisposable
 
     private void BuildVolumeStep()
     {
-        _body.Children.Add(new TextBlock { Text = "步骤 2/4：音量匹配", FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 8) });
+        _body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.measure.step2"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 8) });
         _body.Children.Add(new TextBlock
         {
-            Text = "播放粉红噪声，把功放/系统音量调到平时听音的响度，然后继续。噪声从默认输出播放，不经过 DSP。",
+            Text = AppStrings.Get("wpf.measure.volumeNote"),
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 0, 0, 8),
         });
         var row = new StackPanel { Orientation = Orientation.Horizontal };
-        var play = new Button { Content = "播放噪声", Margin = new Thickness(0, 0, 8, 0) };
-        AutomationProperties.SetName(play, "播放粉红噪声");
+        var play = new Button { Content = AppStrings.Get("wpf.measure.playNoise"), Margin = new Thickness(0, 0, 8, 0) };
+        AutomationProperties.SetName(play, AppStrings.Get("wpf.measure.playPink"));
         play.Click += (_, _) =>
         {
             StopNoise();
@@ -175,13 +176,13 @@ public sealed class MeasureWizardWindow : Window, IDisposable
                     Dispatcher.Invoke(() => _status.Text = error.Message);
                 }
             }, token);
-            _status.Text = "正在播放粉红噪声…";
+            _status.Text = AppStrings.Get("wpf.measure.noisePlaying");
         };
-        var stop = new Button { Content = "停止", Margin = new Thickness(0, 0, 8, 0) };
-        stop.Click += (_, _) => { StopNoise(); _status.Text = "已停止。"; };
-        var next = new Button { Content = "下一步：测量" };
+        var stop = new Button { Content = AppStrings.Get("wpf.measure.stop"), Margin = new Thickness(0, 0, 8, 0) };
+        stop.Click += (_, _) => { StopNoise(); _status.Text = AppStrings.Get("wpf.measure.stopped"); };
+        var next = new Button { Content = AppStrings.Get("wpf.measure.nextMeasure") };
         next.Click += (_, _) => ShowStep(2);
-        var back = new Button { Content = "上一步", Margin = new Thickness(0, 0, 8, 0) };
+        var back = new Button { Content = AppStrings.Get("wpf.measure.back"), Margin = new Thickness(0, 0, 8, 0) };
         back.Click += (_, _) => ShowStep(0);
         row.Children.Add(back);
         row.Children.Add(play);
@@ -192,17 +193,17 @@ public sealed class MeasureWizardWindow : Window, IDisposable
 
     private void BuildMeasureStep()
     {
-        _body.Children.Add(new TextBlock { Text = "步骤 3/4：双扫频测量", FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 8) });
+        _body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.measure.step3"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 8) });
         _body.Children.Add(new TextBlock
         {
-            Text = "保持安静。程序播放两次扫频并同时录音（约 12 秒），随后分析。",
+            Text = AppStrings.Get("wpf.measure.measureNote"),
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 0, 0, 8),
         });
-        var progress = new TextBlock { Text = "准备…", TextWrapping = TextWrapping.Wrap };
+        var progress = new TextBlock { Text = AppStrings.Get("wpf.measure.preparing"), TextWrapping = TextWrapping.Wrap };
         _body.Children.Add(progress);
         var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 12, 0, 0) };
-        var cancel = new Button { Content = "取消" };
+        var cancel = new Button { Content = AppStrings.Get("wpf.cancel") };
         row.Children.Add(cancel);
         _body.Children.Add(row);
         _measureCts = new CancellationTokenSource();
@@ -226,8 +227,8 @@ public sealed class MeasureWizardWindow : Window, IDisposable
             {
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    progress.Text = token.IsCancellationRequested ? "已取消。" : error.Message;
-                    var back = new Button { Content = "返回", Margin = new Thickness(0, 12, 0, 0) };
+                    progress.Text = token.IsCancellationRequested ? AppStrings.Get("wpf.measure.cancelled") : error.Message;
+                    var back = new Button { Content = AppStrings.Get("wpf.measure.return"), Margin = new Thickness(0, 12, 0, 0) };
                     back.Click += (_, _) => ShowStep(0);
                     _body.Children.Add(back);
                 });
@@ -237,25 +238,25 @@ public sealed class MeasureWizardWindow : Window, IDisposable
 
     private void BuildResultStep()
     {
-        _body.Children.Add(new TextBlock { Text = "步骤 4/4：结果", FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 8) });
+        _body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.measure.step4"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 8) });
         var measurement = _measurement;
         if (measurement is null)
         {
-            _body.Children.Add(new TextBlock { Text = "没有测量结果。", TextWrapping = TextWrapping.Wrap });
+            _body.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.measure.noResult"), TextWrapping = TextWrapping.Wrap });
             return;
         }
         var summary = measurement.Valid
-            ? $"有效测量：漂移 {measurement.Drift.EstimatedPpm:0.00} ppm（双扫差 {measurement.Drift.PpmSpread:0.00}），拟合 {measurement.Fit.Bands.Count} 段，残余 RMS {measurement.Fit.RmsDeviationDb:0.00} dB。"
-            : $"测量被拒绝：{measurement.InvalidReason}（拟合结果不会被应用）";
+            ? AppStrings.Get("wpf.measure.validSummary", measurement.Drift.EstimatedPpm.ToString("0.00", CultureInfo.CurrentCulture), measurement.Drift.PpmSpread.ToString("0.00", CultureInfo.CurrentCulture), measurement.Fit.Bands.Count, measurement.Fit.RmsDeviationDb.ToString("0.00", CultureInfo.CurrentCulture))
+            : AppStrings.Get("wpf.measure.invalidSummary", measurement.InvalidReason);
         _body.Children.Add(new TextBlock { Text = summary, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 8) });
         var row = new StackPanel { Orientation = Orientation.Horizontal };
         var apply = new Button
         {
-            Content = "应用为 DSP 预设",
+            Content = AppStrings.Get("wpf.measure.applyPreset"),
             IsEnabled = measurement.Valid,
             Margin = new Thickness(0, 0, 8, 0),
         };
-        AutomationProperties.SetName(apply, "应用测量为 DSP 预设");
+        AutomationProperties.SetName(apply, AppStrings.Get("wpf.measure.applyPresetName"));
         apply.Click += async (_, _) =>
         {
             try
@@ -265,21 +266,21 @@ public sealed class MeasureWizardWindow : Window, IDisposable
                     new RoomMeasureAutoEq.MeasuredBands(measurement.Fit.Bands, true),
                     DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 await _apply(updated);
-                _status.Text = $"已应用预设并选中：{updated.SelectedPresetId}";
+                _status.Text = AppStrings.Get("wpf.measure.presetApplied", updated.SelectedPresetId);
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException or IOException or TimeoutException)
             {
                 _status.Text = error.Message;
             }
         };
-        var import = new Button { Content = "导入 WAV 分析…", Margin = new Thickness(0, 0, 8, 0) };
+        var import = new Button { Content = AppStrings.Get("wpf.measure.importWav"), Margin = new Thickness(0, 0, 8, 0) };
         import.Click += async (_, _) =>
         {
-            var dialog = new OpenFileDialog { Filter = "WAV 文件 (*.wav)|*.wav" };
+            var dialog = new OpenFileDialog { Filter = AppStrings.Get("wpf.measure.wavFile") + " (*.wav)|*.wav" };
             if (dialog.ShowDialog(this) != true) return;
             try
             {
-                _status.Text = "正在分析 WAV…";
+                _status.Text = AppStrings.Get("wpf.measure.analyzingWav");
                 var outcome = await RoomMeasureRunner.ImportWavAsync(
                     await File.ReadAllBytesAsync(dialog.FileName), _calibrationText,
                     message => Dispatcher.Invoke(() => _status.Text = message));
@@ -291,7 +292,7 @@ public sealed class MeasureWizardWindow : Window, IDisposable
                 _status.Text = error.Message;
             }
         };
-        var close = new Button { Content = "关闭" };
+        var close = new Button { Content = AppStrings.Get("wpf.measure.close") };
         close.Click += (_, _) => Close();
         row.Children.Add(apply);
         row.Children.Add(import);

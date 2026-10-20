@@ -612,4 +612,90 @@
   <data name="wpf.status.dspOn" xml:space="preserve"><value>DSP enabled: {0} ({1} presets)</value></data>
   <data name="wpf.status.autoScanOn" xml:space="preserve"><value>Enabled, checking every {0} hours.</value></data>
   <data name="wpf.status.tmdbSaved" xml:space="preserve"><value>TMDB token saved in encrypted storage.</value></data>
+  <data name="wpf.edit.localWorks" xml:space="preserve"><value>Local directory works</value></data>
+  <data name="wpf.edit.historyTitle" xml:space="preserve"><value>Metadata history</value></data>
+  <data name="wpf.edit.provider" xml:space="preserve"><value>Metadata provider</value></data>
+  <data name="wpf.edit.query" xml:space="preserve"><value>Metadata search query</value></data>
+  <data name="wpf.edit.candidates" xml:space="preserve"><value>Online metadata candidates</value></data>
+  <data name="wpf.edit.archiveQuery" xml:space="preserve"><value>Bangumi Archive query</value></data>
+  <data name="wpf.edit.archiveResults" xml:space="preserve"><value>Bangumi Archive results</value></data>
+  <data name="wpf.edit.subjectCollection" xml:space="preserve"><value>Bangumi work collection status</value></data>
+  <data name="wpf.edit.episodeList" xml:space="preserve"><value>Bangumi episode collection list</value></data>
+  <data name="wpf.edit.episodeId" xml:space="preserve"><value>Bangumi episode ID</value></data>
+  <data name="wpf.edit.episodeStatus" xml:space="preserve"><value>Bangumi episode status</value></data>
+  <data name="wpf.edit.title" xml:space="preserve"><value>Edit metadata · {0}</value></data>
+  <data name="wpf.edit.batchNote" xml:space="preserve"><value>Preview applies the same metadata to the selected works.</value></data>
+  <data name="wpf.edit.preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="wpf.edit.works" xml:space="preserve"><value>Works</value></data>
+  <data name="wpf.edit.downloadArchive" xml:space="preserve"><value>Download latest archive</value></data>
+  <data name="wpf.edit.importArchive" xml:space="preserve"><value>Import archive</value></data>
+  <data name="wpf.edit.subjectSection" xml:space="preserve"><value>Bangumi collections and episode statuses</value></data>
+  <data name="wpf.edit.readCollection" xml:space="preserve"><value>Load collection status</value></data>
+  <data name="wpf.edit.saveSubject" xml:space="preserve"><value>Save work collection</value></data>
+  <data name="wpf.edit.saveEpisode" xml:space="preserve"><value>Save episode status</value></data>
+  <data name="wpf.edit.undoHistory" xml:space="preserve"><value>Revert selected history</value></data>
+  <data name="wpf.edit.contentChanged" xml:space="preserve"><value>Content changed; preview again.</value></data>
+  <data name="wpf.edit.noMatch" xml:space="preserve"><value>No matches.</value></data>
+  <data name="wpf.edit.foundAggregate" xml:space="preserve"><value>Found {0} aggregated results.</value></data>
+  <data name="wpf.edit.needTmdb" xml:space="preserve"><value>Configure the TMDB token in settings first.</value></data>
+  <data name="wpf.edit.archiveUpdated" xml:space="preserve"><value>Bangumi Archive updated: {0} bytes.</value></data>
+  <data name="wpf.edit.archiveImported" xml:space="preserve"><value>Bangumi Archive imported: {0} bytes.</value></data>
+  <data name="wpf.edit.archiveNoMatch" xml:space="preserve"><value>Archive has no matches.</value></data>
+  <data name="wpf.edit.archiveFound" xml:space="preserve"><value>Found {0} archive results.</value></data>
+  <data name="wpf.edit.selectStatus" xml:space="preserve"><value>Select a Bangumi status.</value></data>
+  <data name="wpf.edit.needBangumiId" xml:space="preserve"><value>Enter a valid Bangumi ID first.</value></data>
+  <data name="wpf.edit.needBangumiToken" xml:space="preserve"><value>Configure the Bangumi access token in settings first.</value></data>
+  <data name="wpf.edit.notInCollection" xml:space="preserve"><value>This work is not in the Bangumi collection.</value></data>
+  <data name="wpf.edit.collectionLoaded" xml:space="preserve"><value>Loaded Bangumi collection and {0} episode statuses.</value></data>
+  <data name="wpf.edit.subjectSaved" xml:space="preserve"><value>Bangumi work collection saved.</value></data>
+  <data name="wpf.edit.needEpisodeId" xml:space="preserve"><value>Select or enter a valid Bangumi episode ID.</value></data>
+  <data name="wpf.edit.episodeSaved" xml:space="preserve"><value>Bangumi episode {0} status saved.</value></data>
+  <data name="wpf.edit.archivePicked" xml:space="preserve"><value>Selected Bangumi Archive match: {0}.</value></data>
+  <data name="wpf.edit.selectWorks" xml:space="preserve"><value>Select at least one local directory work.</value></data>
+  <data name="wpf.edit.appliedMeta" xml:space="preserve"><value>Metadata applied to local index ({0} works).</value></data>
+  <data name="wpf.edit.selectBatch" xml:space="preserve"><value>Select an applied metadata batch from history first.</value></data>
+  <data name="wpf.edit.episodeLine" xml:space="preserve"><value>Ep {0} · ID {1} · {2}</value></data>
+  <data name="wpf.common.allFiles" xml:space="preserve"><value>All files</value></data>
+  <data name="wpf.measure.step1" xml:space="preserve"><value>Step 1/4: choose microphone</value></data>
+  <data name="wpf.measure.mic" xml:space="preserve"><value>Microphone</value></data>
+  <data name="wpf.measure.outputNote" xml:space="preserve"><value>Output uses the default audio device ({0}).</value></data>
+  <data name="wpf.measure.umikTitle" xml:space="preserve"><value>UMIK-1 calibration (optional)</value></data>
+  <data name="wpf.measure.serial" xml:space="preserve"><value>Serial number</value></data>
+  <data name="wpf.measure.serialName" xml:space="preserve"><value>UMIK serial number</value></data>
+  <data name="wpf.measure.incidence" xml:space="preserve"><value>Calibration angle</value></data>
+  <data name="wpf.measure.download" xml:space="preserve"><value>Download calibration file</value></data>
+  <data name="wpf.measure.calPath" xml:space="preserve"><value>Calibration file path</value></data>
+  <data name="wpf.measure.browseFile" xml:space="preserve"><value>Choose calibration file…</value></data>
+  <data name="wpf.measure.loadedCalibration" xml:space="preserve"><value>Calibration loaded: {0}</value></data>
+  <data name="wpf.measure.nextVolume" xml:space="preserve"><value>Next: volume</value></data>
+  <data name="wpf.measure.selectMicFirst" xml:space="preserve"><value>Select a microphone first.</value></data>
+  <data name="wpf.measure.downloading" xml:space="preserve"><value>Downloading calibration file…</value></data>
+  <data name="wpf.measure.downloadedCalibration" xml:space="preserve"><value>Calibration downloaded: {0}</value></data>
+  <data name="wpf.measure.step2" xml:space="preserve"><value>Step 2/4: volume matching</value></data>
+  <data name="wpf.measure.volumeNote" xml:space="preserve"><value>Play pink noise and set amp/system volume to normal listening loudness, then continue. Noise plays from the default output, bypassing DSP.</value></data>
+  <data name="wpf.measure.playNoise" xml:space="preserve"><value>Play noise</value></data>
+  <data name="wpf.measure.playPink" xml:space="preserve"><value>Play pink noise</value></data>
+  <data name="wpf.measure.noisePlaying" xml:space="preserve"><value>Playing pink noise…</value></data>
+  <data name="wpf.measure.stop" xml:space="preserve"><value>Stop</value></data>
+  <data name="wpf.measure.stopped" xml:space="preserve"><value>Stopped.</value></data>
+  <data name="wpf.measure.nextMeasure" xml:space="preserve"><value>Next: measure</value></data>
+  <data name="wpf.measure.back" xml:space="preserve"><value>Back</value></data>
+  <data name="wpf.measure.step3" xml:space="preserve"><value>Step 3/4: dual-sweep measurement</value></data>
+  <data name="wpf.measure.measureNote" xml:space="preserve"><value>Stay quiet. The app plays two sweeps while recording (~12 s), then analyses.</value></data>
+  <data name="wpf.measure.preparing" xml:space="preserve"><value>Preparing…</value></data>
+  <data name="wpf.measure.cancelled" xml:space="preserve"><value>Cancelled.</value></data>
+  <data name="wpf.measure.return" xml:space="preserve"><value>Back</value></data>
+  <data name="wpf.measure.step4" xml:space="preserve"><value>Step 4/4: results</value></data>
+  <data name="wpf.measure.noResult" xml:space="preserve"><value>No measurement result.</value></data>
+  <data name="wpf.measure.validSummary" xml:space="preserve"><value>Valid measurement: drift {0} ppm (dual-sweep spread {1}), {2} fitted bands, residual RMS {3} dB.</value></data>
+  <data name="wpf.measure.invalidSummary" xml:space="preserve"><value>Measurement rejected: {0} (fit will not be applied)</value></data>
+  <data name="wpf.measure.applyPreset" xml:space="preserve"><value>Apply as DSP preset</value></data>
+  <data name="wpf.measure.applyPresetName" xml:space="preserve"><value>Apply measurement as DSP preset</value></data>
+  <data name="wpf.measure.presetApplied" xml:space="preserve"><value>Preset applied and selected: {0}</value></data>
+  <data name="wpf.measure.importWav" xml:space="preserve"><value>Import WAV for analysis…</value></data>
+  <data name="wpf.measure.wavFile" xml:space="preserve"><value>WAV file</value></data>
+  <data name="wpf.measure.analyzingWav" xml:space="preserve"><value>Analysing WAV…</value></data>
+  <data name="wpf.measure.close" xml:space="preserve"><value>Close</value></data>
+  <data name="wpf.measure.calPoints" xml:space="preserve"><value>{0} ({1} points)</value></data>
+  <data name="wpf.measure.calFilter" xml:space="preserve"><value>Calibration file</value></data>
 </root>

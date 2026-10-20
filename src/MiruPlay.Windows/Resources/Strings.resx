@@ -612,4 +612,90 @@
   <data name="wpf.status.dspOn" xml:space="preserve"><value>DSP 已启用：{0}（{1} 个预设）</value></data>
   <data name="wpf.status.autoScanOn" xml:space="preserve"><value>已启用，每 {0} 小时检查一次。</value></data>
   <data name="wpf.status.tmdbSaved" xml:space="preserve"><value>TMDB Token 已保存在加密存储中。</value></data>
+  <data name="wpf.edit.localWorks" xml:space="preserve"><value>本地目录作品</value></data>
+  <data name="wpf.edit.historyTitle" xml:space="preserve"><value>元数据历史</value></data>
+  <data name="wpf.edit.provider" xml:space="preserve"><value>元数据提供方</value></data>
+  <data name="wpf.edit.query" xml:space="preserve"><value>元数据搜索词</value></data>
+  <data name="wpf.edit.candidates" xml:space="preserve"><value>在线元数据候选</value></data>
+  <data name="wpf.edit.archiveQuery" xml:space="preserve"><value>Bangumi Archive 搜索词</value></data>
+  <data name="wpf.edit.archiveResults" xml:space="preserve"><value>Bangumi Archive 搜索结果</value></data>
+  <data name="wpf.edit.subjectCollection" xml:space="preserve"><value>Bangumi 作品收藏状态</value></data>
+  <data name="wpf.edit.episodeList" xml:space="preserve"><value>Bangumi 分集收藏状态列表</value></data>
+  <data name="wpf.edit.episodeId" xml:space="preserve"><value>Bangumi 分集 ID</value></data>
+  <data name="wpf.edit.episodeStatus" xml:space="preserve"><value>Bangumi 分集状态</value></data>
+  <data name="wpf.edit.title" xml:space="preserve"><value>编辑元数据 · {0}</value></data>
+  <data name="wpf.edit.batchNote" xml:space="preserve"><value>预览时会将相同元数据应用到所选作品。</value></data>
+  <data name="wpf.edit.preview" xml:space="preserve"><value>预览</value></data>
+  <data name="wpf.edit.works" xml:space="preserve"><value>作品</value></data>
+  <data name="wpf.edit.downloadArchive" xml:space="preserve"><value>下载最新 Archive</value></data>
+  <data name="wpf.edit.importArchive" xml:space="preserve"><value>导入 Archive</value></data>
+  <data name="wpf.edit.subjectSection" xml:space="preserve"><value>Bangumi 收藏与分集状态</value></data>
+  <data name="wpf.edit.readCollection" xml:space="preserve"><value>读取收藏状态</value></data>
+  <data name="wpf.edit.saveSubject" xml:space="preserve"><value>保存作品收藏</value></data>
+  <data name="wpf.edit.saveEpisode" xml:space="preserve"><value>保存分集状态</value></data>
+  <data name="wpf.edit.undoHistory" xml:space="preserve"><value>撤销所选历史</value></data>
+  <data name="wpf.edit.contentChanged" xml:space="preserve"><value>内容已更改，请重新预览。</value></data>
+  <data name="wpf.edit.noMatch" xml:space="preserve"><value>没有匹配结果。</value></data>
+  <data name="wpf.edit.foundAggregate" xml:space="preserve"><value>找到 {0} 个聚合结果。</value></data>
+  <data name="wpf.edit.needTmdb" xml:space="preserve"><value>请先在设置中配置 TMDB Token。</value></data>
+  <data name="wpf.edit.archiveUpdated" xml:space="preserve"><value>Bangumi Archive 已更新：{0} 字节。</value></data>
+  <data name="wpf.edit.archiveImported" xml:space="preserve"><value>Bangumi Archive 已导入：{0} 字节。</value></data>
+  <data name="wpf.edit.archiveNoMatch" xml:space="preserve"><value>Archive 没有匹配结果。</value></data>
+  <data name="wpf.edit.archiveFound" xml:space="preserve"><value>找到 {0} 个 Archive 结果。</value></data>
+  <data name="wpf.edit.selectStatus" xml:space="preserve"><value>请选择 Bangumi 状态。</value></data>
+  <data name="wpf.edit.needBangumiId" xml:space="preserve"><value>请先填写有效的 Bangumi ID。</value></data>
+  <data name="wpf.edit.needBangumiToken" xml:space="preserve"><value>请先在设置中配置 Bangumi Access Token。</value></data>
+  <data name="wpf.edit.notInCollection" xml:space="preserve"><value>该作品尚未加入 Bangumi 收藏。</value></data>
+  <data name="wpf.edit.collectionLoaded" xml:space="preserve"><value>已读取 Bangumi 收藏和 {0} 条分集状态。</value></data>
+  <data name="wpf.edit.subjectSaved" xml:space="preserve"><value>Bangumi 作品收藏已保存。</value></data>
+  <data name="wpf.edit.needEpisodeId" xml:space="preserve"><value>请选择或填写有效的 Bangumi 分集 ID。</value></data>
+  <data name="wpf.edit.episodeSaved" xml:space="preserve"><value>Bangumi 分集 {0} 状态已保存。</value></data>
+  <data name="wpf.edit.archivePicked" xml:space="preserve"><value>已选择 Bangumi Archive 匹配：{0}。</value></data>
+  <data name="wpf.edit.selectWorks" xml:space="preserve"><value>请至少选择一部本地目录作品。</value></data>
+  <data name="wpf.edit.appliedMeta" xml:space="preserve"><value>元数据已应用到本地索引（{0} 部作品）。</value></data>
+  <data name="wpf.edit.selectBatch" xml:space="preserve"><value>请先从历史列表选择一批已应用的元数据。</value></data>
+  <data name="wpf.edit.episodeLine" xml:space="preserve"><value>第 {0} 集 · ID {1} · 状态 {2}</value></data>
+  <data name="wpf.common.allFiles" xml:space="preserve"><value>所有文件</value></data>
+  <data name="wpf.measure.step1" xml:space="preserve"><value>步骤 1/4：选择麦克风</value></data>
+  <data name="wpf.measure.mic" xml:space="preserve"><value>麦克风</value></data>
+  <data name="wpf.measure.outputNote" xml:space="preserve"><value>输出将使用默认音频设备（{0}）。</value></data>
+  <data name="wpf.measure.umikTitle" xml:space="preserve"><value>UMIK-1 校准（可选）</value></data>
+  <data name="wpf.measure.serial" xml:space="preserve"><value>序列号</value></data>
+  <data name="wpf.measure.serialName" xml:space="preserve"><value>UMIK 序列号</value></data>
+  <data name="wpf.measure.incidence" xml:space="preserve"><value>校准角度</value></data>
+  <data name="wpf.measure.download" xml:space="preserve"><value>下载校准文件</value></data>
+  <data name="wpf.measure.calPath" xml:space="preserve"><value>校准文件路径</value></data>
+  <data name="wpf.measure.browseFile" xml:space="preserve"><value>选择校准文件…</value></data>
+  <data name="wpf.measure.loadedCalibration" xml:space="preserve"><value>已载入校准：{0}</value></data>
+  <data name="wpf.measure.nextVolume" xml:space="preserve"><value>下一步：音量</value></data>
+  <data name="wpf.measure.selectMicFirst" xml:space="preserve"><value>请先选择麦克风。</value></data>
+  <data name="wpf.measure.downloading" xml:space="preserve"><value>正在下载校准文件…</value></data>
+  <data name="wpf.measure.downloadedCalibration" xml:space="preserve"><value>已下载校准：{0}</value></data>
+  <data name="wpf.measure.step2" xml:space="preserve"><value>步骤 2/4：音量匹配</value></data>
+  <data name="wpf.measure.volumeNote" xml:space="preserve"><value>播放粉红噪声，把功放/系统音量调到平时听音的响度，然后继续。噪声从默认输出播放，不经过 DSP。</value></data>
+  <data name="wpf.measure.playNoise" xml:space="preserve"><value>播放噪声</value></data>
+  <data name="wpf.measure.playPink" xml:space="preserve"><value>播放粉红噪声</value></data>
+  <data name="wpf.measure.noisePlaying" xml:space="preserve"><value>正在播放粉红噪声…</value></data>
+  <data name="wpf.measure.stop" xml:space="preserve"><value>停止</value></data>
+  <data name="wpf.measure.stopped" xml:space="preserve"><value>已停止。</value></data>
+  <data name="wpf.measure.nextMeasure" xml:space="preserve"><value>下一步：测量</value></data>
+  <data name="wpf.measure.back" xml:space="preserve"><value>上一步</value></data>
+  <data name="wpf.measure.step3" xml:space="preserve"><value>步骤 3/4：双扫频测量</value></data>
+  <data name="wpf.measure.measureNote" xml:space="preserve"><value>保持安静。程序播放两次扫频并同时录音（约 12 秒），随后分析。</value></data>
+  <data name="wpf.measure.preparing" xml:space="preserve"><value>准备…</value></data>
+  <data name="wpf.measure.cancelled" xml:space="preserve"><value>已取消。</value></data>
+  <data name="wpf.measure.return" xml:space="preserve"><value>返回</value></data>
+  <data name="wpf.measure.step4" xml:space="preserve"><value>步骤 4/4：结果</value></data>
+  <data name="wpf.measure.noResult" xml:space="preserve"><value>没有测量结果。</value></data>
+  <data name="wpf.measure.validSummary" xml:space="preserve"><value>有效测量：漂移 {0} ppm（双扫差 {1}），拟合 {2} 段，残余 RMS {3} dB。</value></data>
+  <data name="wpf.measure.invalidSummary" xml:space="preserve"><value>测量被拒绝：{0}（拟合结果不会被应用）</value></data>
+  <data name="wpf.measure.applyPreset" xml:space="preserve"><value>应用为 DSP 预设</value></data>
+  <data name="wpf.measure.applyPresetName" xml:space="preserve"><value>应用测量为 DSP 预设</value></data>
+  <data name="wpf.measure.presetApplied" xml:space="preserve"><value>已应用预设并选中：{0}</value></data>
+  <data name="wpf.measure.importWav" xml:space="preserve"><value>导入 WAV 分析…</value></data>
+  <data name="wpf.measure.wavFile" xml:space="preserve"><value>WAV 文件</value></data>
+  <data name="wpf.measure.analyzingWav" xml:space="preserve"><value>正在分析 WAV…</value></data>
+  <data name="wpf.measure.close" xml:space="preserve"><value>关闭</value></data>
+  <data name="wpf.measure.calPoints" xml:space="preserve"><value>{0}（{1} 点）</value></data>
+  <data name="wpf.measure.calFilter" xml:space="preserve"><value>校准文件</value></data>
 </root>

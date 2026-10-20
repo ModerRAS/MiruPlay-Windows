@@ -27,6 +27,8 @@ public sealed class LocaleApiTests : IDisposable
     [Fact]
     public async Task LocaleApiRoundTripsThroughSettings()
     {
+        try
+        {
         var port = ReservePort();
         var tokens = new WebControlTokenStore(Path.Combine(_directory, "token.bin"));
         var settings = new AppSettings(WebControlPort: port);
@@ -68,6 +70,13 @@ public sealed class LocaleApiTests : IDisposable
         var normalized = await client.PutAsJsonAsync("/api/settings/locale", new { language = "xx-YY" });
         Assert.Equal(HttpStatusCode.OK, normalized.StatusCode);
         Assert.Equal("system", (await ReadData(normalized)).GetProperty("language").GetString());
+        }
+        finally
+        {
+            var culture = System.Globalization.CultureInfo.GetCultureInfo("zh-CN");
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+        }
     }
 
     private static async Task<JsonElement> ReadData(HttpResponseMessage response)
