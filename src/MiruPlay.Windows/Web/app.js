@@ -640,7 +640,7 @@ function renderDspView() {
     <div class="actions"><label class="file-button">导入 REW<input id="dsp-rew-file" type="file" accept=".txt,.req,text/plain" hidden></label><button id="dsp-import" type="button">导入到当前声道</button><button id="dsp-add" type="button">添加频段</button><button id="dsp-preview" type="button">预览响应</button></div>
     <div class="table-scroll"><table class="data-table"><thead><tr><th>启用</th><th>类型</th><th>频率 Hz</th><th>增益 dB</th><th>Q</th><th></th></tr></thead><tbody id="dsp-bands"></tbody></table></div>
     <div id="dsp-preview-result" class="muted" role="status"></div><div class="actions"><button class="primary" type="submit">应用 DSP</button></div>
-  </form></section><section class="panel"><h2>状态</h2><p class="muted">${escapeHtml(state.dspData.effectiveRoute || 'disabled')}</p><p class="muted">${(state.dspData.warnings || []).map(escapeHtml).join('<br>') || '没有警告'}</p><p class="muted">预览和 REW 导入不会自动保存，点击应用后才会作用于当前 MiruPlay mpv。</p></section></div>`
+  </form></section><section class="panel"><h2>状态</h2><p class="muted">${escapeHtml(state.dspData.effectiveRoute || 'disabled')}</p><p class="muted">${(state.dspData.warnings || []).map(escapeHtml).join('<br>') || '没有警告'}</p><p class="muted">预览和 REW 导入不会自动保存，点击应用后才会作用于当前 MiruPlay mpv。</p><h2>Topping DAC</h2><div id="topping-status" class="muted" role="status">加载中…</div><div class="actions"><input id="topping-volume" type="number" min="-99" max="0" step="0.5" value="-20" aria-label="Topping 音量 dB" title="Topping 音量 dB"><button id="topping-set-volume" type="button">设置音量</button><button id="topping-push-preset" type="button">推送当前预设 PEQ</button><button id="topping-flat" type="button">旁路全部频段</button></div></section></div>`
   renderDspBands()
   $('#dsp-target').onchange = () => { state.dspConfig = currentDspConfig(); renderDspBands() }
   $('#dsp-preset').onchange = () => { state.dspConfig.selectedPresetId = $('#dsp-preset').value; renderDspView() }
@@ -648,6 +648,38 @@ function renderDspView() {
   $('#dsp-preview').onclick = async () => { try { state.dspConfig = currentDspConfig(); const preview = await api('/api/audio-dsp/preview', { method: 'POST', body: JSON.stringify({ config: state.dspConfig }) }); $('#dsp-preview-result').textContent = preview.channels.map(channel => `${channel.channel}: ${channel.magnitudeDb.length} 个采样点`).join('；') } catch (error) { toast(error.message, true) } }
   $('#dsp-import').onclick = async () => { const file = $('#dsp-rew-file').files[0]; if (!file) { toast('请先选择 REW 文件', true); return } try { const target = Number($('#dsp-target').value); const imported = await api('/api/audio-dsp/import-rew', { method: 'POST', body: JSON.stringify({ target: dspTargetStorage[target], content: await file.text() }) }); state.dspConfig = currentDspConfig(); const presetNow = dspPreset(); presetNow.rules = (presetNow.rules || []).filter(rule => Number(rule.target) !== target); presetNow.rules.push({ target, bands: imported.bands.map(band => ({ type: dspTypeNames.indexOf(band.type), frequencyHz: band.frequencyHz, gainDb: band.gainDb, q: band.q, enabled: band.enabled })), outputGainDb: 0 }); renderDspBands(); toast(`已导入 ${imported.bands.length} 个频段`) } catch (error) { toast(error.message, true) } }
   $('#dsp-form').onsubmit = async event => { event.preventDefault(); try { state.dspConfig = currentDspConfig(); const result = await api('/api/audio-dsp', { method: 'PUT', body: JSON.stringify({ config: state.dspConfig }) }); state.dspConfig = result.config; state.dspData = result; toast('音频 DSP 已应用'); renderDspView() } catch (error) { toast(error.message, true) } }
+  $('#topping-set-volume').onclick = () => setToppingVolume(Number($('#topping-volume').value), false)
+  $('#topping-push-preset').onclick = pushDspPresetToTopping
+  $('#topping-flat').onclick = async () => { try { await api('/api/topping/flat', { method: 'POST', body: '{}' }); toast('Topping 全部频段已旁路'); await loadToppingStatus() } catch (error) { toast(error.message, true) } }
+  loadToppingStatus()
+}
+async function loadToppingStatus() {
+  const node = $('#topping-status')
+  if (!node) return
+  try {
+    const status = await api('/api/topping/status')
+    node.textContent = status.attached
+      ? `${status.model}（写缓存：音量 ${status.volumeDb ?? '未知'} dB，增益 ${status.gainOn ?? '未知'}，预设 ${status.preampDb ?? '未知'} dB）`
+      : (status.reason || '未连接')
+  } catch (error) { node.textContent = `状态不可用：${error.message}` }
+}
+async function setToppingVolume(db, confirmed) {
+  try {
+    await api('/api/topping/volume', { method: 'POST', body: JSON.stringify({ db, confirm: confirmed }) })
+    toast(`Topping 音量已设为 ${db} dB`)
+    await loadToppingStatus()
+  } catch (error) {
+    if (!confirmed && /二次确认/.test(error.message) && confirm(`${error.message}，继续吗？`)) { await setToppingVolume(db, true); return }
+    toast(error.message, true)
+  }
+}
+async function pushDspPresetToTopping() {
+  try {
+    state.dspConfig = currentDspConfig()
+    const result = await api('/api/topping/preset', { method: 'POST', body: JSON.stringify({ presetId: state.dspConfig.selectedPresetId }) })
+    toast((result.warnings || []).length ? `已推送（${result.warnings.length} 条警告）` : '当前预设 PEQ 已推送到 Topping')
+    await loadToppingStatus()
+  } catch (error) { toast(error.message, true) }
 }
 async function loadAudioDsp() {
   state.dspData = await api('/api/audio-dsp')

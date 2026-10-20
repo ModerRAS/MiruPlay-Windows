@@ -1640,7 +1640,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
     private async void OpenAudioDsp_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new AudioDspDialog(_settings.AudioDsp ?? AudioDspConfig.Neutral())
+        var dialog = new AudioDspDialog(_settings.AudioDsp ?? AudioDspConfig.Neutral(), _topping)
         {
             Owner = this,
         };

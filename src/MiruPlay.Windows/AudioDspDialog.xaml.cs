@@ -13,11 +13,13 @@ public partial class AudioDspDialog : Window
     public static IReadOnlyList<AudioDspFilterType> FilterTypes { get; } = Enum.GetValues<AudioDspFilterType>();
 
     private AudioDspConfig _config;
+    private readonly ToppingController? _topping;
     private bool _loading;
 
-    public AudioDspDialog(AudioDspConfig config)
+    public AudioDspDialog(AudioDspConfig config, ToppingController? topping = null)
     {
         InitializeComponent();
+        _topping = topping;
         _config = (config ?? AudioDspConfig.Neutral()).Normalize();
         _loading = true;
         EnabledBox.IsChecked = _config.Enabled;
@@ -94,6 +96,37 @@ public partial class AudioDspDialog : Window
                 (parsed.Errors.Count > 0 ? $" 另有 {parsed.Errors.Count} 个错误。" : string.Empty);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            StatusBox.Text = error.Message;
+        }
+    }
+
+    private async void PushToTopping_Click(object sender, RoutedEventArgs e)
+    {
+        if (_topping is null)
+        {
+            StatusBox.Text = "Windows 客户端未启用 Topping DAC 控制。";
+            return;
+        }
+        AudioDspPreset preset;
+        try
+        {
+            preset = CaptureConfigWithoutRows().Presets!.First(item =>
+                item.Id.Equals(SelectedPreset.Id, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception error) when (error is ArgumentException or InvalidOperationException)
+        {
+            StatusBox.Text = error.Message;
+            return;
+        }
+        try
+        {
+            var mapping = await _topping.ApplyPresetAsync(preset);
+            StatusBox.Text = mapping.Warnings.Count == 0
+                ? $"已推送 {mapping.Bands.Count(band => band.On)} 段 PEQ 到 Topping。"
+                : $"已推送（{mapping.Warnings.Count} 条警告）：{string.Join("; ", mapping.Warnings)}";
+        }
+        catch (ToppingController.ToppingCommandException error)
         {
             StatusBox.Text = error.Message;
         }
