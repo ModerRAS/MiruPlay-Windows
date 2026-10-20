@@ -35,6 +35,18 @@ const used = new Set([...appJs.matchAll(/\bt\(\s*['\"]([^'\"]+)['\"]/g)].map(m =
 for (const key of used) {
   if (!keys.includes(key)) errors.push(`app.js uses unknown key ${key}`);
 }
+for (const line of require('child_process').execSync(
+  'C:/Users/ModerRAS/.pi/agent/bin/rg.exe -o -N --no-filename "services:Loc" src/MiruPlay.Windows --glob "*.xaml"',
+  { cwd: root, encoding: 'utf8' }).split('\n')) {
+  const m = /services:Loc (?:Key=)?([a-z0-9._-]+)/.exec(line);
+  if (m && !keys.includes(m[1])) errors.push(`XAML uses unknown key ${m[1]}`);
+}
+for (const line of require('child_process').execSync(
+  'C:/Users/ModerRAS/.pi/agent/bin/rg.exe -o -N --no-filename "AppStrings.Get" src/MiruPlay.Windows --glob "*.cs"',
+  { cwd: root, encoding: 'utf8' }).split('\n')) {
+  const m = /AppStrings\.Get\("([^"]+)"/.exec(line);
+  if (m && !keys.includes(m[1])) errors.push(`C# uses unknown key ${m[1]}`);
+}
 if (errors.length) fail(errors.slice(0, 30).join('\n') + (errors.length > 30 ? `\n... +${errors.length - 30} more` : ''));
 
 if (checkOnly) { console.log(`i18n OK: ${keys.length} keys x ${locales.length} locales, ${used.size} used by app.js`); return; }
