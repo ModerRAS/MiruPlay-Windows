@@ -686,6 +686,15 @@ public partial class MainWindow : Window, IAsyncDisposable
                     sidecarTimeout.Token);
                 if (remoteSidecars.Count > 0) episode = episode with { ExternalAudioPaths = remoteSidecars };
             }
+            if (episode.ExternalAudioPaths.Count == 0 && source?.Type == "SMB")
+            {
+                using var smbSidecarTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var smbSidecars = await _mediaSourceRegistry.DiscoverSmbSidecarsAsync(
+                    source.Id,
+                    episode.MediaPath,
+                    smbSidecarTimeout.Token);
+                if (smbSidecars.Count > 0) episode = episode with { ExternalAudioPaths = smbSidecars };
+            }
             var playbackProxy = source?.Type == "WEBDAV"
                 ? _mediaSourceRegistry.CreatePlaybackProxy(source.Id, episode)
                 : null;

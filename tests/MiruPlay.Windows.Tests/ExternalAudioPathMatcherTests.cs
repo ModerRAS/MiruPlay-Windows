@@ -24,6 +24,25 @@ public sealed class ExternalAudioPathMatcherTests
     }
 
     [Fact]
+    public void MatchUncSiblingsConfinesMatchesToTheSourceRoot()
+    {
+        const string root = @"\\nas\media";
+        var matches = ExternalAudioPathMatcher.MatchUncSiblings(
+            root,
+            @"\\nas\media\Anime\01.mkv",
+            [
+                @"\\nas\media\Anime\01.en.m4a",
+                @"\\nas\media\Anime\Showcase.en.flac",
+                @"\\nas\media\Other\01.en.m4a",
+                @"\\evil\media\Anime\01.en.m4a",
+            ]);
+
+        Assert.Equal([@"//nas/media/Anime/01.en.m4a"], matches);
+        Assert.Empty(ExternalAudioPathMatcher.MatchUncSiblings(
+            root, @"\\evil\media\Anime\01.mkv", [@"\\evil\media\Anime\01.en.m4a"]));
+    }
+
+    [Fact]
     public void FindLocalSiblingsDiscoversOnlyTheSameDirectoryAndIgnoresFailures()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"miruplay-audio-sidecar-{Guid.NewGuid():N}");

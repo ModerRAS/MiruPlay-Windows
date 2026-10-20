@@ -41,6 +41,25 @@ public sealed class MediaSourceRegistryTests : IDisposable
     }
 
     [Fact]
+    public async Task SmbSidecarDiscoveryFailsClosedOutsideTheShare()
+    {
+        var settings = new AppSettings(
+            MediaSourceSchemaVersion: 1,
+            MediaSources:
+            [
+                new MediaSourceDefinition(1, "Share", "SMB", @"smb://256.256.256.256/media"),
+                new MediaSourceDefinition(2, "Local", "LOCAL", _root),
+            ]);
+        using var registry = new MediaSourceRegistry(() => settings, updated => settings = updated);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+
+        Assert.Empty(await registry.DiscoverSmbSidecarsAsync(2, @"\\256.256.256.256\media\Anime\01.mkv", timeout.Token));
+        Assert.Empty(await registry.DiscoverSmbSidecarsAsync(99, @"\\256.256.256.256\media\Anime\01.mkv", timeout.Token));
+        Assert.Empty(await registry.DiscoverSmbSidecarsAsync(1, @"\\evil\media\Anime\01.mkv", timeout.Token));
+        Assert.Empty(await registry.DiscoverSmbSidecarsAsync(1, @"\\256.256.256.256\media\Anime\01.mkv", timeout.Token));
+    }
+
+    [Fact]
     public async Task WebDavSidecarDiscoveryReturnsEmptyOnTransportFailures()
     {
         var settings = new AppSettings(

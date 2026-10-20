@@ -37,6 +37,22 @@ internal static class ExternalAudioPathMatcher
         }
     }
 
+    /// <summary>Pure UNC sibling match confined to <paramref name="rootUnc"/>.
+    /// The caller ensures the share connection and enumerates candidates;
+    /// paths outside the root never match.</summary>
+    public static IReadOnlyList<string> MatchUncSiblings(
+        string rootUnc,
+        string videoPath,
+        IEnumerable<string> candidatePaths)
+    {
+        var prefix = rootUnc.TrimEnd('\\') + '\\';
+        if (!videoPath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return [];
+        var confined = candidatePaths
+            .Where(path => path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return Find(videoPath, confined);
+    }
+
     public static IReadOnlyList<string> Find(string videoPath, IEnumerable<string> siblingPaths)
     {
         var cleanVideo = videoPath.Replace('\\', '/');

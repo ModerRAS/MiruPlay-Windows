@@ -526,6 +526,43 @@ public sealed class MediaSourceRegistry : IDisposable
         }
     }
 
+    public async Task<IReadOnlyList<string>> DiscoverSmbSidecarsAsync(
+        long sourceId,
+        string mediaPath,
+        CancellationToken cancellationToken = default)
+    {
+        var source = Get(sourceId);
+        if (source?.Type != "SMB") return [];
+        string root;
+        try
+        {
+            root = SmbPath.ToUncPath(source.Location);
+        }
+        catch (Exception error) when (error is ArgumentException or InvalidDataException)
+        {
+            return [];
+        }
+        try
+        {
+            return await Task.Run(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                _smbConnections.EnsureConnected(source.Location, _credentials.Get(sourceId));
+                var directory = Path.GetDirectoryName(mediaPath);
+                if (string.IsNullOrEmpty(directory)) return (IReadOnlyList<string>)[];
+                var candidates = Directory.EnumerateFiles(directory)
+                    .Where(DirectoryLibraryIndex.IsExternalAudioFile)
+                    .Take(1_024)
+                    .ToList();
+                return ExternalAudioPathMatcher.MatchUncSiblings(root, mediaPath, candidates);
+            }, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or InvalidDataException or OperationCanceledException or TimeoutException)
+        {
+            return [];
+        }
+    }
+
     internal WebDavPlaybackProxy CreatePlaybackProxy(long sourceId, LibraryEpisode episode)
     {
         var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
