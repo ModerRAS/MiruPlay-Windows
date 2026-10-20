@@ -971,6 +971,25 @@ public sealed class WebControlServer : IAsyncDisposable
             return Success(ToPlaybackSettings(updated));
         });
 
+        app.MapGet("/api/settings/locale", () => Success(new
+        {
+            language = AppLocale.Normalize(_getSettings().AppLanguage),
+            supported = AppLocale.Supported,
+        }));
+        app.MapPut("/api/settings/locale", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<LocaleSettingsRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? new LocaleSettingsRequest();
+            var language = AppLocale.Normalize(body.Language);
+            var updated = await UpdateSettingsAsync(current => current with { AppLanguage = language }).ConfigureAwait(false);
+            AppLocale.Apply(updated.AppLanguage);
+            return Success(new
+            {
+                language = AppLocale.Normalize(updated.AppLanguage),
+                supported = AppLocale.Supported,
+            });
+        });
+
         app.MapGet("/api/audio-dsp", () =>
             Success(ToAudioDspDto(_getSettings().AudioDsp ?? AudioDspConfig.Neutral())));
         app.MapPut("/api/audio-dsp", async (HttpRequest request) =>
@@ -1585,6 +1604,7 @@ public sealed class WebControlServer : IAsyncDisposable
     private sealed record ApiEnvelope<T>(bool Ok, T? Data, string? Error);
     private sealed record PlayEpisodeRequest(string EpisodeId, long? StartPositionMs = null);
     public sealed record MusicPlayRequest(long SourceId, string File, int Number, string Title, long StartMs, long EndMs);
+    private sealed record LocaleSettingsRequest(string? Language = null);
     private sealed record ToppingVolumeRequest(double Db, bool Confirm = false, double? StepDb = null);
     private sealed record ToppingGainRequest(bool On);
     private sealed record ToppingPowerRequest(bool On);

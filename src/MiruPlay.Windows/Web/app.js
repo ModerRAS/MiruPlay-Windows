@@ -555,7 +555,7 @@ async function importArchive() {
 async function searchArchive(event) { event.preventDefault(); try { const hits = await api(`/api/metadata/archive/search?query=${encodeURIComponent($('#archive-query').value)}&limit=20`); $('#archive-results').innerHTML = hits.map(item => `<button type="button" class="list-item" data-archive-id="${escapeHtml(item.animeId)}"><strong>${escapeHtml(item.titleCn || item.title)}</strong><p>${escapeHtml(item.summary || '')}</p><small>ID ${escapeHtml(item.animeId)} · 匹配 ${Math.round(item.confidence * 100)}%</small></button>`).join('') || '<p class="muted">没有本地匹配。</p>'; $$('[data-archive-id]').forEach(button => button.onclick = () => { clearMetadataPreview(); $('#edit-bangumi').value = button.dataset.archiveId; toast('Archive 匹配已填入 Bangumi ID。') }) } catch (error) { toast(error.message, true) } }
 
 async function loadPlaybackSettings() {
-  const [settings, scan] = await Promise.all([api('/api/settings/playback'), api('/api/settings/scan')])
+  const [settings, scan, locale] = await Promise.all([api('/api/settings/playback'), api('/api/settings/scan'), api('/api/settings/locale')])
   content.innerHTML = `<section class="panel"><form id="playback-settings-form" class="form">
     <div class="form-grid"><label>应用模式<select id="app-mode"><option value="anime" ${scan.currentAppMode === 'anime' ? 'selected' : ''}>动漫</option><option value="drama" ${scan.currentAppMode === 'drama' ? 'selected' : ''}>电视剧</option></select></label>
     <label class="switch"><input id="auto-scan-enabled" type="checkbox" ${scan.autoScanEnabled ? 'checked' : ''}>自动扫描</label></div>
@@ -565,11 +565,13 @@ async function loadPlaybackSettings() {
     <label>下一集版本<select id="version-selection-policy"><option value="auto_nearest" ${scan.episodeVersionSelectionPolicy !== 'manual' ? 'selected' : ''}>自动选择相近路径</option><option value="manual" ${scan.episodeVersionSelectionPolicy === 'manual' ? 'selected' : ''}>每集手动选择版本</option></select></label>
     <label>播放结束后<select id="playback-end"><option value="return_to_detail" ${settings.endAction === 'return_to_detail' ? 'selected' : ''}>返回详情</option><option value="play_next_episode" ${settings.endAction === 'play_next_episode' ? 'selected' : ''}>自动播放下一集</option></select></label>
     <label>字幕语言优先级<select id="playback-subtitle">${[['auto','自动'],['zh_hans','简体中文'],['zh_hant','繁体中文'],['zh','中文'],['en','英语'],['ja','日语']].map(([value,label]) => `<option value="${value}" ${settings.preferredSubtitleLanguage === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
+    <label>应用语言<select id="app-language">${[['system','跟随系统'],['zh-CN','简体中文'],['zh-TW','繁體中文（台灣）'],['zh-HK','繁體中文（香港）'],['en-US','English (US)'],['en-GB','English (UK)']].map(([value,label]) => `<option value="${value}" ${locale.language === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
     <div class="actions"><button class="primary" type="submit">保存播放设置</button></div></form></section>`
   $('#playback-settings-form').onsubmit = async event => {
     event.preventDefault()
     try {
       await api('/api/settings/playback', { method: 'PUT', body: JSON.stringify({ endAction: $('#playback-end').value, preferredSubtitleLanguage: $('#playback-subtitle').value }) })
+      await api('/api/settings/locale', { method: 'PUT', body: JSON.stringify({ language: $('#app-language').value }) })
       await api('/api/settings/scan', { method: 'PUT', body: JSON.stringify({ currentAppMode: $('#app-mode').value, autoScanEnabled: $('#auto-scan-enabled').checked, autoScanIntervalHours: Number($('#auto-scan-interval').value), mergeSameAnimeEnabled: $('#merge-same-anime').checked, posterWallArrangement: $('#poster-arrangement').value, episodeVersionSelectionPolicy: $('#version-selection-policy').value }) })
       toast('播放设置已保存')
     } catch (error) { toast(error.message, true) }

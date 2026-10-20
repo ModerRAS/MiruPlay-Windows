@@ -28,7 +28,8 @@ public sealed record AppSettings(
     string EpisodeVersionSelectionPolicy = "auto_nearest",
     string AppUpdateManifestUrl = "",
     string AudioSrcBypass = "software",
-    int AudioOutputSampleRate = 48000);
+    int AudioOutputSampleRate = 48000,
+    string AppLanguage = "system");
 
 public sealed class AppSettingsStore
 {
@@ -118,12 +119,15 @@ public sealed class AppSettingsStore
             }
             var normalizedSrcBypass = NormalizeAudioSrcBypass(settings.AudioSrcBypass);
             var normalizedSampleRate = NormalizeAudioOutputSampleRate(settings.AudioOutputSampleRate);
-            if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate)
+            var normalizedLanguage = AppLocale.Normalize(settings.AppLanguage);
+            if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate ||
+                settings.AppLanguage != normalizedLanguage)
             {
                 settings = settings with
                 {
                     AudioSrcBypass = normalizedSrcBypass,
                     AudioOutputSampleRate = normalizedSampleRate,
+                    AppLanguage = normalizedLanguage,
                 };
                 needsCleanup = true;
             }

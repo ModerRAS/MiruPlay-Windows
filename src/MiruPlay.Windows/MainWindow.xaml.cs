@@ -2151,6 +2151,14 @@ public partial class MainWindow : Window, IAsyncDisposable
         _settingsStore.Save(_settings);
     }
 
+    private void AppLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || AppLanguageBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { AppLanguage = AppLocale.Normalize(value) };
+        _settingsStore.Save(_settings);
+        AppLocale.Apply(_settings.AppLanguage);
+    }
+
     private sealed record ContinueWatchingItem(string SeriesTitle, LibraryEpisode Episode)
     {
         public string AccessibleName => $"继续播放 {SeriesTitle} {Episode.DisplayNumber}";
@@ -2190,6 +2198,8 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .First(item => Equals(item.Tag, _settings.PosterWallArrangement));
             EpisodeVersionSelectionPolicyBox.SelectedItem = EpisodeVersionSelectionPolicyBox.Items.OfType<ComboBoxItem>()
                 .First(item => Equals(item.Tag, _settings.EpisodeVersionSelectionPolicy));
+            AppLanguageBox.SelectedItem = AppLanguageBox.Items.OfType<ComboBoxItem>()
+                .First(item => Equals(item.Tag, AppLocale.Normalize(_settings.AppLanguage)));
             AutoScanEnabledCheckBox.IsChecked = _settings.AutoScanEnabled;
             AutoScanIntervalBox.IsEnabled = _settings.AutoScanEnabled;
             AutoScanIntervalBox.SelectedItem = AutoScanIntervalBox.Items

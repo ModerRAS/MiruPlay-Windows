@@ -661,6 +661,24 @@
                             <ComboBoxItem Tag="ja"><TextBlock Text="日语" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
+                    <Grid Margin="0,0,0,28">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="应用语言" FontWeight="SemiBold" />
+                            <TextBlock Text="跟随系统或固定区域设置，影响数字与日期格式" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
+                        </StackPanel>
+                        <ComboBox x:Name="AppLanguageBox" Grid.Column="1" SelectionChanged="AppLanguage_SelectionChanged">
+                            <ComboBoxItem Tag="system"><TextBlock Text="跟随系统" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh-CN"><TextBlock Text="简体中文" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh-TW"><TextBlock Text="繁體中文（台灣）" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh-HK"><TextBlock Text="繁體中文（香港）" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="en-US"><TextBlock Text="English (US)" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="en-GB"><TextBlock Text="English (UK)" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
 
                     <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="关于" Style="{StaticResource SectionTitle}" Margin="0,28,0,12" />

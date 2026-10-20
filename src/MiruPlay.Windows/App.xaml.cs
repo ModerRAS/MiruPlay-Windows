@@ -1,6 +1,7 @@
 using System.Configuration;
 using System.Data;
 using System.Windows;
+using MiruPlay.Windows.Services;
 
 namespace MiruPlay.Windows;
 
@@ -24,6 +25,7 @@ public partial class App : Application, IDisposable
         }
         ShutdownMode = ShutdownMode.OnMainWindowClose;
         var background = e.Args.Contains("--background", StringComparer.OrdinalIgnoreCase);
+        AppLocale.Apply(new AppSettingsStore().Load().AppLanguage);
         var window = new MainWindow(background);
         MainWindow = window;
         window.Show();
