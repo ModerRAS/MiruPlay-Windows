@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:MiruPlay.Windows.Controls"
+        xmlns:services="clr-namespace:MiruPlay.Windows.Services"
         mc:Ignorable="d"
         Title="MiruPlay"
         Width="1200"
@@ -35,34 +36,34 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="2">
-                    <Button x:Name="LibraryNavButton" Style="{StaticResource NavButton}" Tag="Selected" AutomationProperties.Name="媒体库" Click="LibraryNav_Click">
+                    <Button x:Name="LibraryNavButton" Style="{StaticResource NavButton}" Tag="Selected" AutomationProperties.Name="{services:Loc nav.library}" Click="LibraryNav_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE80F;" FontSize="17" Width="28" />
-                            <TextBlock Text="媒体库" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc nav.library}" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="SettingsNavButton" Style="{StaticResource NavButton}" AutomationProperties.Name="设置" Click="SettingsNav_Click">
+                    <Button x:Name="SettingsNavButton" Style="{StaticResource NavButton}" AutomationProperties.Name="{services:Loc wpf.main.settings}" Click="SettingsNav_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE713;" FontSize="17" Width="28" />
-                            <TextBlock Text="设置" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.settings}" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="MusicNavButton" Style="{StaticResource NavButton}" AutomationProperties.Name="音乐库" Click="OpenMusicLibrary_Click">
+                    <Button x:Name="MusicNavButton" Style="{StaticResource NavButton}" AutomationProperties.Name="{services:Loc wpf.main.musicLib}" Click="OpenMusicLibrary_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="♪" FontSize="17" Width="28" />
-                            <TextBlock Text="音乐" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.music}" FontWeight="SemiBold" />
                         </StackPanel>
                     </Button>
-                    <TextBlock Text="应用模式" Style="{StaticResource SecondaryText}" Margin="12,22,0,7" />
-                    <ComboBox x:Name="AppModeSelector" SelectionChanged="AppMode_SelectionChanged" AutomationProperties.Name="应用模式">
-                        <ComboBoxItem Tag="anime"><TextBlock Text="动漫" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                        <ComboBoxItem Tag="drama"><TextBlock Text="电视剧" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                    <TextBlock Text="{services:Loc wpf.main.appMode}" Style="{StaticResource SecondaryText}" Margin="12,22,0,7" />
+                    <ComboBox x:Name="AppModeSelector" SelectionChanged="AppMode_SelectionChanged" AutomationProperties.Name="{services:Loc wpf.main.appMode}">
+                        <ComboBoxItem Tag="anime"><TextBlock Text="{services:Loc sources.anime}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        <ComboBoxItem Tag="drama"><TextBlock Text="{services:Loc sources.drama}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                     </ComboBox>
                 </StackPanel>
 
                 <StackPanel Grid.Row="3">
                     <TextBlock Text="WINDOWS" Style="{StaticResource SecondaryText}" FontSize="11" FontWeight="SemiBold" />
-                    <TextBlock x:Name="LibrarySchemaText" Text="尚未载入媒体库" Style="{StaticResource SecondaryText}" Margin="0,5,0,0" TextWrapping="Wrap" />
+                    <TextBlock x:Name="LibrarySchemaText" Text="{services:Loc wpf.main.notLoaded}" Style="{StaticResource SecondaryText}" Margin="0,5,0,0" TextWrapping="Wrap" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -83,17 +84,17 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Text="媒体库" Style="{StaticResource PageTitle}" />
-                        <TextBlock x:Name="LibrarySummaryText" Text="打开包含 library.db 的媒体目录" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
+                        <TextBlock Text="{services:Loc nav.library}" Style="{StaticResource PageTitle}" />
+                        <TextBlock x:Name="LibrarySummaryText" Text="{services:Loc wpf.main.openHint}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
                     </StackPanel>
                     <Grid Grid.Column="1" VerticalAlignment="Center">
-                        <TextBox x:Name="SearchBox" Padding="38,8,12,8" TextChanged="SearchBox_TextChanged" ToolTip="搜索标题、原名或类型" />
+                        <TextBox x:Name="SearchBox" Padding="38,8,12,8" TextChanged="SearchBox_TextChanged" ToolTip="{services:Loc wpf.main.searchTip}" />
                         <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE721;" Foreground="{StaticResource TextSecondary}" Margin="12,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" />
                     </Grid>
                     <Button Grid.Column="3" Click="OpenLibrary_Click" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8B7;" Margin="0,0,8,0" />
-                            <TextBlock Text="打开媒体库" />
+                            <TextBlock Text="{services:Loc wpf.main.openLib}" />
                         </StackPanel>
                     </Button>
                 </Grid>
@@ -110,7 +111,7 @@
                                   Padding="30,0,20,24">
                         <StackPanel>
                         <StackPanel x:Name="ContinueSection" Visibility="Collapsed" Margin="0,0,0,24">
-                            <TextBlock Text="继续观看" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
+                            <TextBlock Text="{services:Loc lib.continue}" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
                             <ItemsControl x:Name="ContinueList">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -140,7 +141,7 @@
                             </ItemsControl>
                         </StackPanel>
                         <StackPanel x:Name="RecentSection" Visibility="Collapsed" Margin="0,0,0,24">
-                            <TextBlock Text="最近观看" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
+                            <TextBlock Text="{services:Loc wpf.main.recent}" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
                             <ItemsControl x:Name="RecentList">
                                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
@@ -153,7 +154,7 @@
                             </ItemsControl>
                         </StackPanel>
                         <StackPanel x:Name="FeaturedSection" Visibility="Collapsed" Margin="0,0,0,24">
-                            <TextBlock Text="精选作品" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
+                            <TextBlock Text="{services:Loc wpf.main.featured}" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
                             <ItemsControl x:Name="FeaturedList">
                                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
@@ -184,7 +185,7 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock x:Name="AllSeriesTitle" Text="全部作品" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" Visibility="Collapsed" />
+                        <TextBlock x:Name="AllSeriesTitle" Text="{services:Loc wpf.main.allWorks}" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" Visibility="Collapsed" />
                         <ItemsControl x:Name="SeriesList" HorizontalAlignment="Stretch">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -218,7 +219,7 @@
                         </ItemsControl>
                         <Button x:Name="LoadMoreButton"
                                 Style="{StaticResource SecondaryButton}"
-                                Content="加载更多"
+                                Content="{services:Loc wpf.main.loadMore}"
                                 HorizontalAlignment="Center"
                                 Margin="0,6,0,18"
                                 Visibility="Collapsed"
@@ -229,8 +230,8 @@
                     <Grid x:Name="EmptyState" Visibility="Visible" IsHitTestVisible="False">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="430">
                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8B7;" FontSize="44" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" />
-                            <TextBlock x:Name="EmptyStateTitle" Text="还没有媒体库" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,18,0,0" />
-                            <TextBlock x:Name="EmptyStateDescription" Text="选择一个由 anime-organizer 生成、根目录包含 library.db 的媒体目录。" Style="{StaticResource SecondaryText}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <TextBlock x:Name="EmptyStateTitle" Text="{services:Loc wpf.main.noLibrary}" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,18,0,0" />
+                            <TextBlock x:Name="EmptyStateDescription" Text="{services:Loc wpf.main.noLibraryHint}" Style="{StaticResource SecondaryText}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,0" />
                         </StackPanel>
                     </Grid>
 
@@ -245,8 +246,8 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="详情" Style="{StaticResource SectionTitle}" />
-                                <Button Grid.Column="1" Style="{StaticResource IconButton}" Content="&#xE8BB;" ToolTip="关闭详情" Click="CloseDetail_Click" />
+                                <TextBlock Text="{services:Loc wpf.main.detail}" Style="{StaticResource SectionTitle}" />
+                                <Button Grid.Column="1" Style="{StaticResource IconButton}" Content="&#xE8BB;" ToolTip="{services:Loc wpf.main.closeDetail}" Click="CloseDetail_Click" />
                             </Grid>
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,20,0,0">
                                 <StackPanel>
@@ -274,7 +275,7 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                     <TextBlock Text="{Binding Summary}" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" LineHeight="21" Margin="0,16,0,0" />
-                                    <TextBlock Text="剧集" Style="{StaticResource SectionTitle}" Margin="0,24,0,12" />
+                                    <TextBlock Text="{services:Loc wpf.detail.episodes}" Style="{StaticResource SectionTitle}" Margin="0,24,0,12" />
                                     <ItemsControl ItemsSource="{Binding Seasons}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
@@ -301,7 +302,7 @@
                                                                                         <TextBlock Text="{Binding ProgressText}" Foreground="{StaticResource AnimeRed}" FontSize="11" />
                                                                                         <ProgressBar Height="3" Margin="0,5,12,0" Maximum="100" Value="{Binding ProgressPercent, Mode=OneWay}" Foreground="{StaticResource AnimeRed}" Background="{StaticResource AccentBlue}" />
                                                                                     </StackPanel>
-                                                                                    <Button Grid.Column="1" Tag="{Binding}" AutomationProperties.Name="{Binding DisplayTitle, StringFormat=播放 {0}}" Click="PlayEpisode_Click" ToolTip="播放" Padding="12,8">
+                                                                                    <Button Grid.Column="1" Tag="{Binding}" AutomationProperties.Name="{services:Loc Key=wpf.play.playFor, Arg={Binding DisplayTitle}}" Click="PlayEpisode_Click" ToolTip="{services:Loc wpf.play.play}" Padding="12,8">
                                                                                         <StackPanel Orientation="Horizontal">
                                                                                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE768;" Margin="0,0,6,0" />
                                                                                             <TextBlock Text="{Binding PlayActionLabel}" />
@@ -320,14 +321,14 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                     <StackPanel Visibility="{Binding HasExtras, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Text="特典" Style="{StaticResource SectionTitle}" Margin="0,16,0,10" />
+                                        <TextBlock Text="{services:Loc wpf.detail.extras}" Style="{StaticResource SectionTitle}" Margin="0,16,0,10" />
                                         <ItemsControl ItemsSource="{Binding Extras}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Grid Margin="0,0,0,8">
                                                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                                         <StackPanel><TextBlock Text="{Binding DisplayTitle}" FontWeight="SemiBold" /><TextBlock Text="{Binding DurationText}" Style="{StaticResource SecondaryText}" FontSize="11" /></StackPanel>
-                                                        <Button Grid.Column="1" Tag="{Binding}" Click="PlayExtra_Click" ToolTip="播放特典" AutomationProperties.Name="播放特典" Padding="12,8"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE768;" /></Button>
+                                                        <Button Grid.Column="1" Tag="{Binding}" Click="PlayExtra_Click" ToolTip="{services:Loc wpf.main.playExtra}" AutomationProperties.Name="{services:Loc wpf.main.playExtra}" Padding="12,8"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE768;" /></Button>
                                                     </Grid>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -345,15 +346,15 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="StatusText" Text="就绪" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="StatusText" Text="{services:Loc wpf.main.ready}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                     </Grid>
                 </Border>
             </Grid>
 
             <ScrollViewer x:Name="SettingsPage" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="32,26" MaxWidth="900" HorizontalAlignment="Left">
-                    <TextBlock Text="设置" Style="{StaticResource PageTitle}" />
-                    <TextBlock Text="Windows 客户端的媒体库和播放配置" Style="{StaticResource SecondaryText}" Margin="0,4,0,30" />
+                    <TextBlock Text="{services:Loc wpf.main.settings}" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="{services:Loc wpf.main.settingsSub}" Style="{StaticResource SecondaryText}" Margin="0,4,0,30" />
 
                     <Grid Margin="0,0,0,28">
                         <Grid.ColumnDefinitions>
@@ -361,12 +362,12 @@
                             <ColumnDefinition Width="240" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="应用模式" FontWeight="SemiBold" />
-                            <TextBlock Text="媒体库只加载对应模式的媒体源，切换后自动打开可用来源" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
+                            <TextBlock Text="{services:Loc wpf.main.appMode}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.appModeHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
                         </StackPanel>
-                        <ComboBox x:Name="SettingsAppMode" Grid.Column="1" SelectionChanged="AppMode_SelectionChanged" AutomationProperties.Name="设置应用模式">
-                            <ComboBoxItem Tag="anime"><TextBlock Text="动漫" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="drama"><TextBlock Text="电视剧" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        <ComboBox x:Name="SettingsAppMode" Grid.Column="1" SelectionChanged="AppMode_SelectionChanged" AutomationProperties.Name="{services:Loc wpf.main.appModeName}">
+                            <ComboBoxItem Tag="anime"><TextBlock Text="{services:Loc sources.anime}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="drama"><TextBlock Text="{services:Loc sources.drama}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
 
@@ -379,16 +380,16 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Text="WebControl" FontWeight="SemiBold" />
-                            <TextBlock Text="允许局域网设备通过兼容 API 浏览和控制 MiruPlay" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
+                            <TextBlock Text="{services:Loc wpf.main.lanNote}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
                         </StackPanel>
-                        <CheckBox x:Name="WebControlEnabledCheckBox" Grid.Column="1" Content="启用" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" Click="WebControlEnabled_Click" />
+                        <CheckBox x:Name="WebControlEnabledCheckBox" Grid.Column="1" Content="{services:Loc wpf.main.enable}" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" Click="WebControlEnabled_Click" />
                     </Grid>
                     <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="110" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="访问地址" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                        <TextBlock Text="{services:Loc access.url}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
                         <TextBox x:Name="WebControlUrlValue" Grid.Column="1" IsReadOnly="True" />
                     </Grid>
                     <Grid Margin="0,0,0,28">
@@ -400,27 +401,27 @@
                             <ColumnDefinition Width="8" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="访问令牌" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                        <TextBlock Text="{services:Loc access.token}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
                         <TextBox x:Name="WebControlTokenValue" Grid.Column="1" IsReadOnly="True" />
-                        <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" Content="复制地址" Click="CopyWebControlUrl_Click" />
-                        <Button Grid.Column="5" Style="{StaticResource SecondaryButton}" Content="更换令牌" Click="RotateWebControlToken_Click" />
+                        <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.copyUrl}" Click="CopyWebControlUrl_Click" />
+                        <Button Grid.Column="5" Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.rotateToken}" Click="RotateWebControlToken_Click" />
                     </Grid>
 
                     <Separator Background="{StaticResource SubtleBorder}" />
-                    <TextBlock Text="在线元数据" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
-                    <TextBlock Text="音频 DSP / PEQ" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <TextBlock Text="{services:Loc wpf.main.onlineMeta}" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <TextBlock Text="{services:Loc wpf.dsp.heading}" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
                     <Grid Margin="0,14,0,28">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock x:Name="AudioDspSummaryText" Text="DSP 已关闭" FontWeight="SemiBold" />
-                            <TextBlock Text="支持逐声道 REW 导入、独立 PEQ 和线性相位 FIR；只作用于 MiruPlay 启动的 mpv。" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" TextWrapping="Wrap" />
+                            <TextBlock x:Name="AudioDspSummaryText" Text="{services:Loc wpf.main.dspOff}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.dspHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" TextWrapping="Wrap" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <CheckBox x:Name="AudioDspEnabledCheckBox" IsHitTestVisible="False" Focusable="False" Content="启用" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" AutomationProperties.Name="音频 DSP 启用状态" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="编辑 DSP" Padding="14,7" Margin="14,0,0,0" Click="OpenAudioDsp_Click" AutomationProperties.Name="编辑音频 DSP" />
+                            <CheckBox x:Name="AudioDspEnabledCheckBox" IsHitTestVisible="False" Focusable="False" Content="{services:Loc wpf.main.enable}" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" AutomationProperties.Name="{services:Loc wpf.main.dspState}" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.editDsp}" Padding="14,7" Margin="14,0,0,0" Click="OpenAudioDsp_Click" AutomationProperties.Name="{services:Loc wpf.main.editDspName}" />
                         </StackPanel>
                     </Grid>
                     <TextBlock Text="Bangumi Access Token" FontWeight="SemiBold" Margin="0,14,0,0" />
@@ -431,10 +432,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <PasswordBox x:Name="BangumiTokenBox" Padding="10,8" AutomationProperties.Name="Bangumi Access Token" />
-                        <Button Grid.Column="1" Content="保存 Bangumi" Click="SaveBangumiToken_Click" Margin="8,0,0,0" />
-                        <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="清除 Bangumi" Click="ClearBangumiToken_Click" Margin="8,0,0,0" />
+                        <Button Grid.Column="1" Content="{services:Loc wpf.main.saveBangumi}" Click="SaveBangumiToken_Click" Margin="8,0,0,0" />
+                        <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.clearBangumi}" Click="ClearBangumiToken_Click" Margin="8,0,0,0" />
                     </Grid>
-                    <TextBlock x:Name="BangumiTokenStatusText" Text="当前未设置 Bangumi Token。" Style="{StaticResource SecondaryText}" Margin="0,0,0,12" />
+                    <TextBlock x:Name="BangumiTokenStatusText" Text="{services:Loc wpf.main.noBangumi}" Style="{StaticResource SecondaryText}" Margin="0,0,0,12" />
                     <TextBlock Text="TMDB Read Access Token" FontWeight="SemiBold" Margin="0,6,0,0" />
                     <Grid Margin="0,8,0,14">
                         <Grid.ColumnDefinitions>
@@ -443,43 +444,43 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <PasswordBox x:Name="TmdbTokenBox" Padding="10,8" AutomationProperties.Name="TMDB Read Access Token" />
-                        <Button Grid.Column="1" Content="保存" Click="SaveTmdbToken_Click" Margin="8,0,0,0" />
-                        <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="清除" Click="ClearTmdbToken_Click" Margin="8,0,0,0" />
+                        <Button Grid.Column="1" Content="{services:Loc wpf.main.save}" Click="SaveTmdbToken_Click" Margin="8,0,0,0" />
+                        <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.clear}" Click="ClearTmdbToken_Click" Margin="8,0,0,0" />
                     </Grid>
-                    <TextBlock x:Name="TmdbTokenStatusText" Text="当前未设置 TMDB Token。" Style="{StaticResource SecondaryText}" Margin="0,0,0,12" />
+                    <TextBlock x:Name="TmdbTokenStatusText" Text="{services:Loc wpf.main.noTmdb}" Style="{StaticResource SecondaryText}" Margin="0,0,0,12" />
 
                     <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="CloudDrive / RSS" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
                     <Grid Margin="0,14,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="150" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                         <Grid.RowDefinitions><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /></Grid.RowDefinitions>
-                        <TextBlock Text="CloudDrive2 地址" VerticalAlignment="Center" />
-                        <TextBox x:Name="CloudDriveEndpointBox" Grid.Column="1" AutomationProperties.Name="CloudDrive2 地址" />
-                        <TextBlock Grid.Row="1" Text="用户名" VerticalAlignment="Center" Margin="0,8,0,0" />
-                        <TextBox x:Name="CloudDriveUsernameBox" Grid.Row="1" Grid.Column="1" AutomationProperties.Name="CloudDrive2 用户名" Margin="0,8,0,0" />
-                        <TextBlock Grid.Row="2" Text="离线下载目录" VerticalAlignment="Center" Margin="0,8,0,0" />
-                        <TextBox x:Name="CloudDriveInboxBox" Grid.Row="2" Grid.Column="1" AutomationProperties.Name="CloudDrive2 离线下载目录" Margin="0,8,0,0" />
-                        <TextBlock Grid.Row="3" Text="媒体库目录" VerticalAlignment="Center" Margin="0,8,0,0" />
-                        <TextBox x:Name="CloudDriveLibraryBox" Grid.Row="3" Grid.Column="1" AutomationProperties.Name="CloudDrive2 媒体库目录" Margin="0,8,0,0" />
-                        <TextBlock Grid.Row="4" Text="模式与周期" VerticalAlignment="Center" Margin="0,8,0,0" />
+                        <TextBlock Text="{services:Loc wpf.main.cdEndpoint}" VerticalAlignment="Center" />
+                        <TextBox x:Name="CloudDriveEndpointBox" Grid.Column="1" AutomationProperties.Name="{services:Loc wpf.main.cdEndpoint}" />
+                        <TextBlock Grid.Row="1" Text="{services:Loc sources.username}" VerticalAlignment="Center" Margin="0,8,0,0" />
+                        <TextBox x:Name="CloudDriveUsernameBox" Grid.Row="1" Grid.Column="1" AutomationProperties.Name="{services:Loc wpf.main.cdUser}" Margin="0,8,0,0" />
+                        <TextBlock Grid.Row="2" Text="{services:Loc wpf.main.cdInbox}" VerticalAlignment="Center" Margin="0,8,0,0" />
+                        <TextBox x:Name="CloudDriveInboxBox" Grid.Row="2" Grid.Column="1" AutomationProperties.Name="{services:Loc wpf.main.cdInboxName}" Margin="0,8,0,0" />
+                        <TextBlock Grid.Row="3" Text="{services:Loc wpf.main.cdLibrary}" VerticalAlignment="Center" Margin="0,8,0,0" />
+                        <TextBox x:Name="CloudDriveLibraryBox" Grid.Row="3" Grid.Column="1" AutomationProperties.Name="{services:Loc wpf.main.cdLibName}" Margin="0,8,0,0" />
+                        <TextBlock Grid.Row="4" Text="{services:Loc wpf.main.cdMode}" VerticalAlignment="Center" Margin="0,8,0,0" />
                         <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
-                            <ComboBox x:Name="CloudDriveLibraryModeBox" Width="210" AutomationProperties.Name="CloudDrive2 媒体库模式"><ComboBoxItem Tag="ORGANIZED_LIBRARY"><TextBlock Text="整理媒体库" Style="{StaticResource ComboItemText}" /></ComboBoxItem><ComboBoxItem Tag="SINGLE_DIRECTORY"><TextBlock Text="单目录" Style="{StaticResource ComboItemText}" /></ComboBoxItem></ComboBox>
-                            <TextBox x:Name="CloudDriveIntervalBox" Width="80" Margin="8,0,0,0" AutomationProperties.Name="CloudDrive2 同步周期分钟" />
-                            <CheckBox x:Name="CloudDriveEnabledCheckBox" Content="启用" Foreground="{StaticResource TextPrimary}" Margin="12,0,0,0" VerticalAlignment="Center" />
-                            <Button Content="保存配置" Click="SaveCloudDriveConfig_Click" Margin="12,0,0,0" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="立即运行" Click="RunCloudDriveNow_Click" Margin="8,0,0,0" />
+                            <ComboBox x:Name="CloudDriveLibraryModeBox" Width="210" AutomationProperties.Name="{services:Loc wpf.main.cdModeName}"><ComboBoxItem Tag="ORGANIZED_LIBRARY"><TextBlock Text="{services:Loc wpf.main.cdOrganized}" Style="{StaticResource ComboItemText}" /></ComboBoxItem><ComboBoxItem Tag="SINGLE_DIRECTORY"><TextBlock Text="{services:Loc wpf.main.cdSingle}" Style="{StaticResource ComboItemText}" /></ComboBoxItem></ComboBox>
+                            <TextBox x:Name="CloudDriveIntervalBox" Width="80" Margin="8,0,0,0" AutomationProperties.Name="{services:Loc wpf.main.cdInterval}" />
+                            <CheckBox x:Name="CloudDriveEnabledCheckBox" Content="{services:Loc wpf.main.enable}" Foreground="{StaticResource TextPrimary}" Margin="12,0,0,0" VerticalAlignment="Center" />
+                            <Button Content="{services:Loc cloud.saveConfig}" Click="SaveCloudDriveConfig_Click" Margin="12,0,0,0" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc cloud.run}" Click="RunCloudDriveNow_Click" Margin="8,0,0,0" />
                         </StackPanel>
                     </Grid>
                     <Grid Margin="0,8,0,8">
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <PasswordBox x:Name="CloudDrivePasswordBox" AutomationProperties.Name="CloudDrive2 密码" />
+                        <PasswordBox x:Name="CloudDrivePasswordBox" AutomationProperties.Name="{services:Loc wpf.main.cdPassword}" />
                         <PasswordBox x:Name="CloudDriveTokenBox" Grid.Column="1" AutomationProperties.Name="CloudDrive2 API Token" Margin="8,0,0,0" />
-                        <Button Grid.Column="2" Content="登录" Click="LoginCloudDrive_Click" Margin="8,0,0,0" />
-                        <Button Grid.Column="3" Content="验证 Token" Click="VerifyCloudDriveToken_Click" Margin="8,0,0,0" />
-                        <Button Grid.Column="4" Style="{StaticResource SecondaryButton}" Content="清除凭据" Click="ClearCloudDriveCredentials_Click" Margin="8,0,0,0" />
+                        <Button Grid.Column="2" Content="{services:Loc wpf.main.login}" Click="LoginCloudDrive_Click" Margin="8,0,0,0" />
+                        <Button Grid.Column="3" Content="{services:Loc wpf.main.verifyToken}" Click="VerifyCloudDriveToken_Click" Margin="8,0,0,0" />
+                        <Button Grid.Column="4" Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.clearCreds}" Click="ClearCloudDriveCredentials_Click" Margin="8,0,0,0" />
                     </Grid>
-                    <TextBlock x:Name="CloudDriveStatusText" Text="CloudDrive2 尚未配置。" Style="{StaticResource SecondaryText}" Margin="0,0,0,12" />
-                    <TextBlock Text="RSS 订阅" FontWeight="SemiBold" Margin="0,14,0,8" />
+                    <TextBlock x:Name="CloudDriveStatusText" Text="{services:Loc wpf.main.cdNotConfigured}" Style="{StaticResource SecondaryText}" Margin="0,0,0,12" />
+                    <TextBlock Text="{services:Loc cloud.rssTitle}" FontWeight="SemiBold" Margin="0,14,0,8" />
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="180" />
@@ -487,13 +488,13 @@
                             <ColumnDefinition Width="180" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="RssNameBox" AutomationProperties.Name="RSS 名称" ToolTip="RSS 名称" />
-                        <TextBox x:Name="RssUrlBox" Grid.Column="1" AutomationProperties.Name="RSS 地址" ToolTip="RSS 地址" Margin="8,0,0,0" />
-                        <TextBox x:Name="RssFilterBox" Grid.Column="2" AutomationProperties.Name="过滤正则" ToolTip="过滤正则（可选）" Margin="8,0,0,0" />
-                        <Button Grid.Column="3" Content="保存 RSS" Click="SaveRssSubscription_Click" Margin="8,0,0,0" />
+                        <TextBox x:Name="RssNameBox" AutomationProperties.Name="{services:Loc wpf.main.rssName}" ToolTip="{services:Loc wpf.main.rssName}" />
+                        <TextBox x:Name="RssUrlBox" Grid.Column="1" AutomationProperties.Name="{services:Loc wpf.main.rssAddress}" ToolTip="{services:Loc wpf.main.rssAddress}" Margin="8,0,0,0" />
+                        <TextBox x:Name="RssFilterBox" Grid.Column="2" AutomationProperties.Name="{services:Loc wpf.main.rssFilterName}" ToolTip="{services:Loc wpf.main.rssFilter}" Margin="8,0,0,0" />
+                        <Button Grid.Column="3" Content="{services:Loc wpf.main.saveRss}" Click="SaveRssSubscription_Click" Margin="8,0,0,0" />
                     </Grid>
-                    <CheckBox x:Name="RssEnabledCheckBox" Content="启用订阅" IsChecked="True" Foreground="{StaticResource TextPrimary}" Margin="0,8,0,10" />
-                    <TextBlock x:Name="RssStatusText" Text="尚未配置 RSS 订阅。" Style="{StaticResource SecondaryText}" Margin="0,0,0,8" />
+                    <CheckBox x:Name="RssEnabledCheckBox" Content="{services:Loc wpf.main.enableSub}" IsChecked="True" Foreground="{StaticResource TextPrimary}" Margin="0,8,0,10" />
+                    <TextBlock x:Name="RssStatusText" Text="{services:Loc wpf.main.noRss}" Style="{StaticResource SecondaryText}" Margin="0,0,0,8" />
                     <ItemsControl x:Name="RssSubscriptionList" Margin="0,0,0,28">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -507,9 +508,9 @@
                                         <TextBlock Text="{Binding Url}" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis" MaxWidth="650" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8" VerticalAlignment="Center">
-                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="预览 RSS" ToolTip="拉取并预览" Click="PreviewRssSubscription_Click"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71C;" /></Button>
-                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="编辑 RSS" ToolTip="编辑" Click="EditRssSubscription_Click" Margin="6,0,0,0"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE70F;" /></Button>
-                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="删除 RSS" ToolTip="删除" Click="DeleteRssSubscription_Click" Margin="6,0,0,0"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74D;" /></Button>
+                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="{services:Loc wpf.main.previewRss}" ToolTip="{services:Loc wpf.main.pullPreview}" Click="PreviewRssSubscription_Click"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71C;" /></Button>
+                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="{services:Loc wpf.main.editRss}" ToolTip="{services:Loc sources.edit}" Click="EditRssSubscription_Click" Margin="6,0,0,0"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE70F;" /></Button>
+                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="{services:Loc wpf.main.deleteRss}" ToolTip="{services:Loc sources.delete}" Click="DeleteRssSubscription_Click" Margin="6,0,0,0"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74D;" /></Button>
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
@@ -517,7 +518,7 @@
                     </ItemsControl>
 
                     <Separator Background="{StaticResource SubtleBorder}" />
-                    <TextBlock Text="媒体库扫描" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <TextBlock Text="{services:Loc wpf.main.scanTitle}" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
                     <Grid Margin="0,14,0,24">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -525,23 +526,23 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <CheckBox x:Name="AutoScanEnabledCheckBox"
-                                      Content="自动扫描媒体源"
+                                      Content="{services:Loc wpf.main.autoScanSrc}"
                                       Foreground="{StaticResource TextPrimary}"
-                                      AutomationProperties.Name="自动扫描媒体源"
+                                      AutomationProperties.Name="{services:Loc wpf.main.autoScanSrc}"
                                       Click="AutoScanEnabled_Click" />
                             <TextBlock x:Name="AutoScanStatusText"
-                                       Text="自动扫描已关闭。"
+                                       Text="{services:Loc wpf.main.autoScanOff}"
                                        Style="{StaticResource SecondaryText}"
                                        Margin="24,5,18,0" />
                         </StackPanel>
                         <ComboBox x:Name="AutoScanIntervalBox"
                                   Grid.Column="1"
-                                  AutomationProperties.Name="自动扫描周期"
+                                  AutomationProperties.Name="{services:Loc wpf.main.scanInterval}"
                                   SelectionChanged="AutoScanInterval_SelectionChanged">
-                            <ComboBoxItem Tag="1"><TextBlock Text="每 1 小时" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="6"><TextBlock Text="每 6 小时" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="12"><TextBlock Text="每 12 小时" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="24"><TextBlock Text="每 24 小时" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="1"><TextBlock Text="{services:Loc wpf.main.every1h}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="6"><TextBlock Text="{services:Loc wpf.main.every6h}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="12"><TextBlock Text="{services:Loc wpf.main.every12h}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="24"><TextBlock Text="{services:Loc wpf.main.every24h}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
 
@@ -551,16 +552,16 @@
                             <ColumnDefinition Width="180" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,18,0">
-                            <CheckBox x:Name="MergeSameAnimeCheckBox" Content="合并同名作品"
+                            <CheckBox x:Name="MergeSameAnimeCheckBox" Content="{services:Loc playback.merge}"
                                       Foreground="{StaticResource TextPrimary}"
-                                      AutomationProperties.Name="合并同名作品" Click="LibraryOrganization_Changed" />
-                            <TextBlock Text="仅合并身份相符的条目，保留全部剧集、版本和观看记录。"
+                                      AutomationProperties.Name="{services:Loc playback.merge}" Click="LibraryOrganization_Changed" />
+                            <TextBlock Text="{services:Loc wpf.main.mergeHint}"
                                        Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="24,5,0,0" />
                         </StackPanel>
                         <ComboBox x:Name="PosterArrangementBox" Grid.Column="1"
-                                  AutomationProperties.Name="海报墙排列" SelectionChanged="LibraryOrganization_Changed">
-                            <ComboBoxItem Tag="TITLE"><TextBlock Text="按标题" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="RELEASE_SEASON"><TextBlock Text="按新番季" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                  AutomationProperties.Name="{services:Loc playback.poster}" SelectionChanged="LibraryOrganization_Changed">
+                            <ComboBoxItem Tag="TITLE"><TextBlock Text="{services:Loc playback.byTitle}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="RELEASE_SEASON"><TextBlock Text="{services:Loc playback.bySeason}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
 
@@ -570,15 +571,15 @@
                             <ColumnDefinition Width="220" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Margin="0,0,18,0">
-                            <TextBlock Text="下一集版本" FontWeight="SemiBold" />
-                            <TextBlock Text="选择自动按相近路径播放，或逐集手动选择多个版本。"
+                            <TextBlock Text="{services:Loc playback.version}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.versionHint}"
                                        Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,5,0,0" />
                         </StackPanel>
                         <ComboBox x:Name="EpisodeVersionSelectionPolicyBox" Grid.Column="1"
-                                  AutomationProperties.Name="下一集版本选择"
+                                  AutomationProperties.Name="{services:Loc wpf.main.versionName}"
                                   SelectionChanged="EpisodeVersionSelectionPolicy_Changed">
-                            <ComboBoxItem Tag="auto_nearest"><TextBlock Text="自动选择相近路径" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="manual"><TextBlock Text="每集手动选择版本" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="auto_nearest"><TextBlock Text="{services:Loc playback.autoNearest}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="manual"><TextBlock Text="{services:Loc playback.manual}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
 
@@ -588,17 +589,17 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="媒体源" Style="{StaticResource SectionTitle}" />
+                        <TextBlock Text="{services:Loc nav.sources}" Style="{StaticResource SectionTitle}" />
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Style="{StaticResource SecondaryButton}" Content="添加本地 MLIP" Click="OpenLibrary_Click" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="添加 WebDAV" Click="AddWebDavSource_Click" Margin="8,0,0,0" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="添加 RSS 在线源" Click="AddRssMediaSource_Click" Margin="8,0,0,0" />
-                            <Button Style="{StaticResource SecondaryButton}" Content="添加 SMB" Click="AddSmbSource_Click" Margin="8,0,0,0" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.addLocal}" Click="OpenLibrary_Click" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.addDav}" Click="AddWebDavSource_Click" Margin="8,0,0,0" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.addRss}" Click="AddRssMediaSource_Click" Margin="8,0,0,0" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.addSmb}" Click="AddSmbSource_Click" Margin="8,0,0,0" />
                         </StackPanel>
                     </Grid>
                     <StackPanel Margin="0,14,0,12">
-                        <TextBlock Text="当前媒体库" FontWeight="SemiBold" />
-                        <TextBlock x:Name="LibraryRootValue" Text="尚未设置" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        <TextBlock Text="{services:Loc wpf.main.currentLib}" FontWeight="SemiBold" />
+                        <TextBlock x:Name="LibraryRootValue" Text="{services:Loc wpf.main.notSet}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
                     </StackPanel>
                     <ItemsControl x:Name="SourceList" Margin="0,0,0,28">
                         <ItemsControl.ItemTemplate>
@@ -617,16 +618,16 @@
                                         <TextBlock Text="{Binding Location}" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis" MaxWidth="590" Margin="0,4,0,0" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8" VerticalAlignment="Center">
-                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="打开媒体源" ToolTip="打开" Click="ActivateSource_Click">
+                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="{services:Loc wpf.main.openSrc}" ToolTip="{services:Loc wpf.main.open}" Click="ActivateSource_Click">
                                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8B7;" />
                                         </Button>
-                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="扫描媒体源" ToolTip="扫描" Click="ScanSource_Click" Margin="6,0,0,0">
+                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="{services:Loc wpf.main.scanSrc}" ToolTip="{services:Loc sources.scan}" Click="ScanSource_Click" Margin="6,0,0,0">
                                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE895;" />
                                         </Button>
-                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="编辑媒体源" ToolTip="编辑" Click="EditSource_Click" Margin="6,0,0,0">
+                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="{services:Loc wpf.main.editSrc}" ToolTip="{services:Loc sources.edit}" Click="EditSource_Click" Margin="6,0,0,0">
                                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE70F;" />
                                         </Button>
-                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="删除媒体源" ToolTip="删除" Click="RemoveSource_Click" Margin="6,0,0,0">
+                                        <Button Style="{StaticResource IconButton}" Tag="{Binding}" AutomationProperties.Name="{services:Loc wpf.main.deleteSrc}" ToolTip="{services:Loc sources.delete}" Click="RemoveSource_Click" Margin="6,0,0,0">
                                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE74D;" />
                                         </Button>
                                     </StackPanel>
@@ -641,12 +642,12 @@
                             <ColumnDefinition Width="240" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="播完后" FontWeight="SemiBold" />
-                            <TextBlock Text="决定剧集自然播放完成后的操作" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
+                            <TextBlock Text="{services:Loc wpf.main.afterPlay}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.afterPlayHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
                         </StackPanel>
                         <ComboBox x:Name="PlaybackEndAction" Grid.Column="1" SelectionChanged="PlaybackEndAction_SelectionChanged">
-                            <ComboBoxItem Tag="return_to_detail"><TextBlock Text="返回详情" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="play_next_episode"><TextBlock Text="播放下一集" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="return_to_detail"><TextBlock Text="{services:Loc wpf.play.back}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="play_next_episode"><TextBlock Text="{services:Loc wpf.main.playNext}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
                     <Grid Margin="0,0,0,28">
@@ -655,16 +656,16 @@
                             <ColumnDefinition Width="240" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="首选字幕语言" FontWeight="SemiBold" />
-                            <TextBlock Text="匹配不到时保留播放器默认轨道" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
+                            <TextBlock Text="{services:Loc wpf.main.subLang}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.subHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
                         </StackPanel>
                         <ComboBox x:Name="SubtitlePreference" Grid.Column="1" SelectionChanged="SubtitlePreference_SelectionChanged">
-                            <ComboBoxItem Tag="auto"><TextBlock Text="自动" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="zh_hans"><TextBlock Text="简体中文" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="zh_hant"><TextBlock Text="繁体中文" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="zh"><TextBlock Text="任意中文" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="en"><TextBlock Text="英语" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="ja"><TextBlock Text="日语" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="auto"><TextBlock Text="{services:Loc sub.auto}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh_hans"><TextBlock Text="{services:Loc sub.hans}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh_hant"><TextBlock Text="{services:Loc sub.hant}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh"><TextBlock Text="{services:Loc sub.zh}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="en"><TextBlock Text="{services:Loc sub.en}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="ja"><TextBlock Text="{services:Loc sub.ja}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
                     <Grid Margin="0,0,0,28">
@@ -673,32 +674,32 @@
                             <ColumnDefinition Width="240" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="应用语言" FontWeight="SemiBold" />
-                            <TextBlock Text="跟随系统或固定区域设置，影响数字与日期格式" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
+                            <TextBlock Text="{services:Loc playback.appLang}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.langHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
                         </StackPanel>
                         <ComboBox x:Name="AppLanguageBox" Grid.Column="1" SelectionChanged="AppLanguage_SelectionChanged">
-                            <ComboBoxItem Tag="system"><TextBlock Text="跟随系统" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="zh-CN"><TextBlock Text="简体中文" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="zh-TW"><TextBlock Text="繁體中文（台灣）" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                            <ComboBoxItem Tag="zh-HK"><TextBlock Text="繁體中文（香港）" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="system"><TextBlock Text="{services:Loc locale.system}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh-CN"><TextBlock Text="{services:Loc locale.zhCN}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh-TW"><TextBlock Text="{services:Loc locale.zhTW}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="zh-HK"><TextBlock Text="{services:Loc locale.zhHK}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                             <ComboBoxItem Tag="en-US"><TextBlock Text="English (US)" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                             <ComboBoxItem Tag="en-GB"><TextBlock Text="English (UK)" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
 
                     <Separator Background="{StaticResource SubtleBorder}" />
-                    <TextBlock Text="关于" Style="{StaticResource SectionTitle}" Margin="0,28,0,12" />
+                    <TextBlock Text="{services:Loc wpf.main.about}" Style="{StaticResource SectionTitle}" Margin="0,28,0,12" />
                     <TextBlock Text="MiruPlay Windows" FontWeight="SemiBold" />
-                    <TextBlock Text="原生 Windows 客户端 · 支持 MLIP v1-v4" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
+                    <TextBlock Text="{services:Loc wpf.main.aboutText}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
                 </StackPanel>
             </ScrollViewer>
 
             <Border x:Name="BusyOverlay" Grid.ColumnSpan="2" Background="#D9202020" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <ProgressBar x:Name="BusyProgressBar" Width="260" Height="4" IsIndeterminate="True" Foreground="{StaticResource AnimeRed}" />
-                    <TextBlock x:Name="BusyOperationText" Text="正在读取媒体库…" Margin="0,16,0,0" FontSize="16" />
+                    <TextBlock x:Name="BusyOperationText" Text="{services:Loc wpf.main.loadingLib}" Margin="0,16,0,0" FontSize="16" />
                     <TextBlock x:Name="BusyProgressText" Text="" Style="{StaticResource SecondaryText}" Margin="0,6,0,0" />
-                    <Button x:Name="CancelScanButton" Content="取消扫描" Visibility="Collapsed" Margin="0,12,0,0" Click="CancelScan_Click" />
+                    <Button x:Name="CancelScanButton" Content="{services:Loc wpf.main.cancelScan}" Visibility="Collapsed" Margin="0,12,0,0" Click="CancelScan_Click" />
                 </StackPanel>
             </Border>
 

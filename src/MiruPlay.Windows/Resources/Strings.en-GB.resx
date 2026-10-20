@@ -360,4 +360,175 @@
   <data name="dsp.unconnected" xml:space="preserve"><value>Not connected</value></data>
   <data name="dsp.unavailable" xml:space="preserve"><value>Status unavailable: {0}</value></data>
   <data name="dsp.samples" xml:space="preserve"><value>{0} samples</value></data>
+  <data name="wpf.cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="wpf.apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="wpf.dsp.heading" xml:space="preserve"><value>Audio DSP / PEQ</value></data>
+  <data name="wpf.dsp.scope" xml:space="preserve"><value>Applies only to mpv instances started by MiruPlay; linear-phase mode generates independent FIRs with identical delay per channel.</value></data>
+  <data name="wpf.dsp.enableAudio" xml:space="preserve"><value>Enable audio DSP</value></data>
+  <data name="wpf.dsp.presetName" xml:space="preserve"><value>DSP preset</value></data>
+  <data name="wpf.dsp.phaseShort" xml:space="preserve"><value>Phase</value></data>
+  <data name="wpf.dsp.phaseName" xml:space="preserve"><value>DSP phase mode</value></data>
+  <data name="wpf.dsp.firName" xml:space="preserve"><value>FIR quality</value></data>
+  <data name="wpf.dsp.layoutShort" xml:space="preserve"><value>Layout</value></data>
+  <data name="wpf.dsp.layoutName" xml:space="preserve"><value>DSP channel layout</value></data>
+  <data name="wpf.dsp.peqTarget" xml:space="preserve"><value>PEQ target channel</value></data>
+  <data name="wpf.dsp.outputShort" xml:space="preserve"><value>Output</value></data>
+  <data name="wpf.dsp.outputName" xml:space="preserve"><value>DSP output mode</value></data>
+  <data name="wpf.dsp.limiterName" xml:space="preserve"><value>DSP limiter</value></data>
+  <data name="wpf.dsp.releaseName" xml:space="preserve"><value>Limiter release milliseconds</value></data>
+  <data name="wpf.dsp.importRew" xml:space="preserve"><value>Import REW calibration file</value></data>
+  <data name="wpf.dsp.bandList" xml:space="preserve"><value>PEQ band list</value></data>
+  <data name="wpf.dsp.sourceLine" xml:space="preserve"><value>Source line</value></data>
+  <data name="wpf.cancelDsp" xml:space="preserve"><value>Cancel audio DSP editing</value></data>
+  <data name="wpf.measureWizard" xml:space="preserve"><value>Room calibration wizard</value></data>
+  <data name="wpf.openMeasureWizard" xml:space="preserve"><value>Open room calibration wizard</value></data>
+  <data name="wpf.pushTopping" xml:space="preserve"><value>Push preset to Topping</value></data>
+  <data name="wpf.pushToppingName" xml:space="preserve"><value>Push current preset to Topping DAC</value></data>
+  <data name="wpf.applyDsp" xml:space="preserve"><value>Apply audio DSP</value></data>
+  <data name="wpf.play.back" xml:space="preserve"><value>Back to details</value></data>
+  <data name="wpf.play.now" xml:space="preserve"><value>Now playing</value></data>
+  <data name="wpf.play.preparing" xml:space="preserve"><value>Preparing player</value></data>
+  <data name="wpf.play.ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="wpf.play.episodes" xml:space="preserve"><value>Episodes</value></data>
+  <data name="wpf.play.openDrawer" xml:space="preserve"><value>Open episode drawer</value></data>
+  <data name="wpf.play.closeDrawer" xml:space="preserve"><value>Close episode drawer</value></data>
+  <data name="wpf.play.fullscreen" xml:space="preserve"><value>Fullscreen</value></data>
+  <data name="wpf.play.toggleFullscreen" xml:space="preserve"><value>Toggle fullscreen</value></data>
+  <data name="wpf.play.stop" xml:space="preserve"><value>Stop playback</value></data>
+  <data name="wpf.play.rate" xml:space="preserve"><value>Speed</value></data>
+  <data name="wpf.play.progress" xml:space="preserve"><value>Playback progress</value></data>
+  <data name="wpf.play.queue" xml:space="preserve"><value>Play queue</value></data>
+  <data name="wpf.play.play" xml:space="preserve"><value>Play</value></data>
+  <data name="wpf.play.options" xml:space="preserve"><value>Playback options</value></data>
+  <data name="wpf.play.openOptions" xml:space="preserve"><value>Open playback options</value></data>
+  <data name="wpf.play.toggleMute" xml:space="preserve"><value>Toggle mute</value></data>
+  <data name="wpf.play.retry" xml:space="preserve"><value>Retry playback</value></data>
+  <data name="wpf.detail.title" xml:space="preserve"><value>Series details</value></data>
+  <data name="wpf.detail.episodes" xml:space="preserve"><value>Episodes</value></data>
+  <data name="wpf.detail.extras" xml:space="preserve"><value>Extras</value></data>
+  <data name="wpf.detail.episodeList" xml:space="preserve"><value>Episode list</value></data>
+  <data name="wpf.detail.extrasList" xml:space="preserve"><value>Extras list</value></data>
+  <data name="wpf.detail.editMeta" xml:space="preserve"><value>Edit metadata</value></data>
+  <data name="wpf.detail.editLocalMeta" xml:space="preserve"><value>Edit local directory metadata</value></data>
+  <data name="wpf.detail.backLibrary" xml:space="preserve"><value>Back to library</value></data>
+  <data name="wpf.detail.season" xml:space="preserve"><value>Select season</value></data>
+  <data name="wpf.browse" xml:space="preserve"><value>Browse</value></data>
+  <data name="wpf.connectSave" xml:space="preserve"><value>Connect and save</value></data>
+  <data name="wpf.src.localMedia" xml:space="preserve"><value>Local media</value></data>
+  <data name="wpf.src.localTitle" xml:space="preserve"><value>Local media source</value></data>
+  <data name="wpf.src.rootDir" xml:space="preserve"><value>Root directory</value></data>
+  <data name="wpf.src.localRecogName" xml:space="preserve"><value>Local recognition</value></data>
+  <data name="wpf.src.addLocalTitle" xml:space="preserve"><value>Add local media source</value></data>
+  <data name="wpf.src.browseTip" xml:space="preserve"><value>Choose the directory containing media files</value></data>
+  <data name="wpf.src.smbTitle" xml:space="preserve"><value>Add SMB media source</value></data>
+  <data name="wpf.src.smbShare" xml:space="preserve"><value>Share address</value></data>
+  <data name="wpf.src.smbRecogName" xml:space="preserve"><value>SMB recognition</value></data>
+  <data name="wpf.src.smbNote" xml:space="preserve"><value>Plain directory scan keeps its index locally and never modifies files on the SMB share.</value></data>
+  <data name="wpf.src.smbTip" xml:space="preserve"><value>e.g. smb://nas/anime or \nas\anime</value></data>
+  <data name="wpf.src.davTitle" xml:space="preserve"><value>Add WebDAV media source</value></data>
+  <data name="wpf.src.davRoot" xml:space="preserve"><value>Root URL</value></data>
+  <data name="wpf.src.davRecogName" xml:space="preserve"><value>WebDAV recognition</value></data>
+  <data name="wpf.src.davNote" xml:space="preserve"><value>HTTP and HTTPS are supported. HTTP credentials travel in cleartext; use only on trusted networks. Plain directory scan keeps its index locally and never modifies remote files.</value></data>
+  <data name="wpf.src.davTip" xml:space="preserve"><value>HTTP and HTTPS supported; enter the WebDAV directory containing library.db</value></data>
+  <data name="wpf.src.rssTitle" xml:space="preserve"><value>RSS online media source</value></data>
+  <data name="wpf.src.rssFeed" xml:space="preserve"><value>RSS feed address</value></data>
+  <data name="wpf.src.rssName" xml:space="preserve"><value>RSS media source name</value></data>
+  <data name="wpf.src.testAdd" xml:space="preserve"><value>Test and add</value></data>
+  <data name="wpf.main.settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="wpf.main.music" xml:space="preserve"><value>Music</value></data>
+  <data name="wpf.main.musicLib" xml:space="preserve"><value>Music library</value></data>
+  <data name="wpf.main.appMode" xml:space="preserve"><value>App mode</value></data>
+  <data name="wpf.main.appModeName" xml:space="preserve"><value>Set app mode</value></data>
+  <data name="wpf.main.notLoaded" xml:space="preserve"><value>Library not loaded</value></data>
+  <data name="wpf.main.openHint" xml:space="preserve"><value>Open the media directory containing library.db</value></data>
+  <data name="wpf.main.searchTip" xml:space="preserve"><value>Search titles, original titles or genres</value></data>
+  <data name="wpf.main.openLib" xml:space="preserve"><value>Open library</value></data>
+  <data name="wpf.main.recent" xml:space="preserve"><value>Recently watched</value></data>
+  <data name="wpf.main.featured" xml:space="preserve"><value>Featured</value></data>
+  <data name="wpf.main.allWorks" xml:space="preserve"><value>All works</value></data>
+  <data name="wpf.main.loadMore" xml:space="preserve"><value>Load more</value></data>
+  <data name="wpf.main.noLibrary" xml:space="preserve"><value>No library yet</value></data>
+  <data name="wpf.main.noLibraryHint" xml:space="preserve"><value>Choose a media directory generated by anime-organizer with library.db at its root.</value></data>
+  <data name="wpf.main.detail" xml:space="preserve"><value>Details</value></data>
+  <data name="wpf.main.closeDetail" xml:space="preserve"><value>Close details</value></data>
+  <data name="wpf.play.playFor" xml:space="preserve"><value>Play {0}</value></data>
+  <data name="wpf.main.playExtra" xml:space="preserve"><value>Play extras</value></data>
+  <data name="wpf.main.ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="wpf.main.settingsSub" xml:space="preserve"><value>Library and playback configuration for the Windows client</value></data>
+  <data name="wpf.main.appModeHint" xml:space="preserve"><value>The library only loads sources matching the mode and opens an available source after switching</value></data>
+  <data name="wpf.main.lanNote" xml:space="preserve"><value>Allow LAN devices to browse and control MiruPlay through the compatible API</value></data>
+  <data name="wpf.main.enable" xml:space="preserve"><value>Enable</value></data>
+  <data name="wpf.main.copyUrl" xml:space="preserve"><value>Copy address</value></data>
+  <data name="wpf.main.rotateToken" xml:space="preserve"><value>Rotate token</value></data>
+  <data name="wpf.main.onlineMeta" xml:space="preserve"><value>Online metadata</value></data>
+  <data name="wpf.main.dspOff" xml:space="preserve"><value>DSP off</value></data>
+  <data name="wpf.main.dspHint" xml:space="preserve"><value>Supports per-channel REW import, independent PEQ and linear-phase FIR; applies only to mpv started by MiruPlay.</value></data>
+  <data name="wpf.main.dspState" xml:space="preserve"><value>Audio DSP enabled state</value></data>
+  <data name="wpf.main.editDsp" xml:space="preserve"><value>Edit DSP</value></data>
+  <data name="wpf.main.editDspName" xml:space="preserve"><value>Edit audio DSP</value></data>
+  <data name="wpf.main.saveBangumi" xml:space="preserve"><value>Save Bangumi</value></data>
+  <data name="wpf.main.clearBangumi" xml:space="preserve"><value>Clear Bangumi</value></data>
+  <data name="wpf.main.noBangumi" xml:space="preserve"><value>No Bangumi token set.</value></data>
+  <data name="wpf.main.save" xml:space="preserve"><value>Save</value></data>
+  <data name="wpf.main.clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="wpf.main.noTmdb" xml:space="preserve"><value>No TMDB token set.</value></data>
+  <data name="wpf.main.cdEndpoint" xml:space="preserve"><value>CloudDrive2 endpoint</value></data>
+  <data name="wpf.main.cdInbox" xml:space="preserve"><value>Offline download directory</value></data>
+  <data name="wpf.main.cdLibrary" xml:space="preserve"><value>Library directory</value></data>
+  <data name="wpf.main.cdMode" xml:space="preserve"><value>Mode and interval</value></data>
+  <data name="wpf.main.cdOrganized" xml:space="preserve"><value>Organise library</value></data>
+  <data name="wpf.main.cdSingle" xml:space="preserve"><value>Single directory</value></data>
+  <data name="wpf.main.cdPassword" xml:space="preserve"><value>CloudDrive2 password</value></data>
+  <data name="wpf.main.login" xml:space="preserve"><value>Log in</value></data>
+  <data name="wpf.main.verifyToken" xml:space="preserve"><value>Verify token</value></data>
+  <data name="wpf.main.clearCreds" xml:space="preserve"><value>Clear credentials</value></data>
+  <data name="wpf.main.cdNotConfigured" xml:space="preserve"><value>CloudDrive2 is not configured.</value></data>
+  <data name="wpf.main.rssName" xml:space="preserve"><value>RSS name</value></data>
+  <data name="wpf.main.rssAddress" xml:space="preserve"><value>RSS address</value></data>
+  <data name="wpf.main.rssFilter" xml:space="preserve"><value>Filter regex (optional)</value></data>
+  <data name="wpf.main.saveRss" xml:space="preserve"><value>Save RSS</value></data>
+  <data name="wpf.main.enableSub" xml:space="preserve"><value>Enable subscription</value></data>
+  <data name="wpf.main.noRss" xml:space="preserve"><value>No RSS subscriptions configured.</value></data>
+  <data name="wpf.main.previewRss" xml:space="preserve"><value>Preview RSS</value></data>
+  <data name="wpf.main.pullPreview" xml:space="preserve"><value>Fetch and preview</value></data>
+  <data name="wpf.main.editRss" xml:space="preserve"><value>Edit RSS</value></data>
+  <data name="wpf.main.deleteRss" xml:space="preserve"><value>Delete RSS</value></data>
+  <data name="wpf.main.scanTitle" xml:space="preserve"><value>Library scan</value></data>
+  <data name="wpf.main.autoScanSrc" xml:space="preserve"><value>Auto-scan media sources</value></data>
+  <data name="wpf.main.autoScanOff" xml:space="preserve"><value>Auto scan is off.</value></data>
+  <data name="wpf.main.scanInterval" xml:space="preserve"><value>Auto-scan interval</value></data>
+  <data name="wpf.main.every1h" xml:space="preserve"><value>Every hour</value></data>
+  <data name="wpf.main.every6h" xml:space="preserve"><value>Every 6 hours</value></data>
+  <data name="wpf.main.every12h" xml:space="preserve"><value>Every 12 hours</value></data>
+  <data name="wpf.main.every24h" xml:space="preserve"><value>Every 24 hours</value></data>
+  <data name="wpf.main.mergeHint" xml:space="preserve"><value>Only entries with matching identity are merged; all episodes, versions and watch history are kept.</value></data>
+  <data name="wpf.main.versionHint" xml:space="preserve"><value>Auto-play by nearest path, or manually choose versions per episode.</value></data>
+  <data name="wpf.main.versionName" xml:space="preserve"><value>Next-episode version choice</value></data>
+  <data name="wpf.main.addLocal" xml:space="preserve"><value>Add local MLIP</value></data>
+  <data name="wpf.main.addDav" xml:space="preserve"><value>Add WebDAV</value></data>
+  <data name="wpf.main.addRss" xml:space="preserve"><value>Add RSS online source</value></data>
+  <data name="wpf.main.addSmb" xml:space="preserve"><value>Add SMB</value></data>
+  <data name="wpf.main.currentLib" xml:space="preserve"><value>Current library</value></data>
+  <data name="wpf.main.notSet" xml:space="preserve"><value>Not set</value></data>
+  <data name="wpf.main.open" xml:space="preserve"><value>Open</value></data>
+  <data name="wpf.main.openSrc" xml:space="preserve"><value>Open media source</value></data>
+  <data name="wpf.main.scanSrc" xml:space="preserve"><value>Scan media source</value></data>
+  <data name="wpf.main.editSrc" xml:space="preserve"><value>Edit media source</value></data>
+  <data name="wpf.main.deleteSrc" xml:space="preserve"><value>Delete media source</value></data>
+  <data name="wpf.main.afterPlay" xml:space="preserve"><value>After playback</value></data>
+  <data name="wpf.main.afterPlayHint" xml:space="preserve"><value>Decide what happens when an episode finishes naturally</value></data>
+  <data name="wpf.main.playNext" xml:space="preserve"><value>Play next episode</value></data>
+  <data name="wpf.main.subLang" xml:space="preserve"><value>Preferred subtitle language</value></data>
+  <data name="wpf.main.subHint" xml:space="preserve"><value>Keep the player default track when nothing matches</value></data>
+  <data name="wpf.main.langHint" xml:space="preserve"><value>Follow the system or pin a locale; affects number and date formats</value></data>
+  <data name="wpf.main.about" xml:space="preserve"><value>About</value></data>
+  <data name="wpf.main.aboutText" xml:space="preserve"><value>Native Windows client · MLIP v1-v4 supported</value></data>
+  <data name="wpf.main.loadingLib" xml:space="preserve"><value>Loading library…</value></data>
+  <data name="wpf.main.cancelScan" xml:space="preserve"><value>Cancel scan</value></data>
+  <data name="wpf.main.cdUser" xml:space="preserve"><value>CloudDrive2 username</value></data>
+  <data name="wpf.main.cdInboxName" xml:space="preserve"><value>CloudDrive2 offline download directory</value></data>
+  <data name="wpf.main.cdLibName" xml:space="preserve"><value>CloudDrive2 library directory</value></data>
+  <data name="wpf.main.cdModeName" xml:space="preserve"><value>CloudDrive2 library mode</value></data>
+  <data name="wpf.main.cdInterval" xml:space="preserve"><value>CloudDrive2 sync interval minutes</value></data>
+  <data name="wpf.main.rssFilterName" xml:space="preserve"><value>Filter regex</value></data>
 </root>

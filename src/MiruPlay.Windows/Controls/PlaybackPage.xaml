@@ -21,21 +21,21 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Button x:Name="BackButton" Style="{StaticResource IconButton}" Click="Back_Click" ToolTip="返回详情" AutomationProperties.Name="返回详情">
+            <Button x:Name="BackButton" Style="{StaticResource IconButton}" Click="Back_Click" ToolTip="{services:Loc wpf.play.back}" AutomationProperties.Name="{services:Loc wpf.play.back}">
                 <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE72B;" />
             </Button>
             <StackPanel Grid.Column="1" Margin="14,0,14,0" VerticalAlignment="Center">
-                <TextBlock x:Name="TitleText" Text="正在播放" FontSize="19" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                <TextBlock x:Name="MediaInfoText" Text="正在准备播放器" Style="{StaticResource SecondaryText}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Name="TitleText" Text="{services:Loc wpf.play.now}" FontSize="19" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Name="MediaInfoText" Text="{services:Loc wpf.play.preparing}" Style="{StaticResource SecondaryText}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Button x:Name="EpisodeDrawerButton" Style="{StaticResource IconButton}" Click="EpisodeDrawer_Click" ToolTip="选集" AutomationProperties.Name="打开选集抽屉">
+                <Button x:Name="EpisodeDrawerButton" Style="{StaticResource IconButton}" Click="EpisodeDrawer_Click" ToolTip="{services:Loc wpf.play.episodes}" AutomationProperties.Name="{services:Loc wpf.play.openDrawer}">
                     <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8A9;" />
                 </Button>
-                <Button x:Name="FullscreenButton" Style="{StaticResource IconButton}" Margin="8,0,0,0" Click="Fullscreen_Click" ToolTip="全屏" AutomationProperties.Name="切换全屏">
+                <Button x:Name="FullscreenButton" Style="{StaticResource IconButton}" Margin="8,0,0,0" Click="Fullscreen_Click" ToolTip="{services:Loc wpf.play.fullscreen}" AutomationProperties.Name="{services:Loc wpf.play.toggleFullscreen}">
                     <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE740;" />
                 </Button>
-                <Button x:Name="StopButton" Style="{StaticResource IconButton}" Margin="8,0,0,0" Click="Stop_Click" ToolTip="停止播放" AutomationProperties.Name="停止播放">
+                <Button x:Name="StopButton" Style="{StaticResource IconButton}" Margin="8,0,0,0" Click="Stop_Click" ToolTip="{services:Loc wpf.play.stop}" AutomationProperties.Name="{services:Loc wpf.play.stop}">
                     <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71A;" />
                 </Button>
             </StackPanel>
@@ -74,52 +74,52 @@
                                 VerticalAlignment="Center"
                                 PreviewMouseLeftButtonUp="Timeline_MouseLeftButtonUp"
                                 PreviewKeyUp="Timeline_PreviewKeyUp"
-                                AutomationProperties.Name="播放进度" />
+                                AutomationProperties.Name="{services:Loc wpf.play.progress}" />
                         <TextBlock x:Name="DurationText" Grid.Column="2" Text="0:00" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
                     </Grid>
 
                     <DockPanel Grid.Row="1" Margin="0,9,0,0" LastChildFill="False">
                         <WrapPanel x:Name="TransportPanel" DockPanel.Dock="Left" VerticalAlignment="Center">
-                            <Button x:Name="PreviousButton" Style="{StaticResource IconButton}" Click="Previous_Click" ToolTip="上一集" AutomationProperties.Name="上一集">
+                            <Button x:Name="PreviousButton" Style="{StaticResource IconButton}" Click="Previous_Click" ToolTip="{services:Loc player.previous}" AutomationProperties.Name="{services:Loc player.previous}">
                                 <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE892;" />
                             </Button>
-                            <Button Style="{StaticResource SecondaryButton}" Margin="7,0,0,0" Padding="11,8" Click="BackSeek_Click" ToolTip="后退 10 秒" AutomationProperties.Name="后退 10 秒">
+                            <Button Style="{StaticResource SecondaryButton}" Margin="7,0,0,0" Padding="11,8" Click="BackSeek_Click" ToolTip="{services:Loc player.back10}" AutomationProperties.Name="{services:Loc player.back10}">
                                 <TextBlock Text="-10" FontWeight="SemiBold" />
                             </Button>
-                            <Button x:Name="PlayPauseButton" Style="{StaticResource PrimaryButton}" MinWidth="96" Margin="7,0,0,0" Click="PlayPause_Click" AutomationProperties.Name="播放或暂停">
+                            <Button x:Name="PlayPauseButton" Style="{StaticResource PrimaryButton}" MinWidth="96" Margin="7,0,0,0" Click="PlayPause_Click" AutomationProperties.Name="{services:Loc player.toggle}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock x:Name="PlayPauseIcon" FontFamily="Segoe Fluent Icons" Text="&#xE768;" Margin="0,0,6,0" />
-                                    <TextBlock x:Name="PlayPauseText" Text="播放" />
+                                    <TextBlock x:Name="PlayPauseText" Text="{services:Loc wpf.play.play}" />
                                 </StackPanel>
                             </Button>
-                            <Button Style="{StaticResource SecondaryButton}" Margin="7,0,0,0" Padding="11,8" Click="ForwardSeek_Click" ToolTip="前进 30 秒" AutomationProperties.Name="前进 30 秒">
+                            <Button Style="{StaticResource SecondaryButton}" Margin="7,0,0,0" Padding="11,8" Click="ForwardSeek_Click" ToolTip="{services:Loc player.fwd30}" AutomationProperties.Name="{services:Loc player.fwd30}">
                                 <TextBlock Text="+30" FontWeight="SemiBold" />
                             </Button>
-                            <Button x:Name="NextButton" Style="{StaticResource IconButton}" Margin="7,0,0,0" Click="Next_Click" ToolTip="下一集" AutomationProperties.Name="下一集">
+                            <Button x:Name="NextButton" Style="{StaticResource IconButton}" Margin="7,0,0,0" Click="Next_Click" ToolTip="{services:Loc player.next}" AutomationProperties.Name="{services:Loc player.next}">
                                 <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE893;" />
                             </Button>
                         </WrapPanel>
 
                         <WrapPanel x:Name="InlineOptionsPanel" DockPanel.Dock="Right" Margin="14,0,0,0" VerticalAlignment="Center">
-                            <ComboBox x:Name="AudioTrackSelector" Width="142" DisplayMemberPath="DisplayLabel" SelectedValuePath="Id" SelectionChanged="AudioTrack_SelectionChanged" ToolTip="音轨" AutomationProperties.Name="音轨" />
-                            <ComboBox x:Name="SubtitleTrackSelector" Width="142" Margin="7,0,0,0" DisplayMemberPath="DisplayLabel" SelectedValuePath="TrackId" SelectionChanged="SubtitleTrack_SelectionChanged" ToolTip="字幕" AutomationProperties.Name="字幕" />
-                            <ComboBox x:Name="SpeedSelector" Width="86" Margin="7,0,0,0" DisplayMemberPath="DisplayLabel" SelectedValuePath="Value" SelectionChanged="Speed_SelectionChanged" ToolTip="播放速度" AutomationProperties.Name="播放速度" />
-                            <Button x:Name="MuteButton" Style="{StaticResource IconButton}" Margin="7,0,0,0" Click="Mute_Click" ToolTip="静音" AutomationProperties.Name="切换静音">
+                            <ComboBox x:Name="AudioTrackSelector" Width="142" DisplayMemberPath="DisplayLabel" SelectedValuePath="Id" SelectionChanged="AudioTrack_SelectionChanged" ToolTip="{services:Loc player.audio}" AutomationProperties.Name="{services:Loc player.audio}" />
+                            <ComboBox x:Name="SubtitleTrackSelector" Width="142" Margin="7,0,0,0" DisplayMemberPath="DisplayLabel" SelectedValuePath="TrackId" SelectionChanged="SubtitleTrack_SelectionChanged" ToolTip="{services:Loc player.subtitle}" AutomationProperties.Name="{services:Loc player.subtitle}" />
+                            <ComboBox x:Name="SpeedSelector" Width="86" Margin="7,0,0,0" DisplayMemberPath="DisplayLabel" SelectedValuePath="Value" SelectionChanged="Speed_SelectionChanged" ToolTip="{services:Loc player.speed}" AutomationProperties.Name="{services:Loc player.speed}" />
+                            <Button x:Name="MuteButton" Style="{StaticResource IconButton}" Margin="7,0,0,0" Click="Mute_Click" ToolTip="{services:Loc player.mute}" AutomationProperties.Name="{services:Loc wpf.play.toggleMute}">
                                 <TextBlock x:Name="MuteIcon" FontFamily="Segoe Fluent Icons" Text="&#xE767;" />
                             </Button>
-                            <Slider x:Name="VolumeSlider" Width="105" Margin="7,0,0,0" Minimum="0" Maximum="100" PreviewMouseLeftButtonUp="Volume_MouseLeftButtonUp" PreviewKeyUp="Volume_PreviewKeyUp" AutomationProperties.Name="音量" />
+                            <Slider x:Name="VolumeSlider" Width="105" Margin="7,0,0,0" Minimum="0" Maximum="100" PreviewMouseLeftButtonUp="Volume_MouseLeftButtonUp" PreviewKeyUp="Volume_PreviewKeyUp" AutomationProperties.Name="{services:Loc player.volume}" />
                         </WrapPanel>
 
-                        <Button x:Name="OptionsOverflowButton" DockPanel.Dock="Right" Style="{StaticResource IconButton}" Margin="12,0,0,0" Click="OptionsOverflow_Click" ToolTip="播放选项" AutomationProperties.Name="打开播放选项">
+                        <Button x:Name="OptionsOverflowButton" DockPanel.Dock="Right" Style="{StaticResource IconButton}" Margin="12,0,0,0" Click="OptionsOverflow_Click" ToolTip="{services:Loc wpf.play.options}" AutomationProperties.Name="{services:Loc wpf.play.openOptions}">
                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE712;" />
                         </Button>
                     </DockPanel>
 
                     <Grid Grid.Row="2" Margin="0,8,0,0">
-                        <TextBlock x:Name="StatusText" Text="准备就绪" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="StatusText" Text="{services:Loc wpf.play.ready}" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis" />
                         <StackPanel x:Name="ErrorPanel" Orientation="Horizontal" HorizontalAlignment="Right" Visibility="Collapsed">
                             <TextBlock x:Name="ErrorText" Foreground="{StaticResource ErrorBrush}" TextTrimming="CharacterEllipsis" MaxWidth="440" VerticalAlignment="Center" />
-                            <Button Style="{StaticResource SecondaryButton}" Margin="10,0,0,0" Padding="10,5" Click="Retry_Click" AutomationProperties.Name="重试播放">重试</Button>
+                            <Button Style="{StaticResource SecondaryButton}" Margin="10,0,0,0" Padding="10,5" Click="Retry_Click" AutomationProperties.Name="{services:Loc wpf.play.retry}">重试</Button>
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -163,8 +163,8 @@
                     </Grid.RowDefinitions>
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <TextBlock Text="选集" Style="{StaticResource SectionTitle}" />
-                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Click="EpisodeDrawerClose_Click" ToolTip="关闭选集" AutomationProperties.Name="关闭选集">
+                        <TextBlock Text="{services:Loc wpf.play.episodes}" Style="{StaticResource SectionTitle}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Click="EpisodeDrawerClose_Click" ToolTip="{services:Loc wpf.play.closeDrawer}" AutomationProperties.Name="{services:Loc wpf.play.closeDrawer}">
                             <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE711;" />
                         </Button>
                     </Grid>
@@ -175,7 +175,7 @@
                               BorderThickness="0"
                               VirtualizingPanel.IsVirtualizing="True"
                               VirtualizingPanel.VirtualizationMode="Recycling"
-                              AutomationProperties.Name="播放队列">
+                              AutomationProperties.Name="{services:Loc wpf.play.queue}">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -235,19 +235,19 @@
                Closed="OptionsOverflowPopup_Closed">
             <Border Background="#FC2C2C2C" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="1" CornerRadius="6" Padding="14" Width="300">
                 <StackPanel>
-                    <TextBlock Text="播放选项" FontWeight="SemiBold" Margin="0,0,0,10" />
-                    <TextBlock Text="音轨" Style="{StaticResource SecondaryText}" />
-                    <ComboBox x:Name="OverflowAudioTrackSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="Id" SelectionChanged="AudioTrack_SelectionChanged" AutomationProperties.Name="音轨" />
-                    <TextBlock Text="字幕" Style="{StaticResource SecondaryText}" />
-                    <ComboBox x:Name="OverflowSubtitleTrackSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="TrackId" SelectionChanged="SubtitleTrack_SelectionChanged" AutomationProperties.Name="字幕" />
-                    <TextBlock Text="倍速" Style="{StaticResource SecondaryText}" />
-                    <ComboBox x:Name="OverflowSpeedSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="Value" SelectionChanged="Speed_SelectionChanged" AutomationProperties.Name="播放速度" />
+                    <TextBlock Text="{services:Loc wpf.play.options}" FontWeight="SemiBold" Margin="0,0,0,10" />
+                    <TextBlock Text="{services:Loc player.audio}" Style="{StaticResource SecondaryText}" />
+                    <ComboBox x:Name="OverflowAudioTrackSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="Id" SelectionChanged="AudioTrack_SelectionChanged" AutomationProperties.Name="{services:Loc player.audio}" />
+                    <TextBlock Text="{services:Loc player.subtitle}" Style="{StaticResource SecondaryText}" />
+                    <ComboBox x:Name="OverflowSubtitleTrackSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="TrackId" SelectionChanged="SubtitleTrack_SelectionChanged" AutomationProperties.Name="{services:Loc player.subtitle}" />
+                    <TextBlock Text="{services:Loc wpf.play.rate}" Style="{StaticResource SecondaryText}" />
+                    <ComboBox x:Name="OverflowSpeedSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="Value" SelectionChanged="Speed_SelectionChanged" AutomationProperties.Name="{services:Loc player.speed}" />
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <Button x:Name="OverflowMuteButton" Style="{StaticResource IconButton}" Click="Mute_Click" ToolTip="静音" AutomationProperties.Name="切换静音">
+                        <Button x:Name="OverflowMuteButton" Style="{StaticResource IconButton}" Click="Mute_Click" ToolTip="{services:Loc player.mute}" AutomationProperties.Name="{services:Loc wpf.play.toggleMute}">
                             <TextBlock x:Name="OverflowMuteIcon" FontFamily="Segoe Fluent Icons" Text="&#xE767;" />
                         </Button>
-                        <Slider x:Name="OverflowVolumeSlider" Grid.Column="1" Margin="10,0" Minimum="0" Maximum="100" PreviewMouseLeftButtonUp="Volume_MouseLeftButtonUp" PreviewKeyUp="Volume_PreviewKeyUp" AutomationProperties.Name="音量" />
+                        <Slider x:Name="OverflowVolumeSlider" Grid.Column="1" Margin="10,0" Minimum="0" Maximum="100" PreviewMouseLeftButtonUp="Volume_MouseLeftButtonUp" PreviewKeyUp="Volume_PreviewKeyUp" AutomationProperties.Name="{services:Loc player.volume}" />
                         <TextBlock x:Name="VolumeText" Grid.Column="2" Text="100%" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
                     </Grid>
                 </StackPanel>

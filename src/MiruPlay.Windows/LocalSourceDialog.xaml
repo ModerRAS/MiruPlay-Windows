@@ -1,7 +1,8 @@
 <Window x:Class="MiruPlay.Windows.LocalSourceDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="添加本地媒体源"
+        xmlns:services="clr-namespace:MiruPlay.Windows.Services"
+        Title="{services:Loc wpf.src.addLocalTitle}"
         Width="560"
         Height="420"
         Icon="Assets/MiruPlay.ico"
@@ -18,28 +19,28 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="本地媒体源" Style="{StaticResource PageTitle}" FontSize="28" />
-        <TextBlock Grid.Row="1" Text="名称" Style="{StaticResource SecondaryText}" Margin="0,20,0,6" />
-        <TextBox x:Name="SourceNameBox" Grid.Row="2" Text="本地媒体" />
-        <TextBlock Grid.Row="3" Text="根目录" Style="{StaticResource SecondaryText}" Margin="0,16,0,6" />
+        <TextBlock Text="{services:Loc wpf.src.localTitle}" Style="{StaticResource PageTitle}" FontSize="28" />
+        <TextBlock Grid.Row="1" Text="{services:Loc cloud.rssName}" Style="{StaticResource SecondaryText}" Margin="0,20,0,6" />
+        <TextBox x:Name="SourceNameBox" Grid.Row="2" Text="{services:Loc wpf.src.localMedia}" />
+        <TextBlock Grid.Row="3" Text="{services:Loc wpf.src.rootDir}" Style="{StaticResource SecondaryText}" Margin="0,16,0,6" />
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="LocationBox" ToolTip="选择媒体文件所在的目录" />
-            <Button Grid.Column="1" Content="浏览" Margin="8,0,0,0" Click="Browse_Click" />
+            <TextBox x:Name="LocationBox" ToolTip="{services:Loc wpf.src.browseTip}" />
+            <Button Grid.Column="1" Content="{services:Loc wpf.browse}" Margin="8,0,0,0" Click="Browse_Click" />
         </Grid>
         <StackPanel Grid.Row="5" Margin="0,18,0,0">
-            <TextBlock Text="识别方式" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
-            <ComboBox x:Name="RecognitionModeBox" AutomationProperties.Name="本地识别方式">
+            <TextBlock Text="{services:Loc sources.recognition}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+            <ComboBox x:Name="RecognitionModeBox" AutomationProperties.Name="{services:Loc wpf.src.localRecogName}">
                 <ComboBoxItem Tag="MLIP"><TextBlock Text="MLIP library.db" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                <ComboBoxItem Tag="DIRECTORY"><TextBlock Text="普通目录扫描" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                <ComboBoxItem Tag="DIRECTORY"><TextBlock Text="{services:Loc sources.directory}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
             </ComboBox>
         </StackPanel>
         <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
-            <Button Style="{StaticResource SecondaryButton}" Content="取消" IsCancel="True" />
-            <Button Content="连接并保存" Margin="10,0,0,0" Click="Save_Click" />
+            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.cancel}" IsCancel="True" />
+            <Button Content="{services:Loc wpf.connectSave}" Margin="10,0,0,0" Click="Save_Click" />
         </StackPanel>
     </Grid>
 </Window>

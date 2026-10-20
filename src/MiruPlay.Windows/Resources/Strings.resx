@@ -360,4 +360,175 @@
   <data name="dsp.unconnected" xml:space="preserve"><value>未连接</value></data>
   <data name="dsp.unavailable" xml:space="preserve"><value>状态不可用：{0}</value></data>
   <data name="dsp.samples" xml:space="preserve"><value>{0} 个采样点</value></data>
+  <data name="wpf.cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="wpf.apply" xml:space="preserve"><value>应用</value></data>
+  <data name="wpf.dsp.heading" xml:space="preserve"><value>音频 DSP / PEQ</value></data>
+  <data name="wpf.dsp.scope" xml:space="preserve"><value>仅作用于 MiruPlay 启动的 mpv；线性相位模式为每个声道生成相同延迟的独立 FIR。</value></data>
+  <data name="wpf.dsp.enableAudio" xml:space="preserve"><value>启用音频 DSP</value></data>
+  <data name="wpf.dsp.presetName" xml:space="preserve"><value>DSP 预设</value></data>
+  <data name="wpf.dsp.phaseShort" xml:space="preserve"><value>相位</value></data>
+  <data name="wpf.dsp.phaseName" xml:space="preserve"><value>DSP 相位模式</value></data>
+  <data name="wpf.dsp.firName" xml:space="preserve"><value>FIR 质量</value></data>
+  <data name="wpf.dsp.layoutShort" xml:space="preserve"><value>布局</value></data>
+  <data name="wpf.dsp.layoutName" xml:space="preserve"><value>DSP 声道布局</value></data>
+  <data name="wpf.dsp.peqTarget" xml:space="preserve"><value>PEQ 目标声道</value></data>
+  <data name="wpf.dsp.outputShort" xml:space="preserve"><value>输出</value></data>
+  <data name="wpf.dsp.outputName" xml:space="preserve"><value>DSP 输出模式</value></data>
+  <data name="wpf.dsp.limiterName" xml:space="preserve"><value>DSP 限幅</value></data>
+  <data name="wpf.dsp.releaseName" xml:space="preserve"><value>限幅释放毫秒</value></data>
+  <data name="wpf.dsp.importRew" xml:space="preserve"><value>导入 REW 校准文件</value></data>
+  <data name="wpf.dsp.bandList" xml:space="preserve"><value>PEQ 频段列表</value></data>
+  <data name="wpf.dsp.sourceLine" xml:space="preserve"><value>来源行</value></data>
+  <data name="wpf.cancelDsp" xml:space="preserve"><value>取消音频 DSP 编辑</value></data>
+  <data name="wpf.measureWizard" xml:space="preserve"><value>房间校准向导</value></data>
+  <data name="wpf.openMeasureWizard" xml:space="preserve"><value>打开房间校准向导</value></data>
+  <data name="wpf.pushTopping" xml:space="preserve"><value>推送预设到 Topping</value></data>
+  <data name="wpf.pushToppingName" xml:space="preserve"><value>推送当前预设到 Topping DAC</value></data>
+  <data name="wpf.applyDsp" xml:space="preserve"><value>应用音频 DSP</value></data>
+  <data name="wpf.play.back" xml:space="preserve"><value>返回详情</value></data>
+  <data name="wpf.play.now" xml:space="preserve"><value>正在播放</value></data>
+  <data name="wpf.play.preparing" xml:space="preserve"><value>正在准备播放器</value></data>
+  <data name="wpf.play.ready" xml:space="preserve"><value>准备就绪</value></data>
+  <data name="wpf.play.episodes" xml:space="preserve"><value>选集</value></data>
+  <data name="wpf.play.openDrawer" xml:space="preserve"><value>打开选集抽屉</value></data>
+  <data name="wpf.play.closeDrawer" xml:space="preserve"><value>关闭选集</value></data>
+  <data name="wpf.play.fullscreen" xml:space="preserve"><value>全屏</value></data>
+  <data name="wpf.play.toggleFullscreen" xml:space="preserve"><value>切换全屏</value></data>
+  <data name="wpf.play.stop" xml:space="preserve"><value>停止播放</value></data>
+  <data name="wpf.play.rate" xml:space="preserve"><value>倍速</value></data>
+  <data name="wpf.play.progress" xml:space="preserve"><value>播放进度</value></data>
+  <data name="wpf.play.queue" xml:space="preserve"><value>播放队列</value></data>
+  <data name="wpf.play.play" xml:space="preserve"><value>播放</value></data>
+  <data name="wpf.play.options" xml:space="preserve"><value>播放选项</value></data>
+  <data name="wpf.play.openOptions" xml:space="preserve"><value>打开播放选项</value></data>
+  <data name="wpf.play.toggleMute" xml:space="preserve"><value>切换静音</value></data>
+  <data name="wpf.play.retry" xml:space="preserve"><value>重试播放</value></data>
+  <data name="wpf.detail.title" xml:space="preserve"><value>系列详情</value></data>
+  <data name="wpf.detail.episodes" xml:space="preserve"><value>剧集</value></data>
+  <data name="wpf.detail.extras" xml:space="preserve"><value>特典</value></data>
+  <data name="wpf.detail.episodeList" xml:space="preserve"><value>剧集列表</value></data>
+  <data name="wpf.detail.extrasList" xml:space="preserve"><value>特典列表</value></data>
+  <data name="wpf.detail.editMeta" xml:space="preserve"><value>编辑元数据</value></data>
+  <data name="wpf.detail.editLocalMeta" xml:space="preserve"><value>编辑本地目录元数据</value></data>
+  <data name="wpf.detail.backLibrary" xml:space="preserve"><value>返回媒体库</value></data>
+  <data name="wpf.detail.season" xml:space="preserve"><value>选择季度</value></data>
+  <data name="wpf.browse" xml:space="preserve"><value>浏览</value></data>
+  <data name="wpf.connectSave" xml:space="preserve"><value>连接并保存</value></data>
+  <data name="wpf.src.localMedia" xml:space="preserve"><value>本地媒体</value></data>
+  <data name="wpf.src.localTitle" xml:space="preserve"><value>本地媒体源</value></data>
+  <data name="wpf.src.rootDir" xml:space="preserve"><value>根目录</value></data>
+  <data name="wpf.src.localRecogName" xml:space="preserve"><value>本地识别方式</value></data>
+  <data name="wpf.src.addLocalTitle" xml:space="preserve"><value>添加本地媒体源</value></data>
+  <data name="wpf.src.browseTip" xml:space="preserve"><value>选择媒体文件所在的目录</value></data>
+  <data name="wpf.src.smbTitle" xml:space="preserve"><value>添加 SMB 媒体源</value></data>
+  <data name="wpf.src.smbShare" xml:space="preserve"><value>共享地址</value></data>
+  <data name="wpf.src.smbRecogName" xml:space="preserve"><value>SMB 识别方式</value></data>
+  <data name="wpf.src.smbNote" xml:space="preserve"><value>普通目录扫描会在本机保存索引，不会修改 SMB 共享中的文件。</value></data>
+  <data name="wpf.src.smbTip" xml:space="preserve"><value>例如 smb://nas/anime 或 \nas\anime</value></data>
+  <data name="wpf.src.davTitle" xml:space="preserve"><value>添加 WebDAV 媒体源</value></data>
+  <data name="wpf.src.davRoot" xml:space="preserve"><value>根地址</value></data>
+  <data name="wpf.src.davRecogName" xml:space="preserve"><value>WebDAV 识别方式</value></data>
+  <data name="wpf.src.davNote" xml:space="preserve"><value>支持 HTTP 和 HTTPS。HTTP 凭据会以明文传输，请仅在可信网络使用。普通目录扫描会在本机保存索引，不会修改远端文件。</value></data>
+  <data name="wpf.src.davTip" xml:space="preserve"><value>支持 HTTP 和 HTTPS；请输入包含 library.db 的 WebDAV 目录</value></data>
+  <data name="wpf.src.rssTitle" xml:space="preserve"><value>RSS 在线媒体源</value></data>
+  <data name="wpf.src.rssFeed" xml:space="preserve"><value>RSS Feed 地址</value></data>
+  <data name="wpf.src.rssName" xml:space="preserve"><value>RSS 媒体源名称</value></data>
+  <data name="wpf.src.testAdd" xml:space="preserve"><value>测试并添加</value></data>
+  <data name="wpf.main.settings" xml:space="preserve"><value>设置</value></data>
+  <data name="wpf.main.music" xml:space="preserve"><value>音乐</value></data>
+  <data name="wpf.main.musicLib" xml:space="preserve"><value>音乐库</value></data>
+  <data name="wpf.main.appMode" xml:space="preserve"><value>应用模式</value></data>
+  <data name="wpf.main.appModeName" xml:space="preserve"><value>设置应用模式</value></data>
+  <data name="wpf.main.notLoaded" xml:space="preserve"><value>尚未载入媒体库</value></data>
+  <data name="wpf.main.openHint" xml:space="preserve"><value>打开包含 library.db 的媒体目录</value></data>
+  <data name="wpf.main.searchTip" xml:space="preserve"><value>搜索标题、原名或类型</value></data>
+  <data name="wpf.main.openLib" xml:space="preserve"><value>打开媒体库</value></data>
+  <data name="wpf.main.recent" xml:space="preserve"><value>最近观看</value></data>
+  <data name="wpf.main.featured" xml:space="preserve"><value>精选作品</value></data>
+  <data name="wpf.main.allWorks" xml:space="preserve"><value>全部作品</value></data>
+  <data name="wpf.main.loadMore" xml:space="preserve"><value>加载更多</value></data>
+  <data name="wpf.main.noLibrary" xml:space="preserve"><value>还没有媒体库</value></data>
+  <data name="wpf.main.noLibraryHint" xml:space="preserve"><value>选择一个由 anime-organizer 生成、根目录包含 library.db 的媒体目录。</value></data>
+  <data name="wpf.main.detail" xml:space="preserve"><value>详情</value></data>
+  <data name="wpf.main.closeDetail" xml:space="preserve"><value>关闭详情</value></data>
+  <data name="wpf.play.playFor" xml:space="preserve"><value>播放 {0}</value></data>
+  <data name="wpf.main.playExtra" xml:space="preserve"><value>播放特典</value></data>
+  <data name="wpf.main.ready" xml:space="preserve"><value>就绪</value></data>
+  <data name="wpf.main.settingsSub" xml:space="preserve"><value>Windows 客户端的媒体库和播放配置</value></data>
+  <data name="wpf.main.appModeHint" xml:space="preserve"><value>媒体库只加载对应模式的媒体源，切换后自动打开可用来源</value></data>
+  <data name="wpf.main.lanNote" xml:space="preserve"><value>允许局域网设备通过兼容 API 浏览和控制 MiruPlay</value></data>
+  <data name="wpf.main.enable" xml:space="preserve"><value>启用</value></data>
+  <data name="wpf.main.copyUrl" xml:space="preserve"><value>复制地址</value></data>
+  <data name="wpf.main.rotateToken" xml:space="preserve"><value>更换令牌</value></data>
+  <data name="wpf.main.onlineMeta" xml:space="preserve"><value>在线元数据</value></data>
+  <data name="wpf.main.dspOff" xml:space="preserve"><value>DSP 已关闭</value></data>
+  <data name="wpf.main.dspHint" xml:space="preserve"><value>支持逐声道 REW 导入、独立 PEQ 和线性相位 FIR；只作用于 MiruPlay 启动的 mpv。</value></data>
+  <data name="wpf.main.dspState" xml:space="preserve"><value>音频 DSP 启用状态</value></data>
+  <data name="wpf.main.editDsp" xml:space="preserve"><value>编辑 DSP</value></data>
+  <data name="wpf.main.editDspName" xml:space="preserve"><value>编辑音频 DSP</value></data>
+  <data name="wpf.main.saveBangumi" xml:space="preserve"><value>保存 Bangumi</value></data>
+  <data name="wpf.main.clearBangumi" xml:space="preserve"><value>清除 Bangumi</value></data>
+  <data name="wpf.main.noBangumi" xml:space="preserve"><value>当前未设置 Bangumi Token。</value></data>
+  <data name="wpf.main.save" xml:space="preserve"><value>保存</value></data>
+  <data name="wpf.main.clear" xml:space="preserve"><value>清除</value></data>
+  <data name="wpf.main.noTmdb" xml:space="preserve"><value>当前未设置 TMDB Token。</value></data>
+  <data name="wpf.main.cdEndpoint" xml:space="preserve"><value>CloudDrive2 地址</value></data>
+  <data name="wpf.main.cdInbox" xml:space="preserve"><value>离线下载目录</value></data>
+  <data name="wpf.main.cdLibrary" xml:space="preserve"><value>媒体库目录</value></data>
+  <data name="wpf.main.cdMode" xml:space="preserve"><value>模式与周期</value></data>
+  <data name="wpf.main.cdOrganized" xml:space="preserve"><value>整理媒体库</value></data>
+  <data name="wpf.main.cdSingle" xml:space="preserve"><value>单目录</value></data>
+  <data name="wpf.main.cdPassword" xml:space="preserve"><value>CloudDrive2 密码</value></data>
+  <data name="wpf.main.login" xml:space="preserve"><value>登录</value></data>
+  <data name="wpf.main.verifyToken" xml:space="preserve"><value>验证 Token</value></data>
+  <data name="wpf.main.clearCreds" xml:space="preserve"><value>清除凭据</value></data>
+  <data name="wpf.main.cdNotConfigured" xml:space="preserve"><value>CloudDrive2 尚未配置。</value></data>
+  <data name="wpf.main.rssName" xml:space="preserve"><value>RSS 名称</value></data>
+  <data name="wpf.main.rssAddress" xml:space="preserve"><value>RSS 地址</value></data>
+  <data name="wpf.main.rssFilter" xml:space="preserve"><value>过滤正则（可选）</value></data>
+  <data name="wpf.main.saveRss" xml:space="preserve"><value>保存 RSS</value></data>
+  <data name="wpf.main.enableSub" xml:space="preserve"><value>启用订阅</value></data>
+  <data name="wpf.main.noRss" xml:space="preserve"><value>尚未配置 RSS 订阅。</value></data>
+  <data name="wpf.main.previewRss" xml:space="preserve"><value>预览 RSS</value></data>
+  <data name="wpf.main.pullPreview" xml:space="preserve"><value>拉取并预览</value></data>
+  <data name="wpf.main.editRss" xml:space="preserve"><value>编辑 RSS</value></data>
+  <data name="wpf.main.deleteRss" xml:space="preserve"><value>删除 RSS</value></data>
+  <data name="wpf.main.scanTitle" xml:space="preserve"><value>媒体库扫描</value></data>
+  <data name="wpf.main.autoScanSrc" xml:space="preserve"><value>自动扫描媒体源</value></data>
+  <data name="wpf.main.autoScanOff" xml:space="preserve"><value>自动扫描已关闭。</value></data>
+  <data name="wpf.main.scanInterval" xml:space="preserve"><value>自动扫描周期</value></data>
+  <data name="wpf.main.every1h" xml:space="preserve"><value>每 1 小时</value></data>
+  <data name="wpf.main.every6h" xml:space="preserve"><value>每 6 小时</value></data>
+  <data name="wpf.main.every12h" xml:space="preserve"><value>每 12 小时</value></data>
+  <data name="wpf.main.every24h" xml:space="preserve"><value>每 24 小时</value></data>
+  <data name="wpf.main.mergeHint" xml:space="preserve"><value>仅合并身份相符的条目，保留全部剧集、版本和观看记录。</value></data>
+  <data name="wpf.main.versionHint" xml:space="preserve"><value>选择自动按相近路径播放，或逐集手动选择多个版本。</value></data>
+  <data name="wpf.main.versionName" xml:space="preserve"><value>下一集版本选择</value></data>
+  <data name="wpf.main.addLocal" xml:space="preserve"><value>添加本地 MLIP</value></data>
+  <data name="wpf.main.addDav" xml:space="preserve"><value>添加 WebDAV</value></data>
+  <data name="wpf.main.addRss" xml:space="preserve"><value>添加 RSS 在线源</value></data>
+  <data name="wpf.main.addSmb" xml:space="preserve"><value>添加 SMB</value></data>
+  <data name="wpf.main.currentLib" xml:space="preserve"><value>当前媒体库</value></data>
+  <data name="wpf.main.notSet" xml:space="preserve"><value>尚未设置</value></data>
+  <data name="wpf.main.open" xml:space="preserve"><value>打开</value></data>
+  <data name="wpf.main.openSrc" xml:space="preserve"><value>打开媒体源</value></data>
+  <data name="wpf.main.scanSrc" xml:space="preserve"><value>扫描媒体源</value></data>
+  <data name="wpf.main.editSrc" xml:space="preserve"><value>编辑媒体源</value></data>
+  <data name="wpf.main.deleteSrc" xml:space="preserve"><value>删除媒体源</value></data>
+  <data name="wpf.main.afterPlay" xml:space="preserve"><value>播完后</value></data>
+  <data name="wpf.main.afterPlayHint" xml:space="preserve"><value>决定剧集自然播放完成后的操作</value></data>
+  <data name="wpf.main.playNext" xml:space="preserve"><value>播放下一集</value></data>
+  <data name="wpf.main.subLang" xml:space="preserve"><value>首选字幕语言</value></data>
+  <data name="wpf.main.subHint" xml:space="preserve"><value>匹配不到时保留播放器默认轨道</value></data>
+  <data name="wpf.main.langHint" xml:space="preserve"><value>跟随系统或固定区域设置，影响数字与日期格式</value></data>
+  <data name="wpf.main.about" xml:space="preserve"><value>关于</value></data>
+  <data name="wpf.main.aboutText" xml:space="preserve"><value>原生 Windows 客户端 · 支持 MLIP v1-v4</value></data>
+  <data name="wpf.main.loadingLib" xml:space="preserve"><value>正在读取媒体库…</value></data>
+  <data name="wpf.main.cancelScan" xml:space="preserve"><value>取消扫描</value></data>
+  <data name="wpf.main.cdUser" xml:space="preserve"><value>CloudDrive2 用户名</value></data>
+  <data name="wpf.main.cdInboxName" xml:space="preserve"><value>CloudDrive2 离线下载目录</value></data>
+  <data name="wpf.main.cdLibName" xml:space="preserve"><value>CloudDrive2 媒体库目录</value></data>
+  <data name="wpf.main.cdModeName" xml:space="preserve"><value>CloudDrive2 媒体库模式</value></data>
+  <data name="wpf.main.cdInterval" xml:space="preserve"><value>CloudDrive2 同步周期分钟</value></data>
+  <data name="wpf.main.rssFilterName" xml:space="preserve"><value>过滤正则</value></data>
 </root>

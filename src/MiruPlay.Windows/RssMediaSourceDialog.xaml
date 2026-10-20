@@ -1,7 +1,8 @@
 <Window x:Class="MiruPlay.Windows.RssMediaSourceDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="RSS 在线媒体源"
+        xmlns:services="clr-namespace:MiruPlay.Windows.Services"
+        Title="{services:Loc wpf.src.rssTitle}"
         Width="560"
         Height="330"
         Icon="Assets/MiruPlay.ico"
@@ -17,14 +18,14 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="RSS 在线源" Style="{StaticResource PageTitle}" FontSize="28" />
-        <TextBlock Grid.Row="1" Text="名称" Style="{StaticResource SecondaryText}" Margin="0,20,0,6" />
-        <TextBox x:Name="SourceNameBox" Grid.Row="2" Text="RSS 在线源" AutomationProperties.Name="RSS 媒体源名称" />
-        <TextBlock Grid.Row="3" Text="RSS Feed 地址" Style="{StaticResource SecondaryText}" Margin="0,16,0,6" />
-        <TextBox x:Name="LocationBox" Grid.Row="4" Text="https://api.ani.rip/ani-download.xml" AutomationProperties.Name="RSS Feed 地址" />
+        <TextBlock Text="{services:Loc sources.rss}" Style="{StaticResource PageTitle}" FontSize="28" />
+        <TextBlock Grid.Row="1" Text="{services:Loc cloud.rssName}" Style="{StaticResource SecondaryText}" Margin="0,20,0,6" />
+        <TextBox x:Name="SourceNameBox" Grid.Row="2" Text="{services:Loc sources.rss}" AutomationProperties.Name="{services:Loc wpf.src.rssName}" />
+        <TextBlock Grid.Row="3" Text="{services:Loc wpf.src.rssFeed}" Style="{StaticResource SecondaryText}" Margin="0,16,0,6" />
+        <TextBox x:Name="LocationBox" Grid.Row="4" Text="https://api.ani.rip/ani-download.xml" AutomationProperties.Name="{services:Loc wpf.src.rssFeed}" />
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
-            <Button Style="{StaticResource SecondaryButton}" Content="取消" IsCancel="True" />
-            <Button Content="测试并添加" Margin="10,0,0,0" Click="Save_Click" />
+            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.cancel}" IsCancel="True" />
+            <Button Content="{services:Loc wpf.src.testAdd}" Margin="10,0,0,0" Click="Save_Click" />
         </StackPanel>
     </Grid>
 </Window>

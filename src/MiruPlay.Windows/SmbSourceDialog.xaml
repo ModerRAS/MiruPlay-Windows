@@ -1,7 +1,8 @@
 <Window x:Class="MiruPlay.Windows.SmbSourceDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="添加 SMB 媒体源"
+        xmlns:services="clr-namespace:MiruPlay.Windows.Services"
+        Title="{services:Loc wpf.src.smbTitle}"
         Width="560"
         Height="570"
         Icon="Assets/MiruPlay.ico"
@@ -19,8 +20,8 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="SMB 媒体源" Style="{StaticResource PageTitle}" FontSize="28" />
-        <TextBlock Grid.Row="1" Text="名称" Style="{StaticResource SecondaryText}" Margin="0,20,0,6" />
+        <TextBlock Text="{services:Loc wpf.src.localTitle}" Style="{StaticResource PageTitle}" FontSize="28" />
+        <TextBlock Grid.Row="1" Text="{services:Loc cloud.rssName}" Style="{StaticResource SecondaryText}" Margin="0,20,0,6" />
         <TextBox x:Name="SourceNameBox" Grid.Row="2" Text="SMB" />
         <Grid Grid.Row="3" Margin="0,16,0,0">
             <Grid.ColumnDefinitions>
@@ -31,33 +32,33 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackPanel>
-                <TextBlock Text="域（可选）" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                <TextBlock Text="{services:Loc sources.domain}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
                 <TextBox x:Name="DomainBox" />
             </StackPanel>
             <StackPanel Grid.Column="2">
-                <TextBlock Text="用户名" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                <TextBlock Text="{services:Loc sources.username}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
                 <TextBox x:Name="UsernameBox" />
             </StackPanel>
             <StackPanel Grid.Column="4">
-                <TextBlock Text="密码" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                <TextBlock Text="{services:Loc sources.password}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
                 <PasswordBox x:Name="PasswordValueBox" Padding="10,8" />
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="4" Margin="0,16,0,0">
-            <TextBlock Text="共享地址" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
-            <TextBox x:Name="LocationBox" ToolTip="例如 smb://nas/anime 或 \\nas\anime" />
+            <TextBlock Text="{services:Loc wpf.src.smbShare}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+            <TextBox x:Name="LocationBox" ToolTip="{services:Loc wpf.src.smbTip}" />
         </StackPanel>
         <StackPanel Grid.Row="5" Margin="0,16,0,0">
-            <TextBlock Text="识别方式" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
-            <ComboBox x:Name="RecognitionModeBox" AutomationProperties.Name="SMB 识别方式">
+            <TextBlock Text="{services:Loc sources.recognition}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+            <ComboBox x:Name="RecognitionModeBox" AutomationProperties.Name="{services:Loc wpf.src.smbRecogName}">
                 <ComboBoxItem Tag="MLIP"><TextBlock Text="MLIP library.db" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
-                <ComboBoxItem Tag="DIRECTORY"><TextBlock Text="普通目录扫描" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                <ComboBoxItem Tag="DIRECTORY"><TextBlock Text="{services:Loc sources.directory}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
             </ComboBox>
         </StackPanel>
-        <TextBlock Grid.Row="6" Text="普通目录扫描会在本机保存索引，不会修改 SMB 共享中的文件。" Style="{StaticResource SecondaryText}" Margin="0,18,0,0" />
+        <TextBlock Grid.Row="6" Text="{services:Loc wpf.src.smbNote}" Style="{StaticResource SecondaryText}" Margin="0,18,0,0" />
         <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource SecondaryButton}" Content="取消" IsCancel="True" />
-            <Button Content="连接并保存" Margin="10,0,0,0" Click="Save_Click" />
+            <Button Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.cancel}" IsCancel="True" />
+            <Button Content="{services:Loc wpf.connectSave}" Margin="10,0,0,0" Click="Save_Click" />
         </StackPanel>
     </Grid>
 </Window>

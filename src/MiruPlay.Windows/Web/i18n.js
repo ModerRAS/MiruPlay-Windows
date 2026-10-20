@@ -2491,6 +2491,1203 @@ const I18N = {
   "zh-HK": "{0} 個採樣點",
   "en-US": "{0} samples",
   "en-GB": "{0} samples"
+ },
+ "wpf.cancel": {
+  "zh-CN": "取消",
+  "zh-TW": "取消",
+  "zh-HK": "取消",
+  "en-US": "Cancel",
+  "en-GB": "Cancel"
+ },
+ "wpf.apply": {
+  "zh-CN": "应用",
+  "zh-TW": "套用",
+  "zh-HK": "套用",
+  "en-US": "Apply",
+  "en-GB": "Apply"
+ },
+ "wpf.dsp.heading": {
+  "zh-CN": "音频 DSP / PEQ",
+  "zh-TW": "音訊 DSP / PEQ",
+  "zh-HK": "音頻 DSP / PEQ",
+  "en-US": "Audio DSP / PEQ",
+  "en-GB": "Audio DSP / PEQ"
+ },
+ "wpf.dsp.scope": {
+  "zh-CN": "仅作用于 MiruPlay 启动的 mpv；线性相位模式为每个声道生成相同延迟的独立 FIR。",
+  "zh-TW": "僅作用於 MiruPlay 啟動的 mpv；線性相位模式為每個聲道產生相同延遲的獨立 FIR。",
+  "zh-HK": "僅作用於 MiruPlay 啟動的 mpv；線性相位模式為每個聲道產生相同延遲的獨立 FIR。",
+  "en-US": "Applies only to mpv instances started by MiruPlay; linear-phase mode generates independent FIRs with identical delay per channel.",
+  "en-GB": "Applies only to mpv instances started by MiruPlay; linear-phase mode generates independent FIRs with identical delay per channel."
+ },
+ "wpf.dsp.enableAudio": {
+  "zh-CN": "启用音频 DSP",
+  "zh-TW": "啟用音訊 DSP",
+  "zh-HK": "啟用音頻 DSP",
+  "en-US": "Enable audio DSP",
+  "en-GB": "Enable audio DSP"
+ },
+ "wpf.dsp.presetName": {
+  "zh-CN": "DSP 预设",
+  "zh-TW": "DSP 預設",
+  "zh-HK": "DSP 預設",
+  "en-US": "DSP preset",
+  "en-GB": "DSP preset"
+ },
+ "wpf.dsp.phaseShort": {
+  "zh-CN": "相位",
+  "zh-TW": "相位",
+  "zh-HK": "相位",
+  "en-US": "Phase",
+  "en-GB": "Phase"
+ },
+ "wpf.dsp.phaseName": {
+  "zh-CN": "DSP 相位模式",
+  "zh-TW": "DSP 相位模式",
+  "zh-HK": "DSP 相位模式",
+  "en-US": "DSP phase mode",
+  "en-GB": "DSP phase mode"
+ },
+ "wpf.dsp.firName": {
+  "zh-CN": "FIR 质量",
+  "zh-TW": "FIR 品質",
+  "zh-HK": "FIR 品質",
+  "en-US": "FIR quality",
+  "en-GB": "FIR quality"
+ },
+ "wpf.dsp.layoutShort": {
+  "zh-CN": "布局",
+  "zh-TW": "佈局",
+  "zh-HK": "佈局",
+  "en-US": "Layout",
+  "en-GB": "Layout"
+ },
+ "wpf.dsp.layoutName": {
+  "zh-CN": "DSP 声道布局",
+  "zh-TW": "DSP 聲道佈局",
+  "zh-HK": "DSP 聲道佈局",
+  "en-US": "DSP channel layout",
+  "en-GB": "DSP channel layout"
+ },
+ "wpf.dsp.peqTarget": {
+  "zh-CN": "PEQ 目标声道",
+  "zh-TW": "PEQ 目標聲道",
+  "zh-HK": "PEQ 目標聲道",
+  "en-US": "PEQ target channel",
+  "en-GB": "PEQ target channel"
+ },
+ "wpf.dsp.outputShort": {
+  "zh-CN": "输出",
+  "zh-TW": "輸出",
+  "zh-HK": "輸出",
+  "en-US": "Output",
+  "en-GB": "Output"
+ },
+ "wpf.dsp.outputName": {
+  "zh-CN": "DSP 输出模式",
+  "zh-TW": "DSP 輸出模式",
+  "zh-HK": "DSP 輸出模式",
+  "en-US": "DSP output mode",
+  "en-GB": "DSP output mode"
+ },
+ "wpf.dsp.limiterName": {
+  "zh-CN": "DSP 限幅",
+  "zh-TW": "DSP 限幅",
+  "zh-HK": "DSP 限幅",
+  "en-US": "DSP limiter",
+  "en-GB": "DSP limiter"
+ },
+ "wpf.dsp.releaseName": {
+  "zh-CN": "限幅释放毫秒",
+  "zh-TW": "限幅釋放毫秒",
+  "zh-HK": "限幅釋放毫秒",
+  "en-US": "Limiter release milliseconds",
+  "en-GB": "Limiter release milliseconds"
+ },
+ "wpf.dsp.importRew": {
+  "zh-CN": "导入 REW 校准文件",
+  "zh-TW": "匯入 REW 校準檔",
+  "zh-HK": "匯入 REW 校準檔",
+  "en-US": "Import REW calibration file",
+  "en-GB": "Import REW calibration file"
+ },
+ "wpf.dsp.bandList": {
+  "zh-CN": "PEQ 频段列表",
+  "zh-TW": "PEQ 頻段列表",
+  "zh-HK": "PEQ 頻段列表",
+  "en-US": "PEQ band list",
+  "en-GB": "PEQ band list"
+ },
+ "wpf.dsp.sourceLine": {
+  "zh-CN": "来源行",
+  "zh-TW": "來源行",
+  "zh-HK": "來源行",
+  "en-US": "Source line",
+  "en-GB": "Source line"
+ },
+ "wpf.cancelDsp": {
+  "zh-CN": "取消音频 DSP 编辑",
+  "zh-TW": "取消音訊 DSP 編輯",
+  "zh-HK": "取消音頻 DSP 編輯",
+  "en-US": "Cancel audio DSP editing",
+  "en-GB": "Cancel audio DSP editing"
+ },
+ "wpf.measureWizard": {
+  "zh-CN": "房间校准向导",
+  "zh-TW": "房間校準精靈",
+  "zh-HK": "房間校準精靈",
+  "en-US": "Room calibration wizard",
+  "en-GB": "Room calibration wizard"
+ },
+ "wpf.openMeasureWizard": {
+  "zh-CN": "打开房间校准向导",
+  "zh-TW": "開啟房間校準精靈",
+  "zh-HK": "開啟房間校準精靈",
+  "en-US": "Open room calibration wizard",
+  "en-GB": "Open room calibration wizard"
+ },
+ "wpf.pushTopping": {
+  "zh-CN": "推送预设到 Topping",
+  "zh-TW": "推送預設到 Topping",
+  "zh-HK": "推送預設到 Topping",
+  "en-US": "Push preset to Topping",
+  "en-GB": "Push preset to Topping"
+ },
+ "wpf.pushToppingName": {
+  "zh-CN": "推送当前预设到 Topping DAC",
+  "zh-TW": "推送目前預設到 Topping DAC",
+  "zh-HK": "推送目前預設到 Topping DAC",
+  "en-US": "Push current preset to Topping DAC",
+  "en-GB": "Push current preset to Topping DAC"
+ },
+ "wpf.applyDsp": {
+  "zh-CN": "应用音频 DSP",
+  "zh-TW": "套用音訊 DSP",
+  "zh-HK": "套用音頻 DSP",
+  "en-US": "Apply audio DSP",
+  "en-GB": "Apply audio DSP"
+ },
+ "wpf.play.back": {
+  "zh-CN": "返回详情",
+  "zh-TW": "返回詳情",
+  "zh-HK": "返回詳情",
+  "en-US": "Back to details",
+  "en-GB": "Back to details"
+ },
+ "wpf.play.now": {
+  "zh-CN": "正在播放",
+  "zh-TW": "正在播放",
+  "zh-HK": "而家播放緊",
+  "en-US": "Now playing",
+  "en-GB": "Now playing"
+ },
+ "wpf.play.preparing": {
+  "zh-CN": "正在准备播放器",
+  "zh-TW": "正在準備播放器",
+  "zh-HK": "準備緊播放器",
+  "en-US": "Preparing player",
+  "en-GB": "Preparing player"
+ },
+ "wpf.play.ready": {
+  "zh-CN": "准备就绪",
+  "zh-TW": "準備就緒",
+  "zh-HK": "準備就緒",
+  "en-US": "Ready",
+  "en-GB": "Ready"
+ },
+ "wpf.play.episodes": {
+  "zh-CN": "选集",
+  "zh-TW": "選集",
+  "zh-HK": "選集",
+  "en-US": "Episodes",
+  "en-GB": "Episodes"
+ },
+ "wpf.play.openDrawer": {
+  "zh-CN": "打开选集抽屉",
+  "zh-TW": "開啟選集抽屜",
+  "zh-HK": "開啟選集抽屜",
+  "en-US": "Open episode drawer",
+  "en-GB": "Open episode drawer"
+ },
+ "wpf.play.closeDrawer": {
+  "zh-CN": "关闭选集",
+  "zh-TW": "關閉選集",
+  "zh-HK": "關閉選集",
+  "en-US": "Close episode drawer",
+  "en-GB": "Close episode drawer"
+ },
+ "wpf.play.fullscreen": {
+  "zh-CN": "全屏",
+  "zh-TW": "全螢幕",
+  "zh-HK": "全螢幕",
+  "en-US": "Fullscreen",
+  "en-GB": "Fullscreen"
+ },
+ "wpf.play.toggleFullscreen": {
+  "zh-CN": "切换全屏",
+  "zh-TW": "切換全螢幕",
+  "zh-HK": "切換全螢幕",
+  "en-US": "Toggle fullscreen",
+  "en-GB": "Toggle fullscreen"
+ },
+ "wpf.play.stop": {
+  "zh-CN": "停止播放",
+  "zh-TW": "停止播放",
+  "zh-HK": "停止播放",
+  "en-US": "Stop playback",
+  "en-GB": "Stop playback"
+ },
+ "wpf.play.rate": {
+  "zh-CN": "倍速",
+  "zh-TW": "倍速",
+  "zh-HK": "倍速",
+  "en-US": "Speed",
+  "en-GB": "Speed"
+ },
+ "wpf.play.progress": {
+  "zh-CN": "播放进度",
+  "zh-TW": "播放進度",
+  "zh-HK": "播放進度",
+  "en-US": "Playback progress",
+  "en-GB": "Playback progress"
+ },
+ "wpf.play.queue": {
+  "zh-CN": "播放队列",
+  "zh-TW": "播放佇列",
+  "zh-HK": "播放列隊",
+  "en-US": "Play queue",
+  "en-GB": "Play queue"
+ },
+ "wpf.play.play": {
+  "zh-CN": "播放",
+  "zh-TW": "播放",
+  "zh-HK": "播放",
+  "en-US": "Play",
+  "en-GB": "Play"
+ },
+ "wpf.play.options": {
+  "zh-CN": "播放选项",
+  "zh-TW": "播放選項",
+  "zh-HK": "播放選項",
+  "en-US": "Playback options",
+  "en-GB": "Playback options"
+ },
+ "wpf.play.openOptions": {
+  "zh-CN": "打开播放选项",
+  "zh-TW": "開啟播放選項",
+  "zh-HK": "開啟播放選項",
+  "en-US": "Open playback options",
+  "en-GB": "Open playback options"
+ },
+ "wpf.play.toggleMute": {
+  "zh-CN": "切换静音",
+  "zh-TW": "切換靜音",
+  "zh-HK": "切換靜音",
+  "en-US": "Toggle mute",
+  "en-GB": "Toggle mute"
+ },
+ "wpf.play.retry": {
+  "zh-CN": "重试播放",
+  "zh-TW": "重試播放",
+  "zh-HK": "重試播放",
+  "en-US": "Retry playback",
+  "en-GB": "Retry playback"
+ },
+ "wpf.detail.title": {
+  "zh-CN": "系列详情",
+  "zh-TW": "系列詳情",
+  "zh-HK": "系列詳情",
+  "en-US": "Series details",
+  "en-GB": "Series details"
+ },
+ "wpf.detail.episodes": {
+  "zh-CN": "剧集",
+  "zh-TW": "劇集",
+  "zh-HK": "劇集",
+  "en-US": "Episodes",
+  "en-GB": "Episodes"
+ },
+ "wpf.detail.extras": {
+  "zh-CN": "特典",
+  "zh-TW": "特典",
+  "zh-HK": "特典",
+  "en-US": "Extras",
+  "en-GB": "Extras"
+ },
+ "wpf.detail.episodeList": {
+  "zh-CN": "剧集列表",
+  "zh-TW": "劇集列表",
+  "zh-HK": "劇集列表",
+  "en-US": "Episode list",
+  "en-GB": "Episode list"
+ },
+ "wpf.detail.extrasList": {
+  "zh-CN": "特典列表",
+  "zh-TW": "特典列表",
+  "zh-HK": "特典列表",
+  "en-US": "Extras list",
+  "en-GB": "Extras list"
+ },
+ "wpf.detail.editMeta": {
+  "zh-CN": "编辑元数据",
+  "zh-TW": "編輯元數據",
+  "zh-HK": "編輯元數據",
+  "en-US": "Edit metadata",
+  "en-GB": "Edit metadata"
+ },
+ "wpf.detail.editLocalMeta": {
+  "zh-CN": "编辑本地目录元数据",
+  "zh-TW": "編輯本機目錄元數據",
+  "zh-HK": "編輯本機目錄元數據",
+  "en-US": "Edit local directory metadata",
+  "en-GB": "Edit local directory metadata"
+ },
+ "wpf.detail.backLibrary": {
+  "zh-CN": "返回媒体库",
+  "zh-TW": "返回媒體庫",
+  "zh-HK": "返回媒體庫",
+  "en-US": "Back to library",
+  "en-GB": "Back to library"
+ },
+ "wpf.detail.season": {
+  "zh-CN": "选择季度",
+  "zh-TW": "選擇季度",
+  "zh-HK": "選擇季度",
+  "en-US": "Select season",
+  "en-GB": "Select season"
+ },
+ "wpf.browse": {
+  "zh-CN": "浏览",
+  "zh-TW": "瀏覽",
+  "zh-HK": "瀏覽",
+  "en-US": "Browse",
+  "en-GB": "Browse"
+ },
+ "wpf.connectSave": {
+  "zh-CN": "连接并保存",
+  "zh-TW": "連接並儲存",
+  "zh-HK": "連接並儲存",
+  "en-US": "Connect and save",
+  "en-GB": "Connect and save"
+ },
+ "wpf.src.localMedia": {
+  "zh-CN": "本地媒体",
+  "zh-TW": "本機媒體",
+  "zh-HK": "本機媒體",
+  "en-US": "Local media",
+  "en-GB": "Local media"
+ },
+ "wpf.src.localTitle": {
+  "zh-CN": "本地媒体源",
+  "zh-TW": "本機媒體來源",
+  "zh-HK": "本機媒體來源",
+  "en-US": "Local media source",
+  "en-GB": "Local media source"
+ },
+ "wpf.src.rootDir": {
+  "zh-CN": "根目录",
+  "zh-TW": "根目錄",
+  "zh-HK": "根目錄",
+  "en-US": "Root directory",
+  "en-GB": "Root directory"
+ },
+ "wpf.src.localRecogName": {
+  "zh-CN": "本地识别方式",
+  "zh-TW": "本機識別方式",
+  "zh-HK": "本機識別方式",
+  "en-US": "Local recognition",
+  "en-GB": "Local recognition"
+ },
+ "wpf.src.addLocalTitle": {
+  "zh-CN": "添加本地媒体源",
+  "zh-TW": "新增本機媒體來源",
+  "zh-HK": "新增本機媒體來源",
+  "en-US": "Add local media source",
+  "en-GB": "Add local media source"
+ },
+ "wpf.src.browseTip": {
+  "zh-CN": "选择媒体文件所在的目录",
+  "zh-TW": "選擇媒體檔案所在的目錄",
+  "zh-HK": "選擇媒體檔案所在的目錄",
+  "en-US": "Choose the directory containing media files",
+  "en-GB": "Choose the directory containing media files"
+ },
+ "wpf.src.smbTitle": {
+  "zh-CN": "添加 SMB 媒体源",
+  "zh-TW": "新增 SMB 媒體來源",
+  "zh-HK": "新增 SMB 媒體來源",
+  "en-US": "Add SMB media source",
+  "en-GB": "Add SMB media source"
+ },
+ "wpf.src.smbShare": {
+  "zh-CN": "共享地址",
+  "zh-TW": "共用位址",
+  "zh-HK": "共用位址",
+  "en-US": "Share address",
+  "en-GB": "Share address"
+ },
+ "wpf.src.smbRecogName": {
+  "zh-CN": "SMB 识别方式",
+  "zh-TW": "SMB 識別方式",
+  "zh-HK": "SMB 識別方式",
+  "en-US": "SMB recognition",
+  "en-GB": "SMB recognition"
+ },
+ "wpf.src.smbNote": {
+  "zh-CN": "普通目录扫描会在本机保存索引，不会修改 SMB 共享中的文件。",
+  "zh-TW": "一般目錄掃描會在本機儲存索引，不會修改 SMB 共用中的檔案。",
+  "zh-HK": "一般目錄掃描會在本機儲存索引，不會修改 SMB 共用中的檔案。",
+  "en-US": "Plain directory scan keeps its index locally and never modifies files on the SMB share.",
+  "en-GB": "Plain directory scan keeps its index locally and never modifies files on the SMB share."
+ },
+ "wpf.src.smbTip": {
+  "zh-CN": "例如 smb://nas/anime 或 \\nas\\anime",
+  "zh-TW": "例如 smb://nas/anime 或 \\nas\\anime",
+  "zh-HK": "例如 smb://nas/anime 或 \\nas\\anime",
+  "en-US": "e.g. smb://nas/anime or \\nas\\anime",
+  "en-GB": "e.g. smb://nas/anime or \\nas\\anime"
+ },
+ "wpf.src.davTitle": {
+  "zh-CN": "添加 WebDAV 媒体源",
+  "zh-TW": "新增 WebDAV 媒體來源",
+  "zh-HK": "新增 WebDAV 媒體來源",
+  "en-US": "Add WebDAV media source",
+  "en-GB": "Add WebDAV media source"
+ },
+ "wpf.src.davRoot": {
+  "zh-CN": "根地址",
+  "zh-TW": "根位址",
+  "zh-HK": "根位址",
+  "en-US": "Root URL",
+  "en-GB": "Root URL"
+ },
+ "wpf.src.davRecogName": {
+  "zh-CN": "WebDAV 识别方式",
+  "zh-TW": "WebDAV 識別方式",
+  "zh-HK": "WebDAV 識別方式",
+  "en-US": "WebDAV recognition",
+  "en-GB": "WebDAV recognition"
+ },
+ "wpf.src.davNote": {
+  "zh-CN": "支持 HTTP 和 HTTPS。HTTP 凭据会以明文传输，请仅在可信网络使用。普通目录扫描会在本机保存索引，不会修改远端文件。",
+  "zh-TW": "支援 HTTP 和 HTTPS。HTTP 憑證會以明文傳輸，請僅在信任網路使用。一般目錄掃描會在本機儲存索引，不會修改遠端檔案。",
+  "zh-HK": "支援 HTTP 和 HTTPS。HTTP 憑證會以明文傳輸，請僅在信任網絡使用。一般目錄掃描會在本機儲存索引，不會修改遠端檔案。",
+  "en-US": "HTTP and HTTPS are supported. HTTP credentials travel in cleartext; use only on trusted networks. Plain directory scan keeps its index locally and never modifies remote files.",
+  "en-GB": "HTTP and HTTPS are supported. HTTP credentials travel in cleartext; use only on trusted networks. Plain directory scan keeps its index locally and never modifies remote files."
+ },
+ "wpf.src.davTip": {
+  "zh-CN": "支持 HTTP 和 HTTPS；请输入包含 library.db 的 WebDAV 目录",
+  "zh-TW": "支援 HTTP 和 HTTPS；請輸入包含 library.db 的 WebDAV 目錄",
+  "zh-HK": "支援 HTTP 和 HTTPS；請輸入包含 library.db 的 WebDAV 目錄",
+  "en-US": "HTTP and HTTPS supported; enter the WebDAV directory containing library.db",
+  "en-GB": "HTTP and HTTPS supported; enter the WebDAV directory containing library.db"
+ },
+ "wpf.src.rssTitle": {
+  "zh-CN": "RSS 在线媒体源",
+  "zh-TW": "RSS 線上媒體來源",
+  "zh-HK": "RSS 線上媒體來源",
+  "en-US": "RSS online media source",
+  "en-GB": "RSS online media source"
+ },
+ "wpf.src.rssFeed": {
+  "zh-CN": "RSS Feed 地址",
+  "zh-TW": "RSS Feed 位址",
+  "zh-HK": "RSS Feed 位址",
+  "en-US": "RSS feed address",
+  "en-GB": "RSS feed address"
+ },
+ "wpf.src.rssName": {
+  "zh-CN": "RSS 媒体源名称",
+  "zh-TW": "RSS 媒體來源名稱",
+  "zh-HK": "RSS 媒體來源名稱",
+  "en-US": "RSS media source name",
+  "en-GB": "RSS media source name"
+ },
+ "wpf.src.testAdd": {
+  "zh-CN": "测试并添加",
+  "zh-TW": "測試並新增",
+  "zh-HK": "測試並新增",
+  "en-US": "Test and add",
+  "en-GB": "Test and add"
+ },
+ "wpf.main.settings": {
+  "zh-CN": "设置",
+  "zh-TW": "設定",
+  "zh-HK": "設定",
+  "en-US": "Settings",
+  "en-GB": "Settings"
+ },
+ "wpf.main.music": {
+  "zh-CN": "音乐",
+  "zh-TW": "音樂",
+  "zh-HK": "音樂",
+  "en-US": "Music",
+  "en-GB": "Music"
+ },
+ "wpf.main.musicLib": {
+  "zh-CN": "音乐库",
+  "zh-TW": "音樂庫",
+  "zh-HK": "音樂庫",
+  "en-US": "Music library",
+  "en-GB": "Music library"
+ },
+ "wpf.main.appMode": {
+  "zh-CN": "应用模式",
+  "zh-TW": "應用模式",
+  "zh-HK": "應用模式",
+  "en-US": "App mode",
+  "en-GB": "App mode"
+ },
+ "wpf.main.appModeName": {
+  "zh-CN": "设置应用模式",
+  "zh-TW": "設定應用模式",
+  "zh-HK": "設定應用模式",
+  "en-US": "Set app mode",
+  "en-GB": "Set app mode"
+ },
+ "wpf.main.notLoaded": {
+  "zh-CN": "尚未载入媒体库",
+  "zh-TW": "尚未載入媒體庫",
+  "zh-HK": "尚未載入媒體庫",
+  "en-US": "Library not loaded",
+  "en-GB": "Library not loaded"
+ },
+ "wpf.main.openHint": {
+  "zh-CN": "打开包含 library.db 的媒体目录",
+  "zh-TW": "開啟包含 library.db 的媒體目錄",
+  "zh-HK": "開啟包含 library.db 的媒體目錄",
+  "en-US": "Open the media directory containing library.db",
+  "en-GB": "Open the media directory containing library.db"
+ },
+ "wpf.main.searchTip": {
+  "zh-CN": "搜索标题、原名或类型",
+  "zh-TW": "搜尋標題、原名或類型",
+  "zh-HK": "搜尋標題、原名或類型",
+  "en-US": "Search titles, original titles or genres",
+  "en-GB": "Search titles, original titles or genres"
+ },
+ "wpf.main.openLib": {
+  "zh-CN": "打开媒体库",
+  "zh-TW": "開啟媒體庫",
+  "zh-HK": "開啟媒體庫",
+  "en-US": "Open library",
+  "en-GB": "Open library"
+ },
+ "wpf.main.recent": {
+  "zh-CN": "最近观看",
+  "zh-TW": "最近觀看",
+  "zh-HK": "最近睇過",
+  "en-US": "Recently watched",
+  "en-GB": "Recently watched"
+ },
+ "wpf.main.featured": {
+  "zh-CN": "精选作品",
+  "zh-TW": "精選作品",
+  "zh-HK": "精選作品",
+  "en-US": "Featured",
+  "en-GB": "Featured"
+ },
+ "wpf.main.allWorks": {
+  "zh-CN": "全部作品",
+  "zh-TW": "全部作品",
+  "zh-HK": "全部作品",
+  "en-US": "All works",
+  "en-GB": "All works"
+ },
+ "wpf.main.loadMore": {
+  "zh-CN": "加载更多",
+  "zh-TW": "載入更多",
+  "zh-HK": "載入更多",
+  "en-US": "Load more",
+  "en-GB": "Load more"
+ },
+ "wpf.main.noLibrary": {
+  "zh-CN": "还没有媒体库",
+  "zh-TW": "還沒有媒體庫",
+  "zh-HK": "仲未有媒體庫",
+  "en-US": "No library yet",
+  "en-GB": "No library yet"
+ },
+ "wpf.main.noLibraryHint": {
+  "zh-CN": "选择一个由 anime-organizer 生成、根目录包含 library.db 的媒体目录。",
+  "zh-TW": "選擇一個由 anime-organizer 產生、根目錄包含 library.db 的媒體目錄。",
+  "zh-HK": "選擇一個由 anime-organizer 產生、根目錄包含 library.db 的媒體目錄。",
+  "en-US": "Choose a media directory generated by anime-organizer with library.db at its root.",
+  "en-GB": "Choose a media directory generated by anime-organizer with library.db at its root."
+ },
+ "wpf.main.detail": {
+  "zh-CN": "详情",
+  "zh-TW": "詳情",
+  "zh-HK": "詳情",
+  "en-US": "Details",
+  "en-GB": "Details"
+ },
+ "wpf.main.closeDetail": {
+  "zh-CN": "关闭详情",
+  "zh-TW": "關閉詳情",
+  "zh-HK": "關閉詳情",
+  "en-US": "Close details",
+  "en-GB": "Close details"
+ },
+ "wpf.play.playFor": {
+  "zh-CN": "播放 {0}",
+  "zh-TW": "播放 {0}",
+  "zh-HK": "播放 {0}",
+  "en-US": "Play {0}",
+  "en-GB": "Play {0}"
+ },
+ "wpf.main.playExtra": {
+  "zh-CN": "播放特典",
+  "zh-TW": "播放特典",
+  "zh-HK": "播放特典",
+  "en-US": "Play extras",
+  "en-GB": "Play extras"
+ },
+ "wpf.main.ready": {
+  "zh-CN": "就绪",
+  "zh-TW": "就緒",
+  "zh-HK": "就緒",
+  "en-US": "Ready",
+  "en-GB": "Ready"
+ },
+ "wpf.main.settingsSub": {
+  "zh-CN": "Windows 客户端的媒体库和播放配置",
+  "zh-TW": "Windows 客戶端的媒體庫和播放設定",
+  "zh-HK": "Windows 客戶端嘅媒體庫同播放設定",
+  "en-US": "Library and playback configuration for the Windows client",
+  "en-GB": "Library and playback configuration for the Windows client"
+ },
+ "wpf.main.appModeHint": {
+  "zh-CN": "媒体库只加载对应模式的媒体源，切换后自动打开可用来源",
+  "zh-TW": "媒體庫只載入對應模式的媒體來源，切換後自動開啟可用來源",
+  "zh-HK": "媒體庫只載入對應模式嘅媒體來源，切換後自動開啟可用來源",
+  "en-US": "The library only loads sources matching the mode and opens an available source after switching",
+  "en-GB": "The library only loads sources matching the mode and opens an available source after switching"
+ },
+ "wpf.main.lanNote": {
+  "zh-CN": "允许局域网设备通过兼容 API 浏览和控制 MiruPlay",
+  "zh-TW": "允許區域網路裝置透過相容 API 瀏覽和控制 MiruPlay",
+  "zh-HK": "允許局域網裝置透過相容 API 瀏覽同控制 MiruPlay",
+  "en-US": "Allow LAN devices to browse and control MiruPlay through the compatible API",
+  "en-GB": "Allow LAN devices to browse and control MiruPlay through the compatible API"
+ },
+ "wpf.main.enable": {
+  "zh-CN": "启用",
+  "zh-TW": "啟用",
+  "zh-HK": "啟用",
+  "en-US": "Enable",
+  "en-GB": "Enable"
+ },
+ "wpf.main.copyUrl": {
+  "zh-CN": "复制地址",
+  "zh-TW": "複製位址",
+  "zh-HK": "複製位址",
+  "en-US": "Copy address",
+  "en-GB": "Copy address"
+ },
+ "wpf.main.rotateToken": {
+  "zh-CN": "更换令牌",
+  "zh-TW": "更換權杖",
+  "zh-HK": "更換權杖",
+  "en-US": "Rotate token",
+  "en-GB": "Rotate token"
+ },
+ "wpf.main.onlineMeta": {
+  "zh-CN": "在线元数据",
+  "zh-TW": "線上元數據",
+  "zh-HK": "線上元數據",
+  "en-US": "Online metadata",
+  "en-GB": "Online metadata"
+ },
+ "wpf.main.dspOff": {
+  "zh-CN": "DSP 已关闭",
+  "zh-TW": "DSP 已關閉",
+  "zh-HK": "DSP 已關閉",
+  "en-US": "DSP off",
+  "en-GB": "DSP off"
+ },
+ "wpf.main.dspHint": {
+  "zh-CN": "支持逐声道 REW 导入、独立 PEQ 和线性相位 FIR；只作用于 MiruPlay 启动的 mpv。",
+  "zh-TW": "支援逐聲道 REW 匯入、獨立 PEQ 和線性相位 FIR；只作用於 MiruPlay 啟動的 mpv。",
+  "zh-HK": "支援逐聲道 REW 匯入、獨立 PEQ 同線性相位 FIR；只作用於 MiruPlay 啟動嘅 mpv。",
+  "en-US": "Supports per-channel REW import, independent PEQ and linear-phase FIR; applies only to mpv started by MiruPlay.",
+  "en-GB": "Supports per-channel REW import, independent PEQ and linear-phase FIR; applies only to mpv started by MiruPlay."
+ },
+ "wpf.main.dspState": {
+  "zh-CN": "音频 DSP 启用状态",
+  "zh-TW": "音訊 DSP 啟用狀態",
+  "zh-HK": "音頻 DSP 啟用狀態",
+  "en-US": "Audio DSP enabled state",
+  "en-GB": "Audio DSP enabled state"
+ },
+ "wpf.main.editDsp": {
+  "zh-CN": "编辑 DSP",
+  "zh-TW": "編輯 DSP",
+  "zh-HK": "編輯 DSP",
+  "en-US": "Edit DSP",
+  "en-GB": "Edit DSP"
+ },
+ "wpf.main.editDspName": {
+  "zh-CN": "编辑音频 DSP",
+  "zh-TW": "編輯音訊 DSP",
+  "zh-HK": "編輯音頻 DSP",
+  "en-US": "Edit audio DSP",
+  "en-GB": "Edit audio DSP"
+ },
+ "wpf.main.saveBangumi": {
+  "zh-CN": "保存 Bangumi",
+  "zh-TW": "儲存 Bangumi",
+  "zh-HK": "儲存 Bangumi",
+  "en-US": "Save Bangumi",
+  "en-GB": "Save Bangumi"
+ },
+ "wpf.main.clearBangumi": {
+  "zh-CN": "清除 Bangumi",
+  "zh-TW": "清除 Bangumi",
+  "zh-HK": "清除 Bangumi",
+  "en-US": "Clear Bangumi",
+  "en-GB": "Clear Bangumi"
+ },
+ "wpf.main.noBangumi": {
+  "zh-CN": "当前未设置 Bangumi Token。",
+  "zh-TW": "目前未設定 Bangumi Token。",
+  "zh-HK": "目前未設定 Bangumi Token。",
+  "en-US": "No Bangumi token set.",
+  "en-GB": "No Bangumi token set."
+ },
+ "wpf.main.save": {
+  "zh-CN": "保存",
+  "zh-TW": "儲存",
+  "zh-HK": "儲存",
+  "en-US": "Save",
+  "en-GB": "Save"
+ },
+ "wpf.main.clear": {
+  "zh-CN": "清除",
+  "zh-TW": "清除",
+  "zh-HK": "清除",
+  "en-US": "Clear",
+  "en-GB": "Clear"
+ },
+ "wpf.main.noTmdb": {
+  "zh-CN": "当前未设置 TMDB Token。",
+  "zh-TW": "目前未設定 TMDB Token。",
+  "zh-HK": "目前未設定 TMDB Token。",
+  "en-US": "No TMDB token set.",
+  "en-GB": "No TMDB token set."
+ },
+ "wpf.main.cdEndpoint": {
+  "zh-CN": "CloudDrive2 地址",
+  "zh-TW": "CloudDrive2 位址",
+  "zh-HK": "CloudDrive2 位址",
+  "en-US": "CloudDrive2 endpoint",
+  "en-GB": "CloudDrive2 endpoint"
+ },
+ "wpf.main.cdInbox": {
+  "zh-CN": "离线下载目录",
+  "zh-TW": "離線下載目錄",
+  "zh-HK": "離線下載目錄",
+  "en-US": "Offline download directory",
+  "en-GB": "Offline download directory"
+ },
+ "wpf.main.cdLibrary": {
+  "zh-CN": "媒体库目录",
+  "zh-TW": "媒體庫目錄",
+  "zh-HK": "媒體庫目錄",
+  "en-US": "Library directory",
+  "en-GB": "Library directory"
+ },
+ "wpf.main.cdMode": {
+  "zh-CN": "模式与周期",
+  "zh-TW": "模式與週期",
+  "zh-HK": "模式與週期",
+  "en-US": "Mode and interval",
+  "en-GB": "Mode and interval"
+ },
+ "wpf.main.cdOrganized": {
+  "zh-CN": "整理媒体库",
+  "zh-TW": "整理媒體庫",
+  "zh-HK": "整理媒體庫",
+  "en-US": "Organize library",
+  "en-GB": "Organise library"
+ },
+ "wpf.main.cdSingle": {
+  "zh-CN": "单目录",
+  "zh-TW": "單目錄",
+  "zh-HK": "單目錄",
+  "en-US": "Single directory",
+  "en-GB": "Single directory"
+ },
+ "wpf.main.cdPassword": {
+  "zh-CN": "CloudDrive2 密码",
+  "zh-TW": "CloudDrive2 密碼",
+  "zh-HK": "CloudDrive2 密碼",
+  "en-US": "CloudDrive2 password",
+  "en-GB": "CloudDrive2 password"
+ },
+ "wpf.main.login": {
+  "zh-CN": "登录",
+  "zh-TW": "登入",
+  "zh-HK": "登入",
+  "en-US": "Log in",
+  "en-GB": "Log in"
+ },
+ "wpf.main.verifyToken": {
+  "zh-CN": "验证 Token",
+  "zh-TW": "驗證 Token",
+  "zh-HK": "驗證 Token",
+  "en-US": "Verify token",
+  "en-GB": "Verify token"
+ },
+ "wpf.main.clearCreds": {
+  "zh-CN": "清除凭据",
+  "zh-TW": "清除憑證",
+  "zh-HK": "清除憑證",
+  "en-US": "Clear credentials",
+  "en-GB": "Clear credentials"
+ },
+ "wpf.main.cdNotConfigured": {
+  "zh-CN": "CloudDrive2 尚未配置。",
+  "zh-TW": "CloudDrive2 尚未設定。",
+  "zh-HK": "CloudDrive2 尚未設定。",
+  "en-US": "CloudDrive2 is not configured.",
+  "en-GB": "CloudDrive2 is not configured."
+ },
+ "wpf.main.rssName": {
+  "zh-CN": "RSS 名称",
+  "zh-TW": "RSS 名稱",
+  "zh-HK": "RSS 名稱",
+  "en-US": "RSS name",
+  "en-GB": "RSS name"
+ },
+ "wpf.main.rssAddress": {
+  "zh-CN": "RSS 地址",
+  "zh-TW": "RSS 位址",
+  "zh-HK": "RSS 位址",
+  "en-US": "RSS address",
+  "en-GB": "RSS address"
+ },
+ "wpf.main.rssFilter": {
+  "zh-CN": "过滤正则（可选）",
+  "zh-TW": "過濾正則（選填）",
+  "zh-HK": "過濾正則（可選）",
+  "en-US": "Filter regex (optional)",
+  "en-GB": "Filter regex (optional)"
+ },
+ "wpf.main.saveRss": {
+  "zh-CN": "保存 RSS",
+  "zh-TW": "儲存 RSS",
+  "zh-HK": "儲存 RSS",
+  "en-US": "Save RSS",
+  "en-GB": "Save RSS"
+ },
+ "wpf.main.enableSub": {
+  "zh-CN": "启用订阅",
+  "zh-TW": "啟用訂閱",
+  "zh-HK": "啟用訂閱",
+  "en-US": "Enable subscription",
+  "en-GB": "Enable subscription"
+ },
+ "wpf.main.noRss": {
+  "zh-CN": "尚未配置 RSS 订阅。",
+  "zh-TW": "尚未設定 RSS 訂閱。",
+  "zh-HK": "尚未設定 RSS 訂閱。",
+  "en-US": "No RSS subscriptions configured.",
+  "en-GB": "No RSS subscriptions configured."
+ },
+ "wpf.main.previewRss": {
+  "zh-CN": "预览 RSS",
+  "zh-TW": "預覽 RSS",
+  "zh-HK": "預覽 RSS",
+  "en-US": "Preview RSS",
+  "en-GB": "Preview RSS"
+ },
+ "wpf.main.pullPreview": {
+  "zh-CN": "拉取并预览",
+  "zh-TW": "拉取並預覽",
+  "zh-HK": "拉取並預覽",
+  "en-US": "Fetch and preview",
+  "en-GB": "Fetch and preview"
+ },
+ "wpf.main.editRss": {
+  "zh-CN": "编辑 RSS",
+  "zh-TW": "編輯 RSS",
+  "zh-HK": "編輯 RSS",
+  "en-US": "Edit RSS",
+  "en-GB": "Edit RSS"
+ },
+ "wpf.main.deleteRss": {
+  "zh-CN": "删除 RSS",
+  "zh-TW": "刪除 RSS",
+  "zh-HK": "刪除 RSS",
+  "en-US": "Delete RSS",
+  "en-GB": "Delete RSS"
+ },
+ "wpf.main.scanTitle": {
+  "zh-CN": "媒体库扫描",
+  "zh-TW": "媒體庫掃描",
+  "zh-HK": "媒體庫掃描",
+  "en-US": "Library scan",
+  "en-GB": "Library scan"
+ },
+ "wpf.main.autoScanSrc": {
+  "zh-CN": "自动扫描媒体源",
+  "zh-TW": "自動掃描媒體來源",
+  "zh-HK": "自動掃描媒體來源",
+  "en-US": "Auto-scan media sources",
+  "en-GB": "Auto-scan media sources"
+ },
+ "wpf.main.autoScanOff": {
+  "zh-CN": "自动扫描已关闭。",
+  "zh-TW": "自動掃描已關閉。",
+  "zh-HK": "自動掃描已關閉。",
+  "en-US": "Auto scan is off.",
+  "en-GB": "Auto scan is off."
+ },
+ "wpf.main.scanInterval": {
+  "zh-CN": "自动扫描周期",
+  "zh-TW": "自動掃描週期",
+  "zh-HK": "自動掃描週期",
+  "en-US": "Auto-scan interval",
+  "en-GB": "Auto-scan interval"
+ },
+ "wpf.main.every1h": {
+  "zh-CN": "每 1 小时",
+  "zh-TW": "每 1 小時",
+  "zh-HK": "每 1 小時",
+  "en-US": "Every hour",
+  "en-GB": "Every hour"
+ },
+ "wpf.main.every6h": {
+  "zh-CN": "每 6 小时",
+  "zh-TW": "每 6 小時",
+  "zh-HK": "每 6 小時",
+  "en-US": "Every 6 hours",
+  "en-GB": "Every 6 hours"
+ },
+ "wpf.main.every12h": {
+  "zh-CN": "每 12 小时",
+  "zh-TW": "每 12 小時",
+  "zh-HK": "每 12 小時",
+  "en-US": "Every 12 hours",
+  "en-GB": "Every 12 hours"
+ },
+ "wpf.main.every24h": {
+  "zh-CN": "每 24 小时",
+  "zh-TW": "每 24 小時",
+  "zh-HK": "每 24 小時",
+  "en-US": "Every 24 hours",
+  "en-GB": "Every 24 hours"
+ },
+ "wpf.main.mergeHint": {
+  "zh-CN": "仅合并身份相符的条目，保留全部剧集、版本和观看记录。",
+  "zh-TW": "僅合併身份相符的條目，保留全部劇集、版本和觀看紀錄。",
+  "zh-HK": "僅合併身份相符嘅條目，保留全部劇集、版本同觀看紀錄。",
+  "en-US": "Only entries with matching identity are merged; all episodes, versions and watch history are kept.",
+  "en-GB": "Only entries with matching identity are merged; all episodes, versions and watch history are kept."
+ },
+ "wpf.main.versionHint": {
+  "zh-CN": "选择自动按相近路径播放，或逐集手动选择多个版本。",
+  "zh-TW": "選擇自動按相近路徑播放，或逐集手動選擇多個版本。",
+  "zh-HK": "選擇自動按相近路徑播放，或逐集手動選擇多個版本。",
+  "en-US": "Auto-play by nearest path, or manually choose versions per episode.",
+  "en-GB": "Auto-play by nearest path, or manually choose versions per episode."
+ },
+ "wpf.main.versionName": {
+  "zh-CN": "下一集版本选择",
+  "zh-TW": "下一集版本選擇",
+  "zh-HK": "下一集版本選擇",
+  "en-US": "Next-episode version choice",
+  "en-GB": "Next-episode version choice"
+ },
+ "wpf.main.addLocal": {
+  "zh-CN": "添加本地 MLIP",
+  "zh-TW": "新增本機 MLIP",
+  "zh-HK": "新增本機 MLIP",
+  "en-US": "Add local MLIP",
+  "en-GB": "Add local MLIP"
+ },
+ "wpf.main.addDav": {
+  "zh-CN": "添加 WebDAV",
+  "zh-TW": "新增 WebDAV",
+  "zh-HK": "新增 WebDAV",
+  "en-US": "Add WebDAV",
+  "en-GB": "Add WebDAV"
+ },
+ "wpf.main.addRss": {
+  "zh-CN": "添加 RSS 在线源",
+  "zh-TW": "新增 RSS 線上來源",
+  "zh-HK": "新增 RSS 線上來源",
+  "en-US": "Add RSS online source",
+  "en-GB": "Add RSS online source"
+ },
+ "wpf.main.addSmb": {
+  "zh-CN": "添加 SMB",
+  "zh-TW": "新增 SMB",
+  "zh-HK": "新增 SMB",
+  "en-US": "Add SMB",
+  "en-GB": "Add SMB"
+ },
+ "wpf.main.currentLib": {
+  "zh-CN": "当前媒体库",
+  "zh-TW": "目前媒體庫",
+  "zh-HK": "目前媒體庫",
+  "en-US": "Current library",
+  "en-GB": "Current library"
+ },
+ "wpf.main.notSet": {
+  "zh-CN": "尚未设置",
+  "zh-TW": "尚未設定",
+  "zh-HK": "尚未設定",
+  "en-US": "Not set",
+  "en-GB": "Not set"
+ },
+ "wpf.main.open": {
+  "zh-CN": "打开",
+  "zh-TW": "開啟",
+  "zh-HK": "開啟",
+  "en-US": "Open",
+  "en-GB": "Open"
+ },
+ "wpf.main.openSrc": {
+  "zh-CN": "打开媒体源",
+  "zh-TW": "開啟媒體來源",
+  "zh-HK": "開啟媒體來源",
+  "en-US": "Open media source",
+  "en-GB": "Open media source"
+ },
+ "wpf.main.scanSrc": {
+  "zh-CN": "扫描媒体源",
+  "zh-TW": "掃描媒體來源",
+  "zh-HK": "掃描媒體來源",
+  "en-US": "Scan media source",
+  "en-GB": "Scan media source"
+ },
+ "wpf.main.editSrc": {
+  "zh-CN": "编辑媒体源",
+  "zh-TW": "編輯媒體來源",
+  "zh-HK": "編輯媒體來源",
+  "en-US": "Edit media source",
+  "en-GB": "Edit media source"
+ },
+ "wpf.main.deleteSrc": {
+  "zh-CN": "删除媒体源",
+  "zh-TW": "刪除媒體來源",
+  "zh-HK": "刪除媒體來源",
+  "en-US": "Delete media source",
+  "en-GB": "Delete media source"
+ },
+ "wpf.main.afterPlay": {
+  "zh-CN": "播完后",
+  "zh-TW": "播完後",
+  "zh-HK": "播完後",
+  "en-US": "After playback",
+  "en-GB": "After playback"
+ },
+ "wpf.main.afterPlayHint": {
+  "zh-CN": "决定剧集自然播放完成后的操作",
+  "zh-TW": "決定劇集自然播放完成後的操作",
+  "zh-HK": "決定劇集自然播放完成後嘅操作",
+  "en-US": "Decide what happens when an episode finishes naturally",
+  "en-GB": "Decide what happens when an episode finishes naturally"
+ },
+ "wpf.main.playNext": {
+  "zh-CN": "播放下一集",
+  "zh-TW": "播放下一集",
+  "zh-HK": "播放下一集",
+  "en-US": "Play next episode",
+  "en-GB": "Play next episode"
+ },
+ "wpf.main.subLang": {
+  "zh-CN": "首选字幕语言",
+  "zh-TW": "偏好字幕語言",
+  "zh-HK": "偏好字幕語言",
+  "en-US": "Preferred subtitle language",
+  "en-GB": "Preferred subtitle language"
+ },
+ "wpf.main.subHint": {
+  "zh-CN": "匹配不到时保留播放器默认轨道",
+  "zh-TW": "比對不到時保留播放器預設軌道",
+  "zh-HK": "比對唔到時保留播放器預設軌道",
+  "en-US": "Keep the player default track when nothing matches",
+  "en-GB": "Keep the player default track when nothing matches"
+ },
+ "wpf.main.langHint": {
+  "zh-CN": "跟随系统或固定区域设置，影响数字与日期格式",
+  "zh-TW": "跟隨系統或固定區域設定，影響數字與日期格式",
+  "zh-HK": "跟隨系統或固定區域設定，影響數字與日期格式",
+  "en-US": "Follow the system or pin a locale; affects number and date formats",
+  "en-GB": "Follow the system or pin a locale; affects number and date formats"
+ },
+ "wpf.main.about": {
+  "zh-CN": "关于",
+  "zh-TW": "關於",
+  "zh-HK": "關於",
+  "en-US": "About",
+  "en-GB": "About"
+ },
+ "wpf.main.aboutText": {
+  "zh-CN": "原生 Windows 客户端 · 支持 MLIP v1-v4",
+  "zh-TW": "原生 Windows 客戶端 · 支援 MLIP v1-v4",
+  "zh-HK": "原生 Windows 客戶端 · 支援 MLIP v1-v4",
+  "en-US": "Native Windows client · MLIP v1-v4 supported",
+  "en-GB": "Native Windows client · MLIP v1-v4 supported"
+ },
+ "wpf.main.loadingLib": {
+  "zh-CN": "正在读取媒体库…",
+  "zh-TW": "正在讀取媒體庫…",
+  "zh-HK": "讀緊媒體庫…",
+  "en-US": "Loading library…",
+  "en-GB": "Loading library…"
+ },
+ "wpf.main.cancelScan": {
+  "zh-CN": "取消扫描",
+  "zh-TW": "取消掃描",
+  "zh-HK": "取消掃描",
+  "en-US": "Cancel scan",
+  "en-GB": "Cancel scan"
+ },
+ "wpf.main.cdUser": {
+  "zh-CN": "CloudDrive2 用户名",
+  "zh-TW": "CloudDrive2 使用者名稱",
+  "zh-HK": "CloudDrive2 用戶名",
+  "en-US": "CloudDrive2 username",
+  "en-GB": "CloudDrive2 username"
+ },
+ "wpf.main.cdInboxName": {
+  "zh-CN": "CloudDrive2 离线下载目录",
+  "zh-TW": "CloudDrive2 離線下載目錄",
+  "zh-HK": "CloudDrive2 離線下載目錄",
+  "en-US": "CloudDrive2 offline download directory",
+  "en-GB": "CloudDrive2 offline download directory"
+ },
+ "wpf.main.cdLibName": {
+  "zh-CN": "CloudDrive2 媒体库目录",
+  "zh-TW": "CloudDrive2 媒體庫目錄",
+  "zh-HK": "CloudDrive2 媒體庫目錄",
+  "en-US": "CloudDrive2 library directory",
+  "en-GB": "CloudDrive2 library directory"
+ },
+ "wpf.main.cdModeName": {
+  "zh-CN": "CloudDrive2 媒体库模式",
+  "zh-TW": "CloudDrive2 媒體庫模式",
+  "zh-HK": "CloudDrive2 媒體庫模式",
+  "en-US": "CloudDrive2 library mode",
+  "en-GB": "CloudDrive2 library mode"
+ },
+ "wpf.main.cdInterval": {
+  "zh-CN": "CloudDrive2 同步周期分钟",
+  "zh-TW": "CloudDrive2 同步週期分鐘",
+  "zh-HK": "CloudDrive2 同步週期分鐘",
+  "en-US": "CloudDrive2 sync interval minutes",
+  "en-GB": "CloudDrive2 sync interval minutes"
+ },
+ "wpf.main.rssFilterName": {
+  "zh-CN": "过滤正则",
+  "zh-TW": "過濾正則",
+  "zh-HK": "過濾正則",
+  "en-US": "Filter regex",
+  "en-GB": "Filter regex"
  }
 };
 let currentLocale = 'zh-CN';
