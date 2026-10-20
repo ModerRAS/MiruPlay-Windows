@@ -531,4 +531,85 @@
   <data name="wpf.main.cdModeName" xml:space="preserve"><value>CloudDrive2 library mode</value></data>
   <data name="wpf.main.cdInterval" xml:space="preserve"><value>CloudDrive2 sync interval minutes</value></data>
   <data name="wpf.main.rssFilterName" xml:space="preserve"><value>Filter regex</value></data>
+  <data name="wpf.status.webStarted" xml:space="preserve"><value>WebControl started: {0}</value></data>
+  <data name="wpf.status.webFailed" xml:space="preserve"><value>WebControl failed to start: {0}</value></data>
+  <data name="wpf.status.bgWebFailed" xml:space="preserve"><value>Background start could not enable WebControl; the window stays visible.</value></data>
+  <data name="wpf.status.connectingDav" xml:space="preserve"><value>Connecting WebDAV and verifying{0}…</value></data>
+  <data name="wpf.status.dirKind" xml:space="preserve"><value>directory</value></data>
+  <data name="wpf.status.mlipKind" xml:space="preserve"><value> MLIP</value></data>
+  <data name="wpf.status.addDavTitle" xml:space="preserve"><value>Cannot add WebDAV</value></data>
+  <data name="wpf.status.addRssTitle" xml:space="preserve"><value>Cannot add RSS online source</value></data>
+  <data name="wpf.status.connectingSmb" xml:space="preserve"><value>Connecting SMB and verifying{0}…</value></data>
+  <data name="wpf.status.addSmbTitle" xml:space="preserve"><value>Cannot add SMB</value></data>
+  <data name="wpf.status.addSrcTitle" xml:space="preserve"><value>Cannot add media source</value></data>
+  <data name="wpf.status.localSrcMissing" xml:space="preserve"><value>Local media source not found.</value></data>
+  <data name="wpf.status.libSummary" xml:space="preserve"><value>{0} works · {1} episodes</value></data>
+  <data name="wpf.status.libLoaded" xml:space="preserve"><value>Loaded {0} works</value></data>
+  <data name="wpf.status.openLibTitle" xml:space="preserve"><value>Cannot open library</value></data>
+  <data name="wpf.status.noMatch" xml:space="preserve"><value>No matching content</value></data>
+  <data name="wpf.status.noMatchHint" xml:space="preserve"><value>Try a different title, original title or genre keyword.</value></data>
+  <data name="wpf.status.openMetaFailed" xml:space="preserve"><value>Cannot open metadata page: {0}</value></data>
+  <data name="wpf.status.sysPlayer" xml:space="preserve"><value>Handed to Windows player: {0} (limited)</value></data>
+  <data name="wpf.status.playingProgress" xml:space="preserve"><value>Playing and tracking progress: {0} {1}</value></data>
+  <data name="wpf.status.playFailed" xml:space="preserve"><value>Cannot play: {0}</value></data>
+  <data name="wpf.status.playFailedTitle" xml:space="preserve"><value>Cannot play</value></data>
+  <data name="wpf.status.progressSynced" xml:space="preserve"><value>Progress saved; Bangumi episode status synced</value></data>
+  <data name="wpf.status.syncFailed" xml:space="preserve"><value>Progress saved; Bangumi sync failed: {0}</value></data>
+  <data name="wpf.status.playbackError" xml:space="preserve"><value>Playback failed: {0}</value></data>
+  <data name="wpf.status.progressSaved" xml:space="preserve"><value>Progress saved</value></data>
+  <data name="wpf.status.uncategorized" xml:space="preserve"><value>Uncategorised</value></data>
+  <data name="wpf.status.noExePath" xml:space="preserve"><value>Cannot determine current executable path.</value></data>
+  <data name="wpf.status.launchFailed" xml:space="preserve"><value>Failed to start playback; check player path and media address.</value></data>
+  <data name="wpf.status.noSession" xml:space="preserve"><value>No controllable mpv session.</value></data>
+  <data name="wpf.status.versionGone" xml:space="preserve"><value>Selected version is no longer in the next-episode list.</value></data>
+  <data name="wpf.status.versionLaunchFailed" xml:space="preserve"><value>Failed to start next-episode version playback.</value></data>
+  <data name="wpf.status.noVersionNeeded" xml:space="preserve"><value>Current next episode needs no version choice.</value></data>
+  <data name="wpf.status.noNext" xml:space="preserve"><value>No next episode to play.</value></data>
+  <data name="wpf.status.noPrev" xml:space="preserve"><value>No previous episode.</value></data>
+  <data name="wpf.status.controlFailed" xml:space="preserve"><value>Playback control failed: {0}</value></data>
+  <data name="wpf.status.rescanSrc" xml:space="preserve"><value>CloudDrive/RSS rescan source must be a configured WebDAV source.</value></data>
+  <data name="wpf.status.rescanFailed" xml:space="preserve"><value>WebDAV rescan failed: {0}</value></data>
+  <data name="wpf.status.scanned" xml:space="preserve"><value>Scanned {0}: {1} episodes, {2} new, {3} deleted</value></data>
+  <data name="wpf.status.scanCancelled" xml:space="preserve"><value>Scan cancelled</value></data>
+  <data name="wpf.status.scanFiles" xml:space="preserve"><value>Processed {0}/{1} files · {2} episodes</value></data>
+  <data name="wpf.status.discovering" xml:space="preserve"><value>Discovering media files…</value></data>
+  <data name="wpf.status.scanningSrc" xml:space="preserve"><value>Scanning media source…</value></data>
+  <data name="wpf.status.taskName" xml:space="preserve"><value>Media source scan {0}</value></data>
+  <data name="wpf.status.taskRunning" xml:space="preserve"><value>Task {0} is already running.</value></data>
+  <data name="wpf.status.srcUpdated" xml:space="preserve"><value>Source updated: {0}</value></data>
+  <data name="wpf.status.updateSrcTitle" xml:space="preserve"><value>Cannot update media source</value></data>
+  <data name="wpf.status.confirmDeleteSrc" xml:space="preserve"><value>Delete media source &quot;{0}&quot;? Media files and library.db are kept.</value></data>
+  <data name="wpf.status.srcDeleted" xml:space="preserve"><value>Source deleted: {0}</value></data>
+  <data name="wpf.status.selectSrc" xml:space="preserve"><value>Select a media source to begin</value></data>
+  <data name="wpf.status.noSrcSelected" xml:space="preserve"><value>No media source selected</value></data>
+  <data name="wpf.status.dramaNoSrc" xml:space="preserve"><value>Drama mode has no configured source</value></data>
+  <data name="wpf.status.animeNoSrc" xml:space="preserve"><value>Anime mode has no configured source</value></data>
+  <data name="wpf.status.dspApplied" xml:space="preserve"><value>Audio DSP applied to the current MiruPlay mpv and saved.</value></data>
+  <data name="wpf.status.dspApplyFailed" xml:space="preserve"><value>Failed to apply audio DSP: {0}</value></data>
+  <data name="wpf.status.measuredApplied" xml:space="preserve"><value>Room calibration preset applied and selected.</value></data>
+  <data name="wpf.status.webOn" xml:space="preserve"><value>WebControl started</value></data>
+  <data name="wpf.status.webOff" xml:space="preserve"><value>WebControl stopped</value></data>
+  <data name="wpf.status.bangumiSaved" xml:space="preserve"><value>Bangumi token saved in encrypted storage.</value></data>
+  <data name="wpf.status.cdSaved" xml:space="preserve"><value>CloudDrive/RSS automation settings saved.</value></data>
+  <data name="wpf.status.cdSyncing" xml:space="preserve"><value>Running CloudDrive/RSS sync...</value></data>
+  <data name="wpf.status.cdSyncDone" xml:space="preserve"><value>Sync complete: {0} submitted, {1} skipped, {2} failed.</value></data>
+  <data name="wpf.status.cdLoggingIn" xml:space="preserve"><value>Logging in to CloudDrive2...</value></data>
+  <data name="wpf.status.cdVerifying" xml:space="preserve"><value>Verifying CloudDrive2 API token...</value></data>
+  <data name="wpf.status.cdTokenVerified" xml:space="preserve"><value>CloudDrive2 API token verified and saved: {0}</value></data>
+  <data name="wpf.status.cdBothSaved" xml:space="preserve"><value>CloudDrive2 token and password saved in encrypted storage.</value></data>
+  <data name="wpf.status.cdTokenOnly" xml:space="preserve"><value>CloudDrive2 token saved in encrypted storage.</value></data>
+  <data name="wpf.status.cdPassOnly" xml:space="preserve"><value>CloudDrive2 password saved in encrypted storage.</value></data>
+  <data name="wpf.status.cdNoCreds" xml:space="preserve"><value>CloudDrive2 credentials not configured.</value></data>
+  <data name="wpf.status.cdNoVerified" xml:space="preserve"><value>No verified credentials for the current CloudDrive2 endpoint.</value></data>
+  <data name="wpf.status.rssSaved" xml:space="preserve"><value>RSS subscription saved: {0}</value></data>
+  <data name="wpf.status.rssFetching" xml:space="preserve"><value>Fetching: {0}</value></data>
+  <data name="wpf.status.rssPreview" xml:space="preserve"><value>Preview complete: {0} items, {1} submittable, {2} processed.</value></data>
+  <data name="wpf.status.rssEditing" xml:space="preserve"><value>Editing: {0}</value></data>
+  <data name="wpf.status.confirmDeleteRss" xml:space="preserve"><value>Delete RSS subscription &quot;{0}&quot;?</value></data>
+  <data name="wpf.status.rssLoaded" xml:space="preserve"><value>Loaded {0} RSS subscriptions.</value></data>
+  <data name="wpf.status.urlCopied" xml:space="preserve"><value>WebControl access address copied</value></data>
+  <data name="wpf.status.continuePlay" xml:space="preserve"><value>Continue playing {0} {1}</value></data>
+  <data name="wpf.status.dspOn" xml:space="preserve"><value>DSP enabled: {0} ({1} presets)</value></data>
+  <data name="wpf.status.autoScanOn" xml:space="preserve"><value>Enabled, checking every {0} hours.</value></data>
+  <data name="wpf.status.tmdbSaved" xml:space="preserve"><value>TMDB token saved in encrypted storage.</value></data>
 </root>

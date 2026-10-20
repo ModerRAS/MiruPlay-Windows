@@ -222,17 +222,17 @@ public partial class MainWindow : Window, IAsyncDisposable
                 {
                     ["port"] = _settings.WebControlPort.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 });
-                StatusText.Text = $"WebControl 已启动：{_webControlServer.PreferredAccessUrl}";
+                StatusText.Text = AppStrings.Get("wpf.status.webStarted", _webControlServer.PreferredAccessUrl);
             }
             catch (IOException error)
             {
                 _localLogs.Write("ERROR", "WebControl failed to start", error);
-                StatusText.Text = $"WebControl 启动失败：{error.Message}";
+                StatusText.Text = AppStrings.Get("wpf.status.webFailed", error.Message);
             }
         }
         UpdateWebControlView();
         if (_backgroundMode && _settings.WebControlEnabled && _webControlServer.IsRunning) Hide();
-        else if (_backgroundMode) StatusText.Text = "后台启动未能启用 WebControl，窗口保持可见。";
+        else if (_backgroundMode) StatusText.Text = AppStrings.Get("wpf.status.bgWebFailed");
         _openObserveLogScheduler.Start();
         _cloudDriveScheduler.Start();
         _mediaSourceAutoScanScheduler.Start();
@@ -266,7 +266,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
         var password = dialog.TakePassword();
         BusyOverlay.Visibility = Visibility.Visible;
-        StatusText.Text = $"正在连接 WebDAV 并验证{(dialog.RecognitionMode == "DIRECTORY" ? "目录" : " MLIP")}…";
+        StatusText.Text = AppStrings.Get("wpf.status.connectingDav", dialog.RecognitionMode == "DIRECTORY" ? AppStrings.Get("wpf.status.dirKind") : AppStrings.Get("wpf.status.mlipKind"));
         try
         {
             var source = await _mediaSourceRegistry.AddAsync(new MediaSourceRequest(
@@ -281,7 +281,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
         catch (Exception error) when (error is HttpRequestException or IOException or InvalidDataException or InvalidOperationException or NotSupportedException or UnauthorizedAccessException)
         {
-            MessageBox.Show(this, error.Message, "无法添加 WebDAV", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, error.Message, AppStrings.Get("wpf.status.addDavTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             StatusText.Text = error.Message;
         }
         finally
@@ -307,7 +307,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
         catch (Exception error) when (error is ArgumentException or HttpRequestException or IOException or InvalidDataException or InvalidOperationException or NotSupportedException or TaskCanceledException)
         {
-            MessageBox.Show(this, error.Message, "无法添加 RSS 在线源", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, error.Message, AppStrings.Get("wpf.status.addRssTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             StatusText.Text = error.Message;
         }
     }
@@ -319,7 +319,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
         var password = dialog.TakePassword();
         BusyOverlay.Visibility = Visibility.Visible;
-        StatusText.Text = $"正在连接 SMB 并验证{(dialog.RecognitionMode == "DIRECTORY" ? "目录" : " MLIP")}…";
+        StatusText.Text = AppStrings.Get("wpf.status.connectingSmb", dialog.RecognitionMode == "DIRECTORY" ? AppStrings.Get("wpf.status.dirKind") : AppStrings.Get("wpf.status.mlipKind"));
         try
         {
             var source = await _mediaSourceRegistry.AddAsync(new MediaSourceRequest(
@@ -335,7 +335,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
         catch (Exception error) when (error is IOException or InvalidDataException or InvalidOperationException or NotSupportedException or UnauthorizedAccessException)
         {
-            MessageBox.Show(this, error.Message, "无法添加 SMB", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, error.Message, AppStrings.Get("wpf.status.addSmbTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             StatusText.Text = error.Message;
         }
         finally
@@ -382,14 +382,14 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
         catch (Exception error) when (error is IOException or InvalidDataException or InvalidOperationException or NotSupportedException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
         {
-            MessageBox.Show(this, error.Message, "无法添加媒体源", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, error.Message, AppStrings.Get("wpf.status.addSrcTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
     private async Task LoadLibraryAsync(string rootPath)
     {
         var source = (_settings.MediaSources ?? []).FirstOrDefault(item => item.Type == "LOCAL" && SamePath(item.Location, rootPath))
-            ?? throw new InvalidOperationException("本地媒体源不存在。");
+            ?? throw new InvalidOperationException(AppStrings.Get("wpf.status.localSrcMissing"));
         await LoadSourceAsync(source);
     }
 
@@ -407,7 +407,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         _loadedSourceId = null;
         _requestedPosterUrls.Clear();
         BusyOverlay.Visibility = Visibility.Visible;
-        StatusText.Text = "正在读取媒体库…";
+        StatusText.Text = AppStrings.Get("wpf.main.loadingLib");
         try
         {
             var catalog = await Task.Run(() => _mediaSourceRegistry.LoadCatalog(source.Id));
@@ -428,18 +428,18 @@ public partial class MainWindow : Window, IAsyncDisposable
             };
             _settingsStore.Save(_settings);
             LibraryRootValue.Text = source.Location;
-            LibrarySchemaText.Text = source.Type == "RSS" ? "RSS 在线源" : $"MLIP v{catalog.SchemaVersion}";
-            LibrarySummaryText.Text = $"{_allSeries.Count} 部作品 · {_allSeries.Sum(item => item.Episodes.Count)} 集";
+            LibrarySchemaText.Text = source.Type == "RSS" ? AppStrings.Get("sources.rss") : $"MLIP v{catalog.SchemaVersion}";
+            LibrarySummaryText.Text = AppStrings.Get("wpf.status.libSummary", _allSeries.Count, _allSeries.Sum(item => item.Episodes.Count));
             SearchBox.Text = string.Empty;
             ShowSeries(_allSeries);
             ApplySettingsToView();
-            StatusText.Text = $"已载入 {_allSeries.Count} 部作品";
+            StatusText.Text = AppStrings.Get("wpf.status.libLoaded", _allSeries.Count);
         }
         catch (Exception error) when (error is IOException or HttpRequestException or InvalidDataException or Microsoft.Data.Sqlite.SqliteException or NotSupportedException or TaskCanceledException or ArgumentException)
         {
             ClearLibraryView();
             StatusText.Text = error.Message;
-            MessageBox.Show(this, error.Message, "无法打开媒体库", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, error.Message, AppStrings.Get("wpf.status.openLibTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         finally
         {
@@ -456,13 +456,13 @@ public partial class MainWindow : Window, IAsyncDisposable
         EmptyState.Visibility = series.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         if (_allSeries.Count > 0 && series.Count == 0)
         {
-            EmptyStateTitle.Text = "没有匹配的内容";
-            EmptyStateDescription.Text = "换一个标题、原名或类型关键词。";
+            EmptyStateTitle.Text = AppStrings.Get("wpf.status.noMatch");
+            EmptyStateDescription.Text = AppStrings.Get("wpf.status.noMatchHint");
         }
         else
         {
-            EmptyStateTitle.Text = "还没有媒体库";
-            EmptyStateDescription.Text = "选择一个由 anime-organizer 生成、根目录包含 library.db 的媒体目录。";
+            EmptyStateTitle.Text = AppStrings.Get("wpf.main.noLibrary");
+            EmptyStateDescription.Text = AppStrings.Get("wpf.main.noLibraryHint");
         }
     }
 
@@ -608,7 +608,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
         catch (Exception error) when (error is InvalidOperationException or System.ComponentModel.Win32Exception)
         {
-            StatusText.Text = $"无法打开元数据页面：{error.Message}";
+            StatusText.Text = AppStrings.Get("wpf.status.openMetaFailed", error.Message);
         }
     }
 
@@ -743,8 +743,8 @@ public partial class MainWindow : Window, IAsyncDisposable
                 ["backend"] = launch.UsedSystemPlayerFallback ? "system" : "libmpv",
             });
             StatusText.Text = launch.UsedSystemPlayerFallback
-                ? $"已交给 Windows 播放器：{episode.DisplayTitle}（能力受限）"
-                : $"正在播放并记录进度：{episode.DisplayNumber} {episode.DisplayTitle}";
+                ? AppStrings.Get("wpf.status.sysPlayer", episode.DisplayTitle)
+                : AppStrings.Get("wpf.status.playingProgress", episode.DisplayNumber, episode.DisplayTitle);
             if (session is not null)
             {
                 session.SubtitleTracksChanged += ActiveSession_SubtitleTracksChanged;
@@ -764,10 +764,10 @@ public partial class MainWindow : Window, IAsyncDisposable
             });
             if (_activePlaybackEpisode?.ProgressKey == episode.ProgressKey)
                 HidePlaybackPage(showDetail: _activePlaybackSeries is not null);
-            StatusText.Text = $"无法播放：{error.Message}";
+            StatusText.Text = AppStrings.Get("wpf.status.playFailed", error.Message);
             if (showErrorDialog)
             {
-                MessageBox.Show(this, error.Message, "无法播放", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, error.Message, AppStrings.Get("wpf.status.playFailedTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return false;
         }
@@ -830,11 +830,11 @@ public partial class MainWindow : Window, IAsyncDisposable
             try
             {
                 if (await _bangumiPlaybackSync.MarkCompletedAsync(playedEpisode, session.WasCompleted) == BangumiPlaybackSyncResult.Updated)
-                    syncStatus = "播放进度已保存，Bangumi 分集状态已同步";
+                    syncStatus = AppStrings.Get("wpf.status.progressSynced");
             }
             catch (Exception error) when (error is HttpRequestException or InvalidDataException)
             {
-                syncStatus = $"播放进度已保存；Bangumi 同步失败：{error.Message}";
+                syncStatus = AppStrings.Get("wpf.status.syncFailed", error.Message);
             }
         }
 
@@ -854,7 +854,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             if (completedPlaybackSeries?.Id == refreshedSeries?.Id)
                 completedPlaybackSeries = refreshedSeries;
         }
-        if (!wasSuperseded) StatusText.Text = session.LastError is { } playbackError ? $"播放失败：{playbackError}" : syncStatus ?? "播放进度已保存";
+        if (!wasSuperseded) StatusText.Text = session.LastError is { } playbackError ? AppStrings.Get("wpf.status.playbackError", playbackError) : syncStatus ?? AppStrings.Get("wpf.status.progressSaved");
         if (nextEpisode is not null && launchGeneration == Interlocked.Read(ref _playbackGeneration))
         {
             var isMusic = nextEpisode.ProgressKey.StartsWith("music:", StringComparison.Ordinal);
@@ -913,7 +913,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             ? _filteredSeries.GroupBy(LibraryOrganization.ReleaseSeasonTitle)
                 .Select(group => new LibraryGenreGroup(group.Key, group.ToList())).ToList()
             : _filteredSeries
-                .SelectMany(series => series.Genres.DefaultIfEmpty("未分类"), (series, genre) => new { series, genre })
+                .SelectMany(series => series.Genres.DefaultIfEmpty(AppStrings.Get("wpf.status.uncategorized")), (series, genre) => new { series, genre })
                 .GroupBy(item => item.genre, StringComparer.CurrentCultureIgnoreCase)
                 .OrderBy(group => group.Key, StringComparer.CurrentCultureIgnoreCase)
                 .Select(group => new LibraryGenreGroup(group.Key, group.Select(item => item.series).ToList()))
@@ -970,7 +970,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     private Task<bool> HandleAppUpdateInstallAsync()
     {
         if (_shutdownStarted) return Task.FromResult(false);
-        var executable = Environment.ProcessPath ?? throw new InvalidOperationException("无法确定当前程序路径。");
+        var executable = Environment.ProcessPath ?? throw new InvalidOperationException(AppStrings.Get("wpf.status.noExePath"));
         _ = _appUpdater.StartInstallerHandoff(executable, Environment.ProcessId, _backgroundMode);
         _localLogs.Write("WARN", "Staged Windows installer handoff accepted");
         _ = Dispatcher.BeginInvoke(new Action(async () =>
@@ -993,7 +993,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         if (_shutdownStarted) return;
         _shutdownStarted = true;
         var restart = action == "restart";
-        var executable = Environment.ProcessPath ?? throw new InvalidOperationException("无法确定当前程序路径。");
+        var executable = Environment.ProcessPath ?? throw new InvalidOperationException(AppStrings.Get("wpf.status.noExePath"));
         _ = Dispatcher.InvokeAsync(async () =>
         {
             try
@@ -1193,14 +1193,14 @@ public partial class MainWindow : Window, IAsyncDisposable
             .InvokeAsync(() => PlayEpisodeAsync(episode, startPositionMs, showErrorDialog: false))
             .Task
             .Unwrap();
-        if (!started) throw new InvalidOperationException("播放启动失败；请检查播放器路径和媒体地址。");
+        if (!started) throw new InvalidOperationException(AppStrings.Get("wpf.status.launchFailed"));
         return true;
     }
 
     private Task<PlaybackRuntimeStatus> ExecutePlaybackCommandFromWebAsync(PlaybackControlCommand command) =>
         Dispatcher.InvokeAsync(async () =>
         {
-            var session = _activeSession ?? throw new InvalidOperationException("当前没有可控制的 mpv 播放会话。");
+            var session = _activeSession ?? throw new InvalidOperationException(AppStrings.Get("wpf.status.noSession"));
             var kind = command.Command.Trim().ToLowerInvariant();
             if (kind is "previous" or "next")
             {
@@ -1211,21 +1211,21 @@ public partial class MainWindow : Window, IAsyncDisposable
                     {
                         if (command.VersionEpisodeId is null) return GetPlaybackRuntimeStatus();
                         var selected = entry.Versions.FirstOrDefault(version => version.ApiId == command.VersionEpisodeId)
-                            ?? throw new InvalidOperationException("所选版本已不在下一集列表中。");
+                            ?? throw new InvalidOperationException(AppStrings.Get("wpf.status.versionGone"));
                         if (queue.Next() is null || queue.SelectVersion(selected.MediaPath) is not { } next ||
                             !await PlayEpisodeAsync(next, showErrorDialog: false))
-                            throw new InvalidOperationException("下一集版本播放启动失败。");
+                            throw new InvalidOperationException(AppStrings.Get("wpf.status.versionLaunchFailed"));
                     }
                     else
                     {
-                        if (command.VersionEpisodeId is not null) throw new InvalidOperationException("当前下一集不需要版本选择。");
-                        if (!await PlayQueueNextAsync(allowManualPrompt: false)) throw new InvalidOperationException("当前没有可播放的下一集。");
+                        if (command.VersionEpisodeId is not null) throw new InvalidOperationException(AppStrings.Get("wpf.status.noVersionNeeded"));
+                        if (!await PlayQueueNextAsync(allowManualPrompt: false)) throw new InvalidOperationException(AppStrings.Get("wpf.status.noNext"));
                     }
                 }
                 else
                 {
                     var previous = _activePlaybackQueue?.Previous();
-                    if (previous is null) throw new InvalidOperationException("当前没有上一集。");
+                    if (previous is null) throw new InvalidOperationException(AppStrings.Get("wpf.status.noPrev"));
                     if (!await PlayEpisodeAsync(previous, showErrorDialog: false)) throw new InvalidOperationException(StatusText.Text);
                 }
             }
@@ -1334,7 +1334,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         catch (Exception error) when (error is IOException or InvalidOperationException or ArgumentException or TimeoutException)
         {
             PlaybackPageView.ShowCommandError(error.Message);
-            StatusText.Text = $"播放控制失败：{error.Message}";
+            StatusText.Text = AppStrings.Get("wpf.status.controlFailed", error.Message);
         }
     }
 
@@ -1377,7 +1377,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
         catch (Exception error) when (error is IOException or InvalidOperationException or ArgumentOutOfRangeException or TimeoutException)
         {
-            StatusText.Text = $"播放控制失败：{error.Message}";
+            StatusText.Text = AppStrings.Get("wpf.status.controlFailed", error.Message);
         }
     }
 
@@ -1467,14 +1467,14 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         cancellationToken.ThrowIfCancellationRequested();
         var source = _mediaSourceRegistry.Get(sourceId);
-        if (source?.Type != "WEBDAV") throw new InvalidOperationException("CloudDrive/RSS 回扫来源必须是已配置的 WebDAV 来源。");
+        if (source?.Type != "WEBDAV") throw new InvalidOperationException(AppStrings.Get("wpf.status.rescanSrc"));
         var result = await ScanSourceFromWebAsync(sourceId, cancellationToken);
         return ToCloudDriveIngestionSummary(result);
     }
 
     internal static CloudDriveIngestionSummary ToCloudDriveIngestionSummary(SourceScanResponse result)
     {
-        if (result.Error is not null) throw new InvalidDataException($"WebDAV 回扫失败：{result.Error}");
+        if (result.Error is not null) throw new InvalidDataException(AppStrings.Get("wpf.status.rescanFailed", result.Error));
         return new CloudDriveIngestionSummary(Indexed: result.EpisodesFound);
     }
 
@@ -1511,12 +1511,12 @@ public partial class MainWindow : Window, IAsyncDisposable
         {
             var result = await ScanSourceForUiAsync(source.Id);
             StatusText.Text = result.Error is null
-                ? $"已扫描 {source.Name}：{result.EpisodesFound} 集，新增 {result.NewEpisodes}，删除 {result.DeletedEpisodes}"
+                ? AppStrings.Get("wpf.status.scanned", source.Name, result.EpisodesFound, result.NewEpisodes, result.DeletedEpisodes)
                 : result.Error;
         }
         catch (OperationCanceledException)
         {
-            StatusText.Text = "扫描已取消";
+            StatusText.Text = AppStrings.Get("wpf.status.scanCancelled");
         }
     }
 
@@ -1531,23 +1531,23 @@ public partial class MainWindow : Window, IAsyncDisposable
         {
             BusyProgressBar.IsIndeterminate = false;
             BusyProgressText.Text = value.FilesDiscovered > 0
-                ? $"已处理 {value.FilesProcessed}/{value.FilesDiscovered} 个文件 · {value.EpisodesFound} 集"
-                : "正在发现媒体文件…";
+                ? AppStrings.Get("wpf.status.scanFiles", value.FilesProcessed, value.FilesDiscovered, value.EpisodesFound)
+                : AppStrings.Get("wpf.status.discovering");
         });
         BusyOverlay.Visibility = Visibility.Visible;
-        BusyOperationText.Text = "正在扫描媒体源…";
-        BusyProgressText.Text = "正在发现媒体文件…";
+        BusyOperationText.Text = AppStrings.Get("wpf.status.scanningSrc");
+        BusyProgressText.Text = AppStrings.Get("wpf.status.discovering");
         BusyProgressBar.IsIndeterminate = true;
         CancelScanButton.Visibility = Visibility.Visible;
         try
         {
             SourceScanResponse? result = null;
-            var started = await _tasks.RunTrackedAsync($"media-source-scan-{sourceId}", $"媒体源扫描 {sourceId}", async token =>
+            var started = await _tasks.RunTrackedAsync($"media-source-scan-{sourceId}", AppStrings.Get("wpf.status.taskName", sourceId), async token =>
             {
                 result = await _mediaSourceRegistry.ScanAsync(sourceId, progress, token).ConfigureAwait(true);
                 if (result.Error is not null) throw new InvalidOperationException(result.Error);
             }, cancellationToken);
-            if (result is null) return new SourceScanResponse(sourceId, string.Empty, 0, 0, 0, $"任务 media-source-scan-{sourceId} 已在运行。");
+            if (result is null) return new SourceScanResponse(sourceId, string.Empty, 0, 0, 0, AppStrings.Get("wpf.status.taskRunning", $"media-source-scan-{sourceId}"));
             _localLogs.Write(started ? "INFO" : "ERROR", started ? "Media source scan completed" : "Media source scan failed",
                 attributes: new Dictionary<string, string>
                 {
@@ -1635,11 +1635,11 @@ public partial class MainWindow : Window, IAsyncDisposable
             var updated = _mediaSourceRegistry.Get(source.Id)!;
             ApplySettingsToView();
             if (_settings.ActiveSourceId == source.Id) await LoadSourceAsync(updated);
-            StatusText.Text = $"已更新媒体源：{updated.Name}";
+            StatusText.Text = AppStrings.Get("wpf.status.srcUpdated", updated.Name);
         }
         catch (Exception error) when (error is ArgumentException or HttpRequestException or IOException or InvalidDataException or InvalidOperationException or NotSupportedException or UnauthorizedAccessException)
         {
-            MessageBox.Show(this, error.Message, "无法更新媒体源", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, error.Message, AppStrings.Get("wpf.status.updateSrcTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             StatusText.Text = error.Message;
         }
         finally
@@ -1653,13 +1653,13 @@ public partial class MainWindow : Window, IAsyncDisposable
         if (sender is not Button { Tag: MediaSourceDefinition source }) return;
         var confirmation = MessageBox.Show(
             this,
-            $"删除媒体源“{source.Name}”？不会删除媒体文件或 library.db。",
-            "删除媒体源",
+            AppStrings.Get("wpf.status.confirmDeleteSrc", source.Name),
+            AppStrings.Get("wpf.main.deleteSrc"),
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning);
         if (confirmation != MessageBoxResult.Yes) return;
         await RemoveSourceFromWebAsync(source.Id);
-        StatusText.Text = $"已删除媒体源：{source.Name}";
+        StatusText.Text = AppStrings.Get("wpf.status.srcDeleted", source.Name);
     }
 
     private void ClearLibraryView()
@@ -1675,10 +1675,10 @@ public partial class MainWindow : Window, IAsyncDisposable
         _allSeries = [];
         UpdateContinueWatching();
         ShowSeries(_allSeries);
-        LibraryRootValue.Text = "尚未设置";
+        LibraryRootValue.Text = AppStrings.Get("wpf.main.notSet");
         LibrarySchemaText.Text = "MLIP v1-v4";
-        LibrarySummaryText.Text = "选择一个媒体源以开始";
-        StatusText.Text = "尚未选择媒体源";
+        LibrarySummaryText.Text = AppStrings.Get("wpf.status.selectSrc");
+        StatusText.Text = AppStrings.Get("wpf.status.noSrcSelected");
     }
 
     private static bool SamePath(string? first, string? second) =>
@@ -1703,7 +1703,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         if (source is null)
         {
             ClearLibraryView();
-            StatusText.Text = normalized == "drama" ? "电视剧模式尚未配置媒体源" : "动漫模式尚未配置媒体源";
+            StatusText.Text = normalized == "drama" ? AppStrings.Get("wpf.status.dramaNoSrc") : AppStrings.Get("wpf.status.animeNoSrc");
             return;
         }
         if (_loadedSourceId != source.Id) await LoadSourceAsync(source);
@@ -1780,11 +1780,11 @@ public partial class MainWindow : Window, IAsyncDisposable
             _settings = _settings with { AudioDsp = config };
             _settingsStore.Save(_settings);
             ApplySettingsToView();
-            StatusText.Text = "音频 DSP 已应用到当前 MiruPlay mpv，并已保存。";
+            StatusText.Text = AppStrings.Get("wpf.status.dspApplied");
         }
         catch (Exception error) when (error is ArgumentException or IOException or InvalidOperationException or TimeoutException)
         {
-            StatusText.Text = $"音频 DSP 应用失败：{error.Message}";
+            StatusText.Text = AppStrings.Get("wpf.status.dspApplyFailed", error.Message);
         }
     }
 
@@ -1796,7 +1796,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             _settings = _settings with { AudioDsp = config };
             _settingsStore.Save(_settings);
             ApplySettingsToView();
-            StatusText.Text = "房间校准预设已应用并选中。";
+            StatusText.Text = AppStrings.Get("wpf.status.measuredApplied");
         }).Task.Unwrap();
     }
 
@@ -1825,13 +1825,13 @@ public partial class MainWindow : Window, IAsyncDisposable
             else await _webControlServer.DisposeAsync();
             _settings = _settings with { WebControlEnabled = enabled };
             _settingsStore.Save(_settings);
-            StatusText.Text = enabled ? "WebControl 已启动" : "WebControl 已停止";
+            StatusText.Text = enabled ? AppStrings.Get("wpf.status.webOn") : AppStrings.Get("wpf.status.webOff");
         }
         catch (IOException error)
         {
             _settings = _settings with { WebControlEnabled = previous };
             WebControlEnabledCheckBox.IsChecked = previous;
-            StatusText.Text = $"WebControl 启动失败：{error.Message}";
+            StatusText.Text = AppStrings.Get("wpf.status.webFailed", error.Message);
         }
         UpdateWebControlView();
     }
@@ -1843,7 +1843,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         try
         {
             _metadataTokens.SaveBangumi(token);
-            BangumiTokenStatusText.Text = "Bangumi Token 已保存在加密存储中。";
+            BangumiTokenStatusText.Text = AppStrings.Get("wpf.status.bangumiSaved");
         }
         catch (ArgumentException error)
         {
@@ -1859,7 +1859,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         BangumiTokenBox.Clear();
         _metadataTokens.ClearBangumi();
-        BangumiTokenStatusText.Text = "当前未设置 Bangumi Token。";
+        BangumiTokenStatusText.Text = AppStrings.Get("wpf.main.noBangumi");
     }
 
     private void SaveTmdbToken_Click(object sender, RoutedEventArgs e)
@@ -1869,7 +1869,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         try
         {
             _metadataTokens.SaveTmdb(token);
-            TmdbTokenStatusText.Text = "TMDB Token 已保存在加密存储中。";
+            TmdbTokenStatusText.Text = AppStrings.Get("wpf.status.tmdbSaved");
         }
         catch (ArgumentException error)
         {
@@ -1885,7 +1885,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         TmdbTokenBox.Clear();
         _metadataTokens.ClearTmdb();
-        TmdbTokenStatusText.Text = "当前未设置 TMDB Token。";
+        TmdbTokenStatusText.Text = AppStrings.Get("wpf.main.noTmdb");
     }
 
     private void SaveCloudDriveConfig_Click(object sender, RoutedEventArgs e)
@@ -1908,7 +1908,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 Enabled = CloudDriveEnabledCheckBox.IsChecked == true,
             });
             ApplyCloudDriveConfig(saved);
-            CloudDriveStatusText.Text = "CloudDrive/RSS 自动化设置已保存。";
+            CloudDriveStatusText.Text = AppStrings.Get("wpf.status.cdSaved");
         }
         catch (Exception error) when (error is ArgumentException or InvalidDataException)
         {
@@ -1920,10 +1920,10 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         try
         {
-            CloudDriveStatusText.Text = "正在执行 CloudDrive/RSS 同步...";
+            CloudDriveStatusText.Text = AppStrings.Get("wpf.status.cdSyncing");
             var status = await _cloudDriveRunner.RunAsync();
             var summary = status.Summary!;
-            CloudDriveStatusText.Text = $"同步完成：提交 {summary.Submitted}，跳过 {summary.Skipped}，失败 {summary.Failed}。";
+            CloudDriveStatusText.Text = AppStrings.Get("wpf.status.cdSyncDone", summary.Submitted, summary.Skipped, summary.Failed);
             RefreshRssSubscriptions();
         }
         catch (Exception error) when (error is ArgumentException or HttpRequestException or InvalidOperationException or InvalidDataException)
@@ -1937,7 +1937,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         var password = CloudDrivePasswordBox.Password;
         try
         {
-            CloudDriveStatusText.Text = "正在登录 CloudDrive2...";
+            CloudDriveStatusText.Text = AppStrings.Get("wpf.status.cdLoggingIn");
             var login = await _cloudDriveClient.LoginAsync(CloudDriveEndpointBox.Text, CloudDriveUsernameBox.Text, password);
             _ = await _cloudDriveClient.GetApiTokenInfoAsync(CloudDriveEndpointBox.Text, login.Token);
             _cloudDriveCredentials.SavePassword(CloudDriveEndpointBox.Text, password);
@@ -1960,12 +1960,12 @@ public partial class MainWindow : Window, IAsyncDisposable
         var token = CloudDriveTokenBox.Password;
         try
         {
-            CloudDriveStatusText.Text = "正在验证 CloudDrive2 API Token...";
+            CloudDriveStatusText.Text = AppStrings.Get("wpf.status.cdVerifying");
             var info = await _cloudDriveClient.GetApiTokenInfoAsync(CloudDriveEndpointBox.Text, token);
             _cloudDriveCredentials.SaveToken(CloudDriveEndpointBox.Text, token);
             CloudDriveTokenBox.Clear();
             var label = string.IsNullOrWhiteSpace(info.FriendlyName) ? info.RootDir : info.FriendlyName;
-            CloudDriveStatusText.Text = $"CloudDrive2 API Token 已验证并保存：{label}";
+            CloudDriveStatusText.Text = AppStrings.Get("wpf.status.cdTokenVerified", label);
         }
         catch (Exception error) when (error is ArgumentException or HttpRequestException or InvalidOperationException)
         {
@@ -1992,15 +1992,15 @@ public partial class MainWindow : Window, IAsyncDisposable
             var credentials = _cloudDriveCredentials.LoadForEndpoint(CloudDriveEndpointBox.Text);
             CloudDriveStatusText.Text = (credentials.Token, credentials.Password) switch
             {
-                (not null, not null) => "CloudDrive2 Token 和密码已保存在加密存储中。",
-                (not null, null) => "CloudDrive2 Token 已保存在加密存储中。",
-                (null, not null) => "CloudDrive2 密码已保存在加密存储中。",
-                _ => "CloudDrive2 凭据尚未配置。",
+                (not null, not null) => AppStrings.Get("wpf.status.cdBothSaved"),
+                (not null, null) => AppStrings.Get("wpf.status.cdTokenOnly"),
+                (null, not null) => AppStrings.Get("wpf.status.cdPassOnly"),
+                _ => AppStrings.Get("wpf.status.cdNoCreds"),
             };
         }
         catch (InvalidOperationException)
         {
-            CloudDriveStatusText.Text = "当前 CloudDrive2 服务地址尚无已验证凭据。";
+            CloudDriveStatusText.Text = AppStrings.Get("wpf.status.cdNoVerified");
         }
     }
 
@@ -2031,7 +2031,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 : _rssSubscriptions.Add(request);
             ClearRssForm();
             RefreshRssSubscriptions();
-            RssStatusText.Text = $"RSS 订阅已保存：{saved.Name}";
+            RssStatusText.Text = AppStrings.Get("wpf.status.rssSaved", saved.Name);
         }
         catch (Exception error) when (error is ArgumentException or InvalidDataException or KeyNotFoundException)
         {
@@ -2044,7 +2044,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         if (sender is not Button { Tag: RssSubscriptionInfo subscription }) return;
         try
         {
-            RssStatusText.Text = $"正在拉取：{subscription.Name}";
+            RssStatusText.Text = AppStrings.Get("wpf.status.rssFetching", subscription.Name);
             var config = _cloudDriveConfig.Load();
             var items = await _rssFeedClient.FetchAsync(
                 subscription.Url,
@@ -2054,7 +2054,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             var decisions = RssSubmissionPlanner.Plan(items, subscription.FilterRegex);
             var ready = decisions.Count(decision => decision.Status == RssSubmissionStatus.WouldSubmit);
             var processed = decisions.Count(decision => decision.ItemKey is not null && _rssProcessed.IsProcessed(subscription.Id, decision.ItemKey));
-            RssStatusText.Text = $"预览完成：{decisions.Count} 项，可提交 {ready} 项，已处理 {processed} 项。";
+            RssStatusText.Text = AppStrings.Get("wpf.status.rssPreview", decisions.Count, ready, processed);
         }
         catch (Exception error) when (error is ArgumentException or HttpRequestException or InvalidDataException or System.Xml.XmlException or TimeoutException)
         {
@@ -2070,19 +2070,19 @@ public partial class MainWindow : Window, IAsyncDisposable
         RssUrlBox.Text = subscription.Url;
         RssFilterBox.Text = subscription.FilterRegex ?? string.Empty;
         RssEnabledCheckBox.IsChecked = subscription.Enabled;
-        RssStatusText.Text = $"正在编辑：{subscription.Name}";
+        RssStatusText.Text = AppStrings.Get("wpf.status.rssEditing", subscription.Name);
     }
 
     private void DeleteRssSubscription_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: RssSubscriptionInfo subscription }) return;
-        if (MessageBox.Show(this, $"删除 RSS 订阅“{subscription.Name}”？", "删除 RSS", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show(this, AppStrings.Get("wpf.status.confirmDeleteRss", subscription.Name), AppStrings.Get("wpf.main.deleteRss"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
         try
         {
             _rssSubscriptions.Remove(subscription.Id);
             if (_editingRssId == subscription.Id) ClearRssForm();
             RefreshRssSubscriptions();
-            RssStatusText.Text = "RSS 订阅已删除。";
+            RssStatusText.Text = AppStrings.Get("cloud.rssDeleted");
         }
         catch (KeyNotFoundException error)
         {
@@ -2094,7 +2094,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         var values = _rssSubscriptions.List();
         RssSubscriptionList.ItemsSource = values;
-        if (_editingRssId is null) RssStatusText.Text = values.Count == 0 ? "尚未配置 RSS 订阅。" : $"已加载 {values.Count} 个 RSS 订阅。";
+        if (_editingRssId is null) RssStatusText.Text = values.Count == 0 ? AppStrings.Get("wpf.main.noRss") : AppStrings.Get("wpf.status.rssLoaded", values.Count);
     }
 
     private void ClearRssForm()
@@ -2116,7 +2116,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     {
         var url = _webControlServer.PreferredAccessUrl;
         Clipboard.SetText($"{url}?token={Uri.EscapeDataString(_webControlTokens.AccessToken)}");
-        StatusText.Text = "WebControl 访问地址已复制";
+        StatusText.Text = AppStrings.Get("wpf.status.urlCopied");
     }
 
     private void UpdateWebControlView()
@@ -2146,13 +2146,13 @@ public partial class MainWindow : Window, IAsyncDisposable
         var id = $"media-source-scan-{sourceId}";
         try
         {
-            var started = await _tasks.RunTrackedAsync(id, $"媒体源扫描 {sourceId}", async token =>
+            var started = await _tasks.RunTrackedAsync(id, AppStrings.Get("wpf.status.taskName", sourceId), async token =>
             {
                 result = await _mediaSourceRegistry.ScanAsync(sourceId, token).ConfigureAwait(false);
                 if (result.Error is not null) throw new InvalidOperationException(result.Error);
             }, cancellationToken).ConfigureAwait(false);
             if (result is null)
-                return new SourceScanResponse(sourceId, string.Empty, 0, 0, 0, $"任务 {id} 已在运行。");
+                return new SourceScanResponse(sourceId, string.Empty, 0, 0, 0, AppStrings.Get("wpf.status.taskRunning", id));
             _localLogs.Write(started ? "INFO" : "ERROR", started ? "Media source scan completed" : "Media source scan failed",
                 attributes: new Dictionary<string, string>
                 {
@@ -2208,7 +2208,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         _allSeries = LibraryOrganization.Apply(_catalogSeries, _settings);
         UpdateContinueWatching();
         ApplySearchFilter();
-        LibrarySummaryText.Text = $"{_allSeries.Count} 部作品 · {_allSeries.Sum(item => item.Episodes.Count)} 集";
+        LibrarySummaryText.Text = AppStrings.Get("wpf.status.libSummary", _allSeries.Count, _allSeries.Sum(item => item.Episodes.Count));
         if (SeriesDetailPageView.CurrentSeries is { } detail &&
             _allSeries.FirstOrDefault(item => item.ApiId == detail.ApiId || item.AlternateApiIds.Contains(detail.ApiId, StringComparer.Ordinal)) is { } refreshed)
             PresentSeriesDetails(refreshed);
@@ -2251,7 +2251,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
     private sealed record ContinueWatchingItem(string SeriesTitle, LibraryEpisode Episode)
     {
-        public string AccessibleName => $"继续播放 {SeriesTitle} {Episode.DisplayNumber}";
+        public string AccessibleName => AppStrings.Get("wpf.status.continuePlay", SeriesTitle, Episode.DisplayNumber);
     }
 
     private void ApplySettingsToView()
@@ -2259,7 +2259,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         _loadingSettings = true;
         try
         {
-            LibraryRootValue.Text = _settings.LibraryRoot ?? "尚未设置";
+            LibraryRootValue.Text = _settings.LibraryRoot ?? AppStrings.Get("wpf.main.notSet");
             SourceList.ItemsSource = _settings.MediaSources ?? [];
             AppModeSelector.SelectedItem = AppModeSelector.Items
                 .OfType<ComboBoxItem>()
@@ -2269,11 +2269,11 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .First(item => Equals(item.Tag, _settings.CurrentAppMode));
             var metadataTokens = _metadataTokens.Load();
             BangumiTokenStatusText.Text = string.IsNullOrEmpty(metadataTokens.Bangumi)
-                ? "当前未设置 Bangumi Token。"
-                : "Bangumi Token 已保存在加密存储中。";
+                ? AppStrings.Get("wpf.main.noBangumi")
+                : AppStrings.Get("wpf.status.bangumiSaved");
             TmdbTokenStatusText.Text = string.IsNullOrEmpty(metadataTokens.Tmdb)
-                ? "当前未设置 TMDB Token。"
-                : "TMDB Token 已保存在加密存储中。";
+                ? AppStrings.Get("wpf.main.noTmdb")
+                : AppStrings.Get("wpf.status.tmdbSaved");
             ApplyCloudDriveConfig(_cloudDriveConfig.Load());
             UpdateCloudDriveCredentialStatus();
             RefreshRssSubscriptions();
@@ -2281,8 +2281,8 @@ public partial class MainWindow : Window, IAsyncDisposable
             var audioDsp = (_settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
             AudioDspEnabledCheckBox.IsChecked = audioDsp.Enabled;
             AudioDspSummaryText.Text = audioDsp.Enabled
-                ? $"DSP 已启用：{audioDsp.SelectedPresetId}（{audioDsp.Presets!.Count} 个预设）"
-                : "DSP 已关闭";
+                ? AppStrings.Get("wpf.status.dspOn", audioDsp.SelectedPresetId, audioDsp.Presets!.Count)
+                : AppStrings.Get("wpf.main.dspOff");
             MergeSameAnimeCheckBox.IsChecked = _settings.MergeSameAnimeEnabled;
             PosterArrangementBox.SelectedItem = PosterArrangementBox.Items.OfType<ComboBoxItem>()
                 .First(item => Equals(item.Tag, _settings.PosterWallArrangement));
@@ -2297,8 +2297,8 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .FirstOrDefault(item => Equals(item.Tag, _settings.AutoScanIntervalHours.ToString(System.Globalization.CultureInfo.InvariantCulture)))
                 ?? AutoScanIntervalBox.Items[1];
             AutoScanStatusText.Text = _settings.AutoScanEnabled
-                ? $"已启用，每 {_settings.AutoScanIntervalHours} 小时检查一次。"
-                : "自动扫描已关闭。";
+                ? AppStrings.Get("wpf.status.autoScanOn", _settings.AutoScanIntervalHours)
+                : AppStrings.Get("wpf.main.autoScanOff");
             PlaybackEndAction.SelectedItem = PlaybackEndAction.Items
                 .OfType<ComboBoxItem>()
                 .FirstOrDefault(item => Equals(item.Tag, _settings.PlaybackEndAction))

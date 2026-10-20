@@ -3688,6 +3688,573 @@ const I18N = {
   "zh-HK": "過濾正則",
   "en-US": "Filter regex",
   "en-GB": "Filter regex"
+ },
+ "wpf.status.webStarted": {
+  "zh-CN": "WebControl 已启动：{0}",
+  "zh-TW": "WebControl 已啟動：{0}",
+  "zh-HK": "WebControl 已啟動：{0}",
+  "en-US": "WebControl started: {0}",
+  "en-GB": "WebControl started: {0}"
+ },
+ "wpf.status.webFailed": {
+  "zh-CN": "WebControl 启动失败：{0}",
+  "zh-TW": "WebControl 啟動失敗：{0}",
+  "zh-HK": "WebControl 啟動失敗：{0}",
+  "en-US": "WebControl failed to start: {0}",
+  "en-GB": "WebControl failed to start: {0}"
+ },
+ "wpf.status.bgWebFailed": {
+  "zh-CN": "后台启动未能启用 WebControl，窗口保持可见。",
+  "zh-TW": "背景啟動未能啟用 WebControl，視窗保持可見。",
+  "zh-HK": "背景啟動未能啟用 WebControl，視窗保持可見。",
+  "en-US": "Background start could not enable WebControl; the window stays visible.",
+  "en-GB": "Background start could not enable WebControl; the window stays visible."
+ },
+ "wpf.status.connectingDav": {
+  "zh-CN": "正在连接 WebDAV 并验证{0}…",
+  "zh-TW": "正在連接 WebDAV 並驗證{0}…",
+  "zh-HK": "連接緊 WebDAV 並驗證{0}…",
+  "en-US": "Connecting WebDAV and verifying{0}…",
+  "en-GB": "Connecting WebDAV and verifying{0}…"
+ },
+ "wpf.status.dirKind": {
+  "zh-CN": "目录",
+  "zh-TW": "目錄",
+  "zh-HK": "目錄",
+  "en-US": "directory",
+  "en-GB": "directory"
+ },
+ "wpf.status.mlipKind": {
+  "zh-CN": " MLIP",
+  "zh-TW": " MLIP",
+  "zh-HK": " MLIP",
+  "en-US": " MLIP",
+  "en-GB": " MLIP"
+ },
+ "wpf.status.addDavTitle": {
+  "zh-CN": "无法添加 WebDAV",
+  "zh-TW": "無法新增 WebDAV",
+  "zh-HK": "無法新增 WebDAV",
+  "en-US": "Cannot add WebDAV",
+  "en-GB": "Cannot add WebDAV"
+ },
+ "wpf.status.addRssTitle": {
+  "zh-CN": "无法添加 RSS 在线源",
+  "zh-TW": "無法新增 RSS 線上來源",
+  "zh-HK": "無法新增 RSS 線上來源",
+  "en-US": "Cannot add RSS online source",
+  "en-GB": "Cannot add RSS online source"
+ },
+ "wpf.status.connectingSmb": {
+  "zh-CN": "正在连接 SMB 并验证{0}…",
+  "zh-TW": "正在連接 SMB 並驗證{0}…",
+  "zh-HK": "連接緊 SMB 並驗證{0}…",
+  "en-US": "Connecting SMB and verifying{0}…",
+  "en-GB": "Connecting SMB and verifying{0}…"
+ },
+ "wpf.status.addSmbTitle": {
+  "zh-CN": "无法添加 SMB",
+  "zh-TW": "無法新增 SMB",
+  "zh-HK": "無法新增 SMB",
+  "en-US": "Cannot add SMB",
+  "en-GB": "Cannot add SMB"
+ },
+ "wpf.status.addSrcTitle": {
+  "zh-CN": "无法添加媒体源",
+  "zh-TW": "無法新增媒體來源",
+  "zh-HK": "無法新增媒體來源",
+  "en-US": "Cannot add media source",
+  "en-GB": "Cannot add media source"
+ },
+ "wpf.status.localSrcMissing": {
+  "zh-CN": "本地媒体源不存在。",
+  "zh-TW": "本機媒體來源不存在。",
+  "zh-HK": "本機媒體來源不存在。",
+  "en-US": "Local media source not found.",
+  "en-GB": "Local media source not found."
+ },
+ "wpf.status.libSummary": {
+  "zh-CN": "{0} 部作品 · {1} 集",
+  "zh-TW": "{0} 部作品 · {1} 集",
+  "zh-HK": "{0} 部作品 · {1} 集",
+  "en-US": "{0} works · {1} episodes",
+  "en-GB": "{0} works · {1} episodes"
+ },
+ "wpf.status.libLoaded": {
+  "zh-CN": "已载入 {0} 部作品",
+  "zh-TW": "已載入 {0} 部作品",
+  "zh-HK": "已載入 {0} 部作品",
+  "en-US": "Loaded {0} works",
+  "en-GB": "Loaded {0} works"
+ },
+ "wpf.status.openLibTitle": {
+  "zh-CN": "无法打开媒体库",
+  "zh-TW": "無法開啟媒體庫",
+  "zh-HK": "無法開啟媒體庫",
+  "en-US": "Cannot open library",
+  "en-GB": "Cannot open library"
+ },
+ "wpf.status.noMatch": {
+  "zh-CN": "没有匹配的内容",
+  "zh-TW": "沒有相符的內容",
+  "zh-HK": "冇相符嘅內容",
+  "en-US": "No matching content",
+  "en-GB": "No matching content"
+ },
+ "wpf.status.noMatchHint": {
+  "zh-CN": "换一个标题、原名或类型关键词。",
+  "zh-TW": "換一個標題、原名或類型關鍵字。",
+  "zh-HK": "換一個標題、原名或類型關鍵字。",
+  "en-US": "Try a different title, original title or genre keyword.",
+  "en-GB": "Try a different title, original title or genre keyword."
+ },
+ "wpf.status.openMetaFailed": {
+  "zh-CN": "无法打开元数据页面：{0}",
+  "zh-TW": "無法開啟元數據頁面：{0}",
+  "zh-HK": "無法開啟元數據頁面：{0}",
+  "en-US": "Cannot open metadata page: {0}",
+  "en-GB": "Cannot open metadata page: {0}"
+ },
+ "wpf.status.sysPlayer": {
+  "zh-CN": "已交给 Windows 播放器：{0}（能力受限）",
+  "zh-TW": "已交給 Windows 播放器：{0}（功能受限）",
+  "zh-HK": "已交畀 Windows 播放器：{0}（功能受限）",
+  "en-US": "Handed to Windows player: {0} (limited)",
+  "en-GB": "Handed to Windows player: {0} (limited)"
+ },
+ "wpf.status.playingProgress": {
+  "zh-CN": "正在播放并记录进度：{0} {1}",
+  "zh-TW": "正在播放並記錄進度：{0} {1}",
+  "zh-HK": "播放緊並記錄進度：{0} {1}",
+  "en-US": "Playing and tracking progress: {0} {1}",
+  "en-GB": "Playing and tracking progress: {0} {1}"
+ },
+ "wpf.status.playFailed": {
+  "zh-CN": "无法播放：{0}",
+  "zh-TW": "無法播放：{0}",
+  "zh-HK": "無法播放：{0}",
+  "en-US": "Cannot play: {0}",
+  "en-GB": "Cannot play: {0}"
+ },
+ "wpf.status.playFailedTitle": {
+  "zh-CN": "无法播放",
+  "zh-TW": "無法播放",
+  "zh-HK": "無法播放",
+  "en-US": "Cannot play",
+  "en-GB": "Cannot play"
+ },
+ "wpf.status.progressSynced": {
+  "zh-CN": "播放进度已保存，Bangumi 分集状态已同步",
+  "zh-TW": "播放進度已儲存，Bangumi 分集狀態已同步",
+  "zh-HK": "播放進度已儲存，Bangumi 分集狀態已同步",
+  "en-US": "Progress saved; Bangumi episode status synced",
+  "en-GB": "Progress saved; Bangumi episode status synced"
+ },
+ "wpf.status.syncFailed": {
+  "zh-CN": "播放进度已保存；Bangumi 同步失败：{0}",
+  "zh-TW": "播放進度已儲存；Bangumi 同步失敗：{0}",
+  "zh-HK": "播放進度已儲存；Bangumi 同步失敗：{0}",
+  "en-US": "Progress saved; Bangumi sync failed: {0}",
+  "en-GB": "Progress saved; Bangumi sync failed: {0}"
+ },
+ "wpf.status.playbackError": {
+  "zh-CN": "播放失败：{0}",
+  "zh-TW": "播放失敗：{0}",
+  "zh-HK": "播放失敗：{0}",
+  "en-US": "Playback failed: {0}",
+  "en-GB": "Playback failed: {0}"
+ },
+ "wpf.status.progressSaved": {
+  "zh-CN": "播放进度已保存",
+  "zh-TW": "播放進度已儲存",
+  "zh-HK": "播放進度已儲存",
+  "en-US": "Progress saved",
+  "en-GB": "Progress saved"
+ },
+ "wpf.status.uncategorized": {
+  "zh-CN": "未分类",
+  "zh-TW": "未分類",
+  "zh-HK": "未分類",
+  "en-US": "Uncategorized",
+  "en-GB": "Uncategorised"
+ },
+ "wpf.status.noExePath": {
+  "zh-CN": "无法确定当前程序路径。",
+  "zh-TW": "無法確認目前程式路徑。",
+  "zh-HK": "無法確認目前程式路徑。",
+  "en-US": "Cannot determine current executable path.",
+  "en-GB": "Cannot determine current executable path."
+ },
+ "wpf.status.launchFailed": {
+  "zh-CN": "播放启动失败；请检查播放器路径和媒体地址。",
+  "zh-TW": "播放啟動失敗；請檢查播放器路徑和媒體位址。",
+  "zh-HK": "播放啟動失敗；請檢查播放器路徑同媒體位址。",
+  "en-US": "Failed to start playback; check player path and media address.",
+  "en-GB": "Failed to start playback; check player path and media address."
+ },
+ "wpf.status.noSession": {
+  "zh-CN": "当前没有可控制的 mpv 播放会话。",
+  "zh-TW": "目前沒有可控制的 mpv 播放工作階段。",
+  "zh-HK": "目前冇可控制嘅 mpv 播放工作階段。",
+  "en-US": "No controllable mpv session.",
+  "en-GB": "No controllable mpv session."
+ },
+ "wpf.status.versionGone": {
+  "zh-CN": "所选版本已不在下一集列表中。",
+  "zh-TW": "所選版本已不在下一集列表中。",
+  "zh-HK": "所選版本已唔喺下一集列表中。",
+  "en-US": "Selected version is no longer in the next-episode list.",
+  "en-GB": "Selected version is no longer in the next-episode list."
+ },
+ "wpf.status.versionLaunchFailed": {
+  "zh-CN": "下一集版本播放启动失败。",
+  "zh-TW": "下一集版本播放啟動失敗。",
+  "zh-HK": "下一集版本播放啟動失敗。",
+  "en-US": "Failed to start next-episode version playback.",
+  "en-GB": "Failed to start next-episode version playback."
+ },
+ "wpf.status.noVersionNeeded": {
+  "zh-CN": "当前下一集不需要版本选择。",
+  "zh-TW": "目前下一集不需要版本選擇。",
+  "zh-HK": "目前下一集唔需要版本選擇。",
+  "en-US": "Current next episode needs no version choice.",
+  "en-GB": "Current next episode needs no version choice."
+ },
+ "wpf.status.noNext": {
+  "zh-CN": "当前没有可播放的下一集。",
+  "zh-TW": "目前沒有可播放的下一集。",
+  "zh-HK": "目前冇可播放嘅下一集。",
+  "en-US": "No next episode to play.",
+  "en-GB": "No next episode to play."
+ },
+ "wpf.status.noPrev": {
+  "zh-CN": "当前没有上一集。",
+  "zh-TW": "目前沒有上一集。",
+  "zh-HK": "目前冇上一集。",
+  "en-US": "No previous episode.",
+  "en-GB": "No previous episode."
+ },
+ "wpf.status.controlFailed": {
+  "zh-CN": "播放控制失败：{0}",
+  "zh-TW": "播放控制失敗：{0}",
+  "zh-HK": "播放控制失敗：{0}",
+  "en-US": "Playback control failed: {0}",
+  "en-GB": "Playback control failed: {0}"
+ },
+ "wpf.status.rescanSrc": {
+  "zh-CN": "CloudDrive/RSS 回扫来源必须是已配置的 WebDAV 来源。",
+  "zh-TW": "CloudDrive/RSS 回掃來源必須是已設定的 WebDAV 來源。",
+  "zh-HK": "CloudDrive/RSS 回掃來源必須係已設定嘅 WebDAV 來源。",
+  "en-US": "CloudDrive/RSS rescan source must be a configured WebDAV source.",
+  "en-GB": "CloudDrive/RSS rescan source must be a configured WebDAV source."
+ },
+ "wpf.status.rescanFailed": {
+  "zh-CN": "WebDAV 回扫失败：{0}",
+  "zh-TW": "WebDAV 回掃失敗：{0}",
+  "zh-HK": "WebDAV 回掃失敗：{0}",
+  "en-US": "WebDAV rescan failed: {0}",
+  "en-GB": "WebDAV rescan failed: {0}"
+ },
+ "wpf.status.scanned": {
+  "zh-CN": "已扫描 {0}：{1} 集，新增 {2}，删除 {3}",
+  "zh-TW": "已掃描 {0}：{1} 集，新增 {2}，刪除 {3}",
+  "zh-HK": "已掃描 {0}：{1} 集，新增 {2}，刪除 {3}",
+  "en-US": "Scanned {0}: {1} episodes, {2} new, {3} deleted",
+  "en-GB": "Scanned {0}: {1} episodes, {2} new, {3} deleted"
+ },
+ "wpf.status.scanCancelled": {
+  "zh-CN": "扫描已取消",
+  "zh-TW": "掃描已取消",
+  "zh-HK": "掃描已取消",
+  "en-US": "Scan cancelled",
+  "en-GB": "Scan cancelled"
+ },
+ "wpf.status.scanFiles": {
+  "zh-CN": "已处理 {0}/{1} 个文件 · {2} 集",
+  "zh-TW": "已處理 {0}/{1} 個檔案 · {2} 集",
+  "zh-HK": "已處理 {0}/{1} 個檔案 · {2} 集",
+  "en-US": "Processed {0}/{1} files · {2} episodes",
+  "en-GB": "Processed {0}/{1} files · {2} episodes"
+ },
+ "wpf.status.discovering": {
+  "zh-CN": "正在发现媒体文件…",
+  "zh-TW": "正在搜尋媒體檔案…",
+  "zh-HK": "搵緊媒體檔案…",
+  "en-US": "Discovering media files…",
+  "en-GB": "Discovering media files…"
+ },
+ "wpf.status.scanningSrc": {
+  "zh-CN": "正在扫描媒体源…",
+  "zh-TW": "正在掃描媒體來源…",
+  "zh-HK": "掃緊媒體來源…",
+  "en-US": "Scanning media source…",
+  "en-GB": "Scanning media source…"
+ },
+ "wpf.status.taskName": {
+  "zh-CN": "媒体源扫描 {0}",
+  "zh-TW": "媒體來源掃描 {0}",
+  "zh-HK": "媒體來源掃描 {0}",
+  "en-US": "Media source scan {0}",
+  "en-GB": "Media source scan {0}"
+ },
+ "wpf.status.taskRunning": {
+  "zh-CN": "任务 {0} 已在运行。",
+  "zh-TW": "工作 {0} 執行中。",
+  "zh-HK": "工作 {0} 執行中。",
+  "en-US": "Task {0} is already running.",
+  "en-GB": "Task {0} is already running."
+ },
+ "wpf.status.srcUpdated": {
+  "zh-CN": "已更新媒体源：{0}",
+  "zh-TW": "已更新媒體來源：{0}",
+  "zh-HK": "已更新媒體來源：{0}",
+  "en-US": "Source updated: {0}",
+  "en-GB": "Source updated: {0}"
+ },
+ "wpf.status.updateSrcTitle": {
+  "zh-CN": "无法更新媒体源",
+  "zh-TW": "無法更新媒體來源",
+  "zh-HK": "無法更新媒體來源",
+  "en-US": "Cannot update media source",
+  "en-GB": "Cannot update media source"
+ },
+ "wpf.status.confirmDeleteSrc": {
+  "zh-CN": "删除媒体源“{0}”？不会删除媒体文件或 library.db。",
+  "zh-TW": "刪除媒體來源「{0}」？不會刪除媒體檔案或 library.db。",
+  "zh-HK": "刪除媒體來源「{0}」？唔會刪除媒體檔案或 library.db。",
+  "en-US": "Delete media source \"{0}\"? Media files and library.db are kept.",
+  "en-GB": "Delete media source \"{0}\"? Media files and library.db are kept."
+ },
+ "wpf.status.srcDeleted": {
+  "zh-CN": "已删除媒体源：{0}",
+  "zh-TW": "已刪除媒體來源：{0}",
+  "zh-HK": "已刪除媒體來源：{0}",
+  "en-US": "Source deleted: {0}",
+  "en-GB": "Source deleted: {0}"
+ },
+ "wpf.status.selectSrc": {
+  "zh-CN": "选择一个媒体源以开始",
+  "zh-TW": "選擇一個媒體來源以開始",
+  "zh-HK": "選擇一個媒體來源以開始",
+  "en-US": "Select a media source to begin",
+  "en-GB": "Select a media source to begin"
+ },
+ "wpf.status.noSrcSelected": {
+  "zh-CN": "尚未选择媒体源",
+  "zh-TW": "尚未選擇媒體來源",
+  "zh-HK": "尚未選擇媒體來源",
+  "en-US": "No media source selected",
+  "en-GB": "No media source selected"
+ },
+ "wpf.status.dramaNoSrc": {
+  "zh-CN": "电视剧模式尚未配置媒体源",
+  "zh-TW": "電視劇模式尚未設定媒體來源",
+  "zh-HK": "電視劇模式尚未設定媒體來源",
+  "en-US": "Drama mode has no configured source",
+  "en-GB": "Drama mode has no configured source"
+ },
+ "wpf.status.animeNoSrc": {
+  "zh-CN": "动漫模式尚未配置媒体源",
+  "zh-TW": "動漫模式尚未設定媒體來源",
+  "zh-HK": "動漫模式尚未設定媒體來源",
+  "en-US": "Anime mode has no configured source",
+  "en-GB": "Anime mode has no configured source"
+ },
+ "wpf.status.dspApplied": {
+  "zh-CN": "音频 DSP 已应用到当前 MiruPlay mpv，并已保存。",
+  "zh-TW": "音訊 DSP 已套用到目前 MiruPlay mpv，並已儲存。",
+  "zh-HK": "音頻 DSP 已套用到目前 MiruPlay mpv，並已儲存。",
+  "en-US": "Audio DSP applied to the current MiruPlay mpv and saved.",
+  "en-GB": "Audio DSP applied to the current MiruPlay mpv and saved."
+ },
+ "wpf.status.dspApplyFailed": {
+  "zh-CN": "音频 DSP 应用失败：{0}",
+  "zh-TW": "音訊 DSP 套用失敗：{0}",
+  "zh-HK": "音頻 DSP 套用失敗：{0}",
+  "en-US": "Failed to apply audio DSP: {0}",
+  "en-GB": "Failed to apply audio DSP: {0}"
+ },
+ "wpf.status.measuredApplied": {
+  "zh-CN": "房间校准预设已应用并选中。",
+  "zh-TW": "房間校準預設已套用並選取。",
+  "zh-HK": "房間校準預設已套用並選取。",
+  "en-US": "Room calibration preset applied and selected.",
+  "en-GB": "Room calibration preset applied and selected."
+ },
+ "wpf.status.webOn": {
+  "zh-CN": "WebControl 已启动",
+  "zh-TW": "WebControl 已啟動",
+  "zh-HK": "WebControl 已啟動",
+  "en-US": "WebControl started",
+  "en-GB": "WebControl started"
+ },
+ "wpf.status.webOff": {
+  "zh-CN": "WebControl 已停止",
+  "zh-TW": "WebControl 已停止",
+  "zh-HK": "WebControl 已停止",
+  "en-US": "WebControl stopped",
+  "en-GB": "WebControl stopped"
+ },
+ "wpf.status.bangumiSaved": {
+  "zh-CN": "Bangumi Token 已保存在加密存储中。",
+  "zh-TW": "Bangumi Token 已儲存在加密存放區。",
+  "zh-HK": "Bangumi Token 已儲存在加密存放區。",
+  "en-US": "Bangumi token saved in encrypted storage.",
+  "en-GB": "Bangumi token saved in encrypted storage."
+ },
+ "wpf.status.cdSaved": {
+  "zh-CN": "CloudDrive/RSS 自动化设置已保存。",
+  "zh-TW": "CloudDrive/RSS 自動化設定已儲存。",
+  "zh-HK": "CloudDrive/RSS 自動化設定已儲存。",
+  "en-US": "CloudDrive/RSS automation settings saved.",
+  "en-GB": "CloudDrive/RSS automation settings saved."
+ },
+ "wpf.status.cdSyncing": {
+  "zh-CN": "正在执行 CloudDrive/RSS 同步...",
+  "zh-TW": "正在執行 CloudDrive/RSS 同步...",
+  "zh-HK": "執行緊 CloudDrive/RSS 同步...",
+  "en-US": "Running CloudDrive/RSS sync...",
+  "en-GB": "Running CloudDrive/RSS sync..."
+ },
+ "wpf.status.cdSyncDone": {
+  "zh-CN": "同步完成：提交 {0}，跳过 {1}，失败 {2}。",
+  "zh-TW": "同步完成：提交 {0}，略過 {1}，失敗 {2}。",
+  "zh-HK": "同步完成：提交 {0}，略過 {1}，失敗 {2}。",
+  "en-US": "Sync complete: {0} submitted, {1} skipped, {2} failed.",
+  "en-GB": "Sync complete: {0} submitted, {1} skipped, {2} failed."
+ },
+ "wpf.status.cdLoggingIn": {
+  "zh-CN": "正在登录 CloudDrive2...",
+  "zh-TW": "正在登入 CloudDrive2...",
+  "zh-HK": "登入緊 CloudDrive2...",
+  "en-US": "Logging in to CloudDrive2...",
+  "en-GB": "Logging in to CloudDrive2..."
+ },
+ "wpf.status.cdVerifying": {
+  "zh-CN": "正在验证 CloudDrive2 API Token...",
+  "zh-TW": "正在驗證 CloudDrive2 API Token...",
+  "zh-HK": "驗證緊 CloudDrive2 API Token...",
+  "en-US": "Verifying CloudDrive2 API token...",
+  "en-GB": "Verifying CloudDrive2 API token..."
+ },
+ "wpf.status.cdTokenVerified": {
+  "zh-CN": "CloudDrive2 API Token 已验证并保存：{0}",
+  "zh-TW": "CloudDrive2 API Token 已驗證並儲存：{0}",
+  "zh-HK": "CloudDrive2 API Token 已驗證並儲存：{0}",
+  "en-US": "CloudDrive2 API token verified and saved: {0}",
+  "en-GB": "CloudDrive2 API token verified and saved: {0}"
+ },
+ "wpf.status.cdBothSaved": {
+  "zh-CN": "CloudDrive2 Token 和密码已保存在加密存储中。",
+  "zh-TW": "CloudDrive2 Token 和密碼已儲存在加密存放區。",
+  "zh-HK": "CloudDrive2 Token 同密碼已儲存在加密存放區。",
+  "en-US": "CloudDrive2 token and password saved in encrypted storage.",
+  "en-GB": "CloudDrive2 token and password saved in encrypted storage."
+ },
+ "wpf.status.cdTokenOnly": {
+  "zh-CN": "CloudDrive2 Token 已保存在加密存储中。",
+  "zh-TW": "CloudDrive2 Token 已儲存在加密存放區。",
+  "zh-HK": "CloudDrive2 Token 已儲存在加密存放區。",
+  "en-US": "CloudDrive2 token saved in encrypted storage.",
+  "en-GB": "CloudDrive2 token saved in encrypted storage."
+ },
+ "wpf.status.cdPassOnly": {
+  "zh-CN": "CloudDrive2 密码已保存在加密存储中。",
+  "zh-TW": "CloudDrive2 密碼已儲存在加密存放區。",
+  "zh-HK": "CloudDrive2 密碼已儲存在加密存放區。",
+  "en-US": "CloudDrive2 password saved in encrypted storage.",
+  "en-GB": "CloudDrive2 password saved in encrypted storage."
+ },
+ "wpf.status.cdNoCreds": {
+  "zh-CN": "CloudDrive2 凭据尚未配置。",
+  "zh-TW": "CloudDrive2 憑證尚未設定。",
+  "zh-HK": "CloudDrive2 憑證尚未設定。",
+  "en-US": "CloudDrive2 credentials not configured.",
+  "en-GB": "CloudDrive2 credentials not configured."
+ },
+ "wpf.status.cdNoVerified": {
+  "zh-CN": "当前 CloudDrive2 服务地址尚无已验证凭据。",
+  "zh-TW": "目前 CloudDrive2 服務位址尚無已驗證憑證。",
+  "zh-HK": "目前 CloudDrive2 服務位址尚無已驗證憑證。",
+  "en-US": "No verified credentials for the current CloudDrive2 endpoint.",
+  "en-GB": "No verified credentials for the current CloudDrive2 endpoint."
+ },
+ "wpf.status.rssSaved": {
+  "zh-CN": "RSS 订阅已保存：{0}",
+  "zh-TW": "RSS 訂閱已儲存：{0}",
+  "zh-HK": "RSS 訂閱已儲存：{0}",
+  "en-US": "RSS subscription saved: {0}",
+  "en-GB": "RSS subscription saved: {0}"
+ },
+ "wpf.status.rssFetching": {
+  "zh-CN": "正在拉取：{0}",
+  "zh-TW": "正在拉取：{0}",
+  "zh-HK": "拉緊：{0}",
+  "en-US": "Fetching: {0}",
+  "en-GB": "Fetching: {0}"
+ },
+ "wpf.status.rssPreview": {
+  "zh-CN": "预览完成：{0} 项，可提交 {1} 项，已处理 {2} 项。",
+  "zh-TW": "預覽完成：{0} 項，可提交 {1} 項，已處理 {2} 項。",
+  "zh-HK": "預覽完成：{0} 項，可提交 {1} 項，已處理 {2} 項。",
+  "en-US": "Preview complete: {0} items, {1} submittable, {2} processed.",
+  "en-GB": "Preview complete: {0} items, {1} submittable, {2} processed."
+ },
+ "wpf.status.rssEditing": {
+  "zh-CN": "正在编辑：{0}",
+  "zh-TW": "正在編輯：{0}",
+  "zh-HK": "編輯緊：{0}",
+  "en-US": "Editing: {0}",
+  "en-GB": "Editing: {0}"
+ },
+ "wpf.status.confirmDeleteRss": {
+  "zh-CN": "删除 RSS 订阅“{0}”？",
+  "zh-TW": "刪除 RSS 訂閱「{0}」？",
+  "zh-HK": "刪除 RSS 訂閱「{0}」？",
+  "en-US": "Delete RSS subscription \"{0}\"?",
+  "en-GB": "Delete RSS subscription \"{0}\"?"
+ },
+ "wpf.status.rssLoaded": {
+  "zh-CN": "已加载 {0} 个 RSS 订阅。",
+  "zh-TW": "已載入 {0} 個 RSS 訂閱。",
+  "zh-HK": "已載入 {0} 個 RSS 訂閱。",
+  "en-US": "Loaded {0} RSS subscriptions.",
+  "en-GB": "Loaded {0} RSS subscriptions."
+ },
+ "wpf.status.urlCopied": {
+  "zh-CN": "WebControl 访问地址已复制",
+  "zh-TW": "WebControl 存取位址已複製",
+  "zh-HK": "WebControl 存取位址已複製",
+  "en-US": "WebControl access address copied",
+  "en-GB": "WebControl access address copied"
+ },
+ "wpf.status.continuePlay": {
+  "zh-CN": "继续播放 {0} {1}",
+  "zh-TW": "繼續播放 {0} {1}",
+  "zh-HK": "繼續播放 {0} {1}",
+  "en-US": "Continue playing {0} {1}",
+  "en-GB": "Continue playing {0} {1}"
+ },
+ "wpf.status.dspOn": {
+  "zh-CN": "DSP 已启用：{0}（{1} 个预设）",
+  "zh-TW": "DSP 已啟用：{0}（{1} 個預設）",
+  "zh-HK": "DSP 已啟用：{0}（{1} 個預設）",
+  "en-US": "DSP enabled: {0} ({1} presets)",
+  "en-GB": "DSP enabled: {0} ({1} presets)"
+ },
+ "wpf.status.autoScanOn": {
+  "zh-CN": "已启用，每 {0} 小时检查一次。",
+  "zh-TW": "已啟用，每 {0} 小時檢查一次。",
+  "zh-HK": "已啟用，每 {0} 小時檢查一次。",
+  "en-US": "Enabled, checking every {0} hours.",
+  "en-GB": "Enabled, checking every {0} hours."
+ },
+ "wpf.status.tmdbSaved": {
+  "zh-CN": "TMDB Token 已保存在加密存储中。",
+  "zh-TW": "TMDB Token 已儲存在加密存放區。",
+  "zh-HK": "TMDB Token 已儲存在加密存放區。",
+  "en-US": "TMDB token saved in encrypted storage.",
+  "en-GB": "TMDB token saved in encrypted storage."
  }
 };
 let currentLocale = 'zh-CN';

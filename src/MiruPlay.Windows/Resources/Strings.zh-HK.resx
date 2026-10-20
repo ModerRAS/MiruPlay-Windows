@@ -531,4 +531,85 @@
   <data name="wpf.main.cdModeName" xml:space="preserve"><value>CloudDrive2 媒體庫模式</value></data>
   <data name="wpf.main.cdInterval" xml:space="preserve"><value>CloudDrive2 同步週期分鐘</value></data>
   <data name="wpf.main.rssFilterName" xml:space="preserve"><value>過濾正則</value></data>
+  <data name="wpf.status.webStarted" xml:space="preserve"><value>WebControl 已啟動：{0}</value></data>
+  <data name="wpf.status.webFailed" xml:space="preserve"><value>WebControl 啟動失敗：{0}</value></data>
+  <data name="wpf.status.bgWebFailed" xml:space="preserve"><value>背景啟動未能啟用 WebControl，視窗保持可見。</value></data>
+  <data name="wpf.status.connectingDav" xml:space="preserve"><value>連接緊 WebDAV 並驗證{0}…</value></data>
+  <data name="wpf.status.dirKind" xml:space="preserve"><value>目錄</value></data>
+  <data name="wpf.status.mlipKind" xml:space="preserve"><value> MLIP</value></data>
+  <data name="wpf.status.addDavTitle" xml:space="preserve"><value>無法新增 WebDAV</value></data>
+  <data name="wpf.status.addRssTitle" xml:space="preserve"><value>無法新增 RSS 線上來源</value></data>
+  <data name="wpf.status.connectingSmb" xml:space="preserve"><value>連接緊 SMB 並驗證{0}…</value></data>
+  <data name="wpf.status.addSmbTitle" xml:space="preserve"><value>無法新增 SMB</value></data>
+  <data name="wpf.status.addSrcTitle" xml:space="preserve"><value>無法新增媒體來源</value></data>
+  <data name="wpf.status.localSrcMissing" xml:space="preserve"><value>本機媒體來源不存在。</value></data>
+  <data name="wpf.status.libSummary" xml:space="preserve"><value>{0} 部作品 · {1} 集</value></data>
+  <data name="wpf.status.libLoaded" xml:space="preserve"><value>已載入 {0} 部作品</value></data>
+  <data name="wpf.status.openLibTitle" xml:space="preserve"><value>無法開啟媒體庫</value></data>
+  <data name="wpf.status.noMatch" xml:space="preserve"><value>冇相符嘅內容</value></data>
+  <data name="wpf.status.noMatchHint" xml:space="preserve"><value>換一個標題、原名或類型關鍵字。</value></data>
+  <data name="wpf.status.openMetaFailed" xml:space="preserve"><value>無法開啟元數據頁面：{0}</value></data>
+  <data name="wpf.status.sysPlayer" xml:space="preserve"><value>已交畀 Windows 播放器：{0}（功能受限）</value></data>
+  <data name="wpf.status.playingProgress" xml:space="preserve"><value>播放緊並記錄進度：{0} {1}</value></data>
+  <data name="wpf.status.playFailed" xml:space="preserve"><value>無法播放：{0}</value></data>
+  <data name="wpf.status.playFailedTitle" xml:space="preserve"><value>無法播放</value></data>
+  <data name="wpf.status.progressSynced" xml:space="preserve"><value>播放進度已儲存，Bangumi 分集狀態已同步</value></data>
+  <data name="wpf.status.syncFailed" xml:space="preserve"><value>播放進度已儲存；Bangumi 同步失敗：{0}</value></data>
+  <data name="wpf.status.playbackError" xml:space="preserve"><value>播放失敗：{0}</value></data>
+  <data name="wpf.status.progressSaved" xml:space="preserve"><value>播放進度已儲存</value></data>
+  <data name="wpf.status.uncategorized" xml:space="preserve"><value>未分類</value></data>
+  <data name="wpf.status.noExePath" xml:space="preserve"><value>無法確認目前程式路徑。</value></data>
+  <data name="wpf.status.launchFailed" xml:space="preserve"><value>播放啟動失敗；請檢查播放器路徑同媒體位址。</value></data>
+  <data name="wpf.status.noSession" xml:space="preserve"><value>目前冇可控制嘅 mpv 播放工作階段。</value></data>
+  <data name="wpf.status.versionGone" xml:space="preserve"><value>所選版本已唔喺下一集列表中。</value></data>
+  <data name="wpf.status.versionLaunchFailed" xml:space="preserve"><value>下一集版本播放啟動失敗。</value></data>
+  <data name="wpf.status.noVersionNeeded" xml:space="preserve"><value>目前下一集唔需要版本選擇。</value></data>
+  <data name="wpf.status.noNext" xml:space="preserve"><value>目前冇可播放嘅下一集。</value></data>
+  <data name="wpf.status.noPrev" xml:space="preserve"><value>目前冇上一集。</value></data>
+  <data name="wpf.status.controlFailed" xml:space="preserve"><value>播放控制失敗：{0}</value></data>
+  <data name="wpf.status.rescanSrc" xml:space="preserve"><value>CloudDrive/RSS 回掃來源必須係已設定嘅 WebDAV 來源。</value></data>
+  <data name="wpf.status.rescanFailed" xml:space="preserve"><value>WebDAV 回掃失敗：{0}</value></data>
+  <data name="wpf.status.scanned" xml:space="preserve"><value>已掃描 {0}：{1} 集，新增 {2}，刪除 {3}</value></data>
+  <data name="wpf.status.scanCancelled" xml:space="preserve"><value>掃描已取消</value></data>
+  <data name="wpf.status.scanFiles" xml:space="preserve"><value>已處理 {0}/{1} 個檔案 · {2} 集</value></data>
+  <data name="wpf.status.discovering" xml:space="preserve"><value>搵緊媒體檔案…</value></data>
+  <data name="wpf.status.scanningSrc" xml:space="preserve"><value>掃緊媒體來源…</value></data>
+  <data name="wpf.status.taskName" xml:space="preserve"><value>媒體來源掃描 {0}</value></data>
+  <data name="wpf.status.taskRunning" xml:space="preserve"><value>工作 {0} 執行中。</value></data>
+  <data name="wpf.status.srcUpdated" xml:space="preserve"><value>已更新媒體來源：{0}</value></data>
+  <data name="wpf.status.updateSrcTitle" xml:space="preserve"><value>無法更新媒體來源</value></data>
+  <data name="wpf.status.confirmDeleteSrc" xml:space="preserve"><value>刪除媒體來源「{0}」？唔會刪除媒體檔案或 library.db。</value></data>
+  <data name="wpf.status.srcDeleted" xml:space="preserve"><value>已刪除媒體來源：{0}</value></data>
+  <data name="wpf.status.selectSrc" xml:space="preserve"><value>選擇一個媒體來源以開始</value></data>
+  <data name="wpf.status.noSrcSelected" xml:space="preserve"><value>尚未選擇媒體來源</value></data>
+  <data name="wpf.status.dramaNoSrc" xml:space="preserve"><value>電視劇模式尚未設定媒體來源</value></data>
+  <data name="wpf.status.animeNoSrc" xml:space="preserve"><value>動漫模式尚未設定媒體來源</value></data>
+  <data name="wpf.status.dspApplied" xml:space="preserve"><value>音頻 DSP 已套用到目前 MiruPlay mpv，並已儲存。</value></data>
+  <data name="wpf.status.dspApplyFailed" xml:space="preserve"><value>音頻 DSP 套用失敗：{0}</value></data>
+  <data name="wpf.status.measuredApplied" xml:space="preserve"><value>房間校準預設已套用並選取。</value></data>
+  <data name="wpf.status.webOn" xml:space="preserve"><value>WebControl 已啟動</value></data>
+  <data name="wpf.status.webOff" xml:space="preserve"><value>WebControl 已停止</value></data>
+  <data name="wpf.status.bangumiSaved" xml:space="preserve"><value>Bangumi Token 已儲存在加密存放區。</value></data>
+  <data name="wpf.status.cdSaved" xml:space="preserve"><value>CloudDrive/RSS 自動化設定已儲存。</value></data>
+  <data name="wpf.status.cdSyncing" xml:space="preserve"><value>執行緊 CloudDrive/RSS 同步...</value></data>
+  <data name="wpf.status.cdSyncDone" xml:space="preserve"><value>同步完成：提交 {0}，略過 {1}，失敗 {2}。</value></data>
+  <data name="wpf.status.cdLoggingIn" xml:space="preserve"><value>登入緊 CloudDrive2...</value></data>
+  <data name="wpf.status.cdVerifying" xml:space="preserve"><value>驗證緊 CloudDrive2 API Token...</value></data>
+  <data name="wpf.status.cdTokenVerified" xml:space="preserve"><value>CloudDrive2 API Token 已驗證並儲存：{0}</value></data>
+  <data name="wpf.status.cdBothSaved" xml:space="preserve"><value>CloudDrive2 Token 同密碼已儲存在加密存放區。</value></data>
+  <data name="wpf.status.cdTokenOnly" xml:space="preserve"><value>CloudDrive2 Token 已儲存在加密存放區。</value></data>
+  <data name="wpf.status.cdPassOnly" xml:space="preserve"><value>CloudDrive2 密碼已儲存在加密存放區。</value></data>
+  <data name="wpf.status.cdNoCreds" xml:space="preserve"><value>CloudDrive2 憑證尚未設定。</value></data>
+  <data name="wpf.status.cdNoVerified" xml:space="preserve"><value>目前 CloudDrive2 服務位址尚無已驗證憑證。</value></data>
+  <data name="wpf.status.rssSaved" xml:space="preserve"><value>RSS 訂閱已儲存：{0}</value></data>
+  <data name="wpf.status.rssFetching" xml:space="preserve"><value>拉緊：{0}</value></data>
+  <data name="wpf.status.rssPreview" xml:space="preserve"><value>預覽完成：{0} 項，可提交 {1} 項，已處理 {2} 項。</value></data>
+  <data name="wpf.status.rssEditing" xml:space="preserve"><value>編輯緊：{0}</value></data>
+  <data name="wpf.status.confirmDeleteRss" xml:space="preserve"><value>刪除 RSS 訂閱「{0}」？</value></data>
+  <data name="wpf.status.rssLoaded" xml:space="preserve"><value>已載入 {0} 個 RSS 訂閱。</value></data>
+  <data name="wpf.status.urlCopied" xml:space="preserve"><value>WebControl 存取位址已複製</value></data>
+  <data name="wpf.status.continuePlay" xml:space="preserve"><value>繼續播放 {0} {1}</value></data>
+  <data name="wpf.status.dspOn" xml:space="preserve"><value>DSP 已啟用：{0}（{1} 個預設）</value></data>
+  <data name="wpf.status.autoScanOn" xml:space="preserve"><value>已啟用，每 {0} 小時檢查一次。</value></data>
+  <data name="wpf.status.tmdbSaved" xml:space="preserve"><value>TMDB Token 已儲存在加密存放區。</value></data>
 </root>
