@@ -1448,6 +1448,1049 @@ const I18N = {
   "zh-HK": "工作已結束",
   "en-US": "Task already ended",
   "en-GB": "Task already ended"
+ },
+ "meta.configured": {
+  "zh-CN": "已配置",
+  "zh-TW": "已設定",
+  "zh-HK": "已設定",
+  "en-US": "Configured",
+  "en-GB": "Configured"
+ },
+ "meta.unconfigured": {
+  "zh-CN": "未配置",
+  "zh-TW": "未設定",
+  "zh-HK": "未設定",
+  "en-US": "Not configured",
+  "en-GB": "Not configured"
+ },
+ "meta.accessToken": {
+  "zh-CN": "Access Token",
+  "zh-TW": "Access Token",
+  "zh-HK": "Access Token",
+  "en-US": "Access Token",
+  "en-GB": "Access Token"
+ },
+ "meta.readToken": {
+  "zh-CN": "Read Access Token",
+  "zh-TW": "Read Access Token",
+  "zh-HK": "Read Access Token",
+  "en-US": "Read Access Token",
+  "en-GB": "Read Access Token"
+ },
+ "meta.save": {
+  "zh-CN": "保存",
+  "zh-TW": "儲存",
+  "zh-HK": "儲存",
+  "en-US": "Save",
+  "en-GB": "Save"
+ },
+ "meta.clear": {
+  "zh-CN": "清除",
+  "zh-TW": "清除",
+  "zh-HK": "清除",
+  "en-US": "Clear",
+  "en-GB": "Clear"
+ },
+ "meta.archive": {
+  "zh-CN": "Bangumi Archive",
+  "zh-TW": "Bangumi Archive",
+  "zh-HK": "Bangumi Archive",
+  "en-US": "Bangumi Archive",
+  "en-GB": "Bangumi Archive"
+ },
+ "meta.noImport": {
+  "zh-CN": "尚未导入",
+  "zh-TW": "尚未匯入",
+  "zh-HK": "尚未匯入",
+  "en-US": "Not imported",
+  "en-GB": "Not imported"
+ },
+ "meta.downloadLatest": {
+  "zh-CN": "下载最新数据",
+  "zh-TW": "下載最新資料",
+  "zh-HK": "下載最新資料",
+  "en-US": "Download latest data",
+  "en-GB": "Download latest data"
+ },
+ "meta.importFile": {
+  "zh-CN": "导入 ZIP 或 JSONL",
+  "zh-TW": "匯入 ZIP 或 JSONL",
+  "zh-HK": "匯入 ZIP 或 JSONL",
+  "en-US": "Import ZIP or JSONL",
+  "en-GB": "Import ZIP or JSONL"
+ },
+ "meta.localSearch": {
+  "zh-CN": "本地搜索",
+  "zh-TW": "本機搜尋",
+  "zh-HK": "本機搜尋",
+  "en-US": "Local search",
+  "en-GB": "Local search"
+ },
+ "meta.searchArchive": {
+  "zh-CN": "搜索 Archive",
+  "zh-TW": "搜尋 Archive",
+  "zh-HK": "搜尋 Archive",
+  "en-US": "Search archive",
+  "en-GB": "Search archive"
+ },
+ "meta.onlineSearch": {
+  "zh-CN": "在线搜索",
+  "zh-TW": "線上搜尋",
+  "zh-HK": "線上搜尋",
+  "en-US": "Online search",
+  "en-GB": "Online search"
+ },
+ "meta.provider": {
+  "zh-CN": "提供方",
+  "zh-TW": "提供方",
+  "zh-HK": "提供方",
+  "en-US": "Provider",
+  "en-GB": "Provider"
+ },
+ "meta.allSources": {
+  "zh-CN": "全部来源",
+  "zh-TW": "全部來源",
+  "zh-HK": "全部來源",
+  "en-US": "All sources",
+  "en-GB": "All sources"
+ },
+ "meta.keyword": {
+  "zh-CN": "关键词",
+  "zh-TW": "關鍵字",
+  "zh-HK": "關鍵字",
+  "en-US": "Keyword",
+  "en-GB": "Keyword"
+ },
+ "meta.year": {
+  "zh-CN": "年份（TMDB，可选）",
+  "zh-TW": "年份（TMDB，選填）",
+  "zh-HK": "年份（TMDB，可選）",
+  "en-US": "Year (TMDB, optional)",
+  "en-GB": "Year (TMDB, optional)"
+ },
+ "meta.search": {
+  "zh-CN": "搜索",
+  "zh-TW": "搜尋",
+  "zh-HK": "搜尋",
+  "en-US": "Search",
+  "en-GB": "Search"
+ },
+ "meta.localTitle": {
+  "zh-CN": "本地目录元数据",
+  "zh-TW": "本機目錄元數據",
+  "zh-HK": "本機目錄元數據",
+  "en-US": "Local directory metadata",
+  "en-GB": "Local directory metadata"
+ },
+ "meta.writableSource": {
+  "zh-CN": "可写目录来源",
+  "zh-TW": "可寫入目錄來源",
+  "zh-HK": "可寫入目錄來源",
+  "en-US": "Writable directory source",
+  "en-GB": "Writable directory source"
+ },
+ "meta.series": {
+  "zh-CN": "作品（可多选，支持批量应用）",
+  "zh-TW": "作品（可多選，支援批次套用）",
+  "zh-HK": "作品（可多選，支援批次套用）",
+  "en-US": "Works (multi-select, batch apply supported)",
+  "en-GB": "Works (multi-select, batch apply supported)"
+ },
+ "meta.title": {
+  "zh-CN": "标题",
+  "zh-TW": "標題",
+  "zh-HK": "標題",
+  "en-US": "Title",
+  "en-GB": "Title"
+ },
+ "meta.original": {
+  "zh-CN": "原名",
+  "zh-TW": "原名",
+  "zh-HK": "原名",
+  "en-US": "Original title",
+  "en-GB": "Original title"
+ },
+ "meta.summary": {
+  "zh-CN": "简介",
+  "zh-TW": "簡介",
+  "zh-HK": "簡介",
+  "en-US": "Summary",
+  "en-GB": "Summary"
+ },
+ "meta.premiered": {
+  "zh-CN": "首播日期",
+  "zh-TW": "首播日期",
+  "zh-HK": "首播日期",
+  "en-US": "Premiered",
+  "en-GB": "Premiered"
+ },
+ "meta.genres": {
+  "zh-CN": "类型（逗号分隔）",
+  "zh-TW": "類型（逗號分隔）",
+  "zh-HK": "類型（逗號分隔）",
+  "en-US": "Genres (comma separated)",
+  "en-GB": "Genres (comma separated)"
+ },
+ "meta.preview": {
+  "zh-CN": "预览变更",
+  "zh-TW": "預覽變更",
+  "zh-HK": "預覽變更",
+  "en-US": "Preview changes",
+  "en-GB": "Preview changes"
+ },
+ "meta.tokenSaved": {
+  "zh-CN": "{0} Token 已保存",
+  "zh-TW": "{0} Token 已儲存",
+  "zh-HK": "{0} Token 已儲存",
+  "en-US": "{0} token saved",
+  "en-GB": "{0} token saved"
+ },
+ "meta.confirmClear": {
+  "zh-CN": "清除 {0} Token？",
+  "zh-TW": "清除 {0} Token？",
+  "zh-HK": "清除 {0} Token？",
+  "en-US": "Clear the {0} token?",
+  "en-GB": "Clear the {0} token?"
+ },
+ "meta.tokenCleared": {
+  "zh-CN": "Token 已清除",
+  "zh-TW": "Token 已清除",
+  "zh-HK": "Token 已清除",
+  "en-US": "Token cleared",
+  "en-GB": "Token cleared"
+ },
+ "meta.archiveMatch": {
+  "zh-CN": "Archive 匹配已填入 Bangumi ID。",
+  "zh-TW": "Archive 比對已填入 Bangumi ID。",
+  "zh-HK": "Archive 比對已填入 Bangumi ID。",
+  "en-US": "Archive match filled in the Bangumi ID.",
+  "en-GB": "Archive match filled in the Bangumi ID."
+ },
+ "meta.noLocalMatch": {
+  "zh-CN": "没有本地匹配。",
+  "zh-TW": "沒有本機比對。",
+  "zh-HK": "沒有本機比對。",
+  "en-US": "No local matches.",
+  "en-GB": "No local matches."
+ },
+ "meta.matchPercent": {
+  "zh-CN": "匹配 {0}%",
+  "zh-TW": "比對 {0}%",
+  "zh-HK": "比對 {0}%",
+  "en-US": "{0}% match",
+  "en-GB": "{0}% match"
+ },
+ "meta.aggregate": {
+  "zh-CN": "聚合",
+  "zh-TW": "聚合",
+  "zh-HK": "聚合",
+  "en-US": "Aggregated",
+  "en-GB": "Aggregated"
+ },
+ "meta.noResults": {
+  "zh-CN": "没有结果。",
+  "zh-TW": "沒有結果。",
+  "zh-HK": "沒有結果。",
+  "en-US": "No results.",
+  "en-GB": "No results."
+ },
+ "meta.filled": {
+  "zh-CN": "搜索结果已填入编辑表单，确认后预览变更。",
+  "zh-TW": "搜尋結果已填入編輯表單，確認後預覽變更。",
+  "zh-HK": "搜尋結果已填入編輯表單，確認後預覽變更。",
+  "en-US": "Search results filled into the edit form; preview to confirm.",
+  "en-GB": "Search results filled into the edit form; preview to confirm."
+ },
+ "meta.selectFirst": {
+  "zh-CN": "请先选择可写目录和至少一部作品。",
+  "zh-TW": "請先選擇可寫入目錄和至少一部作品。",
+  "zh-HK": "請先選擇可寫入目錄和至少一部作品。",
+  "en-US": "Select a writable source and at least one work first.",
+  "en-GB": "Select a writable source and at least one work first."
+ },
+ "meta.previewTitle": {
+  "zh-CN": "预览 · {0} 部作品",
+  "zh-TW": "預覽 · {0} 部作品",
+  "zh-HK": "預覽 · {0} 部作品",
+  "en-US": "Preview · {0} works",
+  "en-GB": "Preview · {0} works"
+ },
+ "meta.historyWorks": {
+  "zh-CN": "{0} 部作品",
+  "zh-TW": "{0} 部作品",
+  "zh-HK": "{0} 部作品",
+  "en-US": "{0} works",
+  "en-GB": "{0} works"
+ },
+ "meta.undo": {
+  "zh-CN": "撤销",
+  "zh-TW": "復原",
+  "zh-HK": "復原",
+  "en-US": "Undo",
+  "en-GB": "Undo"
+ },
+ "meta.applied": {
+  "zh-CN": "本地元数据已应用",
+  "zh-TW": "本機元數據已套用",
+  "zh-HK": "本機元數據已套用",
+  "en-US": "Local metadata applied",
+  "en-GB": "Local metadata applied"
+ },
+ "meta.undone": {
+  "zh-CN": "本地元数据已撤销",
+  "zh-TW": "本機元數據已復原",
+  "zh-HK": "本機元數據已復原",
+  "en-US": "Local metadata reverted",
+  "en-GB": "Local metadata reverted"
+ },
+ "meta.archiveUpdated": {
+  "zh-CN": "Bangumi Archive 已更新",
+  "zh-TW": "Bangumi Archive 已更新",
+  "zh-HK": "Bangumi Archive 已更新",
+  "en-US": "Bangumi Archive updated",
+  "en-GB": "Bangumi Archive updated"
+ },
+ "meta.archiveImported": {
+  "zh-CN": "Bangumi Archive 已导入",
+  "zh-TW": "Bangumi Archive 已匯入",
+  "zh-HK": "Bangumi Archive 已匯入",
+  "en-US": "Bangumi Archive imported",
+  "en-GB": "Bangumi Archive imported"
+ },
+ "common.unknown": {
+  "zh-CN": "未知",
+  "zh-TW": "未知",
+  "zh-HK": "未知",
+  "en-US": "Unknown",
+  "en-GB": "Unknown"
+ },
+ "common.notExecuted": {
+  "zh-CN": "尚未执行",
+  "zh-TW": "尚未執行",
+  "zh-HK": "尚未執行",
+  "en-US": "Not run yet",
+  "en-GB": "Not run yet"
+ },
+ "common.continue": {
+  "zh-CN": "继续吗？",
+  "zh-TW": "繼續嗎？",
+  "zh-HK": "繼續嗎？",
+  "en-US": "Continue?",
+  "en-GB": "Continue?"
+ },
+ "locale.system": {
+  "zh-CN": "跟随系统",
+  "zh-TW": "跟隨系統",
+  "zh-HK": "跟隨系統",
+  "en-US": "Follow system",
+  "en-GB": "Follow system"
+ },
+ "locale.zhCN": {
+  "zh-CN": "简体中文",
+  "zh-TW": "簡體中文",
+  "zh-HK": "簡體中文",
+  "en-US": "Simplified Chinese",
+  "en-GB": "Simplified Chinese"
+ },
+ "locale.zhTW": {
+  "zh-CN": "繁體中文（台灣）",
+  "zh-TW": "繁體中文（台灣）",
+  "zh-HK": "繁體中文（台灣）",
+  "en-US": "Traditional Chinese (Taiwan)",
+  "en-GB": "Traditional Chinese (Taiwan)"
+ },
+ "locale.zhHK": {
+  "zh-CN": "繁體中文（香港）",
+  "zh-TW": "繁體中文（香港）",
+  "zh-HK": "繁體中文（香港）",
+  "en-US": "Traditional Chinese (Hong Kong)",
+  "en-GB": "Traditional Chinese (Hong Kong)"
+ },
+ "locale.enUS": {
+  "zh-CN": "English (US)",
+  "zh-TW": "English (US)",
+  "zh-HK": "English (US)",
+  "en-US": "English (US)",
+  "en-GB": "English (US)"
+ },
+ "locale.enGB": {
+  "zh-CN": "English (UK)",
+  "zh-TW": "English (UK)",
+  "zh-HK": "English (UK)",
+  "en-US": "English (UK)",
+  "en-GB": "English (UK)"
+ },
+ "playback.appMode": {
+  "zh-CN": "应用模式",
+  "zh-TW": "應用模式",
+  "zh-HK": "應用模式",
+  "en-US": "App mode",
+  "en-GB": "App mode"
+ },
+ "playback.autoScan": {
+  "zh-CN": "自动扫描",
+  "zh-TW": "自動掃描",
+  "zh-HK": "自動掃描",
+  "en-US": "Auto scan",
+  "en-GB": "Auto scan"
+ },
+ "playback.interval": {
+  "zh-CN": "扫描周期",
+  "zh-TW": "掃描週期",
+  "zh-HK": "掃描週期",
+  "en-US": "Scan interval",
+  "en-GB": "Scan interval"
+ },
+ "playback.everyHours": {
+  "zh-CN": "每 {0} 小时",
+  "zh-TW": "每 {0} 小時",
+  "zh-HK": "每 {0} 小時",
+  "en-US": "Every {0} hours",
+  "en-GB": "Every {0} hours"
+ },
+ "playback.merge": {
+  "zh-CN": "合并同名作品",
+  "zh-TW": "合併同名作品",
+  "zh-HK": "合併同名作品",
+  "en-US": "Merge same-titled works",
+  "en-GB": "Merge same-titled works"
+ },
+ "playback.poster": {
+  "zh-CN": "海报墙排列",
+  "zh-TW": "海報牆排列",
+  "zh-HK": "海報牆排列",
+  "en-US": "Poster wall arrangement",
+  "en-GB": "Poster wall arrangement"
+ },
+ "playback.bySeason": {
+  "zh-CN": "按新番季",
+  "zh-TW": "按新番季",
+  "zh-HK": "按新番季",
+  "en-US": "By season",
+  "en-GB": "By season"
+ },
+ "playback.byTitle": {
+  "zh-CN": "按标题",
+  "zh-TW": "按標題",
+  "zh-HK": "按標題",
+  "en-US": "By title",
+  "en-GB": "By title"
+ },
+ "playback.version": {
+  "zh-CN": "下一集版本",
+  "zh-TW": "下一集版本",
+  "zh-HK": "下一集版本",
+  "en-US": "Next-episode version",
+  "en-GB": "Next-episode version"
+ },
+ "playback.autoNearest": {
+  "zh-CN": "自动选择相近路径",
+  "zh-TW": "自動選擇相近路徑",
+  "zh-HK": "自動選擇相近路徑",
+  "en-US": "Auto-pick nearest path",
+  "en-GB": "Auto-pick nearest path"
+ },
+ "playback.manual": {
+  "zh-CN": "每集手动选择版本",
+  "zh-TW": "每集手動選擇版本",
+  "zh-HK": "每集手動選擇版本",
+  "en-US": "Choose version per episode",
+  "en-GB": "Choose version per episode"
+ },
+ "playback.endAction": {
+  "zh-CN": "播放结束后",
+  "zh-TW": "播放結束後",
+  "zh-HK": "播放結束後",
+  "en-US": "After playback ends",
+  "en-GB": "After playback ends"
+ },
+ "playback.returnDetail": {
+  "zh-CN": "返回详情",
+  "zh-TW": "返回詳情",
+  "zh-HK": "返回詳情",
+  "en-US": "Return to details",
+  "en-GB": "Return to details"
+ },
+ "playback.playNext": {
+  "zh-CN": "自动播放下一集",
+  "zh-TW": "自動播放下一集",
+  "zh-HK": "自動播放下一集",
+  "en-US": "Auto-play next episode",
+  "en-GB": "Auto-play next episode"
+ },
+ "playback.subLang": {
+  "zh-CN": "字幕语言优先级",
+  "zh-TW": "字幕語言優先順序",
+  "zh-HK": "字幕語言優先順序",
+  "en-US": "Subtitle language priority",
+  "en-GB": "Subtitle language priority"
+ },
+ "playback.appLang": {
+  "zh-CN": "应用语言",
+  "zh-TW": "應用語言",
+  "zh-HK": "應用語言",
+  "en-US": "Application language",
+  "en-GB": "Application language"
+ },
+ "playback.saved": {
+  "zh-CN": "播放设置已保存",
+  "zh-TW": "播放設定已儲存",
+  "zh-HK": "播放設定已儲存",
+  "en-US": "Playback settings saved",
+  "en-GB": "Playback settings saved"
+ },
+ "sub.auto": {
+  "zh-CN": "自动",
+  "zh-TW": "自動",
+  "zh-HK": "自動",
+  "en-US": "Auto",
+  "en-GB": "Auto"
+ },
+ "sub.hans": {
+  "zh-CN": "简体中文",
+  "zh-TW": "簡體中文",
+  "zh-HK": "簡體中文",
+  "en-US": "Simplified Chinese",
+  "en-GB": "Simplified Chinese"
+ },
+ "sub.hant": {
+  "zh-CN": "繁体中文",
+  "zh-TW": "繁體中文",
+  "zh-HK": "繁體中文",
+  "en-US": "Traditional Chinese",
+  "en-GB": "Traditional Chinese"
+ },
+ "sub.zh": {
+  "zh-CN": "中文",
+  "zh-TW": "中文",
+  "zh-HK": "中文",
+  "en-US": "Chinese",
+  "en-GB": "Chinese"
+ },
+ "sub.en": {
+  "zh-CN": "英语",
+  "zh-TW": "英語",
+  "zh-HK": "英語",
+  "en-US": "English",
+  "en-GB": "English"
+ },
+ "sub.ja": {
+  "zh-CN": "日语",
+  "zh-TW": "日語",
+  "zh-HK": "日語",
+  "en-US": "Japanese",
+  "en-GB": "Japanese"
+ },
+ "dsp.enabled": {
+  "zh-CN": "启用 DSP",
+  "zh-TW": "啟用 DSP",
+  "zh-HK": "啟用 DSP",
+  "en-US": "Enable DSP",
+  "en-GB": "Enable DSP"
+ },
+ "dsp.preset": {
+  "zh-CN": "预设",
+  "zh-TW": "預設",
+  "zh-HK": "預設",
+  "en-US": "Preset",
+  "en-GB": "Preset"
+ },
+ "dsp.phase": {
+  "zh-CN": "相位模式",
+  "zh-TW": "相位模式",
+  "zh-HK": "相位模式",
+  "en-US": "Phase mode",
+  "en-GB": "Phase mode"
+ },
+ "dsp.minPhase": {
+  "zh-CN": "最小相位",
+  "zh-TW": "最小相位",
+  "zh-HK": "最小相位",
+  "en-US": "Minimum phase",
+  "en-GB": "Minimum phase"
+ },
+ "dsp.linear": {
+  "zh-CN": "线性相位 FIR",
+  "zh-TW": "線性相位 FIR",
+  "zh-HK": "線性相位 FIR",
+  "en-US": "Linear-phase FIR",
+  "en-GB": "Linear-phase FIR"
+ },
+ "dsp.fir": {
+  "zh-CN": "FIR 质量",
+  "zh-TW": "FIR 品質",
+  "zh-HK": "FIR 品質",
+  "en-US": "FIR quality",
+  "en-GB": "FIR quality"
+ },
+ "dsp.low": {
+  "zh-CN": "低（1024 taps）",
+  "zh-TW": "低（1024 taps）",
+  "zh-HK": "低（1024 taps）",
+  "en-US": "Low (1024 taps)",
+  "en-GB": "Low (1024 taps)"
+ },
+ "dsp.mid": {
+  "zh-CN": "中（2048 taps）",
+  "zh-TW": "中（2048 taps）",
+  "zh-HK": "中（2048 taps）",
+  "en-US": "Medium (2048 taps)",
+  "en-GB": "Medium (2048 taps)"
+ },
+ "dsp.high": {
+  "zh-CN": "高（4096 taps）",
+  "zh-TW": "高（4096 taps）",
+  "zh-HK": "高（4096 taps）",
+  "en-US": "High (4096 taps)",
+  "en-GB": "High (4096 taps)"
+ },
+ "dsp.layout": {
+  "zh-CN": "声道布局",
+  "zh-TW": "聲道佈局",
+  "zh-HK": "聲道佈局",
+  "en-US": "Channel layout",
+  "en-GB": "Channel layout"
+ },
+ "dsp.target": {
+  "zh-CN": "目标声道",
+  "zh-TW": "目標聲道",
+  "zh-HK": "目標聲道",
+  "en-US": "Target channel",
+  "en-GB": "Target channel"
+ },
+ "dsp.output": {
+  "zh-CN": "输出模式",
+  "zh-TW": "輸出模式",
+  "zh-HK": "輸出模式",
+  "en-US": "Output mode",
+  "en-GB": "Output mode"
+ },
+ "dsp.keep": {
+  "zh-CN": "保持原声道",
+  "zh-TW": "保持原聲道",
+  "zh-HK": "保持原聲道",
+  "en-US": "Keep channels",
+  "en-GB": "Keep channels"
+ },
+ "dsp.downmix": {
+  "zh-CN": "立体声下混",
+  "zh-TW": "立體聲下混",
+  "zh-HK": "立體聲下混",
+  "en-US": "Stereo downmix",
+  "en-GB": "Stereo downmix"
+ },
+ "dsp.hrtf": {
+  "zh-CN": "HRTF 双耳",
+  "zh-TW": "HRTF 雙耳",
+  "zh-HK": "HRTF 雙耳",
+  "en-US": "HRTF binaural",
+  "en-GB": "HRTF binaural"
+ },
+ "dsp.limiter": {
+  "zh-CN": "限幅",
+  "zh-TW": "限幅",
+  "zh-HK": "限幅",
+  "en-US": "Limiter",
+  "en-GB": "Limiter"
+ },
+ "dsp.ceiling": {
+  "zh-CN": "上限 dB",
+  "zh-TW": "上限 dB",
+  "zh-HK": "上限 dB",
+  "en-US": "Ceiling dB",
+  "en-GB": "Ceiling dB"
+ },
+ "dsp.release": {
+  "zh-CN": "释放 ms",
+  "zh-TW": "釋放 ms",
+  "zh-HK": "釋放 ms",
+  "en-US": "Release ms",
+  "en-GB": "Release ms"
+ },
+ "dsp.colEnabled": {
+  "zh-CN": "启用",
+  "zh-TW": "啟用",
+  "zh-HK": "啟用",
+  "en-US": "On",
+  "en-GB": "On"
+ },
+ "dsp.colType": {
+  "zh-CN": "类型",
+  "zh-TW": "類型",
+  "zh-HK": "類型",
+  "en-US": "Type",
+  "en-GB": "Type"
+ },
+ "dsp.colFreq": {
+  "zh-CN": "频率 Hz",
+  "zh-TW": "頻率 Hz",
+  "zh-HK": "頻率 Hz",
+  "en-US": "Frequency Hz",
+  "en-GB": "Frequency Hz"
+ },
+ "dsp.colGain": {
+  "zh-CN": "增益 dB",
+  "zh-TW": "增益 dB",
+  "zh-HK": "增益 dB",
+  "en-US": "Gain dB",
+  "en-GB": "Gain dB"
+ },
+ "dsp.colQ": {
+  "zh-CN": "Q",
+  "zh-TW": "Q",
+  "zh-HK": "Q",
+  "en-US": "Q",
+  "en-GB": "Q"
+ },
+ "dsp.removeBand": {
+  "zh-CN": "删除频段",
+  "zh-TW": "刪除頻段",
+  "zh-HK": "刪除頻段",
+  "en-US": "Remove band",
+  "en-GB": "Remove band"
+ },
+ "dsp.removeBandN": {
+  "zh-CN": "删除第 {0} 个 PEQ",
+  "zh-TW": "刪除第 {0} 個 PEQ",
+  "zh-HK": "刪除第 {0} 個 PEQ",
+  "en-US": "Remove PEQ {0}",
+  "en-GB": "Remove PEQ {0}"
+ },
+ "dsp.enableBandN": {
+  "zh-CN": "启用第 {0} 个 PEQ",
+  "zh-TW": "啟用第 {0} 個 PEQ",
+  "zh-HK": "啟用第 {0} 個 PEQ",
+  "en-US": "Enable PEQ {0}",
+  "en-GB": "Enable PEQ {0}"
+ },
+ "dsp.bandTypeN": {
+  "zh-CN": "第 {0} 个 PEQ 类型",
+  "zh-TW": "第 {0} 個 PEQ 類型",
+  "zh-HK": "第 {0} 個 PEQ 類型",
+  "en-US": "PEQ {0} type",
+  "en-GB": "PEQ {0} type"
+ },
+ "dsp.importFile": {
+  "zh-CN": "导入 REW",
+  "zh-TW": "匯入 REW",
+  "zh-HK": "匯入 REW",
+  "en-US": "Import REW",
+  "en-GB": "Import REW"
+ },
+ "dsp.importToCurrent": {
+  "zh-CN": "导入到当前声道",
+  "zh-TW": "匯入到目前聲道",
+  "zh-HK": "匯入到目前聲道",
+  "en-US": "Import into current channel",
+  "en-GB": "Import into current channel"
+ },
+ "dsp.addBand": {
+  "zh-CN": "添加频段",
+  "zh-TW": "新增頻段",
+  "zh-HK": "新增頻段",
+  "en-US": "Add band",
+  "en-GB": "Add band"
+ },
+ "dsp.previewResp": {
+  "zh-CN": "预览响应",
+  "zh-TW": "預覽響應",
+  "zh-HK": "預覽響應",
+  "en-US": "Preview response",
+  "en-GB": "Preview response"
+ },
+ "dsp.apply": {
+  "zh-CN": "应用 DSP",
+  "zh-TW": "套用 DSP",
+  "zh-HK": "套用 DSP",
+  "en-US": "Apply DSP",
+  "en-GB": "Apply DSP"
+ },
+ "dsp.imported": {
+  "zh-CN": "已导入 {0} 个频段",
+  "zh-TW": "已匯入 {0} 個頻段",
+  "zh-HK": "已匯入 {0} 個頻段",
+  "en-US": "Imported {0} bands",
+  "en-GB": "Imported {0} bands"
+ },
+ "dsp.applied": {
+  "zh-CN": "音频 DSP 已应用",
+  "zh-TW": "音訊 DSP 已套用",
+  "zh-HK": "音頻 DSP 已套用",
+  "en-US": "Audio DSP applied",
+  "en-GB": "Audio DSP applied"
+ },
+ "dsp.selectRew": {
+  "zh-CN": "请先选择 REW 文件",
+  "zh-TW": "請先選擇 REW 檔案",
+  "zh-HK": "請先選擇 REW 檔案",
+  "en-US": "Select a REW file first",
+  "en-GB": "Select a REW file first"
+ },
+ "dsp.state": {
+  "zh-CN": "状态",
+  "zh-TW": "狀態",
+  "zh-HK": "狀態",
+  "en-US": "Status",
+  "en-GB": "Status"
+ },
+ "dsp.noWarnings": {
+  "zh-CN": "没有警告",
+  "zh-TW": "沒有警告",
+  "zh-HK": "沒有警告",
+  "en-US": "No warnings",
+  "en-GB": "No warnings"
+ },
+ "dsp.note": {
+  "zh-CN": "预览和 REW 导入不会自动保存，点击应用后才会作用于当前 MiruPlay mpv。",
+  "zh-TW": "預覽和 REW 匯入不會自動儲存，點擊套用後才會作用於目前 MiruPlay mpv。",
+  "zh-HK": "預覽和 REW 匯入不會自動儲存，點擊套用後才會作用於目前 MiruPlay mpv。",
+  "en-US": "Previews and REW imports are not saved automatically; they affect the current MiruPlay mpv only after applying.",
+  "en-GB": "Previews and REW imports are not saved automatically; they affect the current MiruPlay mpv only after applying."
+ },
+ "dsp.topping": {
+  "zh-CN": "Topping DAC",
+  "zh-TW": "Topping DAC",
+  "zh-HK": "Topping DAC",
+  "en-US": "Topping DAC",
+  "en-GB": "Topping DAC"
+ },
+ "dsp.loading": {
+  "zh-CN": "加载中…",
+  "zh-TW": "載入中…",
+  "zh-HK": "載入中…",
+  "en-US": "Loading…",
+  "en-GB": "Loading…"
+ },
+ "dsp.volumeDb": {
+  "zh-CN": "Topping 音量 dB",
+  "zh-TW": "Topping 音量 dB",
+  "zh-HK": "Topping 音量 dB",
+  "en-US": "Topping volume dB",
+  "en-GB": "Topping volume dB"
+ },
+ "dsp.setVolume": {
+  "zh-CN": "设置音量",
+  "zh-TW": "設定音量",
+  "zh-HK": "設定音量",
+  "en-US": "Set volume",
+  "en-GB": "Set volume"
+ },
+ "dsp.pushPreset": {
+  "zh-CN": "推送当前预设 PEQ",
+  "zh-TW": "推送目前預設 PEQ",
+  "zh-HK": "推送目前預設 PEQ",
+  "en-US": "Push current preset PEQ",
+  "en-GB": "Push current preset PEQ"
+ },
+ "dsp.flat": {
+  "zh-CN": "旁路全部频段",
+  "zh-TW": "略過全部頻段",
+  "zh-HK": "略過全部頻段",
+  "en-US": "Bypass all bands",
+  "en-GB": "Bypass all bands"
+ },
+ "dsp.volSet": {
+  "zh-CN": "Topping 音量已设为 {0} dB",
+  "zh-TW": "Topping 音量已設為 {0} dB",
+  "zh-HK": "Topping 音量已設為 {0} dB",
+  "en-US": "Topping volume set to {0} dB",
+  "en-GB": "Topping volume set to {0} dB"
+ },
+ "dsp.pushed": {
+  "zh-CN": "已推送（{0} 条警告）",
+  "zh-TW": "已推送（{0} 條警告）",
+  "zh-HK": "已推送（{0} 條警告）",
+  "en-US": "Pushed ({0} warnings)",
+  "en-GB": "Pushed ({0} warnings)"
+ },
+ "dsp.pushedOk": {
+  "zh-CN": "当前预设 PEQ 已推送到 Topping",
+  "zh-TW": "目前預設 PEQ 已推送到 Topping",
+  "zh-HK": "目前預設 PEQ 已推送到 Topping",
+  "en-US": "Current preset PEQ pushed to Topping",
+  "en-GB": "Current preset PEQ pushed to Topping"
+ },
+ "dsp.flatted": {
+  "zh-CN": "Topping 全部频段已旁路",
+  "zh-TW": "Topping 全部頻段已略過",
+  "zh-HK": "Topping 全部頻段已略過",
+  "en-US": "All Topping bands bypassed",
+  "en-GB": "All Topping bands bypassed"
+ },
+ "dsp.chLeft": {
+  "zh-CN": "左",
+  "zh-TW": "左",
+  "zh-HK": "左",
+  "en-US": "Left",
+  "en-GB": "Left"
+ },
+ "dsp.chRight": {
+  "zh-CN": "右",
+  "zh-TW": "右",
+  "zh-HK": "右",
+  "en-US": "Right",
+  "en-GB": "Right"
+ },
+ "dsp.chCenter": {
+  "zh-CN": "中置",
+  "zh-TW": "中置",
+  "zh-HK": "中置",
+  "en-US": "Center",
+  "en-GB": "Centre"
+ },
+ "dsp.chLfe": {
+  "zh-CN": "LFE",
+  "zh-TW": "LFE",
+  "zh-HK": "LFE",
+  "en-US": "LFE",
+  "en-GB": "LFE"
+ },
+ "dsp.chLs": {
+  "zh-CN": "左环绕",
+  "zh-TW": "左環繞",
+  "zh-HK": "左環繞",
+  "en-US": "Left surround",
+  "en-GB": "Left surround"
+ },
+ "dsp.chRs": {
+  "zh-CN": "右环绕",
+  "zh-TW": "右環繞",
+  "zh-HK": "右環繞",
+  "en-US": "Right surround",
+  "en-GB": "Right surround"
+ },
+ "dsp.chAll": {
+  "zh-CN": "全部",
+  "zh-TW": "全部",
+  "zh-HK": "全部",
+  "en-US": "All",
+  "en-GB": "All"
+ },
+ "dsp.chFront": {
+  "zh-CN": "前置",
+  "zh-TW": "前置",
+  "zh-HK": "前置",
+  "en-US": "Front",
+  "en-GB": "Front"
+ },
+ "dsp.chCenterLfe": {
+  "zh-CN": "中置/LFE",
+  "zh-TW": "中置/LFE",
+  "zh-HK": "中置/LFE",
+  "en-US": "Center/LFE",
+  "en-GB": "Centre/LFE"
+ },
+ "dsp.chSurround": {
+  "zh-CN": "环绕",
+  "zh-TW": "環繞",
+  "zh-HK": "環繞",
+  "en-US": "Surround",
+  "en-GB": "Surround"
+ },
+ "access.status": {
+  "zh-CN": "访问状态",
+  "zh-TW": "存取狀態",
+  "zh-HK": "存取狀態",
+  "en-US": "Access status",
+  "en-GB": "Access status"
+ },
+ "access.on": {
+  "zh-CN": "已启用",
+  "zh-TW": "已啟用",
+  "zh-HK": "已啟用",
+  "en-US": "Enabled",
+  "en-GB": "Enabled"
+ },
+ "access.off": {
+  "zh-CN": "已停用",
+  "zh-TW": "已停用",
+  "zh-HK": "已停用",
+  "en-US": "Disabled",
+  "en-GB": "Disabled"
+ },
+ "access.url": {
+  "zh-CN": "访问地址",
+  "zh-TW": "存取位址",
+  "zh-HK": "存取位址",
+  "en-US": "Access URL",
+  "en-GB": "Access URL"
+ },
+ "access.currentToken": {
+  "zh-CN": "当前访问令牌",
+  "zh-TW": "目前存取權杖",
+  "zh-HK": "目前存取權杖",
+  "en-US": "Current access token",
+  "en-GB": "Current access token"
+ },
+ "access.copy": {
+  "zh-CN": "复制令牌",
+  "zh-TW": "複製權杖",
+  "zh-HK": "複製權杖",
+  "en-US": "Copy token",
+  "en-GB": "Copy token"
+ },
+ "access.copied": {
+  "zh-CN": "令牌已复制",
+  "zh-TW": "權杖已複製",
+  "zh-HK": "權杖已複製",
+  "en-US": "Token copied",
+  "en-GB": "Token copied"
+ },
+ "access.rotate": {
+  "zh-CN": "轮换令牌",
+  "zh-TW": "輪換權杖",
+  "zh-HK": "輪換權杖",
+  "en-US": "Rotate token",
+  "en-GB": "Rotate token"
+ },
+ "access.confirmRotate": {
+  "zh-CN": "旧令牌将立即失效，继续轮换？",
+  "zh-TW": "舊權杖將立即失效，繼續輪換？",
+  "zh-HK": "舊權杖將立即失效，繼續輪換？",
+  "en-US": "The old token expires immediately. Rotate?",
+  "en-GB": "The old token expires immediately. Rotate?"
+ },
+ "access.rotated": {
+  "zh-CN": "令牌已轮换并更新当前浏览器",
+  "zh-TW": "權杖已輪換並更新目前瀏覽器",
+  "zh-HK": "權杖已輪換並更新目前瀏覽器",
+  "en-US": "Token rotated and updated in this browser",
+  "en-GB": "Token rotated and updated in this browser"
+ },
+ "access.disconnect": {
+  "zh-CN": "断开此浏览器",
+  "zh-TW": "中斷此瀏覽器",
+  "zh-HK": "中斷此瀏覽器",
+  "en-US": "Disconnect this browser",
+  "en-GB": "Disconnect this browser"
+ },
+ "dsp.cacheLine": {
+  "zh-CN": "{0}（写缓存：音量 {1} dB，增益 {2}，预设 {3} dB）",
+  "zh-TW": "{0}（寫快取：音量 {1} dB，增益 {2}，預設 {3} dB）",
+  "zh-HK": "{0}（寫快取：音量 {1} dB，增益 {2}，預設 {3} dB）",
+  "en-US": "{0} (write cache: volume {1} dB, gain {2}, preset {3} dB)",
+  "en-GB": "{0} (write cache: volume {1} dB, gain {2}, preset {3} dB)"
+ },
+ "dsp.unconnected": {
+  "zh-CN": "未连接",
+  "zh-TW": "未連接",
+  "zh-HK": "未連接",
+  "en-US": "Not connected",
+  "en-GB": "Not connected"
+ },
+ "dsp.unavailable": {
+  "zh-CN": "状态不可用：{0}",
+  "zh-TW": "狀態不可用：{0}",
+  "zh-HK": "狀態不可用：{0}",
+  "en-US": "Status unavailable: {0}",
+  "en-GB": "Status unavailable: {0}"
+ },
+ "dsp.samples": {
+  "zh-CN": "{0} 个采样点",
+  "zh-TW": "{0} 個採樣點",
+  "zh-HK": "{0} 個採樣點",
+  "en-US": "{0} samples",
+  "en-GB": "{0} samples"
  }
 };
 let currentLocale = 'zh-CN';

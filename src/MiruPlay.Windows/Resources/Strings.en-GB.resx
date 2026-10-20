@@ -211,4 +211,153 @@
   <data name="ops.exitSent" xml:space="preserve"><value>Quit requested</value></data>
   <data name="ops.cancelSent" xml:space="preserve"><value>Cancel requested</value></data>
   <data name="ops.taskEnded" xml:space="preserve"><value>Task already ended</value></data>
+  <data name="meta.configured" xml:space="preserve"><value>Configured</value></data>
+  <data name="meta.unconfigured" xml:space="preserve"><value>Not configured</value></data>
+  <data name="meta.accessToken" xml:space="preserve"><value>Access Token</value></data>
+  <data name="meta.readToken" xml:space="preserve"><value>Read Access Token</value></data>
+  <data name="meta.save" xml:space="preserve"><value>Save</value></data>
+  <data name="meta.clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="meta.archive" xml:space="preserve"><value>Bangumi Archive</value></data>
+  <data name="meta.noImport" xml:space="preserve"><value>Not imported</value></data>
+  <data name="meta.downloadLatest" xml:space="preserve"><value>Download latest data</value></data>
+  <data name="meta.importFile" xml:space="preserve"><value>Import ZIP or JSONL</value></data>
+  <data name="meta.localSearch" xml:space="preserve"><value>Local search</value></data>
+  <data name="meta.searchArchive" xml:space="preserve"><value>Search archive</value></data>
+  <data name="meta.onlineSearch" xml:space="preserve"><value>Online search</value></data>
+  <data name="meta.provider" xml:space="preserve"><value>Provider</value></data>
+  <data name="meta.allSources" xml:space="preserve"><value>All sources</value></data>
+  <data name="meta.keyword" xml:space="preserve"><value>Keyword</value></data>
+  <data name="meta.year" xml:space="preserve"><value>Year (TMDB, optional)</value></data>
+  <data name="meta.search" xml:space="preserve"><value>Search</value></data>
+  <data name="meta.localTitle" xml:space="preserve"><value>Local directory metadata</value></data>
+  <data name="meta.writableSource" xml:space="preserve"><value>Writable directory source</value></data>
+  <data name="meta.series" xml:space="preserve"><value>Works (multi-select, batch apply supported)</value></data>
+  <data name="meta.title" xml:space="preserve"><value>Title</value></data>
+  <data name="meta.original" xml:space="preserve"><value>Original title</value></data>
+  <data name="meta.summary" xml:space="preserve"><value>Summary</value></data>
+  <data name="meta.premiered" xml:space="preserve"><value>Premiered</value></data>
+  <data name="meta.genres" xml:space="preserve"><value>Genres (comma separated)</value></data>
+  <data name="meta.preview" xml:space="preserve"><value>Preview changes</value></data>
+  <data name="meta.tokenSaved" xml:space="preserve"><value>{0} token saved</value></data>
+  <data name="meta.confirmClear" xml:space="preserve"><value>Clear the {0} token?</value></data>
+  <data name="meta.tokenCleared" xml:space="preserve"><value>Token cleared</value></data>
+  <data name="meta.archiveMatch" xml:space="preserve"><value>Archive match filled in the Bangumi ID.</value></data>
+  <data name="meta.noLocalMatch" xml:space="preserve"><value>No local matches.</value></data>
+  <data name="meta.matchPercent" xml:space="preserve"><value>{0}% match</value></data>
+  <data name="meta.aggregate" xml:space="preserve"><value>Aggregated</value></data>
+  <data name="meta.noResults" xml:space="preserve"><value>No results.</value></data>
+  <data name="meta.filled" xml:space="preserve"><value>Search results filled into the edit form; preview to confirm.</value></data>
+  <data name="meta.selectFirst" xml:space="preserve"><value>Select a writable source and at least one work first.</value></data>
+  <data name="meta.previewTitle" xml:space="preserve"><value>Preview · {0} works</value></data>
+  <data name="meta.historyWorks" xml:space="preserve"><value>{0} works</value></data>
+  <data name="meta.undo" xml:space="preserve"><value>Undo</value></data>
+  <data name="meta.applied" xml:space="preserve"><value>Local metadata applied</value></data>
+  <data name="meta.undone" xml:space="preserve"><value>Local metadata reverted</value></data>
+  <data name="meta.archiveUpdated" xml:space="preserve"><value>Bangumi Archive updated</value></data>
+  <data name="meta.archiveImported" xml:space="preserve"><value>Bangumi Archive imported</value></data>
+  <data name="common.unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="common.notExecuted" xml:space="preserve"><value>Not run yet</value></data>
+  <data name="common.continue" xml:space="preserve"><value>Continue?</value></data>
+  <data name="locale.system" xml:space="preserve"><value>Follow system</value></data>
+  <data name="locale.zhCN" xml:space="preserve"><value>Simplified Chinese</value></data>
+  <data name="locale.zhTW" xml:space="preserve"><value>Traditional Chinese (Taiwan)</value></data>
+  <data name="locale.zhHK" xml:space="preserve"><value>Traditional Chinese (Hong Kong)</value></data>
+  <data name="locale.enUS" xml:space="preserve"><value>English (US)</value></data>
+  <data name="locale.enGB" xml:space="preserve"><value>English (UK)</value></data>
+  <data name="playback.appMode" xml:space="preserve"><value>App mode</value></data>
+  <data name="playback.autoScan" xml:space="preserve"><value>Auto scan</value></data>
+  <data name="playback.interval" xml:space="preserve"><value>Scan interval</value></data>
+  <data name="playback.everyHours" xml:space="preserve"><value>Every {0} hours</value></data>
+  <data name="playback.merge" xml:space="preserve"><value>Merge same-titled works</value></data>
+  <data name="playback.poster" xml:space="preserve"><value>Poster wall arrangement</value></data>
+  <data name="playback.bySeason" xml:space="preserve"><value>By season</value></data>
+  <data name="playback.byTitle" xml:space="preserve"><value>By title</value></data>
+  <data name="playback.version" xml:space="preserve"><value>Next-episode version</value></data>
+  <data name="playback.autoNearest" xml:space="preserve"><value>Auto-pick nearest path</value></data>
+  <data name="playback.manual" xml:space="preserve"><value>Choose version per episode</value></data>
+  <data name="playback.endAction" xml:space="preserve"><value>After playback ends</value></data>
+  <data name="playback.returnDetail" xml:space="preserve"><value>Return to details</value></data>
+  <data name="playback.playNext" xml:space="preserve"><value>Auto-play next episode</value></data>
+  <data name="playback.subLang" xml:space="preserve"><value>Subtitle language priority</value></data>
+  <data name="playback.appLang" xml:space="preserve"><value>Application language</value></data>
+  <data name="playback.saved" xml:space="preserve"><value>Playback settings saved</value></data>
+  <data name="sub.auto" xml:space="preserve"><value>Auto</value></data>
+  <data name="sub.hans" xml:space="preserve"><value>Simplified Chinese</value></data>
+  <data name="sub.hant" xml:space="preserve"><value>Traditional Chinese</value></data>
+  <data name="sub.zh" xml:space="preserve"><value>Chinese</value></data>
+  <data name="sub.en" xml:space="preserve"><value>English</value></data>
+  <data name="sub.ja" xml:space="preserve"><value>Japanese</value></data>
+  <data name="dsp.enabled" xml:space="preserve"><value>Enable DSP</value></data>
+  <data name="dsp.preset" xml:space="preserve"><value>Preset</value></data>
+  <data name="dsp.phase" xml:space="preserve"><value>Phase mode</value></data>
+  <data name="dsp.minPhase" xml:space="preserve"><value>Minimum phase</value></data>
+  <data name="dsp.linear" xml:space="preserve"><value>Linear-phase FIR</value></data>
+  <data name="dsp.fir" xml:space="preserve"><value>FIR quality</value></data>
+  <data name="dsp.low" xml:space="preserve"><value>Low (1024 taps)</value></data>
+  <data name="dsp.mid" xml:space="preserve"><value>Medium (2048 taps)</value></data>
+  <data name="dsp.high" xml:space="preserve"><value>High (4096 taps)</value></data>
+  <data name="dsp.layout" xml:space="preserve"><value>Channel layout</value></data>
+  <data name="dsp.target" xml:space="preserve"><value>Target channel</value></data>
+  <data name="dsp.output" xml:space="preserve"><value>Output mode</value></data>
+  <data name="dsp.keep" xml:space="preserve"><value>Keep channels</value></data>
+  <data name="dsp.downmix" xml:space="preserve"><value>Stereo downmix</value></data>
+  <data name="dsp.hrtf" xml:space="preserve"><value>HRTF binaural</value></data>
+  <data name="dsp.limiter" xml:space="preserve"><value>Limiter</value></data>
+  <data name="dsp.ceiling" xml:space="preserve"><value>Ceiling dB</value></data>
+  <data name="dsp.release" xml:space="preserve"><value>Release ms</value></data>
+  <data name="dsp.colEnabled" xml:space="preserve"><value>On</value></data>
+  <data name="dsp.colType" xml:space="preserve"><value>Type</value></data>
+  <data name="dsp.colFreq" xml:space="preserve"><value>Frequency Hz</value></data>
+  <data name="dsp.colGain" xml:space="preserve"><value>Gain dB</value></data>
+  <data name="dsp.colQ" xml:space="preserve"><value>Q</value></data>
+  <data name="dsp.removeBand" xml:space="preserve"><value>Remove band</value></data>
+  <data name="dsp.removeBandN" xml:space="preserve"><value>Remove PEQ {0}</value></data>
+  <data name="dsp.enableBandN" xml:space="preserve"><value>Enable PEQ {0}</value></data>
+  <data name="dsp.bandTypeN" xml:space="preserve"><value>PEQ {0} type</value></data>
+  <data name="dsp.importFile" xml:space="preserve"><value>Import REW</value></data>
+  <data name="dsp.importToCurrent" xml:space="preserve"><value>Import into current channel</value></data>
+  <data name="dsp.addBand" xml:space="preserve"><value>Add band</value></data>
+  <data name="dsp.previewResp" xml:space="preserve"><value>Preview response</value></data>
+  <data name="dsp.apply" xml:space="preserve"><value>Apply DSP</value></data>
+  <data name="dsp.imported" xml:space="preserve"><value>Imported {0} bands</value></data>
+  <data name="dsp.applied" xml:space="preserve"><value>Audio DSP applied</value></data>
+  <data name="dsp.selectRew" xml:space="preserve"><value>Select a REW file first</value></data>
+  <data name="dsp.state" xml:space="preserve"><value>Status</value></data>
+  <data name="dsp.noWarnings" xml:space="preserve"><value>No warnings</value></data>
+  <data name="dsp.note" xml:space="preserve"><value>Previews and REW imports are not saved automatically; they affect the current MiruPlay mpv only after applying.</value></data>
+  <data name="dsp.topping" xml:space="preserve"><value>Topping DAC</value></data>
+  <data name="dsp.loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="dsp.volumeDb" xml:space="preserve"><value>Topping volume dB</value></data>
+  <data name="dsp.setVolume" xml:space="preserve"><value>Set volume</value></data>
+  <data name="dsp.pushPreset" xml:space="preserve"><value>Push current preset PEQ</value></data>
+  <data name="dsp.flat" xml:space="preserve"><value>Bypass all bands</value></data>
+  <data name="dsp.volSet" xml:space="preserve"><value>Topping volume set to {0} dB</value></data>
+  <data name="dsp.pushed" xml:space="preserve"><value>Pushed ({0} warnings)</value></data>
+  <data name="dsp.pushedOk" xml:space="preserve"><value>Current preset PEQ pushed to Topping</value></data>
+  <data name="dsp.flatted" xml:space="preserve"><value>All Topping bands bypassed</value></data>
+  <data name="dsp.chLeft" xml:space="preserve"><value>Left</value></data>
+  <data name="dsp.chRight" xml:space="preserve"><value>Right</value></data>
+  <data name="dsp.chCenter" xml:space="preserve"><value>Centre</value></data>
+  <data name="dsp.chLfe" xml:space="preserve"><value>LFE</value></data>
+  <data name="dsp.chLs" xml:space="preserve"><value>Left surround</value></data>
+  <data name="dsp.chRs" xml:space="preserve"><value>Right surround</value></data>
+  <data name="dsp.chAll" xml:space="preserve"><value>All</value></data>
+  <data name="dsp.chFront" xml:space="preserve"><value>Front</value></data>
+  <data name="dsp.chCenterLfe" xml:space="preserve"><value>Centre/LFE</value></data>
+  <data name="dsp.chSurround" xml:space="preserve"><value>Surround</value></data>
+  <data name="access.status" xml:space="preserve"><value>Access status</value></data>
+  <data name="access.on" xml:space="preserve"><value>Enabled</value></data>
+  <data name="access.off" xml:space="preserve"><value>Disabled</value></data>
+  <data name="access.url" xml:space="preserve"><value>Access URL</value></data>
+  <data name="access.currentToken" xml:space="preserve"><value>Current access token</value></data>
+  <data name="access.copy" xml:space="preserve"><value>Copy token</value></data>
+  <data name="access.copied" xml:space="preserve"><value>Token copied</value></data>
+  <data name="access.rotate" xml:space="preserve"><value>Rotate token</value></data>
+  <data name="access.confirmRotate" xml:space="preserve"><value>The old token expires immediately. Rotate?</value></data>
+  <data name="access.rotated" xml:space="preserve"><value>Token rotated and updated in this browser</value></data>
+  <data name="access.disconnect" xml:space="preserve"><value>Disconnect this browser</value></data>
+  <data name="dsp.cacheLine" xml:space="preserve"><value>{0} (write cache: volume {1} dB, gain {2}, preset {3} dB)</value></data>
+  <data name="dsp.unconnected" xml:space="preserve"><value>Not connected</value></data>
+  <data name="dsp.unavailable" xml:space="preserve"><value>Status unavailable: {0}</value></data>
+  <data name="dsp.samples" xml:space="preserve"><value>{0} samples</value></data>
 </root>

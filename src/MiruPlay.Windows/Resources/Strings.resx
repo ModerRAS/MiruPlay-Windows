@@ -211,4 +211,153 @@
   <data name="ops.exitSent" xml:space="preserve"><value>已发送退出请求</value></data>
   <data name="ops.cancelSent" xml:space="preserve"><value>取消请求已发送</value></data>
   <data name="ops.taskEnded" xml:space="preserve"><value>任务已结束</value></data>
+  <data name="meta.configured" xml:space="preserve"><value>已配置</value></data>
+  <data name="meta.unconfigured" xml:space="preserve"><value>未配置</value></data>
+  <data name="meta.accessToken" xml:space="preserve"><value>Access Token</value></data>
+  <data name="meta.readToken" xml:space="preserve"><value>Read Access Token</value></data>
+  <data name="meta.save" xml:space="preserve"><value>保存</value></data>
+  <data name="meta.clear" xml:space="preserve"><value>清除</value></data>
+  <data name="meta.archive" xml:space="preserve"><value>Bangumi Archive</value></data>
+  <data name="meta.noImport" xml:space="preserve"><value>尚未导入</value></data>
+  <data name="meta.downloadLatest" xml:space="preserve"><value>下载最新数据</value></data>
+  <data name="meta.importFile" xml:space="preserve"><value>导入 ZIP 或 JSONL</value></data>
+  <data name="meta.localSearch" xml:space="preserve"><value>本地搜索</value></data>
+  <data name="meta.searchArchive" xml:space="preserve"><value>搜索 Archive</value></data>
+  <data name="meta.onlineSearch" xml:space="preserve"><value>在线搜索</value></data>
+  <data name="meta.provider" xml:space="preserve"><value>提供方</value></data>
+  <data name="meta.allSources" xml:space="preserve"><value>全部来源</value></data>
+  <data name="meta.keyword" xml:space="preserve"><value>关键词</value></data>
+  <data name="meta.year" xml:space="preserve"><value>年份（TMDB，可选）</value></data>
+  <data name="meta.search" xml:space="preserve"><value>搜索</value></data>
+  <data name="meta.localTitle" xml:space="preserve"><value>本地目录元数据</value></data>
+  <data name="meta.writableSource" xml:space="preserve"><value>可写目录来源</value></data>
+  <data name="meta.series" xml:space="preserve"><value>作品（可多选，支持批量应用）</value></data>
+  <data name="meta.title" xml:space="preserve"><value>标题</value></data>
+  <data name="meta.original" xml:space="preserve"><value>原名</value></data>
+  <data name="meta.summary" xml:space="preserve"><value>简介</value></data>
+  <data name="meta.premiered" xml:space="preserve"><value>首播日期</value></data>
+  <data name="meta.genres" xml:space="preserve"><value>类型（逗号分隔）</value></data>
+  <data name="meta.preview" xml:space="preserve"><value>预览变更</value></data>
+  <data name="meta.tokenSaved" xml:space="preserve"><value>{0} Token 已保存</value></data>
+  <data name="meta.confirmClear" xml:space="preserve"><value>清除 {0} Token？</value></data>
+  <data name="meta.tokenCleared" xml:space="preserve"><value>Token 已清除</value></data>
+  <data name="meta.archiveMatch" xml:space="preserve"><value>Archive 匹配已填入 Bangumi ID。</value></data>
+  <data name="meta.noLocalMatch" xml:space="preserve"><value>没有本地匹配。</value></data>
+  <data name="meta.matchPercent" xml:space="preserve"><value>匹配 {0}%</value></data>
+  <data name="meta.aggregate" xml:space="preserve"><value>聚合</value></data>
+  <data name="meta.noResults" xml:space="preserve"><value>没有结果。</value></data>
+  <data name="meta.filled" xml:space="preserve"><value>搜索结果已填入编辑表单，确认后预览变更。</value></data>
+  <data name="meta.selectFirst" xml:space="preserve"><value>请先选择可写目录和至少一部作品。</value></data>
+  <data name="meta.previewTitle" xml:space="preserve"><value>预览 · {0} 部作品</value></data>
+  <data name="meta.historyWorks" xml:space="preserve"><value>{0} 部作品</value></data>
+  <data name="meta.undo" xml:space="preserve"><value>撤销</value></data>
+  <data name="meta.applied" xml:space="preserve"><value>本地元数据已应用</value></data>
+  <data name="meta.undone" xml:space="preserve"><value>本地元数据已撤销</value></data>
+  <data name="meta.archiveUpdated" xml:space="preserve"><value>Bangumi Archive 已更新</value></data>
+  <data name="meta.archiveImported" xml:space="preserve"><value>Bangumi Archive 已导入</value></data>
+  <data name="common.unknown" xml:space="preserve"><value>未知</value></data>
+  <data name="common.notExecuted" xml:space="preserve"><value>尚未执行</value></data>
+  <data name="common.continue" xml:space="preserve"><value>继续吗？</value></data>
+  <data name="locale.system" xml:space="preserve"><value>跟随系统</value></data>
+  <data name="locale.zhCN" xml:space="preserve"><value>简体中文</value></data>
+  <data name="locale.zhTW" xml:space="preserve"><value>繁體中文（台灣）</value></data>
+  <data name="locale.zhHK" xml:space="preserve"><value>繁體中文（香港）</value></data>
+  <data name="locale.enUS" xml:space="preserve"><value>English (US)</value></data>
+  <data name="locale.enGB" xml:space="preserve"><value>English (UK)</value></data>
+  <data name="playback.appMode" xml:space="preserve"><value>应用模式</value></data>
+  <data name="playback.autoScan" xml:space="preserve"><value>自动扫描</value></data>
+  <data name="playback.interval" xml:space="preserve"><value>扫描周期</value></data>
+  <data name="playback.everyHours" xml:space="preserve"><value>每 {0} 小时</value></data>
+  <data name="playback.merge" xml:space="preserve"><value>合并同名作品</value></data>
+  <data name="playback.poster" xml:space="preserve"><value>海报墙排列</value></data>
+  <data name="playback.bySeason" xml:space="preserve"><value>按新番季</value></data>
+  <data name="playback.byTitle" xml:space="preserve"><value>按标题</value></data>
+  <data name="playback.version" xml:space="preserve"><value>下一集版本</value></data>
+  <data name="playback.autoNearest" xml:space="preserve"><value>自动选择相近路径</value></data>
+  <data name="playback.manual" xml:space="preserve"><value>每集手动选择版本</value></data>
+  <data name="playback.endAction" xml:space="preserve"><value>播放结束后</value></data>
+  <data name="playback.returnDetail" xml:space="preserve"><value>返回详情</value></data>
+  <data name="playback.playNext" xml:space="preserve"><value>自动播放下一集</value></data>
+  <data name="playback.subLang" xml:space="preserve"><value>字幕语言优先级</value></data>
+  <data name="playback.appLang" xml:space="preserve"><value>应用语言</value></data>
+  <data name="playback.saved" xml:space="preserve"><value>播放设置已保存</value></data>
+  <data name="sub.auto" xml:space="preserve"><value>自动</value></data>
+  <data name="sub.hans" xml:space="preserve"><value>简体中文</value></data>
+  <data name="sub.hant" xml:space="preserve"><value>繁体中文</value></data>
+  <data name="sub.zh" xml:space="preserve"><value>中文</value></data>
+  <data name="sub.en" xml:space="preserve"><value>英语</value></data>
+  <data name="sub.ja" xml:space="preserve"><value>日语</value></data>
+  <data name="dsp.enabled" xml:space="preserve"><value>启用 DSP</value></data>
+  <data name="dsp.preset" xml:space="preserve"><value>预设</value></data>
+  <data name="dsp.phase" xml:space="preserve"><value>相位模式</value></data>
+  <data name="dsp.minPhase" xml:space="preserve"><value>最小相位</value></data>
+  <data name="dsp.linear" xml:space="preserve"><value>线性相位 FIR</value></data>
+  <data name="dsp.fir" xml:space="preserve"><value>FIR 质量</value></data>
+  <data name="dsp.low" xml:space="preserve"><value>低（1024 taps）</value></data>
+  <data name="dsp.mid" xml:space="preserve"><value>中（2048 taps）</value></data>
+  <data name="dsp.high" xml:space="preserve"><value>高（4096 taps）</value></data>
+  <data name="dsp.layout" xml:space="preserve"><value>声道布局</value></data>
+  <data name="dsp.target" xml:space="preserve"><value>目标声道</value></data>
+  <data name="dsp.output" xml:space="preserve"><value>输出模式</value></data>
+  <data name="dsp.keep" xml:space="preserve"><value>保持原声道</value></data>
+  <data name="dsp.downmix" xml:space="preserve"><value>立体声下混</value></data>
+  <data name="dsp.hrtf" xml:space="preserve"><value>HRTF 双耳</value></data>
+  <data name="dsp.limiter" xml:space="preserve"><value>限幅</value></data>
+  <data name="dsp.ceiling" xml:space="preserve"><value>上限 dB</value></data>
+  <data name="dsp.release" xml:space="preserve"><value>释放 ms</value></data>
+  <data name="dsp.colEnabled" xml:space="preserve"><value>启用</value></data>
+  <data name="dsp.colType" xml:space="preserve"><value>类型</value></data>
+  <data name="dsp.colFreq" xml:space="preserve"><value>频率 Hz</value></data>
+  <data name="dsp.colGain" xml:space="preserve"><value>增益 dB</value></data>
+  <data name="dsp.colQ" xml:space="preserve"><value>Q</value></data>
+  <data name="dsp.removeBand" xml:space="preserve"><value>删除频段</value></data>
+  <data name="dsp.removeBandN" xml:space="preserve"><value>删除第 {0} 个 PEQ</value></data>
+  <data name="dsp.enableBandN" xml:space="preserve"><value>启用第 {0} 个 PEQ</value></data>
+  <data name="dsp.bandTypeN" xml:space="preserve"><value>第 {0} 个 PEQ 类型</value></data>
+  <data name="dsp.importFile" xml:space="preserve"><value>导入 REW</value></data>
+  <data name="dsp.importToCurrent" xml:space="preserve"><value>导入到当前声道</value></data>
+  <data name="dsp.addBand" xml:space="preserve"><value>添加频段</value></data>
+  <data name="dsp.previewResp" xml:space="preserve"><value>预览响应</value></data>
+  <data name="dsp.apply" xml:space="preserve"><value>应用 DSP</value></data>
+  <data name="dsp.imported" xml:space="preserve"><value>已导入 {0} 个频段</value></data>
+  <data name="dsp.applied" xml:space="preserve"><value>音频 DSP 已应用</value></data>
+  <data name="dsp.selectRew" xml:space="preserve"><value>请先选择 REW 文件</value></data>
+  <data name="dsp.state" xml:space="preserve"><value>状态</value></data>
+  <data name="dsp.noWarnings" xml:space="preserve"><value>没有警告</value></data>
+  <data name="dsp.note" xml:space="preserve"><value>预览和 REW 导入不会自动保存，点击应用后才会作用于当前 MiruPlay mpv。</value></data>
+  <data name="dsp.topping" xml:space="preserve"><value>Topping DAC</value></data>
+  <data name="dsp.loading" xml:space="preserve"><value>加载中…</value></data>
+  <data name="dsp.volumeDb" xml:space="preserve"><value>Topping 音量 dB</value></data>
+  <data name="dsp.setVolume" xml:space="preserve"><value>设置音量</value></data>
+  <data name="dsp.pushPreset" xml:space="preserve"><value>推送当前预设 PEQ</value></data>
+  <data name="dsp.flat" xml:space="preserve"><value>旁路全部频段</value></data>
+  <data name="dsp.volSet" xml:space="preserve"><value>Topping 音量已设为 {0} dB</value></data>
+  <data name="dsp.pushed" xml:space="preserve"><value>已推送（{0} 条警告）</value></data>
+  <data name="dsp.pushedOk" xml:space="preserve"><value>当前预设 PEQ 已推送到 Topping</value></data>
+  <data name="dsp.flatted" xml:space="preserve"><value>Topping 全部频段已旁路</value></data>
+  <data name="dsp.chLeft" xml:space="preserve"><value>左</value></data>
+  <data name="dsp.chRight" xml:space="preserve"><value>右</value></data>
+  <data name="dsp.chCenter" xml:space="preserve"><value>中置</value></data>
+  <data name="dsp.chLfe" xml:space="preserve"><value>LFE</value></data>
+  <data name="dsp.chLs" xml:space="preserve"><value>左环绕</value></data>
+  <data name="dsp.chRs" xml:space="preserve"><value>右环绕</value></data>
+  <data name="dsp.chAll" xml:space="preserve"><value>全部</value></data>
+  <data name="dsp.chFront" xml:space="preserve"><value>前置</value></data>
+  <data name="dsp.chCenterLfe" xml:space="preserve"><value>中置/LFE</value></data>
+  <data name="dsp.chSurround" xml:space="preserve"><value>环绕</value></data>
+  <data name="access.status" xml:space="preserve"><value>访问状态</value></data>
+  <data name="access.on" xml:space="preserve"><value>已启用</value></data>
+  <data name="access.off" xml:space="preserve"><value>已停用</value></data>
+  <data name="access.url" xml:space="preserve"><value>访问地址</value></data>
+  <data name="access.currentToken" xml:space="preserve"><value>当前访问令牌</value></data>
+  <data name="access.copy" xml:space="preserve"><value>复制令牌</value></data>
+  <data name="access.copied" xml:space="preserve"><value>令牌已复制</value></data>
+  <data name="access.rotate" xml:space="preserve"><value>轮换令牌</value></data>
+  <data name="access.confirmRotate" xml:space="preserve"><value>旧令牌将立即失效，继续轮换？</value></data>
+  <data name="access.rotated" xml:space="preserve"><value>令牌已轮换并更新当前浏览器</value></data>
+  <data name="access.disconnect" xml:space="preserve"><value>断开此浏览器</value></data>
+  <data name="dsp.cacheLine" xml:space="preserve"><value>{0}（写缓存：音量 {1} dB，增益 {2}，预设 {3} dB）</value></data>
+  <data name="dsp.unconnected" xml:space="preserve"><value>未连接</value></data>
+  <data name="dsp.unavailable" xml:space="preserve"><value>状态不可用：{0}</value></data>
+  <data name="dsp.samples" xml:space="preserve"><value>{0} 个采样点</value></data>
 </root>
