@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:services="clr-namespace:MiruPlay.Windows.Services"
+        xmlns:controls="clr-namespace:MiruPlay.Windows.Controls"
         mc:Ignorable="d"
         Title="MiruPlay"
         Width="1200"
@@ -16,7 +16,7 @@
         WindowStartupLocation="CenterScreen">
     <Grid Background="{StaticResource DarkBackground}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="216" />
+            <ColumnDefinition x:Name="NavigationColumn" Width="216" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -65,7 +65,6 @@
             <Grid x:Name="LibraryPage">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -93,28 +92,7 @@
                     </Button>
                 </Grid>
 
-                <Grid Grid.Row="1" x:Name="PlaybackSurface" Visibility="Collapsed" Margin="30,0,30,16">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="230" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Border Background="#121820" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="1">
-                        <services:MpvWindowHost x:Name="MpvHost" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-                    </Border>
-                    <Grid Grid.Row="1" Margin="0,8,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="PlaybackInfoText" Text="正在准备播放器…" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button x:Name="EmbeddedPreviousButton" Style="{StaticResource IconButton}" ToolTip="上一集" AutomationProperties.Name="上一集" Click="PreviousEpisode_Click"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE892;" /></Button>
-                            <Button x:Name="EmbeddedNextButton" Style="{StaticResource IconButton}" ToolTip="下一集" AutomationProperties.Name="下一集" Click="NextEpisode_Click" Margin="6,0,0,0"><TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE893;" /></Button>
-                        </StackPanel>
-                    </Grid>
-                </Grid>
-
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition x:Name="DetailColumn" Width="0" />
@@ -355,23 +333,13 @@
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="3" Background="{StaticResource DarkSurface}" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="0,1,0,0" Padding="32,8">
+                <Border Grid.Row="2" Background="{StaticResource DarkSurface}" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="0,1,0,0" Padding="32,8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="StatusText" Text="就绪" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                        <StackPanel x:Name="ActivePlaybackControls" Grid.Column="1" Orientation="Horizontal" Visibility="Collapsed">
-                            <ComboBox x:Name="ActiveAudioTrack" Width="220" DisplayMemberPath="DisplayLabel" SelectionChanged="ActiveAudioTrack_SelectionChanged" AutomationProperties.Name="当前音频轨道" />
-                            <ComboBox x:Name="ActiveSubtitleTrack" Width="220" DisplayMemberPath="Label" SelectionChanged="ActiveSubtitleTrack_SelectionChanged" AutomationProperties.Name="当前字幕轨道" />
-                            <Button Style="{StaticResource IconButton}" Margin="8,0,0,0" ToolTip="播放或暂停" AutomationProperties.Name="播放或暂停" Click="TogglePlayback_Click">
-                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE769;" />
-                            </Button>
-                            <Button Style="{StaticResource IconButton}" Margin="6,0,0,0" ToolTip="停止" AutomationProperties.Name="停止播放" Click="StopPlayback_Click">
-                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71A;" />
-                            </Button>
-                        </StackPanel>
                     </Grid>
                 </Border>
             </Grid>
@@ -571,6 +539,43 @@
                         </ComboBox>
                     </Grid>
 
+                    <Grid Margin="0,0,0,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="180" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <CheckBox x:Name="MergeSameAnimeCheckBox" Content="合并同名作品"
+                                      Foreground="{StaticResource TextPrimary}"
+                                      AutomationProperties.Name="合并同名作品" Click="LibraryOrganization_Changed" />
+                            <TextBlock Text="仅合并身份相符的条目，保留全部剧集、版本和观看记录。"
+                                       Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="24,5,0,0" />
+                        </StackPanel>
+                        <ComboBox x:Name="PosterArrangementBox" Grid.Column="1"
+                                  AutomationProperties.Name="海报墙排列" SelectionChanged="LibraryOrganization_Changed">
+                            <ComboBoxItem Tag="TITLE"><TextBlock Text="按标题" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="RELEASE_SEASON"><TextBlock Text="按新番季" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="220" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="下一集版本" FontWeight="SemiBold" />
+                            <TextBlock Text="选择自动按相近路径播放，或逐集手动选择多个版本。"
+                                       Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,5,0,0" />
+                        </StackPanel>
+                        <ComboBox x:Name="EpisodeVersionSelectionPolicyBox" Grid.Column="1"
+                                  AutomationProperties.Name="下一集版本选择"
+                                  SelectionChanged="EpisodeVersionSelectionPolicy_Changed">
+                            <ComboBoxItem Tag="auto_nearest"><TextBlock Text="自动选择相近路径" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="manual"><TextBlock Text="每集手动选择版本" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+
                     <Separator Background="{StaticResource SubtleBorder}" />
                     <Grid Margin="0,28,0,0">
                         <Grid.ColumnDefinitions>
@@ -581,6 +586,7 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Button Style="{StaticResource SecondaryButton}" Content="添加本地 MLIP" Click="OpenLibrary_Click" />
                             <Button Style="{StaticResource SecondaryButton}" Content="添加 WebDAV" Click="AddWebDavSource_Click" Margin="8,0,0,0" />
+                            <Button Style="{StaticResource SecondaryButton}" Content="添加 RSS 在线源" Click="AddRssMediaSource_Click" Margin="8,0,0,0" />
                             <Button Style="{StaticResource SecondaryButton}" Content="添加 SMB" Click="AddSmbSource_Click" Margin="8,0,0,0" />
                         </StackPanel>
                     </Grid>
@@ -671,6 +677,9 @@
                     <Button x:Name="CancelScanButton" Content="取消扫描" Visibility="Collapsed" Margin="0,12,0,0" Click="CancelScan_Click" />
                 </StackPanel>
             </Border>
+
+            <controls:SeriesDetailPage x:Name="SeriesDetailPageView" Visibility="Collapsed" />
+            <controls:PlaybackPage x:Name="PlaybackPageView" Visibility="Collapsed" />
         </Grid>
     </Grid>
 </Window>

@@ -103,6 +103,48 @@ public sealed class WebDavRequestDispatcherTests
         Assert.Equal(2, handler.RequestCount);
     }
 
+    [Fact]
+    public async Task Anonymous401RetriesOnceAndPreservesReadHeadersWithoutReplacingCredentials()
+    {
+        foreach (var method in new[] { HttpMethod.Get, HttpMethod.Head, new HttpMethod("PROPFIND") })
+        {
+            var authorizations = new List<string?>();
+            var handler = new CountingHandler(index => new HttpResponseMessage(
+                index == 2 ? HttpStatusCode.OK : HttpStatusCode.Unauthorized), request =>
+            {
+                authorizations.Add(request.Headers.Authorization?.ToString());
+                Assert.Equal("1", Assert.Single(request.Headers.GetValues("Depth")));
+                Assert.Equal("bytes=10-20", request.Headers.Range?.ToString());
+                Assert.Equal(method, request.Method);
+                Assert.Equal("http://example.test/dav/media", request.RequestUri?.AbsoluteUri);
+            });
+            await using var dispatcher = new WebDavRequestDispatcher(handler, minimumInterval: TimeSpan.Zero);
+            var root = new Uri("http://example.test/dav/");
+            using var request = new HttpRequestMessage(method, new Uri(root, "media"));
+            request.Headers.Add("Depth", "1");
+            request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(10, 20);
+            using (var lease = await dispatcher.SendAsync(root, WebDavRequestKind.Range, request,
+                TimeSpan.FromSeconds(5), CancellationToken.None))
+                Assert.Equal(HttpStatusCode.OK, lease.Response.StatusCode);
+            Assert.Equal(new string?[] { null, "Basic YW5vbnltb3VzOg==" }, authorizations);
+
+            using var authenticated = new HttpRequestMessage(method, new Uri(root, "media"));
+            authenticated.Headers.Add("Depth", "1");
+            authenticated.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(10, 20);
+            authenticated.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "YWxpY2U6c2VjcmV0");
+            using var rejected = await dispatcher.SendAsync(root, WebDavRequestKind.Range, authenticated,
+                TimeSpan.FromSeconds(5), CancellationToken.None);
+            Assert.Equal(HttpStatusCode.Unauthorized, rejected.Response.StatusCode);
+            Assert.Equal(3, handler.RequestCount);
+            Assert.Equal("Basic YWxpY2U6c2VjcmV0", authorizations[^1]);
+        }
+
+        var denied = new CountingHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        await using var deniedDispatcher = new WebDavRequestDispatcher(denied, minimumInterval: TimeSpan.Zero);
+        await SendAndDisposeAsync(deniedDispatcher, new Uri("https://example.test/dav/"), "denied");
+        Assert.Equal(2, denied.RequestCount);
+    }
+
     private static async Task SendAndDisposeAsync(WebDavRequestDispatcher dispatcher, Uri root, string path)
     {
         await using var lease = await dispatcher.SendAsync(
@@ -113,7 +155,7 @@ public sealed class WebDavRequestDispatcherTests
             CancellationToken.None);
     }
 
-    private sealed class CountingHandler(Func<int, HttpResponseMessage> response) : HttpMessageHandler
+    private sealed class CountingHandler(Func<int, HttpResponseMessage> response, Action<HttpRequestMessage>? inspect = null) : HttpMessageHandler
     {
         private int _active;
         private int _count;
@@ -131,6 +173,7 @@ public sealed class WebDavRequestDispatcherTests
             var index = Interlocked.Increment(ref _count);
             try
             {
+                inspect?.Invoke(request);
                 await Task.Delay(5, cancellationToken);
                 return response(index);
             }

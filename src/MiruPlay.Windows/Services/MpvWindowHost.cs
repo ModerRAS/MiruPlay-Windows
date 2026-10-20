@@ -7,12 +7,22 @@ namespace MiruPlay.Windows.Services;
 /// <summary>Provides a native child HWND for mpv's --wid embedding mode.</summary>
 public sealed class MpvWindowHost : HwndHost
 {
+    private const int SsNotify = 0x0100;
     private const int WsChild = 0x40000000;
     private const int WsVisible = 0x10000000;
     private const int SwpNoActivate = 0x0010;
     private const int SwpNoZOrder = 0x0004;
 
     public new IntPtr Handle { get; private set; }
+    public event EventHandler? PointerActivity;
+    public event EventHandler? VideoDoubleClicked;
+
+    protected override IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == 0x0200) PointerActivity?.Invoke(this, EventArgs.Empty); // WM_MOUSEMOVE
+        if (msg == 0x0203) VideoDoubleClicked?.Invoke(this, EventArgs.Empty); // WM_LBUTTONDBLCLK
+        return base.WndProc(hwnd, msg, wParam, lParam, ref handled);
+    }
 
     protected override HandleRef BuildWindowCore(HandleRef hwndParent)
     {
@@ -20,7 +30,7 @@ public sealed class MpvWindowHost : HwndHost
             0,
             "STATIC",
             string.Empty,
-            WsChild | WsVisible,
+            WsChild | WsVisible | SsNotify,
             0,
             0,
             Math.Max(1, (int)ActualWidth),

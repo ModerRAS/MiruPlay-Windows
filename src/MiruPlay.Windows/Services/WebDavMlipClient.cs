@@ -333,7 +333,7 @@ public sealed class WebDavMlipClient : IDisposable
     private static string CacheKey(Uri normalizedRoot) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedRoot.AbsoluteUri)))[..24];
 
-    private static async Task CopyBoundedAsync(
+    internal static async Task CopyBoundedAsync(
         Stream input,
         Stream output,
         long maximumBytes,

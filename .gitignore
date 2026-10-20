@@ -12,6 +12,7 @@ TestResults/
 .playwright-cli/
 output/
 artifacts/
+docs/superpowers/
 *.msix
 *.msixbundle
 *.appinstaller

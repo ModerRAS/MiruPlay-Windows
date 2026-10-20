@@ -17,6 +17,21 @@ $portable = Get-ChildItem $release -Filter "MiruPlay-$($manifest.appVersion)-$($
 $setup = Get-ChildItem $release -Filter "MiruPlay-$($manifest.appVersion)-$($manifest.runtimeIdentifier)-setup.exe" -File | Select-Object -First 1
 if (-not $portable) { throw 'Portable release archive was not found.' }
 if (-not $SkipInstaller -and -not $setup) { throw 'Installer release artifact was not found.' }
+if (-not $SkipInstaller) {
+    $updateManifestPath = Join-Path $release 'windows-update.json'
+    if (-not (Test-Path $updateManifestPath)) { throw 'windows-update.json is required when the installer is included.' }
+    $update = Get-Content $updateManifestPath -Raw | ConvertFrom-Json
+    $releaseUri = [Uri]$update.releaseUrl
+    $downloadUri = [Uri]$update.downloadUrl
+    $setupHash = (Get-FileHash $setup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($update.versionName -ne "$($manifest.appVersion).0" -or $update.assetName -ne $setup.Name -or
+        [long]$update.assetSizeBytes -ne $setup.Length -or $update.sha256 -ne $setupHash -or
+        $releaseUri.Scheme -ne 'https' -or $downloadUri.Scheme -ne 'https' -or
+        $releaseUri.UserInfo -or $downloadUri.UserInfo -or $releaseUri.Fragment -or $downloadUri.Fragment -or
+        -not $downloadUri.AbsolutePath.EndsWith("/$([Uri]::EscapeDataString($setup.Name))", [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'windows-update.json does not match the Setup artifact or contains an unsafe URL.'
+    }
+}
 
 $verifiedHashes = 0
 foreach ($line in Get-Content $checksumsPath) {
@@ -113,6 +128,7 @@ try {
         PortableLaunch = $true
         InstallerTested = $installerTested
         InstallerUninstall = $installerTested
+        WindowsUpdateManifest = -not $SkipInstaller
     } | ConvertTo-Json
 }
 finally {

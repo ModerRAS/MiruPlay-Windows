@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param(
-    [ValidatePattern('^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$')]
+    [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string]$Version = '0.1.0',
+    [ValidatePattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')]
+    [string]$GitHubRepository = 'ModerRAS/MiruPlay-Windows',
     [ValidateSet('win-x64')]
     [string]$RuntimeIdentifier = 'win-x64',
     [string]$ArtifactsDirectory,
@@ -228,6 +230,27 @@ if (-not $SkipInstaller) {
     if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed (exit code $LASTEXITCODE)" }
     $setupPath = Join-Path $releaseDirectory "$setupBaseName.exe"
     if ($signed) { Sign-File $setupPath $signTool }
+
+    $setupAsset = Get-Item $setupPath
+    $tagName = "v$Version"
+    $releaseRoot = "https://github.com/$GitHubRepository"
+    $escapedTag = [Uri]::EscapeDataString($tagName)
+    $escapedAsset = [Uri]::EscapeDataString($setupAsset.Name)
+    $windowsUpdate = [ordered]@{
+        versionName = "$Version.0"
+        versionCode = $null
+        releaseName = "MiruPlay $Version"
+        tagName = $tagName
+        publishedAt = [DateTimeOffset]::UtcNow.ToString('O')
+        releaseUrl = "$releaseRoot/releases/tag/$escapedTag"
+        assetName = $setupAsset.Name
+        assetSizeBytes = [long]$setupAsset.Length
+        downloadUrl = "$releaseRoot/releases/download/$escapedTag/$escapedAsset"
+        sha256 = (Get-FileHash $setupPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+    $windowsUpdatePath = Join-Path $releaseDirectory 'windows-update.json'
+    [IO.File]::WriteAllText($windowsUpdatePath, ($windowsUpdate | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))
+    Write-Output "Windows update manifest: $windowsUpdatePath"
 }
 
 $checksumPath = Join-Path $releaseDirectory 'SHA256SUMS.txt'

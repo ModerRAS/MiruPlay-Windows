@@ -2,10 +2,11 @@
 
 MiruPlay publishes Windows x64 artifacts from one self-contained `.NET 10` publish directory:
 
-- `MiruPlay-<version>-win-x64-portable.zip`: portable application with the .NET runtime and pinned mpv runtime.
+- `MiruPlay-<version>-win-x64-portable.zip`: portable application with the .NET runtime and pinned in-process libmpv runtime.
 - `MiruPlay-<version>-win-x64-setup.exe`: per-user Inno Setup installer. The default directory is `%LOCALAPPDATA%\Programs\MiruPlay`; elevation is not required.
 - `MiruPlay-<version>-win-x64-symbols.zip`: first-party portable PDB files.
-- `release-manifest.json`: version, runtime, deployment, signing state, and mpv provenance.
+- `release-manifest.json`: build/runtime metadata, signing state, and mpv provenance.
+- `windows-update.json`: updater-compatible GitHub Release metadata and SHA-256/size for the `*-setup.exe` asset (generated when `-SkipInstaller` is not used).
 - `SHA256SUMS.txt`: SHA-256 for every release artifact and manifest.
 
 Both application formats contain `THIRD-PARTY-NOTICES.md` and a `licenses` directory. Packaging derives `licenses/NuGet-Packages.json` from the restored assets file, copies exact .NET/runtime package notices, and includes the required mpv, FFmpeg, Protobuf, Apache, and MIT license texts.
@@ -22,7 +23,9 @@ winget install --id JRSoftware.InnoSetup --exact --scope user
 .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
 ```
 
-`Publish-Release.ps1` downloads the pinned mpv archive only when the local runtime is missing and verifies its hard-coded SHA-256 before extraction. Use `-SkipMpvDownload` to require a pre-existing runtime or `-SkipInstaller` for a portable-only developer build.
+`Publish-Release.ps1` emits `windows-update.json` beside the downloadable assets. Its `downloadUrl` points to the tag asset for `-GitHubRepository` (default `ModerRAS/MiruPlay-Windows`); host that JSON at a stable URL and configure the same URL in WebControl. `-SkipInstaller` creates a portable-only build and therefore does not emit an update manifest.
+
+`Publish-Release.ps1` downloads the pinned libmpv archive only when the local runtime is missing and verifies its hard-coded SHA-256 value before extraction. Use `-SkipLibMpvDownload` to require a pre-existing runtime, or `-SkipInstaller` for a portable-only developer build.
 
 ## Signing policy
 

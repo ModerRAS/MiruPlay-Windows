@@ -19,6 +19,27 @@ public sealed class MpvPlayerLauncherTests : IDisposable
     }
 
     [Fact]
+    public async Task DirectRssPlaybackAllowsHttpUrlsButRejectsEmbeddedCredentials()
+    {
+        var progress = new PlaybackProgressStore(Path.Combine(_directory, "rss-state.db"));
+        var episode = new LibraryEpisode(1, "rss", "rss-key", 1, 1, 1, "RSS", "https://cdn.example.test/video.mp4", TimeSpan.Zero, []);
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => MpvPlayerLauncher.PlayAsync(
+            episode,
+            new AppSettings(LibMpvPath: Path.Combine(_directory, "missing.dll")),
+            progress,
+            allowDirectHttp: true));
+        Assert.DoesNotContain("shared endpoint consumer", error.Message, StringComparison.Ordinal);
+
+        var credentialed = episode with { MediaPath = "https://user:secret@cdn.example.test/video.mp4" };
+        var credentialError = await Assert.ThrowsAsync<InvalidOperationException>(() => MpvPlayerLauncher.PlayAsync(
+            credentialed,
+            new AppSettings(),
+            progress,
+            allowDirectHttp: true));
+        Assert.Contains("embedded credentials", credentialError.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task RemotePlaybackWithoutSharedProxyIsRejected()
     {
         var episode = CreateEpisode(

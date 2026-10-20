@@ -220,6 +220,25 @@ internal sealed class WebDavRequestDispatcher : IAsyncDisposable
                             item.Request,
                             HttpCompletionOption.ResponseHeadersRead,
                             item.Cancellation.Token).ConfigureAwait(false);
+                        if (response.StatusCode == HttpStatusCode.Unauthorized &&
+                            item.Request.Headers.Authorization is null && item.Request.Content is null &&
+                            item.Request.Method.Method is "GET" or "HEAD" or "PROPFIND")
+                        {
+                            response.Dispose();
+                            using var anonymous = new HttpRequestMessage(item.Request.Method, item.Request.RequestUri)
+                            {
+                                Version = item.Request.Version,
+                                VersionPolicy = item.Request.VersionPolicy,
+                            };
+                            foreach (var header in item.Request.Headers)
+                                anonymous.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                            anonymous.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "YW5vbnltb3VzOg==");
+                            if (_minimumInterval > TimeSpan.Zero)
+                                await Task.Delay(_minimumInterval, item.Cancellation.Token).ConfigureAwait(false);
+                            _lastStarted = _utcNow();
+                            response = await _client.SendAsync(anonymous, HttpCompletionOption.ResponseHeadersRead,
+                                item.Cancellation.Token).ConfigureAwait(false);
+                        }
                         if (response.StatusCode == HttpStatusCode.MethodNotAllowed)
                         {
                             response.Dispose();

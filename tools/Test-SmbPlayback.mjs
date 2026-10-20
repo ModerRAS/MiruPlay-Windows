@@ -1,10 +1,13 @@
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const api = 'http://127.0.0.1:9978';
+const directoryMode = process.argv.includes('--directory');
 const drive = (process.env.MIRUPLAY_SMB_SMOKE_DRIVE ?? 'Z').replace(/:$/, '');
+if (!/^[a-z]$/i.test(drive)) throw new Error('SMB smoke drive must be a drive letter.');
 const driveResult = spawnSync('powershell.exe', [
   '-NoProfile',
   '-Command',
@@ -14,7 +17,7 @@ if (driveResult.status !== 0 || !driveResult.stdout.trim().startsWith('\\\\')) {
   throw new Error(`SMB smoke drive ${drive}: is unavailable or is not a network mapping.`);
 }
 const shareRoot = driveResult.stdout.trim().replace(/[\\/]+$/, '');
-const fixtureName = `miruplay-windows-smb-${process.pid}`;
+const fixtureName = `miruplay-windows-smb-${process.pid}-${Date.now()}`;
 const mappedDirectory = `${drive}:/Download/${fixtureName}`;
 const uncDirectory = `${shareRoot}\\Download\\${fixtureName}`;
 const databasePath = path.join(os.tmpdir(), `${fixtureName}.db`);
@@ -66,7 +69,9 @@ const token = tokenResult.stdout.trim();
 const authHeaders = { 'X-MiruPlay-Token': token };
 const jsonHeaders = { ...authHeaders, 'Content-Type': 'application/json' };
 let sourceId = null;
+let episodeId = null;
 const result = {};
+const originalSeries = (await (await fetch(`${api}/api/library`, { headers: authHeaders })).json()).data.allAnime.length;
 try {
   let response = await fetch(`${api}/api/sources`, {
     method: 'POST',
@@ -76,7 +81,7 @@ try {
       type: 'SMB',
       location: uncDirectory,
       contentMode: 'ANIME',
-      recognitionMode: 'MLIP',
+      recognitionMode: directoryMode ? 'DIRECTORY' : 'MLIP',
     }),
   });
   result.addStatus = response.status;
@@ -85,16 +90,19 @@ try {
   sourceId = added.data.id;
   result.persistedConnectionKeys = Object.keys(added.data.connectionInfo).sort();
 
-  let library = await (await fetch(`${api}/api/library`, { headers: authHeaders })).json();
-  result.remoteSeries = library.data.allAnime.length;
-  const animeId = library.data.allAnime[0].id;
-  const detail = await (await fetch(`${api}/api/anime/${encodeURIComponent(animeId)}`, { headers: authHeaders })).json();
-  const episodeId = detail.data.episodes[0].episode.id;
-
   response = await fetch(`${api}/api/sources/${sourceId}/scan`, { method: 'POST', headers: authHeaders });
   const scan = await response.json();
   result.scanStatus = response.status;
   result.scannedEpisodes = scan.data.episodesFound;
+  assert.equal(result.scanStatus, 200);
+  assert.equal(result.scannedEpisodes, 1);
+  assert.equal(scan.data.error, null);
+
+  let library = await (await fetch(`${api}/api/library`, { headers: authHeaders })).json();
+  result.remoteSeries = library.data.allAnime.length;
+  const animeId = library.data.allAnime[0].id;
+  const detail = await (await fetch(`${api}/api/anime/${encodeURIComponent(animeId)}`, { headers: authHeaders })).json();
+  episodeId = detail.data.episodes[0].episode.id;
 
   response = await fetch(`${api}/api/playback/play`, {
     method: 'POST',
@@ -105,6 +113,11 @@ try {
   result.initialStatus = (await response.json()).data;
   await new Promise(resolve => setTimeout(resolve, 2000));
   result.statusAfterTwoSeconds = (await (await fetch(`${api}/api/playback/status`, { headers: authHeaders })).json()).data;
+  assert.equal(result.playStatus, 200);
+  assert.equal(result.statusAfterTwoSeconds.state, 'PLAYING');
+  assert.ok(result.statusAfterTwoSeconds.positionMs > 0, 'Real SMB playback must advance.');
+  assert.ok(result.statusAfterTwoSeconds.durationMs > 0);
+  assert.equal(result.statusAfterTwoSeconds.error, null);
 
   response = await fetch(`${api}/api/playback/command`, {
     method: 'POST',
@@ -123,6 +136,8 @@ try {
   library = await (await fetch(`${api}/api/library`, { headers: authHeaders })).json();
   result.restoredSeries = library.data.allAnime.length;
   result.databaseRemainedReadOnly = fs.statSync(path.join(mappedDirectory, 'library.db')).mtimeMs === initialDatabaseMtime;
+  assert.equal(result.databaseRemainedReadOnly, true);
+  assert.equal(result.restoredSeries, originalSeries);
 } finally {
   if (sourceId !== null) {
     await fetch(`${api}/api/playback/command`, {
@@ -131,6 +146,13 @@ try {
       body: JSON.stringify({ command: 'stop' }),
     }).catch(() => {});
     await fetch(`${api}/api/sources/${sourceId}`, { method: 'DELETE', headers: authHeaders }).catch(() => {});
+  }
+  if (episodeId !== null) {
+    const escapedKey = episodeId.replaceAll("'", "''");
+    const cleanup = spawnSync(sqlite, [path.join(process.env.LOCALAPPDATA, 'MiruPlay', 'state.db')], {
+      input: `DELETE FROM playback_progress WHERE episode_key='${escapedKey}';`, encoding: 'utf8',
+    });
+    assert.equal(cleanup.status, 0, 'Could not remove temporary SMB playback progress.');
   }
   if (fs.existsSync(mappedDirectory)) fs.rmSync(mappedDirectory, { recursive: true, force: true });
   if (fs.existsSync(databasePath)) fs.unlinkSync(databasePath);

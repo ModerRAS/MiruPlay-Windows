@@ -32,6 +32,7 @@ public sealed class CloudDriveRssRunner
     private readonly TorrentSubmissionPreparer _torrentPreparer;
     private readonly CloudDriveLibraryOrganizer _organizer;
     private readonly Func<long, CancellationToken, Task<CloudDriveIngestionSummary>>? _rescanWebDav;
+    private readonly RotatingLocalLogStore? _localLogs;
     private int _running;
     private CloudDriveRunStatus _status = new("IDLE", false);
 
@@ -44,7 +45,8 @@ public sealed class CloudDriveRssRunner
         CloudDriveGrpcClient cloudDrive,
         TorrentSubmissionPreparer? torrentPreparer = null,
         CloudDriveLibraryOrganizer? organizer = null,
-        Func<long, CancellationToken, Task<CloudDriveIngestionSummary>>? rescanWebDav = null)
+        Func<long, CancellationToken, Task<CloudDriveIngestionSummary>>? rescanWebDav = null,
+        RotatingLocalLogStore? localLogs = null)
     {
         _config = config;
         _credentials = credentials;
@@ -55,6 +57,7 @@ public sealed class CloudDriveRssRunner
         _torrentPreparer = torrentPreparer ?? new TorrentSubmissionPreparer(cloudDrive);
         _organizer = organizer ?? new CloudDriveLibraryOrganizer(cloudDrive);
         _rescanWebDav = rescanWebDav;
+        _localLogs = localLogs;
     }
 
     public CloudDriveRunStatus Status => _status;
@@ -65,6 +68,7 @@ public sealed class CloudDriveRssRunner
         if (Interlocked.Exchange(ref _running, 1) != 0) throw new InvalidOperationException("CloudDrive/RSS 同步已在运行。");
         var startedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         _status = new CloudDriveRunStatus("RUNNING", true, startedAt);
+        _localLogs?.Write("INFO", "CloudDrive/RSS run started");
         try
         {
             var summary = await RunCoreAsync(cancellationToken).ConfigureAwait(false);
@@ -72,7 +76,21 @@ public sealed class CloudDriveRssRunner
             var config = _config.Load();
             _config.Save(config with { LastRunAt = finishedAt });
             _status = new CloudDriveRunStatus("SUCCEEDED", false, startedAt, finishedAt, summary);
+            _localLogs?.Write("INFO", "CloudDrive/RSS run completed", attributes: new Dictionary<string, string>
+            {
+                ["submitted"] = summary.Submitted.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["skipped"] = summary.Skipped.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["failed"] = summary.Failed.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["organized"] = summary.Organized.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["indexed"] = summary.Indexed.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            });
             return _status;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _status = new CloudDriveRunStatus("CANCELED", false, startedAt, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            _localLogs?.Write("WARN", "CloudDrive/RSS run canceled");
+            throw;
         }
         catch (Exception error)
         {
@@ -81,7 +99,8 @@ public sealed class CloudDriveRssRunner
                 false,
                 startedAt,
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                Error: error.Message);
+                Error: RotatingLocalLogStore.Redact(error.Message));
+            _localLogs?.Write("ERROR", "CloudDrive/RSS run failed", error);
             throw;
         }
         finally

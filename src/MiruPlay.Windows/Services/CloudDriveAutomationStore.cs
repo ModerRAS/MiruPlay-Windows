@@ -86,6 +86,7 @@ public sealed class CloudDriveAutomationStore
         var library = NormalizePath(config.LibraryPath, "媒体库目录");
         var proxyHost = config.RssProxyHost.Trim();
         if (proxyHost.Length > 253) throw new ArgumentException("RSS 代理主机名过长。", nameof(config));
+        if (config.RssProxyEnabled) _ = OutboundHttpProxy.ValidateUri(proxyHost, config.RssProxyPort);
         if (config.Enabled && (inbox.Length == 0 || library.Length == 0))
             throw new ArgumentException("启用 CloudDrive/RSS 前必须设置离线下载目录和媒体库目录。", nameof(config));
         return config with

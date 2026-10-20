@@ -22,7 +22,11 @@ public sealed record AppSettings(
     long LastLogUploadAt = 0,
     string? LastLogUploadStatus = null,
     AudioDspConfig? AudioDsp = null,
-    string? LibMpvPath = null);
+    string? LibMpvPath = null,
+    bool MergeSameAnimeEnabled = false,
+    string PosterWallArrangement = "TITLE",
+    string EpisodeVersionSelectionPolicy = "auto_nearest",
+    string AppUpdateManifestUrl = "");
 
 public sealed class AppSettingsStore
 {
@@ -98,6 +102,16 @@ public sealed class AppSettingsStore
             if (settings.AutoScanIntervalHours != normalizedInterval)
             {
                 settings = settings with { AutoScanIntervalHours = normalizedInterval };
+                needsCleanup = true;
+            }
+            if (!LibraryOrganization.ArrangementOptions.Contains(settings.PosterWallArrangement))
+            {
+                settings = settings with { PosterWallArrangement = "TITLE" };
+                needsCleanup = true;
+            }
+            if (settings.EpisodeVersionSelectionPolicy is not ("auto_nearest" or "manual"))
+            {
+                settings = settings with { EpisodeVersionSelectionPolicy = "auto_nearest" };
                 needsCleanup = true;
             }
             if (settings.ActiveSourceId is null && settings.MediaSources is { Count: > 0 })

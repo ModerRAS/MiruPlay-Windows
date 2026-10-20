@@ -1,4 +1,7 @@
+using System.Diagnostics;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 
 namespace MiruPlay.Windows.Services;
@@ -12,7 +15,8 @@ public sealed record WindowsUpdateInfo(
     string ReleaseUrl,
     string AssetName,
     long AssetSizeBytes,
-    string DownloadUrl);
+    string DownloadUrl,
+    string Sha256 = "");
 
 public sealed record WindowsUpdateStatus(
     bool Supported,
@@ -22,15 +26,17 @@ public sealed record WindowsUpdateStatus(
     bool UpdateAvailable = false,
     long LastCheckedAt = 0,
     string? LastError = null,
-    string? StagedInstallerPath = null);
+    string? StagedInstallerPath = null,
+    string ManifestUrl = "");
 
-public sealed class WindowsAppUpdater
+public sealed class WindowsAppUpdater : IDisposable
 {
     private const long MaxManifestBytes = 1 * 1024 * 1024;
     private const long MaxDownloadBytes = 512L * 1024 * 1024;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private readonly Uri? _manifestUri;
+    private Uri? _manifestUri;
     private readonly HttpClient _httpClient;
+    private readonly bool _ownsHttpClient;
     private readonly string _downloadDirectory;
     private readonly string _currentVersionName;
     private readonly long _currentVersionCode;
@@ -43,20 +49,27 @@ public sealed class WindowsAppUpdater
         string? currentVersionName = null,
         long? currentVersionCode = null)
     {
-        if (!string.IsNullOrWhiteSpace(manifestUrl))
-        {
-            if (!Uri.TryCreate(manifestUrl.Trim(), UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
-                uri.UserInfo.Length > 0 || uri.Query.Length > 0 || uri.Fragment.Length > 0)
-                throw new ArgumentException("更新清单地址必须是无凭据、查询或片段的 HTTP(S) 地址。", nameof(manifestUrl));
-            _manifestUri = uri;
-        }
         _httpClient = httpClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        _ownsHttpClient = httpClient is null;
         _downloadDirectory = downloadDirectory ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiruPlay", "updates");
         _currentVersionName = currentVersionName ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0";
         _currentVersionCode = currentVersionCode ?? 0;
-        _status = new WindowsUpdateStatus(_manifestUri is not null, _currentVersionName, _currentVersionCode);
+        _status = new WindowsUpdateStatus(false, _currentVersionName, _currentVersionCode);
+        ConfigureManifest(manifestUrl);
     }
+
+    public void ConfigureManifest(string? manifestUrl)
+    {
+        var normalized = NormalizeManifestUrl(manifestUrl);
+        _manifestUri = normalized.Length == 0 ? null : new Uri(normalized, UriKind.Absolute);
+        _status = new WindowsUpdateStatus(
+            _manifestUri is not null, _currentVersionName, _currentVersionCode, ManifestUrl: _manifestUri?.AbsoluteUri ?? string.Empty);
+    }
+
+    public static string NormalizeManifestUrl(string? manifestUrl) => string.IsNullOrWhiteSpace(manifestUrl)
+        ? string.Empty
+        : ValidateManifestUri(manifestUrl).AbsoluteUri;
 
     public bool IsSupported => _manifestUri is not null;
     public WindowsUpdateStatus Status => _status;
@@ -115,6 +128,7 @@ public sealed class WindowsAppUpdater
             if (contentLength is > MaxDownloadBytes || contentLength is > 0 && contentLength > latest.AssetSizeBytes * 2)
                 throw new InvalidDataException("更新响应大小超出限制。");
             await using var input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
             await using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None, 64 * 1024, FileOptions.SequentialScan))
             {
                 var buffer = new byte[64 * 1024];
@@ -124,9 +138,12 @@ public sealed class WindowsAppUpdater
                 {
                     total += read;
                     if (total > MaxDownloadBytes || total > latest.AssetSizeBytes * 2) throw new InvalidDataException("更新下载大小超出限制。");
+                    hash.AppendData(buffer.AsSpan(0, read));
                     await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
                 }
                 if (total != latest.AssetSizeBytes) throw new InvalidDataException("更新下载大小与清单不一致。");
+                if (!CryptographicOperations.FixedTimeEquals(hash.GetHashAndReset(), Convert.FromHexString(latest.Sha256)))
+                    throw new InvalidDataException("更新文件 SHA-256 与清单不一致。");
                 await output.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
             File.Move(temporary, target, true);
@@ -139,6 +156,58 @@ public sealed class WindowsAppUpdater
             return _status = _status with { LastError = RotatingLocalLogStore.Redact(error.Message) };
         }
     }
+
+    public int StartInstallerHandoff(string currentExecutable, int parentProcessId, bool backgroundMode = false)
+    {
+        var script = BuildInstallerHandoffScript(currentExecutable, parentProcessId, backgroundMode);
+        var encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
+        var start = new ProcessStartInfo("powershell.exe")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WindowStyle = ProcessWindowStyle.Hidden,
+        };
+        start.ArgumentList.Add("-NoProfile");
+        start.ArgumentList.Add("-NonInteractive");
+        start.ArgumentList.Add("-WindowStyle");
+        start.ArgumentList.Add("Hidden");
+        start.ArgumentList.Add("-ExecutionPolicy");
+        start.ArgumentList.Add("Bypass");
+        start.ArgumentList.Add("-EncodedCommand");
+        start.ArgumentList.Add(encoded);
+        using var process = Process.Start(start) ?? throw new InvalidOperationException("无法启动 Windows 安装交接进程。");
+        return process.Id;
+    }
+
+    internal string BuildInstallerHandoffScript(string currentExecutable, int parentProcessId, bool backgroundMode = false)
+    {
+        var staged = _status.StagedInstallerPath ?? throw new InvalidOperationException("尚未暂存经过校验的 Windows 安装器。");
+        var fullPath = Path.GetFullPath(staged);
+        var basePath = Path.GetFullPath(_downloadDirectory) + Path.DirectorySeparatorChar;
+        if (!fullPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase) ||
+            !Path.GetFileName(fullPath).EndsWith("-setup.exe", StringComparison.OrdinalIgnoreCase) ||
+            !File.Exists(fullPath) || parentProcessId < 1)
+            throw new InvalidOperationException("暂存文件不是有效的 MiruPlay Setup 安装器。");
+        var expected = _status.Latest?.Sha256 ?? throw new InvalidOperationException("更新清单未提供 SHA-256。");
+        using (var input = File.OpenRead(fullPath))
+        {
+            var actual = Convert.ToHexString(SHA256.HashData(input));
+            if (!CryptographicOperations.FixedTimeEquals(Convert.FromHexString(expected), Convert.FromHexString(actual)))
+                throw new InvalidDataException("暂存安装器的 SHA-256 校验失败。");
+        }
+        var executable = Path.GetFullPath(currentExecutable);
+        var restart = backgroundMode ? " -ArgumentList '--background'" : string.Empty;
+        var logPath = Path.Combine(_downloadDirectory, "installer-handoff.log");
+        return $"$ErrorActionPreference='Stop'; $log={PowerShellLiteral(logPath)}; try {{ Wait-Process -Id {parentProcessId} -ErrorAction SilentlyContinue; $p=Start-Process -FilePath {PowerShellLiteral(fullPath)} -ArgumentList '/VERYSILENT','/NORESTART' -Wait -PassThru; if ($p.ExitCode -ne 0) {{ throw ('Installer exited with code ' + $p.ExitCode) }}; Start-Process -FilePath {PowerShellLiteral(executable)}{restart} }} catch {{ [IO.File]::WriteAllText($log, $_.Exception.Message) }}";
+    }
+
+    public void Dispose()
+    {
+        if (_ownsHttpClient) _httpClient.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    private static string PowerShellLiteral(string value) => "'" + value.Replace("'", "''", StringComparison.Ordinal) + "'";
 
     private static async Task<WindowsUpdateInfo> ReadBoundedManifestAsync(Stream stream, CancellationToken cancellationToken)
     {
@@ -156,8 +225,10 @@ public sealed class WindowsAppUpdater
 
     private static WindowsUpdateInfo NormalizeInfo(WindowsUpdateInfo info)
     {
-        if (string.IsNullOrWhiteSpace(info.VersionName) || string.IsNullOrWhiteSpace(info.AssetName) || info.AssetSizeBytes <= 0)
-            throw new InvalidDataException("更新清单缺少必要字段。");
+        if (string.IsNullOrWhiteSpace(info.VersionName) || string.IsNullOrWhiteSpace(info.AssetName) ||
+            string.IsNullOrWhiteSpace(info.DownloadUrl) || string.IsNullOrWhiteSpace(info.Sha256) || info.AssetSizeBytes <= 0 ||
+            info.Sha256.Length != 64 || info.Sha256.Any(character => !Uri.IsHexDigit(character)))
+            throw new InvalidDataException("更新清单缺少必要字段或 SHA-256 无效。");
         _ = ValidateDownloadUri(info.DownloadUrl);
         if (info.AssetSizeBytes > MaxDownloadBytes) throw new InvalidDataException("更新文件大小超出限制。");
         return info with { VersionName = info.VersionName.Trim(), AssetName = info.AssetName.Trim() };
@@ -167,6 +238,14 @@ public sealed class WindowsAppUpdater
         ? code > _currentVersionCode
         : Version.TryParse(info.VersionName.TrimStart('v'), out var latest) &&
           Version.TryParse(_currentVersionName.TrimStart('v'), out var current) && latest > current;
+
+    private static Uri ValidateManifestUri(string manifestUrl)
+    {
+        if (!Uri.TryCreate(manifestUrl.Trim(), UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
+            uri.UserInfo.Length > 0 || uri.Query.Length > 0 || uri.Fragment.Length > 0)
+            throw new ArgumentException("更新清单地址必须是无凭据、查询或片段的 HTTP(S) 地址。", nameof(manifestUrl));
+        return uri;
+    }
 
     private static Uri ValidateDownloadUri(string value)
     {

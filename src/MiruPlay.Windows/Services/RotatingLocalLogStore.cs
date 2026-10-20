@@ -73,10 +73,16 @@ public sealed class RotatingLocalLogStore
                 item => Truncate(Redact(item.Value), 4_096),
                 StringComparer.Ordinal));
         var line = SerializeBounded(record);
-        lock (_sync)
+        try
         {
-            RotateIfNeeded(Encoding.UTF8.GetByteCount(line));
-            File.AppendAllText(_activePath, line);
+            lock (_sync)
+            {
+                RotateIfNeeded(Encoding.UTF8.GetByteCount(line));
+                File.AppendAllText(_activePath, line);
+            }
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
         }
     }
 

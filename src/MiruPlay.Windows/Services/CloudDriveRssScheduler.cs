@@ -7,18 +7,20 @@ public sealed class CloudDriveRssScheduler : IDisposable, IAsyncDisposable
     private readonly Func<bool> _isRunning;
     private readonly TimeProvider _timeProvider;
     private readonly TimeSpan _pollInterval;
+    private readonly HeadlessTaskScheduler? _tasks;
     private readonly CancellationTokenSource _cancellation = new();
     private Task? _loop;
     private long _lastAttemptAt;
     private bool _disposed;
 
-    public CloudDriveRssScheduler(CloudDriveAutomationStore config, CloudDriveRssRunner runner)
+    public CloudDriveRssScheduler(CloudDriveAutomationStore config, CloudDriveRssRunner runner, HeadlessTaskScheduler? tasks = null)
         : this(
             config.Load,
             async cancellationToken => { await runner.RunAsync(cancellationToken).ConfigureAwait(false); },
             () => runner.Status.Running,
             TimeProvider.System,
-            TimeSpan.FromMinutes(1))
+            TimeSpan.FromMinutes(1),
+            tasks)
     {
     }
 
@@ -27,13 +29,15 @@ public sealed class CloudDriveRssScheduler : IDisposable, IAsyncDisposable
         Func<CancellationToken, Task> run,
         Func<bool> isRunning,
         TimeProvider timeProvider,
-        TimeSpan pollInterval)
+        TimeSpan pollInterval,
+        HeadlessTaskScheduler? tasks = null)
     {
         _loadConfig = loadConfig;
         _run = run;
         _isRunning = isRunning;
         _timeProvider = timeProvider;
         _pollInterval = pollInterval;
+        _tasks = tasks;
     }
 
     public void Start()
@@ -52,7 +56,8 @@ public sealed class CloudDriveRssScheduler : IDisposable, IAsyncDisposable
         Interlocked.Exchange(ref _lastAttemptAt, now);
         try
         {
-            await _run(cancellationToken).ConfigureAwait(false);
+            if (_tasks is null) await _run(cancellationToken).ConfigureAwait(false);
+            else await _tasks.RunTrackedAsync("cloud-drive-rss", "CloudDrive/RSS 同步", _run, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception error) when (error is ArgumentException or HttpRequestException or InvalidDataException or InvalidOperationException)
         {

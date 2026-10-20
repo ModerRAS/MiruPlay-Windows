@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
@@ -6,8 +7,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const api = 'http://127.0.0.1:9978';
-const username = 'miruplay-smoke';
-const password = crypto.randomBytes(18).toString('base64url');
+const anonymous = process.argv.includes('--anonymous');
+const username = anonymous ? 'anonymous' : 'miruplay-smoke';
+const password = anonymous ? '' : crypto.randomBytes(18).toString('base64url');
 const expectedAuthorization = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
 const databasePath = path.join(os.tmpdir(), `miruplay-webdav-play-${process.pid}.db`);
 const sqlite = 'C:\\ProgramData\\miniconda3\\Library\\bin\\sqlite3.exe';
@@ -91,7 +93,15 @@ const root = `http://127.0.0.1:${server.address().port}/dav`;
 const authHeaders = { 'X-MiruPlay-Token': token };
 const jsonHeaders = { ...authHeaders, 'Content-Type': 'application/json' };
 let sourceId = null;
+let episodeId = null;
 const result = {};
+let originalSeries = 0;
+const configuredSources = (await (await fetch(`${api}/api/sources`, { headers: authHeaders })).json()).data;
+for (let attempt = 0; attempt < 150; attempt++) {
+  originalSeries = (await (await fetch(`${api}/api/library`, { headers: authHeaders })).json()).data.allAnime.length;
+  if (originalSeries > 0 || configuredSources.length === 0) break;
+  await new Promise(resolve => setTimeout(resolve, 100));
+}
 try {
   let response = await fetch(`${api}/api/sources`, {
     method: 'POST',
@@ -100,8 +110,8 @@ try {
       name: 'WebDAV playback smoke',
       type: 'WEBDAV',
       location: root,
-      username,
-      password,
+      username: anonymous ? undefined : username,
+      password: anonymous ? undefined : password,
       contentMode: 'ANIME',
       recognitionMode: 'MLIP',
     }),
@@ -115,7 +125,7 @@ try {
   result.remoteSeries = library.data.allAnime.length;
   const animeId = library.data.allAnime[0].id;
   const detail = await (await fetch(`${api}/api/anime/${encodeURIComponent(animeId)}`, { headers: authHeaders })).json();
-  const episodeId = detail.data.episodes[0].episode.id;
+  episodeId = detail.data.episodes[0].episode.id;
 
   response = await fetch(`${api}/api/playback/play`, {
     method: 'POST',
@@ -126,6 +136,12 @@ try {
   result.initialStatus = (await response.json()).data;
   await new Promise(resolve => setTimeout(resolve, 2000));
   result.statusAfterTwoSeconds = (await (await fetch(`${api}/api/playback/status`, { headers: authHeaders })).json()).data;
+  assert.equal(result.playStatus, 200);
+  assert.equal(result.statusAfterTwoSeconds.state, 'PLAYING');
+  assert.ok(result.statusAfterTwoSeconds.positionMs > 0, 'The real playback position must advance.');
+  assert.ok(result.statusAfterTwoSeconds.durationMs > 0);
+  assert.equal(result.statusAfterTwoSeconds.error, null);
+  if (anonymous) assert.ok(requestStats.unauthorized > 0, 'Anonymous playback must exercise a 401 retry.');
 
   if (result.statusAfterTwoSeconds.state !== 'IDLE') {
     response = await fetch(`${api}/api/playback/command`, {
@@ -143,6 +159,7 @@ try {
   sourceId = null;
   await new Promise(resolve => setTimeout(resolve, 1500));
   result.restoredSeries = (await (await fetch(`${api}/api/library`, { headers: authHeaders })).json()).data.allAnime.length;
+  assert.equal(result.restoredSeries, originalSeries);
 } finally {
   if (sourceId !== null) {
     await fetch(`${api}/api/playback/command`, {
@@ -151,6 +168,13 @@ try {
       body: JSON.stringify({ command: 'stop' }),
     }).catch(() => {});
     await fetch(`${api}/api/sources/${sourceId}`, { method: 'DELETE', headers: authHeaders }).catch(() => {});
+  }
+  if (episodeId !== null) {
+    const escapedKey = episodeId.replaceAll("'", "''");
+    const cleanup = spawnSync(sqlite, [path.join(process.env.LOCALAPPDATA, 'MiruPlay', 'state.db')], {
+      input: `DELETE FROM playback_progress WHERE episode_key='${escapedKey}';`, encoding: 'utf8',
+    });
+    assert.equal(cleanup.status, 0, 'Could not remove temporary playback progress.');
   }
   await new Promise(resolve => server.close(resolve));
   if (fs.existsSync(databasePath)) fs.unlinkSync(databasePath);

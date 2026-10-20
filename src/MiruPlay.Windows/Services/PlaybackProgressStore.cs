@@ -15,7 +15,13 @@ public sealed record PlaybackProgress(
     public bool IsCompleted => DurationMs > 0 && PositionMs >= DurationMs * 0.9 || DurationMs == 0 && PlayCount > 0;
 }
 
-public sealed class PlaybackProgressStore
+internal interface IPlaybackProgressStore
+{
+    PlaybackProgress? Get(string episodeKey);
+    void Save(string episodeKey, long positionMs, long durationMs, bool completed = false);
+}
+
+public sealed class PlaybackProgressStore : IPlaybackProgressStore
 {
     private readonly string _databasePath;
 

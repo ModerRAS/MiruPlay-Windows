@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using MiruPlay.Windows.Services;
@@ -32,6 +33,82 @@ public sealed class CloudDriveStoresTests : IDisposable
         Assert.Equal(65_535, saved.RssProxyPort);
         Assert.Equal(CloudDriveLibraryMode.SingleDirectory, new CloudDriveAutomationStore(path).Load().LibraryMode);
         Assert.Contains("SINGLE_DIRECTORY", File.ReadAllText(path), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("proxy.example.test", 8080)]
+    [InlineData("127.0.0.1", 1080)]
+    public void EnabledProxyRequiresAnHttpHostAndValidPort(string host, int port)
+    {
+        var saved = new CloudDriveAutomationStore(Path.Combine(_directory, $"proxy-{Guid.NewGuid():N}.json"))
+            .Save(new CloudDriveAutomationConfig(RssProxyEnabled: true, RssProxyHost: host, RssProxyPort: port));
+        Assert.Equal(host, saved.RssProxyHost);
+        Assert.Equal(port, saved.RssProxyPort);
+    }
+
+    [Theory]
+    [InlineData("http://user:pass@proxy.example.test", 8080)]
+    [InlineData("proxy.example.test/path", 8080)]
+    [InlineData("proxy.example.test", 0)]
+    [InlineData("proxy.example.test", 65_536)]
+    public void EnabledProxyRejectsCredentialsPathsAndInvalidPorts(string host, int port)
+    {
+        var store = new CloudDriveAutomationStore(Path.Combine(_directory, $"invalid-proxy-{Guid.NewGuid():N}.json"));
+        Assert.Throws<ArgumentException>(() => store.Save(new CloudDriveAutomationConfig(
+            RssProxyEnabled: true, RssProxyHost: host, RssProxyPort: port)));
+    }
+
+    [Fact]
+    public void OutboundProxyReadsCloudDriveSettingsDynamically()
+    {
+        var config = new CloudDriveAutomationConfig();
+        using var handler = OutboundHttpProxy.CreateHandler(() => config);
+        var proxy = handler.Proxy!;
+        var destination = new Uri("https://metadata.example.test/search");
+        Assert.True(proxy.IsBypassed(destination));
+        config = config with { RssProxyEnabled = true, RssProxyHost = "proxy.example.test", RssProxyPort = 8080 };
+        Assert.False(proxy.IsBypassed(destination));
+        Assert.Equal("http://proxy.example.test:8080/", proxy.GetProxy(destination)!.AbsoluteUri);
+        config = config with { RssProxyEnabled = false };
+        Assert.True(proxy.IsBypassed(destination));
+    }
+
+    [Fact]
+    public async Task OutboundProxySwitchChangesActualHttpRoutingWithoutRecreatingTheClient()
+    {
+        using var listener = new TcpListener(System.Net.IPAddress.Loopback, 0);
+        listener.Start();
+        var port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+        var config = new CloudDriveAutomationConfig(RssProxyEnabled: true, RssProxyHost: "127.0.0.1", RssProxyPort: port);
+        using var client = new HttpClient(OutboundHttpProxy.CreateHandler(() => config));
+
+        var proxiedExchange = ReadRequestAndRespondAsync(listener);
+        using (var proxied = await client.GetAsync("http://proxy-target.invalid/first").WaitAsync(TimeSpan.FromSeconds(5)))
+            Assert.Equal(System.Net.HttpStatusCode.OK, proxied.StatusCode);
+        Assert.Equal("GET http://proxy-target.invalid/first HTTP/1.1", await proxiedExchange);
+
+        config = config with { RssProxyEnabled = false };
+        var directExchange = ReadRequestAndRespondAsync(listener);
+        using (var direct = await client.GetAsync($"http://127.0.0.1:{port}/direct").WaitAsync(TimeSpan.FromSeconds(5)))
+            Assert.Equal(System.Net.HttpStatusCode.OK, direct.StatusCode);
+        Assert.Equal("GET /direct HTTP/1.1", await directExchange);
+
+        config = config with { RssProxyEnabled = true };
+        var reenabledExchange = ReadRequestAndRespondAsync(listener);
+        using (var reenabled = await client.GetAsync("http://proxy-target.invalid/again").WaitAsync(TimeSpan.FromSeconds(5)))
+            Assert.Equal(System.Net.HttpStatusCode.OK, reenabled.StatusCode);
+        Assert.Equal("GET http://proxy-target.invalid/again HTTP/1.1", await reenabledExchange);
+    }
+
+    private static async Task<string> ReadRequestAndRespondAsync(TcpListener listener)
+    {
+        using var client = await listener.AcceptTcpClientAsync().WaitAsync(TimeSpan.FromSeconds(5));
+        await using var stream = client.GetStream();
+        using var reader = new StreamReader(stream, Encoding.ASCII, leaveOpen: true);
+        var requestLine = await reader.ReadLineAsync().WaitAsync(TimeSpan.FromSeconds(5));
+        while (await reader.ReadLineAsync().WaitAsync(TimeSpan.FromSeconds(5)) is { Length: > 0 }) { }
+        await stream.WriteAsync("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"u8.ToArray());
+        return requestLine ?? string.Empty;
     }
 
     [Theory]

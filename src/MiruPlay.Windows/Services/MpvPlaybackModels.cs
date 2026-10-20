@@ -8,7 +8,9 @@ public sealed record MpvPlaybackCommand(
     long? DeltaMs = null,
     float? Speed = null,
     int? SubtitleTrackId = null,
-    int? AudioTrackId = null);
+    int? AudioTrackId = null,
+    double? VolumePercent = null,
+    bool? IsMuted = null);
 
 public enum MpvDisplayPipeline
 {
@@ -75,7 +77,9 @@ public sealed record MpvPlaybackInfo(
     IReadOnlyList<MpvAudioTrack> AudioTracks,
     IReadOnlyList<PlaybackSubtitleTrack> SubtitleTracks,
     int? SelectedAudioTrackId,
-    int? SelectedSubtitleTrackId);
+    int? SelectedSubtitleTrackId,
+    double VolumePercent,
+    bool IsMuted);
 
 public enum MpvFallbackMode
 {
