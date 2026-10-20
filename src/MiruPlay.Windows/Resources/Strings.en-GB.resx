@@ -4,4 +4,163 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="web.title" xml:space="preserve"><value>MiruPlay Web Control</value></data>
+  <data name="access.title" xml:space="preserve"><value>Connect MiruPlay</value></data>
+  <data name="access.hint" xml:space="preserve"><value>Enter the WebUI access token shown on the Windows client settings page.</value></data>
+  <data name="access.token" xml:space="preserve"><value>Access token</value></data>
+  <data name="access.connect" xml:space="preserve"><value>Connect</value></data>
+  <data name="access.invalid" xml:space="preserve"><value>Access token invalid or rotated.</value></data>
+  <data name="nav.main" xml:space="preserve"><value>Main navigation</value></data>
+  <data name="nav.library" xml:space="preserve"><value>Library</value></data>
+  <data name="nav.library.sub" xml:space="preserve"><value>Browse and play the MLIP library</value></data>
+  <data name="nav.sources" xml:space="preserve"><value>Sources</value></data>
+  <data name="nav.sources.sub" xml:space="preserve"><value>Manage Local, WebDAV, SMB and RSS online sources</value></data>
+  <data name="nav.automation" xml:space="preserve"><value>Automation</value></data>
+  <data name="nav.automation.sub" xml:space="preserve"><value>CloudDrive2 ingest and RSS submission</value></data>
+  <data name="nav.metadata" xml:space="preserve"><value>Metadata</value></data>
+  <data name="nav.metadata.sub" xml:space="preserve"><value>Manage credentials and search supplementary metadata</value></data>
+  <data name="nav.playback" xml:space="preserve"><value>Playback</value></data>
+  <data name="nav.playback.sub" xml:space="preserve"><value>Configure end action and subtitle language priority</value></data>
+  <data name="nav.operations" xml:space="preserve"><value>Operations</value></data>
+  <data name="nav.operations.sub" xml:space="preserve"><value>View local logs, background tasks and update status</value></data>
+  <data name="nav.access" xml:space="preserve"><value>WebUI access</value></data>
+  <data name="nav.access.sub" xml:space="preserve"><value>View addresses and rotate the access token</value></data>
+  <data name="nav.dsp" xml:space="preserve"><value>Audio DSP</value></data>
+  <data name="nav.dsp.sub" xml:space="preserve"><value>Per-channel PEQ, REW import and linear-phase FIR</value></data>
+  <data name="player.now" xml:space="preserve"><value>Now playing</value></data>
+  <data name="modal.close" xml:space="preserve"><value>Close</value></data>
+  <data name="toolbar.searchTitle" xml:space="preserve"><value>Search titles</value></data>
+  <data name="toolbar.searchLibrary" xml:space="preserve"><value>Search library</value></data>
+  <data name="toolbar.refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="common.loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="lib.continue" xml:space="preserve"><value>Continue watching</value></data>
+  <data name="lib.items" xml:space="preserve"><value>{0} items</value></data>
+  <data name="lib.episodeTitle" xml:space="preserve"><value>Ep {0} · {1}</value></data>
+  <data name="lib.seriesCount" xml:space="preserve"><value>{0} titles</value></data>
+  <data name="lib.all" xml:space="preserve"><value>Everything</value></data>
+  <data name="lib.empty" xml:space="preserve"><value>This media source has nothing to show.</value></data>
+  <data name="lib.posterAlt" xml:space="preserve"><value>{0} poster</value></data>
+  <data name="lib.episodeCount" xml:space="preserve"><value>{0} episodes</value></data>
+  <data name="bangumi.subjectStatus" xml:space="preserve"><value>Bangumi collection status</value></data>
+  <data name="bangumi.want" xml:space="preserve"><value>Plan to watch</value></data>
+  <data name="bangumi.done" xml:space="preserve"><value>Watched</value></data>
+  <data name="bangumi.watching" xml:space="preserve"><value>Watching</value></data>
+  <data name="bangumi.onHold" xml:space="preserve"><value>On hold</value></data>
+  <data name="bangumi.dropped" xml:space="preserve"><value>Dropped</value></data>
+  <data name="bangumi.updateCollection" xml:space="preserve"><value>Update collection</value></data>
+  <data name="bangumi.noSummary" xml:space="preserve"><value>No summary</value></data>
+  <data name="bangumi.watched" xml:space="preserve"><value>Watched {0}</value></data>
+  <data name="bangumi.unwatched" xml:space="preserve"><value>Not watched</value></data>
+  <data name="bangumi.episodeStatus" xml:space="preserve"><value>Bangumi status</value></data>
+  <data name="bangumi.unmarked" xml:space="preserve"><value>Not marked</value></data>
+  <data name="bangumi.updateStatus" xml:space="preserve"><value>Update status</value></data>
+  <data name="play.play" xml:space="preserve"><value>Play</value></data>
+  <data name="bangumi.subjectUpdated" xml:space="preserve"><value>Bangumi collection updated</value></data>
+  <data name="bangumi.episodeUpdated" xml:space="preserve"><value>Bangumi episode status updated</value></data>
+  <data name="play.started" xml:space="preserve"><value>Playback started</value></data>
+  <data name="version.nextTitle" xml:space="preserve"><value>Choose next episode version</value></data>
+  <data name="diag.unavailable" xml:space="preserve"><value>No playback diagnostics available</value></data>
+  <data name="diag.summary" xml:space="preserve"><value>Diagnostics {0} · {1} log entries{2}</value></data>
+  <data name="diag.noProps" xml:space="preserve"><value>no properties</value></data>
+  <data name="player.current" xml:space="preserve"><value>Current media</value></data>
+  <data name="player.previous" xml:space="preserve"><value>Previous</value></data>
+  <data name="player.audio" xml:space="preserve"><value>Audio</value></data>
+  <data name="player.subtitle" xml:space="preserve"><value>Subtitles</value></data>
+  <data name="player.back10" xml:space="preserve"><value>Back 10 seconds</value></data>
+  <data name="player.toggle" xml:space="preserve"><value>Play or pause</value></data>
+  <data name="player.fwd30" xml:space="preserve"><value>Forward 30 seconds</value></data>
+  <data name="player.next" xml:space="preserve"><value>Next</value></data>
+  <data name="player.speed" xml:space="preserve"><value>Speed</value></data>
+  <data name="player.volume" xml:space="preserve"><value>Volume</value></data>
+  <data name="player.mute" xml:space="preserve"><value>Mute</value></data>
+  <data name="player.unmute" xml:space="preserve"><value>Unmute</value></data>
+  <data name="player.stop" xml:space="preserve"><value>Stop</value></data>
+  <data name="player.diagnostics" xml:space="preserve"><value>Playback diagnostics</value></data>
+  <data name="player.diagnose" xml:space="preserve"><value>Diagnose</value></data>
+  <data name="player.noSubs" xml:space="preserve"><value>Subtitles off</value></data>
+  <data name="sources.scanAll" xml:space="preserve"><value>Scan all</value></data>
+  <data name="sources.empty" xml:space="preserve"><value>No media sources yet.</value></data>
+  <data name="sources.edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="sources.scan" xml:space="preserve"><value>Scan</value></data>
+  <data name="sources.delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="sources.addTitle" xml:space="preserve"><value>Add media source</value></data>
+  <data name="sources.editTitle" xml:space="preserve"><value>Edit media source</value></data>
+  <data name="sources.type" xml:space="preserve"><value>Type</value></data>
+  <data name="sources.rss" xml:space="preserve"><value>RSS online source</value></data>
+  <data name="sources.mode" xml:space="preserve"><value>Content type</value></data>
+  <data name="sources.anime" xml:space="preserve"><value>Anime</value></data>
+  <data name="sources.drama" xml:space="preserve"><value>Drama</value></data>
+  <data name="sources.name" xml:space="preserve"><value>Display name</value></data>
+  <data name="sources.location" xml:space="preserve"><value>Location</value></data>
+  <data name="sources.locationPh" xml:space="preserve"><value>Local directory, HTTP(S) WebDAV, SMB or RSS feed URL</value></data>
+  <data name="sources.locationPhLocal" xml:space="preserve"><value>Local directory, HTTP(S) WebDAV or smb://</value></data>
+  <data name="sources.browse" xml:space="preserve"><value>Browse</value></data>
+  <data name="sources.username" xml:space="preserve"><value>Username</value></data>
+  <data name="sources.password" xml:space="preserve"><value>Password</value></data>
+  <data name="sources.passwordPh" xml:space="preserve"><value>Leave blank to keep when editing</value></data>
+  <data name="sources.domain" xml:space="preserve"><value>Domain (optional)</value></data>
+  <data name="sources.recognition" xml:space="preserve"><value>Recognition</value></data>
+  <data name="sources.directory" xml:space="preserve"><value>Plain directory scan</value></data>
+  <data name="sources.test" xml:space="preserve"><value>Test connection</value></data>
+  <data name="sources.save" xml:space="preserve"><value>Save</value></data>
+  <data name="sources.clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="sources.saved" xml:space="preserve"><value>Media source saved</value></data>
+  <data name="sources.scanned" xml:space="preserve"><value>Scan complete: {0} episodes</value></data>
+  <data name="sources.scanRunning" xml:space="preserve"><value>A scan task is already running for this source</value></data>
+  <data name="sources.scanAllRunning" xml:space="preserve"><value>Scan tasks already running</value></data>
+  <data name="sources.partialFail" xml:space="preserve"><value>, some sources failed</value></data>
+  <data name="sources.confirmDelete" xml:space="preserve"><value>Delete the source and its locally encrypted credentials?</value></data>
+  <data name="sources.deleted" xml:space="preserve"><value>Source deleted</value></data>
+  <data name="folder.title" xml:space="preserve"><value>Choose local directory</value></data>
+  <data name="folder.up" xml:space="preserve"><value>Up</value></data>
+  <data name="folder.select" xml:space="preserve"><value>Select current directory</value></data>
+  <data name="cloud.keyOk" xml:space="preserve"><value>Key verified</value></data>
+  <data name="cloud.noKey" xml:space="preserve"><value>Key not configured</value></data>
+  <data name="cloud.periodic" xml:space="preserve"><value>Enable scheduled runs</value></data>
+  <data name="cloud.endpoint" xml:space="preserve"><value>Service endpoint</value></data>
+  <data name="cloud.tokenLabel" xml:space="preserve"><value>API Token / Key</value></data>
+  <data name="cloud.mode" xml:space="preserve"><value>Ingest mode</value></data>
+  <data name="cloud.organized" xml:space="preserve"><value>Organized ingest</value></data>
+  <data name="cloud.single" xml:space="preserve"><value>Single-directory ingest</value></data>
+  <data name="cloud.inbox" xml:space="preserve"><value>Download directory A</value></data>
+  <data name="cloud.library" xml:space="preserve"><value>Library directory B</value></data>
+  <data name="cloud.rescan" xml:space="preserve"><value>Rescan WebDAV after ingest</value></data>
+  <data name="cloud.noRescan" xml:space="preserve"><value>No rescan</value></data>
+  <data name="cloud.interval" xml:space="preserve"><value>Interval (minutes)</value></data>
+  <data name="cloud.proxy" xml:space="preserve"><value>Use HTTP proxy for RSS and online metadata</value></data>
+  <data name="cloud.proxyHost" xml:space="preserve"><value>Proxy host</value></data>
+  <data name="cloud.proxyPort" xml:space="preserve"><value>Proxy port</value></data>
+  <data name="cloud.saveConfig" xml:space="preserve"><value>Save configuration</value></data>
+  <data name="cloud.login" xml:space="preserve"><value>Log in and save</value></data>
+  <data name="cloud.verifyKey" xml:space="preserve"><value>Verify key</value></data>
+  <data name="cloud.run" xml:space="preserve"><value>Run now</value></data>
+  <data name="cloud.runStatus" xml:space="preserve"><value>Run status</value></data>
+  <data name="cloud.rssTitle" xml:space="preserve"><value>RSS subscriptions</value></data>
+  <data name="cloud.subCount" xml:space="preserve"><value>{0}</value></data>
+  <data name="cloud.rssName" xml:space="preserve"><value>Name</value></data>
+  <data name="cloud.address" xml:space="preserve"><value>Address</value></data>
+  <data name="cloud.filter" xml:space="preserve"><value>Title filter regex</value></data>
+  <data name="cloud.enabled" xml:space="preserve"><value>Enabled</value></data>
+  <data name="cloud.disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="cloud.saveSub" xml:space="preserve"><value>Save subscription</value></data>
+  <data name="cloud.noSubs" xml:space="preserve"><value>No RSS subscriptions yet.</value></data>
+  <data name="cloud.filterLabel" xml:space="preserve"><value>Filter: {0}</value></data>
+  <data name="cloud.lastChecked" xml:space="preserve"><value>Last checked: {0}</value></data>
+  <data name="cloud.preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="cloud.saved" xml:space="preserve"><value>CloudDrive configuration saved</value></data>
+  <data name="cloud.loginOk" xml:space="preserve"><value>Login credentials verified and saved</value></data>
+  <data name="cloud.tokenOk" xml:space="preserve"><value>API token verified and saved</value></data>
+  <data name="cloud.runDone" xml:space="preserve"><value>Run finished: {0}</value></data>
+  <data name="cloud.chooseDir" xml:space="preserve"><value>Choose CloudDrive2 directory</value></data>
+  <data name="cloud.rssSaved" xml:space="preserve"><value>RSS subscription saved</value></data>
+  <data name="cloud.confirmDeleteRss" xml:space="preserve"><value>Delete this RSS subscription? Processed records are kept for dedup.</value></data>
+  <data name="cloud.rssDeleted" xml:space="preserve"><value>RSS subscription deleted</value></data>
+  <data name="cloud.previewTitle" xml:space="preserve"><value>RSS preview</value></data>
+  <data name="cloud.previewStats" xml:space="preserve"><value>{0} items · {1} submittable · {2} skipped · {3} missing links</value></data>
+  <data name="cloud.colTitle" xml:space="preserve"><value>Title</value></data>
+  <data name="cloud.colLink" xml:space="preserve"><value>Link</value></data>
+  <data name="cloud.colStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="cloud.processed" xml:space="preserve"><value>Processed</value></data>
+  <data name="common.result" xml:space="preserve"><value>Result</value></data>
+  <data name="common.notRun" xml:space="preserve"><value>Not run yet</value></data>
 </root>

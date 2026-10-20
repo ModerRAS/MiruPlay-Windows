@@ -4,4 +4,163 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="web.title" xml:space="preserve"><value>MiruPlay Web Control</value></data>
+  <data name="access.title" xml:space="preserve"><value>连接 MiruPlay</value></data>
+  <data name="access.hint" xml:space="preserve"><value>输入 Windows 客户端设置页显示的 WebUI 访问令牌。</value></data>
+  <data name="access.token" xml:space="preserve"><value>访问令牌</value></data>
+  <data name="access.connect" xml:space="preserve"><value>连接</value></data>
+  <data name="access.invalid" xml:space="preserve"><value>访问令牌无效或已轮换。</value></data>
+  <data name="nav.main" xml:space="preserve"><value>主导航</value></data>
+  <data name="nav.library" xml:space="preserve"><value>片库</value></data>
+  <data name="nav.library.sub" xml:space="preserve"><value>浏览并播放 MLIP 媒体库</value></data>
+  <data name="nav.sources" xml:space="preserve"><value>媒体源</value></data>
+  <data name="nav.sources.sub" xml:space="preserve"><value>管理 Local、WebDAV、SMB 与 RSS 在线源</value></data>
+  <data name="nav.automation" xml:space="preserve"><value>自动化</value></data>
+  <data name="nav.automation.sub" xml:space="preserve"><value>CloudDrive2 入库与 RSS 提交</value></data>
+  <data name="nav.metadata" xml:space="preserve"><value>元数据</value></data>
+  <data name="nav.metadata.sub" xml:space="preserve"><value>管理凭据并搜索补充元数据</value></data>
+  <data name="nav.playback" xml:space="preserve"><value>播放设置</value></data>
+  <data name="nav.playback.sub" xml:space="preserve"><value>设置结束动作和字幕语言优先级</value></data>
+  <data name="nav.operations" xml:space="preserve"><value>运维</value></data>
+  <data name="nav.operations.sub" xml:space="preserve"><value>查看本地日志、后台任务和更新状态</value></data>
+  <data name="nav.access" xml:space="preserve"><value>WebUI 访问</value></data>
+  <data name="nav.access.sub" xml:space="preserve"><value>查看地址并轮换访问令牌</value></data>
+  <data name="nav.dsp" xml:space="preserve"><value>音频 DSP</value></data>
+  <data name="nav.dsp.sub" xml:space="preserve"><value>逐声道 PEQ、REW 导入和线性相位 FIR</value></data>
+  <data name="player.now" xml:space="preserve"><value>当前播放</value></data>
+  <data name="modal.close" xml:space="preserve"><value>关闭</value></data>
+  <data name="toolbar.searchTitle" xml:space="preserve"><value>搜索标题</value></data>
+  <data name="toolbar.searchLibrary" xml:space="preserve"><value>搜索片库</value></data>
+  <data name="toolbar.refresh" xml:space="preserve"><value>刷新</value></data>
+  <data name="common.loading" xml:space="preserve"><value>正在读取…</value></data>
+  <data name="lib.continue" xml:space="preserve"><value>继续观看</value></data>
+  <data name="lib.items" xml:space="preserve"><value>{0} 项</value></data>
+  <data name="lib.episodeTitle" xml:space="preserve"><value>第 {0} 集 · {1}</value></data>
+  <data name="lib.seriesCount" xml:space="preserve"><value>{0} 部</value></data>
+  <data name="lib.all" xml:space="preserve"><value>全部内容</value></data>
+  <data name="lib.empty" xml:space="preserve"><value>当前媒体源没有可显示内容。</value></data>
+  <data name="lib.posterAlt" xml:space="preserve"><value>{0} 海报</value></data>
+  <data name="lib.episodeCount" xml:space="preserve"><value>{0} 集</value></data>
+  <data name="bangumi.subjectStatus" xml:space="preserve"><value>Bangumi 收藏状态</value></data>
+  <data name="bangumi.want" xml:space="preserve"><value>想看</value></data>
+  <data name="bangumi.done" xml:space="preserve"><value>看过</value></data>
+  <data name="bangumi.watching" xml:space="preserve"><value>在看</value></data>
+  <data name="bangumi.onHold" xml:space="preserve"><value>搁置</value></data>
+  <data name="bangumi.dropped" xml:space="preserve"><value>抛弃</value></data>
+  <data name="bangumi.updateCollection" xml:space="preserve"><value>更新收藏</value></data>
+  <data name="bangumi.noSummary" xml:space="preserve"><value>暂无简介</value></data>
+  <data name="bangumi.watched" xml:space="preserve"><value>已观看 {0}</value></data>
+  <data name="bangumi.unwatched" xml:space="preserve"><value>未观看</value></data>
+  <data name="bangumi.episodeStatus" xml:space="preserve"><value>Bangumi 状态</value></data>
+  <data name="bangumi.unmarked" xml:space="preserve"><value>未标记</value></data>
+  <data name="bangumi.updateStatus" xml:space="preserve"><value>更新状态</value></data>
+  <data name="play.play" xml:space="preserve"><value>播放</value></data>
+  <data name="bangumi.subjectUpdated" xml:space="preserve"><value>Bangumi 收藏已更新</value></data>
+  <data name="bangumi.episodeUpdated" xml:space="preserve"><value>Bangumi 分集状态已更新</value></data>
+  <data name="play.started" xml:space="preserve"><value>已开始播放</value></data>
+  <data name="version.nextTitle" xml:space="preserve"><value>选择下一集版本</value></data>
+  <data name="diag.unavailable" xml:space="preserve"><value>当前没有可用的播放诊断</value></data>
+  <data name="diag.summary" xml:space="preserve"><value>诊断 {0} · 日志 {1} 条{2}</value></data>
+  <data name="diag.noProps" xml:space="preserve"><value>无属性</value></data>
+  <data name="player.current" xml:space="preserve"><value>当前媒体</value></data>
+  <data name="player.previous" xml:space="preserve"><value>上一集</value></data>
+  <data name="player.audio" xml:space="preserve"><value>音频轨道</value></data>
+  <data name="player.subtitle" xml:space="preserve"><value>字幕轨道</value></data>
+  <data name="player.back10" xml:space="preserve"><value>后退 10 秒</value></data>
+  <data name="player.toggle" xml:space="preserve"><value>播放或暂停</value></data>
+  <data name="player.fwd30" xml:space="preserve"><value>前进 30 秒</value></data>
+  <data name="player.next" xml:space="preserve"><value>下一集</value></data>
+  <data name="player.speed" xml:space="preserve"><value>播放速度</value></data>
+  <data name="player.volume" xml:space="preserve"><value>音量</value></data>
+  <data name="player.mute" xml:space="preserve"><value>静音</value></data>
+  <data name="player.unmute" xml:space="preserve"><value>取消静音</value></data>
+  <data name="player.stop" xml:space="preserve"><value>停止</value></data>
+  <data name="player.diagnostics" xml:space="preserve"><value>播放诊断</value></data>
+  <data name="player.diagnose" xml:space="preserve"><value>诊断</value></data>
+  <data name="player.noSubs" xml:space="preserve"><value>关闭字幕</value></data>
+  <data name="sources.scanAll" xml:space="preserve"><value>扫描全部</value></data>
+  <data name="sources.empty" xml:space="preserve"><value>尚未添加媒体源。</value></data>
+  <data name="sources.edit" xml:space="preserve"><value>编辑</value></data>
+  <data name="sources.scan" xml:space="preserve"><value>扫描</value></data>
+  <data name="sources.delete" xml:space="preserve"><value>删除</value></data>
+  <data name="sources.addTitle" xml:space="preserve"><value>添加媒体源</value></data>
+  <data name="sources.editTitle" xml:space="preserve"><value>编辑媒体源</value></data>
+  <data name="sources.type" xml:space="preserve"><value>类型</value></data>
+  <data name="sources.rss" xml:space="preserve"><value>RSS 在线源</value></data>
+  <data name="sources.mode" xml:space="preserve"><value>内容类型</value></data>
+  <data name="sources.anime" xml:space="preserve"><value>动漫</value></data>
+  <data name="sources.drama" xml:space="preserve"><value>电视剧</value></data>
+  <data name="sources.name" xml:space="preserve"><value>显示名称</value></data>
+  <data name="sources.location" xml:space="preserve"><value>位置</value></data>
+  <data name="sources.locationPh" xml:space="preserve"><value>本地目录、HTTP(S) WebDAV、SMB 或 RSS Feed URL</value></data>
+  <data name="sources.locationPhLocal" xml:space="preserve"><value>本地目录、HTTP(S) WebDAV 或 smb://</value></data>
+  <data name="sources.browse" xml:space="preserve"><value>浏览</value></data>
+  <data name="sources.username" xml:space="preserve"><value>用户名</value></data>
+  <data name="sources.password" xml:space="preserve"><value>密码</value></data>
+  <data name="sources.passwordPh" xml:space="preserve"><value>编辑时留空保留</value></data>
+  <data name="sources.domain" xml:space="preserve"><value>域（可选）</value></data>
+  <data name="sources.recognition" xml:space="preserve"><value>识别方式</value></data>
+  <data name="sources.directory" xml:space="preserve"><value>普通目录扫描</value></data>
+  <data name="sources.test" xml:space="preserve"><value>测试连接</value></data>
+  <data name="sources.save" xml:space="preserve"><value>保存</value></data>
+  <data name="sources.clear" xml:space="preserve"><value>清空</value></data>
+  <data name="sources.saved" xml:space="preserve"><value>媒体源已保存</value></data>
+  <data name="sources.scanned" xml:space="preserve"><value>扫描完成：{0} 集</value></data>
+  <data name="sources.scanRunning" xml:space="preserve"><value>该来源已有扫描任务运行</value></data>
+  <data name="sources.scanAllRunning" xml:space="preserve"><value>扫描任务已在运行</value></data>
+  <data name="sources.partialFail" xml:space="preserve"><value>，部分媒体源失败</value></data>
+  <data name="sources.confirmDelete" xml:space="preserve"><value>删除媒体源及其本机加密凭据？</value></data>
+  <data name="sources.deleted" xml:space="preserve"><value>媒体源已删除</value></data>
+  <data name="folder.title" xml:space="preserve"><value>选择本地目录</value></data>
+  <data name="folder.up" xml:space="preserve"><value>上一级</value></data>
+  <data name="folder.select" xml:space="preserve"><value>选择当前目录</value></data>
+  <data name="cloud.keyOk" xml:space="preserve"><value>Key 已验证</value></data>
+  <data name="cloud.noKey" xml:space="preserve"><value>未配置 Key</value></data>
+  <data name="cloud.periodic" xml:space="preserve"><value>启用周期执行</value></data>
+  <data name="cloud.endpoint" xml:space="preserve"><value>服务地址</value></data>
+  <data name="cloud.tokenLabel" xml:space="preserve"><value>API Token / Key</value></data>
+  <data name="cloud.mode" xml:space="preserve"><value>入库模式</value></data>
+  <data name="cloud.organized" xml:space="preserve"><value>整理入库</value></data>
+  <data name="cloud.single" xml:space="preserve"><value>单目录入库</value></data>
+  <data name="cloud.inbox" xml:space="preserve"><value>下载目录 A</value></data>
+  <data name="cloud.library" xml:space="preserve"><value>媒体库目录 B</value></data>
+  <data name="cloud.rescan" xml:space="preserve"><value>入库后回扫 WebDAV</value></data>
+  <data name="cloud.noRescan" xml:space="preserve"><value>不回扫</value></data>
+  <data name="cloud.interval" xml:space="preserve"><value>间隔（分钟）</value></data>
+  <data name="cloud.proxy" xml:space="preserve"><value>RSS 与在线元数据使用 HTTP 代理</value></data>
+  <data name="cloud.proxyHost" xml:space="preserve"><value>代理主机</value></data>
+  <data name="cloud.proxyPort" xml:space="preserve"><value>代理端口</value></data>
+  <data name="cloud.saveConfig" xml:space="preserve"><value>保存配置</value></data>
+  <data name="cloud.login" xml:space="preserve"><value>登录并保存</value></data>
+  <data name="cloud.verifyKey" xml:space="preserve"><value>验证 Key</value></data>
+  <data name="cloud.run" xml:space="preserve"><value>立即运行</value></data>
+  <data name="cloud.runStatus" xml:space="preserve"><value>运行状态</value></data>
+  <data name="cloud.rssTitle" xml:space="preserve"><value>RSS 订阅</value></data>
+  <data name="cloud.subCount" xml:space="preserve"><value>{0} 个</value></data>
+  <data name="cloud.rssName" xml:space="preserve"><value>名称</value></data>
+  <data name="cloud.address" xml:space="preserve"><value>地址</value></data>
+  <data name="cloud.filter" xml:space="preserve"><value>标题过滤正则</value></data>
+  <data name="cloud.enabled" xml:space="preserve"><value>启用</value></data>
+  <data name="cloud.disabled" xml:space="preserve"><value>停用</value></data>
+  <data name="cloud.saveSub" xml:space="preserve"><value>保存订阅</value></data>
+  <data name="cloud.noSubs" xml:space="preserve"><value>尚未添加 RSS 订阅。</value></data>
+  <data name="cloud.filterLabel" xml:space="preserve"><value>过滤：{0}</value></data>
+  <data name="cloud.lastChecked" xml:space="preserve"><value>上次检查：{0}</value></data>
+  <data name="cloud.preview" xml:space="preserve"><value>预览</value></data>
+  <data name="cloud.saved" xml:space="preserve"><value>CloudDrive 配置已保存</value></data>
+  <data name="cloud.loginOk" xml:space="preserve"><value>登录凭据已验证并保存</value></data>
+  <data name="cloud.tokenOk" xml:space="preserve"><value>API Token 已验证并保存</value></data>
+  <data name="cloud.runDone" xml:space="preserve"><value>运行结束：{0}</value></data>
+  <data name="cloud.chooseDir" xml:space="preserve"><value>选择 CloudDrive2 目录</value></data>
+  <data name="cloud.rssSaved" xml:space="preserve"><value>RSS 订阅已保存</value></data>
+  <data name="cloud.confirmDeleteRss" xml:space="preserve"><value>删除这个 RSS 订阅？已处理记录会保留用于去重。</value></data>
+  <data name="cloud.rssDeleted" xml:space="preserve"><value>RSS 订阅已删除</value></data>
+  <data name="cloud.previewTitle" xml:space="preserve"><value>RSS 预览</value></data>
+  <data name="cloud.previewStats" xml:space="preserve"><value>{0} 项 · 可提交 {1} · 已跳过 {2} · 缺少链接 {3}</value></data>
+  <data name="cloud.colTitle" xml:space="preserve"><value>标题</value></data>
+  <data name="cloud.colLink" xml:space="preserve"><value>链接</value></data>
+  <data name="cloud.colStatus" xml:space="preserve"><value>状态</value></data>
+  <data name="cloud.processed" xml:space="preserve"><value>已处理</value></data>
+  <data name="common.result" xml:space="preserve"><value>结果</value></data>
+  <data name="common.notRun" xml:space="preserve"><value>尚未运行</value></data>
 </root>
