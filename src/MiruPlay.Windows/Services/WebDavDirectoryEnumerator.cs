@@ -144,6 +144,31 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
         return read(buffer);
     }
 
+    public async Task<IReadOnlyList<Uri>> ListSiblingFilesAsync(
+        string rootUrl,
+        Uri mediaUri,
+        MediaSourceCredential? credential,
+        CancellationToken cancellationToken = default)
+    {
+        var root = WebDavMlipClient.NormalizeRoot(rootUrl);
+        if (mediaUri.Scheme is not ("http" or "https") ||
+            !string.IsNullOrEmpty(mediaUri.UserInfo) ||
+            !string.IsNullOrEmpty(mediaUri.Query) ||
+            !string.IsNullOrEmpty(mediaUri.Fragment) ||
+            !root.IsBaseOf(mediaUri))
+            throw new InvalidDataException("播放地址不属于该 WebDAV 来源。");
+        var slash = mediaUri.AbsolutePath.LastIndexOf('/');
+        if (slash <= 0) return [];
+        var parent = new Uri(mediaUri, mediaUri.AbsolutePath[..(slash + 1)]);
+        var siblings = new List<Uri>();
+        foreach (var response in await ListAsync(root, parent, credential, cancellationToken).ConfigureAwait(false))
+        {
+            if (response.IsCollection || IsSamePath(parent, response.Uri)) continue;
+            siblings.Add(response.Uri);
+        }
+        return siblings;
+    }
+
     public void Dispose()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0) return;

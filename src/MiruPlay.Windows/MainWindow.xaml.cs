@@ -670,6 +670,15 @@ public partial class MainWindow : Window, IAsyncDisposable
                 var localSidecars = ExternalAudioPathMatcher.FindLocalSiblings(episode.MediaPath);
                 if (localSidecars.Count > 0) episode = episode with { ExternalAudioPaths = localSidecars };
             }
+            if (episode.ExternalAudioPaths.Count == 0 && source?.Type == "WEBDAV")
+            {
+                using var sidecarTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                var remoteSidecars = await _mediaSourceRegistry.DiscoverWebDavSidecarsAsync(
+                    source.Id,
+                    episode.MediaPath,
+                    sidecarTimeout.Token);
+                if (remoteSidecars.Count > 0) episode = episode with { ExternalAudioPaths = remoteSidecars };
+            }
             var playbackProxy = source?.Type == "WEBDAV"
                 ? _mediaSourceRegistry.CreatePlaybackProxy(source.Id, episode)
                 : null;

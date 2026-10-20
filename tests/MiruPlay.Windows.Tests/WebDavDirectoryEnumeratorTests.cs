@@ -55,6 +55,24 @@ public sealed class WebDavDirectoryEnumeratorTests
         Assert.All(handler.Authorizations, value => Assert.Equal("Basic YWxpY2U6c2VjcmV0", value));
     }
 
+    [Fact]
+    public async Task ListsPlaybackSiblingsWithoutLeavingTheSourceRoot()
+    {
+        using var enumerator = new WebDavDirectoryEnumerator(new DirectoryHandler(null), TimeSpan.Zero);
+
+        var siblings = await enumerator.ListSiblingFilesAsync(
+            "https://example.test/dav",
+            new Uri("https://example.test/dav/Anime/01.mkv"),
+            null);
+
+        Assert.Contains(siblings, uri => uri.AbsoluteUri == "https://example.test/dav/Anime/01.en.m4a");
+        Assert.DoesNotContain(siblings, uri => uri.AbsoluteUri.EndsWith("/Anime/", StringComparison.Ordinal));
+        await Assert.ThrowsAsync<InvalidDataException>(() => enumerator.ListSiblingFilesAsync(
+            "https://example.test/dav",
+            new Uri("https://example.test/escape.mkv"),
+            null));
+    }
+
     [Theory]
     [InlineData("invalid")]
     [InlineData("oversized")]

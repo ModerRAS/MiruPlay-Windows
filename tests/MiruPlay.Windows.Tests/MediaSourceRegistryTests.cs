@@ -1,3 +1,5 @@
+using System.Net;
+using System.Text;
 using Microsoft.Data.Sqlite;
 using MiruPlay.Windows.Services;
 
@@ -13,6 +15,86 @@ public sealed class MediaSourceRegistryTests : IDisposable
         File.WriteAllText(Path.Combine(_root, "Anime", "01.mkv"), "video");
         CreateDatabase();
         SqliteConnection.ClearAllPools();
+    }
+
+    [Fact]
+    public async Task WebDavSidecarDiscoveryMatchesSiblingsAndFailsClosed()
+    {
+        var settings = new AppSettings(
+            MediaSourceSchemaVersion: 1,
+            MediaSources:
+            [
+                new MediaSourceDefinition(1, "Remote", "WEBDAV", "https://example.test/dav"),
+                new MediaSourceDefinition(2, "Local", "LOCAL", _root),
+            ]);
+        using var registry = new MediaSourceRegistry(
+            () => settings,
+            updated => settings = updated,
+            webDavDirectory: new WebDavDirectoryEnumerator(new SidecarHandler(), TimeSpan.Zero));
+
+        var matches = await registry.DiscoverWebDavSidecarsAsync(1, "https://example.test/dav/Anime/01.mkv");
+        Assert.Equal(["https://example.test/dav/Anime/01.en.m4a"], matches);
+        Assert.Empty(await registry.DiscoverWebDavSidecarsAsync(1, "https://example.test/escape.mkv"));
+        Assert.Empty(await registry.DiscoverWebDavSidecarsAsync(1, "not-a-url"));
+        Assert.Empty(await registry.DiscoverWebDavSidecarsAsync(2, "https://example.test/dav/Anime/01.mkv"));
+        Assert.Empty(await registry.DiscoverWebDavSidecarsAsync(99, "https://example.test/dav/Anime/01.mkv"));
+    }
+
+    [Fact]
+    public async Task WebDavSidecarDiscoveryReturnsEmptyOnTransportFailures()
+    {
+        var settings = new AppSettings(
+            MediaSourceSchemaVersion: 1,
+            MediaSources: [new MediaSourceDefinition(1, "Remote", "WEBDAV", "https://example.test/dav")]);
+        using var registry = new MediaSourceRegistry(
+            () => settings,
+            updated => settings = updated,
+            webDavDirectory: new WebDavDirectoryEnumerator(new FailingHandler(), TimeSpan.Zero));
+
+        Assert.Empty(await registry.DiscoverWebDavSidecarsAsync(1, "https://example.test/dav/Anime/01.mkv"));
+    }
+
+    private sealed class SidecarHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            Assert.Equal("PROPFIND", request.Method.Method);
+            const string body = """
+                <?xml version="1.0" encoding="utf-8" ?>
+                <d:multistatus xmlns:d="DAV:">
+                  <d:response>
+                    <d:href>https://example.test/dav/Anime/</d:href>
+                    <d:propstat><d:prop><d:resourcetype><d:collection /></d:resourcetype></d:prop></d:propstat>
+                  </d:response>
+                  <d:response>
+                    <d:href>https://example.test/dav/Anime/01.mkv</d:href>
+                    <d:propstat><d:prop><d:getcontentlength>12</d:getcontentlength></d:prop></d:propstat>
+                  </d:response>
+                  <d:response>
+                    <d:href>https://example.test/dav/Anime/01.en.m4a</d:href>
+                    <d:propstat><d:prop><d:getcontentlength>8</d:getcontentlength></d:prop></d:propstat>
+                  </d:response>
+                  <d:response>
+                    <d:href>https://example.test/dav/Anime/Showcase.en.flac</d:href>
+                    <d:propstat><d:prop><d:getcontentlength>8</d:getcontentlength></d:prop></d:propstat>
+                  </d:response>
+                </d:multistatus>
+                """;
+            return Task.FromResult(new HttpResponseMessage((HttpStatusCode)207)
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/xml"),
+            });
+        }
+    }
+
+    private sealed class FailingHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken) =>
+            throw new HttpRequestException("network is unavailable");
     }
 
     [Fact]

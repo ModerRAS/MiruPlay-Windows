@@ -501,6 +501,31 @@ public sealed class MediaSourceRegistry : IDisposable
 
     public MediaSourceCredential? GetCredential(long sourceId) => _credentials.Get(sourceId);
 
+    public async Task<IReadOnlyList<string>> DiscoverWebDavSidecarsAsync(
+        long sourceId,
+        string mediaPath,
+        CancellationToken cancellationToken = default)
+    {
+        var source = Get(sourceId);
+        if (source?.Type != "WEBDAV") return [];
+        if (!Uri.TryCreate(mediaPath, UriKind.Absolute, out var mediaUri)) return [];
+        try
+        {
+            var siblings = await _webDavDirectory.ListSiblingFilesAsync(
+                source.Location,
+                mediaUri,
+                _credentials.Get(sourceId),
+                cancellationToken).ConfigureAwait(false);
+            return ExternalAudioPathMatcher.Find(
+                mediaUri.AbsoluteUri,
+                siblings.Select(uri => uri.AbsoluteUri));
+        }
+        catch (Exception error) when (error is IOException or HttpRequestException or InvalidDataException or UnauthorizedAccessException or OperationCanceledException or TimeoutException)
+        {
+            return [];
+        }
+    }
+
     internal WebDavPlaybackProxy CreatePlaybackProxy(long sourceId, LibraryEpisode episode)
     {
         var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
