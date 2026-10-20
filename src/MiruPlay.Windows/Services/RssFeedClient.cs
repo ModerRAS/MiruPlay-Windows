@@ -8,7 +8,14 @@ using System.Xml.Linq;
 
 namespace MiruPlay.Windows.Services;
 
-public sealed record RssFeedItem(string Title, string? GuidValue, string? Link, string? EnclosureUrl)
+public sealed record RssFeedItem(
+    string Title,
+    string? GuidValue,
+    string? Link,
+    string? EnclosureUrl,
+    string Category = "",
+    long PublishedAtMs = 0,
+    long SizeBytes = 0)
 {
     public string? SubmissionUrl => RssSubmissionPlanner.SelectSubmissionUrl(Link, EnclosureUrl);
 }
@@ -49,7 +56,14 @@ public sealed class RssFeedClient
         if (response.Content.Headers.ContentLength > MaximumFeedBytes) throw new InvalidDataException("RSS 响应超过 5 MiB。");
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         using var limited = new LimitedReadStream(stream, MaximumFeedBytes);
-        return Parse(limited);
+        try
+        {
+            return Parse(limited);
+        }
+        catch (XmlException error)
+        {
+            throw new InvalidDataException("RSS 响应不是有效的 XML Feed。", error);
+        }
     }
 
     internal static IReadOnlyList<RssFeedItem> Parse(Stream xml)
@@ -77,17 +91,54 @@ public sealed class RssFeedClient
         if (title.Length == 0) title = "未命名条目";
         var linkElements = element.Elements().Where(child => child.Name.LocalName == "link").ToList();
         var link = atom
-            ? linkElements.Select(child => Clean(child.Attribute("href")?.Value ?? child.Value, 4_096)).FirstOrDefault(value => value is not null)
+            ? linkElements
+                .Where(child => !string.Equals(child.Attribute("rel")?.Value, "enclosure", StringComparison.OrdinalIgnoreCase))
+                .Select(child => Clean(child.Attribute("href")?.Value ?? child.Value, 4_096))
+                .FirstOrDefault(value => value is not null)
             : Clean(ChildText(element, "link"), 4_096);
-        var enclosure = element.Elements()
-            .Where(child => child.Name.LocalName == "enclosure")
-            .Select(child => Clean(child.Attribute("url")?.Value, 4_096))
-            .FirstOrDefault(value => value is not null);
+        var enclosure = atom
+            ? linkElements
+                .Where(child => string.Equals(child.Attribute("rel")?.Value, "enclosure", StringComparison.OrdinalIgnoreCase))
+                .Select(child => Clean(child.Attribute("href")?.Value, 4_096))
+                .FirstOrDefault(value => value is not null)
+            : element.Elements()
+                .Where(child => child.Name.LocalName == "enclosure")
+                .Select(child => Clean(child.Attribute("url")?.Value, 4_096))
+                .FirstOrDefault(value => value is not null);
+        var categoryElement = element.Elements().FirstOrDefault(child => child.Name.LocalName == "category");
+        var category = Clean(atom ? categoryElement?.Attribute("term")?.Value ?? categoryElement?.Value : categoryElement?.Value, 500) ?? string.Empty;
+        var published = ChildText(element, atom ? "published" : "pubDate");
+        if (published.Length == 0) published = ChildText(element, "updated");
+        var size = ParseSizeBytes(ChildText(element, "size"));
+        if (size == 0 && long.TryParse(
+                element.Elements().FirstOrDefault(child => child.Name.LocalName == "enclosure")?.Attribute("length")?.Value,
+                out var enclosureLength))
+            size = Math.Max(0, enclosureLength);
         return new RssFeedItem(
             Clean(title, 1_000) ?? "未命名条目",
             Clean(ChildText(element, atom ? "id" : "guid"), 4_096),
             link,
-            enclosure);
+            enclosure,
+            category,
+            DateTimeOffset.TryParse(published, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal, out var publishedAt)
+                ? publishedAt.ToUnixTimeMilliseconds()
+                : 0,
+            size);
+    }
+
+    private static long ParseSizeBytes(string value)
+    {
+        var match = Regex.Match(value.Trim(), @"^(?<amount>[\d.]+)\s*(?<unit>[KMG]?B)?$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
+        if (!match.Success || !double.TryParse(match.Groups["amount"].Value, System.Globalization.CultureInfo.InvariantCulture, out var amount)) return 0;
+        var multiplier = match.Groups["unit"].Value.ToUpperInvariant() switch
+        {
+            "KB" => 1024d,
+            "MB" => 1024d * 1024d,
+            "GB" => 1024d * 1024d * 1024d,
+            _ => 1d,
+        };
+        var bytes = amount * multiplier;
+        return double.IsFinite(bytes) && bytes is > 0 and <= long.MaxValue ? (long)bytes : 0;
     }
 
     private static string ChildText(XElement element, string name) =>
@@ -108,13 +159,8 @@ public sealed class RssFeedClient
         return uri;
     }
 
-    private static HttpClientHandler CreateHandler(bool proxyEnabled, string proxyHost, int proxyPort)
-    {
-        if (!proxyEnabled) return new HttpClientHandler();
-        var host = proxyHost.Trim();
-        if (host.Length == 0) throw new ArgumentException("启用 RSS 代理时必须填写代理主机。", nameof(proxyHost));
-        return new HttpClientHandler { Proxy = new WebProxy(host, Math.Clamp(proxyPort, 1, 65_535)), UseProxy = true };
-    }
+    private static HttpClientHandler CreateHandler(bool proxyEnabled, string proxyHost, int proxyPort) =>
+        OutboundHttpProxy.CreateHandler(proxyEnabled, proxyHost, proxyPort);
 
     private sealed class LimitedReadStream(Stream inner, long maximumBytes) : Stream
     {

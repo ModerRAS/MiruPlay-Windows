@@ -16,7 +16,8 @@ public static class MpvPlayerLauncher
         bool headless = false,
         WebDavPlaybackProxy? playbackProxy = null,
         IntPtr? windowHandle = null,
-        MpvWindowsVideoOptions? videoOptions = null) =>
+        MpvWindowsVideoOptions? videoOptions = null,
+        bool allowDirectHttp = false) =>
         (await PlayDetailedAsync(
             episode,
             settings,
@@ -25,7 +26,8 @@ public static class MpvPlayerLauncher
             headless,
             playbackProxy,
             windowHandle,
-            videoOptions).ConfigureAwait(false)).Session;
+            videoOptions,
+            allowDirectHttp).ConfigureAwait(false)).Session;
 
     internal static async Task<MpvPlaybackLaunchResult> PlayDetailedAsync(
         LibraryEpisode episode,
@@ -35,13 +37,18 @@ public static class MpvPlayerLauncher
         bool headless = false,
         WebDavPlaybackProxy? playbackProxy = null,
         IntPtr? windowHandle = null,
-        MpvWindowsVideoOptions? videoOptions = null)
+        MpvWindowsVideoOptions? videoOptions = null,
+        bool allowDirectHttp = false)
     {
         var isRemote = IsRemoteUri(episode.MediaPath);
+        Exception? backendError = null;
         try
         {
-            if (isRemote && playbackProxy is null)
+            if (isRemote && playbackProxy is null && !allowDirectHttp)
                 throw new InvalidOperationException("WebDAV playback must use the shared endpoint consumer.");
+            if (allowDirectHttp && isRemote && Uri.TryCreate(episode.MediaPath, UriKind.Absolute, out var remoteUri) &&
+                !string.IsNullOrEmpty(remoteUri.UserInfo))
+                throw new InvalidOperationException("Direct playback URLs cannot contain embedded credentials.");
             if (!isRemote && !File.Exists(episode.MediaPath))
                 throw new FileNotFoundException("找不到视频文件。", episode.MediaPath);
 
@@ -59,7 +66,8 @@ public static class MpvPlayerLauncher
                         headless,
                         windowHandle,
                         playbackProxy,
-                        videoOptions).ConfigureAwait(false);
+                        videoOptions,
+                        startPositionMs).ConfigureAwait(false);
                     playbackProxy = null;
                     return new MpvPlaybackLaunchResult(
                         embeddedSession,
@@ -68,11 +76,14 @@ public static class MpvPlayerLauncher
                 }
                 catch (Exception error) when (error is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException or InvalidOperationException or IOException or TimeoutException)
                 {
-                    // A missing or incompatible native runtime falls through to the local system-player degradation.
+                    backendError = error;
                 }
             }
 
-            if (isRemote) throw new NotSupportedException("播放 WebDAV 媒体需要 libmpv。");
+            if (isRemote || headless)
+                throw new InvalidOperationException(
+                    backendError is null ? "找不到内置 libmpv 播放运行时。" : $"内置播放器启动失败：{backendError.Message}",
+                    backendError);
             Process.Start(new ProcessStartInfo(episode.MediaPath) { UseShellExecute = true });
             return new MpvPlaybackLaunchResult(
                 null,
