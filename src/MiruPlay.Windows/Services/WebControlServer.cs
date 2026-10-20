@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -7,8 +8,10 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using MiruPlay.Windows.Models;
 
 namespace MiruPlay.Windows.Services;
@@ -19,7 +22,14 @@ public sealed record PlaybackControlCommand(
     long? DeltaMs = null,
     float? Speed = null,
     int? SubtitleTrackId = null,
-    int? AudioTrackId = null);
+    int? AudioTrackId = null,
+    double? VolumePercent = null,
+    bool? IsMuted = null,
+    string? VersionEpisodeId = null);
+
+public sealed record PlaybackVersionChoice(string EpisodeId, string VersionLabel);
+public sealed record AppUpdateConfigRequest(string ManifestUrl);
+public sealed record AppUpdateInstallRequest(bool Confirm);
 
 public sealed record MediaSourceActions(
     Func<IReadOnlyList<MediaSourceInfoDto>> List,
@@ -27,7 +37,7 @@ public sealed record MediaSourceActions(
     Func<MediaSourceRequest, Task<MediaSourceInfoDto>> Add,
     Func<long, MediaSourceRequest, Task<MediaSourceInfoDto>> Update,
     Func<long, Task> Remove,
-    Func<long, Task<SourceScanResponse>> Scan);
+    Func<long, CancellationToken, Task<SourceScanResponse>> Scan);
 
 public sealed record PlaybackSubtitleTrack(
     int Id,
@@ -62,7 +72,13 @@ public sealed record PlaybackRuntimeStatus(
     IReadOnlyList<PlaybackSubtitleTrack>? SubtitleTracks = null,
     int? SelectedSubtitleTrackId = null,
     IReadOnlyList<MpvAudioTrack>? AudioTracks = null,
-    int? SelectedAudioTrackId = null);
+    int? SelectedAudioTrackId = null,
+    double Speed = 1,
+    double VolumePercent = 100,
+    bool IsMuted = false,
+    bool CanPlayPrevious = false,
+    bool CanPlayNext = false,
+    IReadOnlyList<PlaybackVersionChoice>? NextEpisodeVersions = null);
 
 public sealed class WebControlServer : IAsyncDisposable
 {
@@ -79,6 +95,7 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly WebControlTokenStore _tokens;
     private readonly Func<IReadOnlyList<LibrarySeries>> _getSeries;
     private readonly Func<PlaybackRuntimeStatus> _getPlaybackStatus;
+    private readonly Func<MpvNativeDiagnostics?> _getPlaybackDiagnostics;
     private readonly Func<string, long?, Task<bool>> _playEpisode;
     private readonly Func<PlaybackControlCommand, Task<PlaybackRuntimeStatus>> _playbackCommand;
     private readonly Func<AppSettings> _getSettings;
@@ -86,8 +103,13 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly Func<AudioDspConfig, Task>? _applyAudioDsp;
     private readonly SemaphoreSlim _settingsLock = new(1, 1);
     private readonly MediaSourceActions _mediaSources;
+    private readonly MediaSourceRegistry? _metadataSources;
+    private readonly Func<long, Task>? _refreshSource;
     private readonly BangumiMetadataClient _bangumiMetadata;
+    private readonly BangumiArchiveStore _bangumiArchive;
     private readonly TmdbMetadataClient _tmdbMetadata;
+    private readonly TvMazeMetadataClient _tvMazeMetadata;
+    private readonly MetadataSearchService _metadataSearch;
     private readonly MetadataTokenStore _metadataTokens;
     private readonly RssSubscriptionStore _rssSubscriptions;
     private readonly CloudDriveAutomationStore _cloudDriveConfig;
@@ -101,6 +123,7 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly WindowsAppUpdater _appUpdater;
     private readonly HeadlessTaskScheduler _tasks;
     private readonly Func<string, Task<bool>>? _appControl;
+    private readonly Func<Task<bool>>? _installUpdate;
     private readonly Func<LibrarySeries, CancellationToken, Task<string?>> _resolvePosterPath;
     private readonly bool _listenOnAnyIp;
     private readonly long _startedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -133,20 +156,34 @@ public sealed class WebControlServer : IAsyncDisposable
         WindowsAppUpdater? appUpdater = null,
         HeadlessTaskScheduler? tasks = null,
         Func<string, Task<bool>>? appControl = null,
-        Func<AudioDspConfig, Task>? applyAudioDsp = null)
+        Func<Task<bool>>? installUpdate = null,
+        Func<AudioDspConfig, Task>? applyAudioDsp = null,
+        MediaSourceRegistry? metadataSources = null,
+        Func<long, Task>? refreshSource = null,
+        BangumiArchiveStore? bangumiArchive = null,
+        TvMazeMetadataClient? tvMazeMetadata = null,
+        MetadataSearchService? metadataSearch = null,
+        Func<MpvNativeDiagnostics?>? getPlaybackDiagnostics = null)
     {
         _port = port;
         _tokens = tokens;
         _getSeries = getSeries;
         _getPlaybackStatus = getPlaybackStatus;
+        _getPlaybackDiagnostics = getPlaybackDiagnostics ?? (() => null);
         _playEpisode = playEpisode;
         _playbackCommand = playbackCommand;
         _getSettings = getSettings;
         _updateSettings = updateSettings;
         _applyAudioDsp = applyAudioDsp;
         _mediaSources = mediaSources;
+        _metadataSources = metadataSources;
+        _refreshSource = refreshSource;
         _bangumiMetadata = bangumiMetadata ?? new BangumiMetadataClient();
+        _bangumiArchive = bangumiArchive ?? new BangumiArchiveStore(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiruPlay", "bangumi-archive"));
         _tmdbMetadata = tmdbMetadata ?? new TmdbMetadataClient();
+        _tvMazeMetadata = tvMazeMetadata ?? new TvMazeMetadataClient();
+        _metadataSearch = metadataSearch ?? new MetadataSearchService(_bangumiMetadata, _tmdbMetadata, _tvMazeMetadata);
         _metadataTokens = metadataTokens ?? new MetadataTokenStore();
         _rssSubscriptions = rssSubscriptions ?? new RssSubscriptionStore();
         _cloudDriveConfig = cloudDriveConfig ?? new CloudDriveAutomationStore();
@@ -166,6 +203,7 @@ public sealed class WebControlServer : IAsyncDisposable
         _appUpdater = appUpdater ?? new WindowsAppUpdater();
         _tasks = tasks ?? new HeadlessTaskScheduler();
         _appControl = appControl;
+        _installUpdate = installUpdate;
         _resolvePosterPath = resolvePosterPath ?? ((series, _) => Task.FromResult(
             series.PosterUri?.IsFile == true ? series.PosterPath : null));
         _listenOnAnyIp = listenOnAnyIp;
@@ -177,12 +215,15 @@ public sealed class WebControlServer : IAsyncDisposable
 
     public string PreferredAccessUrl => _listenOnAnyIp && Urls.Count > 1 ? Urls[1] : Urls[0];
 
+    public bool IsRunning => _app is not null;
+
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (_app is not null) return;
 
         var builder = WebApplication.CreateSlimBuilder();
         builder.Logging.ClearProviders();
+        builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = BangumiArchiveStore.MaxArchiveBytes + 1_048_576);
         builder.WebHost.ConfigureKestrel(options =>
         {
             if (_listenOnAnyIp) options.ListenAnyIP(_port);
@@ -207,6 +248,7 @@ public sealed class WebControlServer : IAsyncDisposable
     {
         app.Use(async (context, next) =>
         {
+            var elapsed = Stopwatch.StartNew();
             context.Response.Headers.CacheControl = "no-store";
             context.Response.Headers.XContentTypeOptions = "nosniff";
             context.Response.Headers["Referrer-Policy"] = "no-referrer";
@@ -250,9 +292,22 @@ public sealed class WebControlServer : IAsyncDisposable
             {
                 await WriteEnvelopeAsync(context, StatusCodes.Status409Conflict, null, error.Message).ConfigureAwait(false);
             }
-            catch (Exception)
+            catch (Exception error)
             {
+                _localLogs.Write("ERROR", "Unhandled WebControl request failure", error,
+                    new Dictionary<string, string> { ["path"] = context.Request.Path.Value ?? string.Empty });
                 await WriteEnvelopeAsync(context, StatusCodes.Status500InternalServerError, null, "服务器内部错误").ConfigureAwait(false);
+            }
+            finally
+            {
+                _localLogs.Write(context.Response.StatusCode >= 500 ? "ERROR" : "INFO", "WebControl request completed",
+                    attributes: new Dictionary<string, string>
+                    {
+                        ["method"] = context.Request.Method,
+                        ["path"] = context.Request.Path.Value ?? string.Empty,
+                        ["status"] = context.Response.StatusCode.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        ["elapsedMs"] = elapsed.ElapsedMilliseconds.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    });
             }
         });
     }
@@ -274,10 +329,10 @@ public sealed class WebControlServer : IAsyncDisposable
                 logUpload = true,
                 localLogs = true,
                 appUpdate = _appUpdater.IsSupported,
-                appUpdateInstall = false,
+                appUpdateInstall = _installUpdate is not null,
                 appControl = _appControl is not null,
                 formatAwareToneMapping = false,
-                backgroundTasks = false,
+                backgroundTasks = _tasks.IsPersistent,
             },
         }));
 
@@ -287,6 +342,8 @@ public sealed class WebControlServer : IAsyncDisposable
             var task = _tasks.Get(id) ?? throw new KeyNotFoundException("任务不存在。");
             return Success(task);
         });
+        app.MapPost("/api/tasks/{id}/cancel", (string id) =>
+            Success(new { accepted = _tasks.Cancel(id), task = _tasks.Get(id) }));
 
         app.MapGet("/api/logs", (HttpRequest request) =>
         {
@@ -338,10 +395,26 @@ public sealed class WebControlServer : IAsyncDisposable
         });
 
         app.MapGet("/api/app-update", () => Success(_appUpdater.Status));
+        app.MapPut("/api/app-update/config", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<AppUpdateConfigRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            var manifestUrl = WindowsAppUpdater.NormalizeManifestUrl(body.ManifestUrl);
+            var settings = await _updateSettings(current => current with { AppUpdateManifestUrl = manifestUrl }).ConfigureAwait(false);
+            _appUpdater.ConfigureManifest(settings.AppUpdateManifestUrl);
+            return Success(_appUpdater.Status);
+        });
         app.MapPost("/api/app-update/check", async (HttpRequest request) =>
             Success(await _appUpdater.CheckAsync(request.HttpContext.RequestAborted).ConfigureAwait(false)));
         app.MapPost("/api/app-update/download", async (HttpRequest request) =>
             Success(await _appUpdater.DownloadAsync(request.HttpContext.RequestAborted).ConfigureAwait(false)));
+        app.MapPost("/api/app-update/install", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<AppUpdateInstallRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            if (!body.Confirm) throw new BadHttpRequestException("启动 Windows 安装器前必须明确确认。");
+            return Success(new { accepted = _installUpdate is not null && await _installUpdate().ConfigureAwait(false) });
+        });
         app.MapPost("/api/app-update/install-permission", () => UnsupportedOnWindows());
         app.MapPost("/api/app-control", async (HttpRequest request) =>
         {
@@ -377,10 +450,35 @@ public sealed class WebControlServer : IAsyncDisposable
             await _mediaSources.Remove(sourceId).ConfigureAwait(false);
             return Success(new { });
         });
-        app.MapPost("/api/sources/{id}/scan", async (string id) =>
+        app.MapPost("/api/sources/scan-all", async (HttpRequest request) =>
+        {
+            List<SourceScanResponse>? results = null;
+            _ = await _tasks.RunTrackedAsync("media-source-scan-all", "扫描全部媒体源", async token =>
+            {
+                var sources = _mediaSources.List();
+                results = [];
+                for (var index = 0; index < sources.Count; index++)
+                {
+                    token.ThrowIfCancellationRequested();
+                    results.Add(await _mediaSources.Scan(sources[index].Id, token).ConfigureAwait(false));
+                    _tasks.Update("media-source-scan-all", $"已扫描 {index + 1} / {sources.Count} 个来源",
+                        (int)(100d * (index + 1) / Math.Max(1, sources.Count)));
+                }
+                if (results.Any(result => result.Error is not null))
+                    throw new InvalidOperationException("一个或多个媒体源扫描失败；请查看任务与本地日志。");
+            }, request.HttpContext.RequestAborted).ConfigureAwait(false);
+            return Success(new { accepted = results is not null, results = results ?? [], task = _tasks.Get("media-source-scan-all") });
+        });
+        app.MapPost("/api/sources/{id}/scan", async (string id, HttpRequest request) =>
         {
             if (!long.TryParse(id, out var sourceId)) throw new BadHttpRequestException("媒体源 ID 不正确");
-            return Success(await _mediaSources.Scan(sourceId).ConfigureAwait(false));
+            SourceScanResponse? result = null;
+            _ = await _tasks.RunTrackedAsync($"media-source-scan-{sourceId}", $"媒体源扫描 {sourceId}", async token =>
+            {
+                result = await _mediaSources.Scan(sourceId, token).ConfigureAwait(false);
+                if (result.Error is not null) throw new InvalidOperationException(result.Error);
+            }, request.HttpContext.RequestAborted).ConfigureAwait(false);
+            return Success(new { accepted = result is not null, result, task = _tasks.Get($"media-source-scan-{sourceId}") });
         });
 
         app.MapGet("/api/settings/scan", () => Success(ToScanSettings(_getSettings(), _mediaSources.List())));
@@ -388,8 +486,10 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var body = await JsonSerializer.DeserializeAsync<ScanSettingsRequest>(request.Body, JsonOptions).ConfigureAwait(false)
                 ?? new ScanSettingsRequest();
-            if (body.MergeSameAnimeEnabled == true || body.PosterWallArrangement is not (null or "TITLE"))
-                throw new NotSupportedException("Windows 客户端当前仅支持标题排列，尚未支持同名合并。");
+            if (body.PosterWallArrangement is not null && !LibraryOrganization.ArrangementOptions.Contains(body.PosterWallArrangement))
+                throw new BadHttpRequestException("posterWallArrangement 必须是 TITLE 或 RELEASE_SEASON。");
+            if (body.EpisodeVersionSelectionPolicy is not null && body.EpisodeVersionSelectionPolicy is not ("auto_nearest" or "manual"))
+                throw new BadHttpRequestException("episodeVersionSelectionPolicy 不正确。");
             if (body.AutoScanIntervalHours is int intervalHours &&
                 !MediaSourceAutoScanScheduler.IntervalOptionsHours.Contains(intervalHours))
                 throw new BadHttpRequestException("autoScanIntervalHours 必须是 1、6、12 或 24。");
@@ -399,6 +499,9 @@ public sealed class WebControlServer : IAsyncDisposable
             {
                 AutoScanEnabled = body.AutoScanEnabled ?? current.AutoScanEnabled,
                 AutoScanIntervalHours = body.AutoScanIntervalHours ?? current.AutoScanIntervalHours,
+                MergeSameAnimeEnabled = body.MergeSameAnimeEnabled ?? current.MergeSameAnimeEnabled,
+                PosterWallArrangement = body.PosterWallArrangement ?? current.PosterWallArrangement,
+                EpisodeVersionSelectionPolicy = body.EpisodeVersionSelectionPolicy ?? current.EpisodeVersionSelectionPolicy,
                 CurrentAppMode = requestedMode ?? current.CurrentAppMode,
             }).ConfigureAwait(false);
             return Success(ToScanSettings(updated, _mediaSources.List()));
@@ -493,7 +596,12 @@ public sealed class WebControlServer : IAsyncDisposable
         });
         app.MapGet("/api/cloud-drive/run", () => Success(_cloudDriveRunner.Status));
         app.MapPost("/api/cloud-drive/run", async (HttpRequest request) =>
-            Success(await _cloudDriveRunner.RunAsync(request.HttpContext.RequestAborted).ConfigureAwait(false)));
+        {
+            _ = await _tasks.RunTrackedAsync("cloud-drive-rss", "CloudDrive/RSS 同步",
+                async token => { await _cloudDriveRunner.RunAsync(token).ConfigureAwait(false); },
+                request.HttpContext.RequestAborted).ConfigureAwait(false);
+            return Success(_cloudDriveRunner.Status);
+        });
 
         app.MapPost("/api/cloud-drive/offline", async (HttpRequest request) =>
         {
@@ -582,7 +690,77 @@ public sealed class WebControlServer : IAsyncDisposable
                     (item.OriginalTitle?.Contains(query, StringComparison.CurrentCultureIgnoreCase) ?? false) ||
                     item.ApiId.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
             }
-            return Success(ToLibraryDto(series));
+            return Success(ToLibraryDto(series, _getSettings()));
+        });
+
+        app.MapGet("/api/metadata/archive", () => Success(_bangumiArchive.Snapshot()));
+        app.MapPost("/api/metadata/archive/download", async (HttpRequest request) =>
+            Success(await _bangumiArchive.DownloadLatestAsync(cancellationToken: request.HttpContext.RequestAborted).ConfigureAwait(false)));
+        app.MapPost("/api/metadata/archive/import", async (HttpRequest request) =>
+        {
+            const long maximumRequestBytes = BangumiArchiveStore.MaxArchiveBytes + 1_048_576;
+            var requestLimit = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
+            if (requestLimit is { IsReadOnly: false }) requestLimit.MaxRequestBodySize = maximumRequestBytes;
+            if (request.ContentLength is > maximumRequestBytes)
+                throw new BadHttpRequestException("Bangumi Archive 上传超过 2 GiB 限制。", StatusCodes.Status413PayloadTooLarge);
+            var form = await request.ReadFormAsync(request.HttpContext.RequestAborted).ConfigureAwait(false);
+            var file = form.Files.GetFile("file");
+            if (file is null || file.Length is <= 0 or > BangumiArchiveStore.MaxArchiveBytes)
+                throw new BadHttpRequestException("Archive 文件必须为 1 B 至 2 GiB。", StatusCodes.Status413PayloadTooLarge);
+            await using var input = file.OpenReadStream();
+            return Success(await _bangumiArchive.ImportAsync(input, file.FileName, file.Length,
+                cancellationToken: request.HttpContext.RequestAborted).ConfigureAwait(false));
+        });
+        app.MapGet("/api/metadata/archive/search", (HttpRequest request) =>
+            Success(_bangumiArchive.Search(request.Query["query"].ToString(),
+                ParseOptionalInt(request.Query["limit"].ToString(), "limit") ?? 20)));
+
+        app.MapGet("/api/metadata/sources", () => Success((_getSettings().MediaSources ?? [])
+            .Where(source => source.RecognitionMode == "DIRECTORY")
+            .Select(source => new { source.Id, source.Name, source.ContentMode, source.Location })));
+        app.MapGet("/api/metadata/sources/{id:long}/library", (long id) =>
+        {
+            var catalog = MetadataSources().LoadCatalog(id);
+            return Success(catalog.Series.Select(ToAnimeDto).ToList());
+        });
+        app.MapGet("/api/metadata/sources/{id:long}/history", (long id) =>
+            Success(MetadataSources().MetadataHistory(id)));
+        app.MapPost("/api/metadata/sources/{id:long}/preview", async (long id, HttpRequest request) =>
+        {
+            var edits = await JsonSerializer.DeserializeAsync<List<SeriesMetadataEdit>>(request.Body, JsonOptions,
+                request.HttpContext.RequestAborted).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("元数据预览不能为空。");
+            return Success(MetadataSources().PreviewMetadata(id, edits));
+        });
+        app.MapPost("/api/metadata/sources/{id:long}/batches/{batchId}/apply", async (long id, string batchId) =>
+        {
+            var result = MetadataSources().ApplyMetadata(id, batchId);
+            if (_refreshSource is not null) await _refreshSource(id).ConfigureAwait(false);
+            return Success(result);
+        });
+        app.MapPost("/api/metadata/sources/{id:long}/batches/{batchId}/undo", async (long id, string batchId) =>
+        {
+            var result = MetadataSources().UndoMetadata(id, batchId);
+            if (_refreshSource is not null) await _refreshSource(id).ConfigureAwait(false);
+            return Success(result);
+        });
+
+        app.MapGet("/api/metadata/search", async (HttpRequest request) =>
+        {
+            var mode = request.Query["mode"].ToString().Trim().ToLowerInvariant();
+            if (mode.Length == 0) mode = "anime";
+            var year = ParseOptionalInt(request.Query["year"].ToString(), "year");
+            var season = ParseOptionalInt(request.Query["season"].ToString(), "season");
+            var search = new MetadataSearchRequest(
+                request.Query["query"].ToString(), mode,
+                request.Query["title"].ToString(), request.Query["localizedTitle"].ToString(),
+                request.Query["originalTitle"].ToString(), request.Query["alias"].Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value!).ToArray(),
+                request.Query["path"].Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value!).ToArray(),
+                request.Query["metadataTitle"].ToString(), year, season);
+            return Success(await _metadataSearch.SearchAsync(
+                search,
+                _metadataTokens.Load().Tmdb,
+                request.HttpContext.RequestAborted).ConfigureAwait(false));
         });
 
         app.MapGet("/api/metadata/bangumi/search", async (HttpRequest request) =>
@@ -660,6 +838,12 @@ public sealed class WebControlServer : IAsyncDisposable
                 request.HttpContext.RequestAborted).ConfigureAwait(false));
         });
 
+        app.MapGet("/api/metadata/tvmaze/search", async (HttpRequest request) =>
+            Success(await _tvMazeMetadata.SearchAsync(
+                request.Query["query"].ToString(),
+                ParseOptionalInt(request.Query["limit"].ToString(), "limit") ?? 10,
+                request.HttpContext.RequestAborted).ConfigureAwait(false)));
+
         app.MapGet("/api/settings/metadata", () =>
         {
             var tokens = _metadataTokens.Load();
@@ -696,7 +880,7 @@ public sealed class WebControlServer : IAsyncDisposable
 
         app.MapGet("/api/anime/{id}/poster", async (string id, HttpRequest request) =>
         {
-            var series = _getSeries().FirstOrDefault(item => item.ApiId == id)
+            var series = _getSeries().FirstOrDefault(item => item.ApiId == id || item.AlternateApiIds.Contains(id, StringComparer.Ordinal))
                 ?? throw new BadHttpRequestException("番剧不存在", StatusCodes.Status404NotFound);
             var path = await _resolvePosterPath(series, request.HttpContext.RequestAborted).ConfigureAwait(false);
             if (path is not null && File.Exists(path)) return Results.File(path, PosterContentType(path));
@@ -705,7 +889,7 @@ public sealed class WebControlServer : IAsyncDisposable
 
         app.MapGet("/api/anime/{id}", (string id) =>
         {
-            var series = _getSeries().FirstOrDefault(item => item.ApiId == id)
+            var series = _getSeries().FirstOrDefault(item => item.ApiId == id || item.AlternateApiIds.Contains(id, StringComparer.Ordinal))
                 ?? throw new BadHttpRequestException("番剧不存在", StatusCodes.Status404NotFound);
             return Success(new
             {
@@ -732,6 +916,11 @@ public sealed class WebControlServer : IAsyncDisposable
         });
 
         app.MapGet("/api/playback/status", () => Success(_getPlaybackStatus()));
+        app.MapGet("/api/playback/diagnostics", () =>
+        {
+            var diagnostics = _getPlaybackDiagnostics();
+            return Success(new { available = diagnostics is not null, diagnostics });
+        });
 
         app.MapPost("/api/playback/command", async (HttpRequest request) =>
         {
@@ -744,7 +933,10 @@ public sealed class WebControlServer : IAsyncDisposable
                 body.DeltaMs,
                 body.Speed,
                 body.SubtitleTrackId,
-                body.AudioTrackId)).ConfigureAwait(false);
+                body.AudioTrackId,
+                body.VolumePercent,
+                body.IsMuted,
+                body.VersionEpisodeId)).ConfigureAwait(false);
             return Success(status);
         });
 
@@ -938,6 +1130,9 @@ public sealed class WebControlServer : IAsyncDisposable
         }
     }
 
+    private MediaSourceRegistry MetadataSources() => _metadataSources
+        ?? throw new NotSupportedException("本机未提供可写目录元数据索引。");
+
     private static bool CanReadDirectory(string path)
     {
         try
@@ -964,7 +1159,7 @@ public sealed class WebControlServer : IAsyncDisposable
         return request.Cookies.TryGetValue("miruplay_web_token", out var cookie) && _tokens.Matches(cookie);
     }
 
-    private static object ToLibraryDto(IReadOnlyList<LibrarySeries> series)
+    private static object ToLibraryDto(IReadOnlyList<LibrarySeries> series, AppSettings settings)
     {
         var continueWatching = series
             .SelectMany(item => item.Episodes
@@ -982,7 +1177,11 @@ public sealed class WebControlServer : IAsyncDisposable
             .Take(30)
             .ToList();
         var anime = series.Select(ToAnimeDto).ToList();
-        return new { continueWatching, recentlyAdded = anime.Take(30).ToList(), allAnime = anime };
+        var sections = settings.PosterWallArrangement == "RELEASE_SEASON"
+            ? series.GroupBy(LibraryOrganization.ReleaseSeasonTitle)
+                .Select(group => new { title = (string?)group.Key, anime = group.Select(ToAnimeDto).ToList() }).ToList()
+            : [new { title = (string?)null, anime }];
+        return new { continueWatching, recentlyAdded = anime.Take(30).ToList(), allAnime = anime, sections, posterWallArrangement = settings.PosterWallArrangement };
     }
 
     private static object ToAnimeDto(LibrarySeries series) => new
@@ -1135,11 +1334,13 @@ public sealed class WebControlServer : IAsyncDisposable
         autoScanEnabled = settings.AutoScanEnabled,
         autoScanIntervalHours = settings.AutoScanIntervalHours,
         lastScanAt = sources.Count == 0 ? 0 : sources.Max(source => source.LastScanned),
-        mergeSameAnimeEnabled = false,
-        posterWallArrangement = "TITLE",
+        mergeSameAnimeEnabled = settings.MergeSameAnimeEnabled,
+        posterWallArrangement = settings.PosterWallArrangement,
+        episodeVersionSelectionPolicy = settings.EpisodeVersionSelectionPolicy,
+        episodeVersionSelectionPolicyOptions = new[] { "auto_nearest", "manual" },
         currentAppMode = settings.CurrentAppMode,
         appModeOptions = new[] { "anime", "drama" },
-        posterWallArrangementOptions = new[] { "TITLE" },
+        posterWallArrangementOptions = LibraryOrganization.ArrangementOptions,
         autoScanIntervalOptionsHours = MediaSourceAutoScanScheduler.IntervalOptionsHours,
     };
 
@@ -1259,7 +1460,10 @@ public sealed class WebControlServer : IAsyncDisposable
         long? DeltaMs = null,
         float? Speed = null,
         int? SubtitleTrackId = null,
-        int? AudioTrackId = null);
+        int? AudioTrackId = null,
+        double? VolumePercent = null,
+        bool? IsMuted = null,
+        string? VersionEpisodeId = null);
     private sealed record PlaybackSettingsRequest(
         string? EndAction = null,
         string? PreferredSubtitleLanguage = null,
@@ -1269,5 +1473,6 @@ public sealed class WebControlServer : IAsyncDisposable
         int? AutoScanIntervalHours = null,
         bool? MergeSameAnimeEnabled = null,
         string? PosterWallArrangement = null,
+        string? EpisodeVersionSelectionPolicy = null,
         string? CurrentAppMode = null);
 }

@@ -49,7 +49,7 @@ public sealed class WebControlServerTests : IDisposable
                 return Task.FromResult(sourceInfo);
             },
             _ => Task.CompletedTask,
-            _ => Task.FromResult(new SourceScanResponse(1, "Anime", 1, 0, 0)));
+            (id, _) => Task.FromResult(new SourceScanResponse(1, "Anime", 1, 0, 0)));
         using var bangumiMetadata = new BangumiMetadataClient(
             new StaticJsonHandler("""
                 { "data": [{ "id": 431767, "type": 2, "name": "Sousou no Frieren", "name_cn": "葬送的芙莉莲" }] }
@@ -60,6 +60,11 @@ public sealed class WebControlServerTests : IDisposable
                 { "results": [{ "id": 209867, "name": "Frieren", "original_name": "Sousou no Frieren" }] }
                 """),
             new Uri("https://tmdb.test/3/"));
+        using var tvMazeMetadata = new TvMazeMetadataClient(
+            new StaticJsonHandler("""
+                [{ "show": { "id": 123, "name": "Frieren", "summary": "<p>Summary</p>" } }]
+                """),
+            new Uri("https://tvmaze.test/"));
         var metadataTokens = new MetadataTokenStore(Path.Combine(_directory, "metadata-tokens.bin"));
         var rssSubscriptions = new RssSubscriptionStore(Path.Combine(_directory, "rss-subscriptions.json"));
         var cloudDriveConfig = new CloudDriveAutomationStore(Path.Combine(_directory, "cloud-drive.json"));
@@ -77,6 +82,9 @@ public sealed class WebControlServerTests : IDisposable
         var openObserveLogs = new OpenObserveLogService(
             localLogs,
             new OpenObserveTokenStore(Path.Combine(_directory, "openobserve-token.bin")));
+        await using var tasks = new HeadlessTaskScheduler(storePath: Path.Combine(_directory, "tasks.json"));
+        string? requestedAppControl = null;
+        var appInstallRequested = false;
         var cloudDriveClient = new CloudDriveGrpcClient(
             (_, username, password, _) =>
             {
@@ -111,6 +119,8 @@ public sealed class WebControlServerTests : IDisposable
                 Assert.Equal("/Anime/Downloads", target);
                 return Task.CompletedTask;
             });
+        var appUpdaterClient = new HttpClient(new StaticJsonHandler("{}"));
+        var appUpdater = new WindowsAppUpdater(httpClient: appUpdaterClient);
         await using var server = new WebControlServer(
             port,
             tokens,
@@ -121,7 +131,8 @@ public sealed class WebControlServerTests : IDisposable
                 SubtitleTracks: [new PlaybackSubtitleTrack(7, "zh-CN", "简体中文", "subrip", true, "episode.zh-CN.srt", true)],
                 SelectedSubtitleTrackId: 7,
                 AudioTracks: [new MpvAudioTrack(2, "jpn", "日语", "aac", false, true)],
-                SelectedAudioTrackId: 2),
+                SelectedAudioTrackId: 2,
+                NextEpisodeVersions: [new PlaybackVersionChoice("episode-version-2", "Show.S01E02.1080p")]),
             (episodeId, positionMs) =>
             {
                 requestedEpisode = episodeId;
@@ -148,6 +159,7 @@ public sealed class WebControlServerTests : IDisposable
             listenOnAnyIp: false,
             bangumiMetadata: bangumiMetadata,
             tmdbMetadata: tmdbMetadata,
+            tvMazeMetadata: tvMazeMetadata,
             metadataTokens: metadataTokens,
             rssSubscriptions: rssSubscriptions,
             cloudDriveConfig: cloudDriveConfig,
@@ -157,8 +169,17 @@ public sealed class WebControlServerTests : IDisposable
             rssProcessed: rssProcessed,
             localLogs: localLogs,
             openObserveLogs: openObserveLogs,
+            appUpdater: appUpdater,
+            tasks: tasks,
+            appControl: action => { requestedAppControl = action; return Task.FromResult(true); },
+            installUpdate: () => { appInstallRequested = true; return Task.FromResult(true); },
             resolvePosterPath: (value, _) => Task.FromResult<string?>(
-                value.ApiId == series.ApiId ? posterPath : null));
+                value.ApiId == series.ApiId ? posterPath : null),
+            getPlaybackDiagnostics: () => new MpvNativeDiagnostics(
+                12345,
+                true,
+                [new MpvNativePropertySample("vo", "gpu-next")],
+                [new MpvNativeLogMessage(12340, "vo", 20, "plain message")]));
         await server.StartAsync();
 
         using var unauthorized = new HttpClient { BaseAddress = new Uri($"http://localhost:{port}") };
@@ -195,12 +216,32 @@ public sealed class WebControlServerTests : IDisposable
         Assert.True(capabilities.GetProperty("logUpload").GetBoolean());
         Assert.False(capabilities.GetProperty("appUpdate").GetBoolean());
         Assert.False(capabilities.GetProperty("formatAwareToneMapping").GetBoolean());
-        Assert.False(capabilities.GetProperty("backgroundTasks").GetBoolean());
+        Assert.True(capabilities.GetProperty("backgroundTasks").GetBoolean());
+        Assert.True(capabilities.GetProperty("appUpdateInstall").GetBoolean());
         var logs = await ReadJson(await client.GetAsync("/api/logs?limit=1"));
         Assert.Equal(1, logs.RootElement.GetProperty("data").GetProperty("records").GetArrayLength());
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/tasks")).StatusCode);
+        var cancelStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Assert.True(tasks.TryStart("cancel-from-api", "Cancel test", async token =>
+        {
+            cancelStarted.SetResult();
+            await Task.Delay(Timeout.InfiniteTimeSpan, token);
+        }));
+        await cancelStarted.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        var cancelTask = await ReadJson(await client.PostAsync("/api/tasks/cancel-from-api/cancel", null));
+        Assert.True(cancelTask.RootElement.GetProperty("data").GetProperty("accepted").GetBoolean());
+        await Task.Delay(25);
+        Assert.Equal("CANCELED", tasks.Get("cancel-from-api")?.State);
         var appControl = await ReadJson(await client.PostAsJsonAsync("/api/app-control", new { action = "restart" }));
-        Assert.False(appControl.RootElement.GetProperty("data").GetProperty("accepted").GetBoolean());
+        Assert.True(appControl.RootElement.GetProperty("data").GetProperty("accepted").GetBoolean());
+        Assert.Equal("restart", requestedAppControl);
+        var saveUpdateConfig = await ReadJson(await client.PutAsJsonAsync("/api/app-update/config", new { manifestUrl = "https://updates.example.test/manifest.json" }));
+        Assert.Equal("https://updates.example.test/manifest.json", saveUpdateConfig.RootElement.GetProperty("data").GetProperty("manifestUrl").GetString());
+        var installWithoutConfirm = await client.PostAsJsonAsync("/api/app-update/install", new { confirm = false });
+        Assert.Equal(HttpStatusCode.BadRequest, installWithoutConfirm.StatusCode);
+        var installUpdate = await ReadJson(await client.PostAsJsonAsync("/api/app-update/install", new { confirm = true }));
+        Assert.True(installUpdate.RootElement.GetProperty("data").GetProperty("accepted").GetBoolean());
+        Assert.True(appInstallRequested);
         var addSource = await client.PostAsJsonAsync("/api/sources", new
         {
             name = "Anime",
@@ -341,6 +382,8 @@ public sealed class WebControlServerTests : IDisposable
         var candidate = Assert.Single(metadataSearch.RootElement.GetProperty("data").EnumerateArray());
         Assert.Equal(431767, candidate.GetProperty("id").GetInt32());
         Assert.Equal("Bangumi", candidate.GetProperty("provider").GetString());
+        var tvMazeSearch = await ReadJson(await client.GetAsync("/api/metadata/tvmaze/search?query=Frieren"));
+        Assert.Equal(123, Assert.Single(tvMazeSearch.RootElement.GetProperty("data").EnumerateArray()).GetProperty("id").GetInt32());
         var invalidMetadataSearch = await client.GetAsync("/api/metadata/bangumi/search?query=%20");
         Assert.Equal(HttpStatusCode.BadRequest, invalidMetadataSearch.StatusCode);
         var metadataSettings = await ReadJson(await client.GetAsync("/api/settings/metadata"));
@@ -400,7 +443,16 @@ public sealed class WebControlServerTests : IDisposable
         Assert.Equal("第 1 集 · 测试分集", statusData.GetProperty("title").GetString());
         Assert.Equal("简体中文（外挂）", Assert.Single(statusData.GetProperty("subtitleTracks").EnumerateArray()).GetProperty("displayLabel").GetString());
         Assert.Equal(2, statusData.GetProperty("selectedAudioTrackId").GetInt32());
+        var versionChoice = Assert.Single(statusData.GetProperty("nextEpisodeVersions").EnumerateArray());
+        Assert.Equal("episode-version-2", versionChoice.GetProperty("episodeId").GetString());
+        Assert.Equal("Show.S01E02.1080p", versionChoice.GetProperty("versionLabel").GetString());
         Assert.Equal("日语", Assert.Single(statusData.GetProperty("audioTracks").EnumerateArray()).GetProperty("displayLabel").GetString());
+        var diagnostics = await ReadJson(await client.GetAsync("/api/playback/diagnostics"));
+        var diagnosticsData = diagnostics.RootElement.GetProperty("data");
+        Assert.True(diagnosticsData.GetProperty("available").GetBoolean());
+        Assert.True(diagnosticsData.GetProperty("diagnostics").GetProperty("surfaceAttached").GetBoolean());
+        Assert.Equal("gpu-next", Assert.Single(diagnosticsData.GetProperty("diagnostics").GetProperty("properties").EnumerateArray()).GetProperty("value").GetString());
+        Assert.Equal("plain message", Assert.Single(diagnosticsData.GetProperty("diagnostics").GetProperty("recentLogs").EnumerateArray()).GetProperty("text").GetString());
         var subtitleCommand = await client.PostAsJsonAsync("/api/playback/command", new
         {
             command = "subtitle",
@@ -416,6 +468,25 @@ public sealed class WebControlServerTests : IDisposable
         });
         Assert.Equal(HttpStatusCode.OK, audioCommand.StatusCode);
         Assert.Equal(new PlaybackControlCommand("audio", AudioTrackId: 2), requestedCommand);
+
+        var scanAll = await client.PostAsync("/api/sources/scan-all", null);
+        Assert.Equal(HttpStatusCode.OK, scanAll.StatusCode);
+        var allScansResponse = await ReadJson(scanAll);
+        var allScansData = allScansResponse.RootElement.GetProperty("data");
+        var allScans = Assert.Single(allScansData.GetProperty("results").EnumerateArray());
+        Assert.True(allScansData.GetProperty("accepted").GetBoolean());
+        Assert.Equal(1, allScans.GetProperty("sourceId").GetInt64());
+        Assert.Equal(1, allScans.GetProperty("episodesFound").GetInt32());
+
+        var volumeCommand = await client.PostAsJsonAsync("/api/playback/command", new { command = "set_volume", volumePercent = 47.5 });
+        Assert.Equal(HttpStatusCode.OK, volumeCommand.StatusCode);
+        Assert.Equal(new PlaybackControlCommand("set_volume", VolumePercent: 47.5), requestedCommand);
+        var muteCommand = await client.PostAsJsonAsync("/api/playback/command", new { command = "set_mute", isMuted = true });
+        Assert.Equal(HttpStatusCode.OK, muteCommand.StatusCode);
+        Assert.Equal(new PlaybackControlCommand("set_mute", IsMuted: true), requestedCommand);
+        var nextCommand = await client.PostAsJsonAsync("/api/playback/command", new { command = "next", versionEpisodeId = "episode-version-2" });
+        Assert.Equal(HttpStatusCode.OK, nextCommand.StatusCode);
+        Assert.Equal(new PlaybackControlCommand("next", VersionEpisodeId: "episode-version-2"), requestedCommand);
 
         var missingCommand = await client.PostAsJsonAsync("/api/playback/command", new { deltaMs = 1_000 });
         Assert.Equal(HttpStatusCode.BadRequest, missingCommand.StatusCode);
@@ -449,11 +520,11 @@ public sealed class WebControlServerTests : IDisposable
         Assert.Equal(HttpStatusCode.NotImplemented, unsupportedToneMapping.StatusCode);
 
         var updateStatus = await ReadJson(await client.GetAsync("/api/app-update"));
-        Assert.False(updateStatus.RootElement.GetProperty("data").GetProperty("supported").GetBoolean());
+        Assert.True(updateStatus.RootElement.GetProperty("data").GetProperty("supported").GetBoolean());
         var updateCheck = await ReadJson(await client.PostAsync("/api/app-update/check", null));
         Assert.False(updateCheck.RootElement.GetProperty("data").GetProperty("updateAvailable").GetBoolean());
         var updateDownload = await ReadJson(await client.PostAsync("/api/app-update/download", null));
-        Assert.Contains("尚未配置", updateDownload.RootElement.GetProperty("data").GetProperty("lastError").GetString(), StringComparison.Ordinal);
+        Assert.Contains("尚未获取可用更新", updateDownload.RootElement.GetProperty("data").GetProperty("lastError").GetString(), StringComparison.Ordinal);
 
         foreach (var (method, path) in new (HttpMethod Method, string Path)[]
         {
@@ -487,8 +558,21 @@ public sealed class WebControlServerTests : IDisposable
         {
             autoScanEnabled = true,
             autoScanIntervalHours = 12,
+            mergeSameAnimeEnabled = true,
+            posterWallArrangement = "RELEASE_SEASON",
+            episodeVersionSelectionPolicy = "manual",
         }));
         Assert.True(settings.AutoScanEnabled);
+        Assert.True(settings.MergeSameAnimeEnabled);
+        Assert.Equal("RELEASE_SEASON", settings.PosterWallArrangement);
+        Assert.Equal("manual", settings.EpisodeVersionSelectionPolicy);
+        Assert.True(automaticScan.RootElement.GetProperty("data").GetProperty("mergeSameAnimeEnabled").GetBoolean());
+        Assert.Equal("RELEASE_SEASON", automaticScan.RootElement.GetProperty("data").GetProperty("posterWallArrangement").GetString());
+        Assert.Equal("manual", automaticScan.RootElement.GetProperty("data").GetProperty("episodeVersionSelectionPolicy").GetString());
+        Assert.Equal(["auto_nearest", "manual"], automaticScan.RootElement.GetProperty("data").GetProperty("episodeVersionSelectionPolicyOptions")
+            .EnumerateArray().Select(item => item.GetString()!).ToArray());
+        Assert.Equal(["TITLE", "RELEASE_SEASON"], automaticScan.RootElement.GetProperty("data").GetProperty("posterWallArrangementOptions")
+            .EnumerateArray().Select(item => item.GetString()!).ToArray());
         Assert.Equal(12, settings.AutoScanIntervalHours);
         Assert.True(automaticScan.RootElement.GetProperty("data").GetProperty("autoScanEnabled").GetBoolean());
         Assert.Equal(12, automaticScan.RootElement.GetProperty("data").GetProperty("autoScanIntervalHours").GetInt32());
@@ -496,6 +580,14 @@ public sealed class WebControlServerTests : IDisposable
             [1, 6, 12, 24],
             automaticScan.RootElement.GetProperty("data").GetProperty("autoScanIntervalOptionsHours")
                 .EnumerateArray().Select(item => item.GetInt32()).ToArray());
+        var invalidArrangement = await client.PutAsJsonAsync("/api/settings/scan", new { posterWallArrangement = "scan_time" });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidArrangement.StatusCode);
+        Assert.Equal("RELEASE_SEASON", settings.PosterWallArrangement);
+        var seasonalLibrary = await ReadJson(await client.GetAsync("/api/library"));
+        Assert.NotEmpty(seasonalLibrary.RootElement.GetProperty("data").GetProperty("sections").EnumerateArray());
+        var invalidVersionPolicy = await client.PutAsJsonAsync("/api/settings/scan", new { episodeVersionSelectionPolicy = "random" });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidVersionPolicy.StatusCode);
+        Assert.Equal("manual", settings.EpisodeVersionSelectionPolicy);
         var invalidAutomaticScan = await client.PutAsJsonAsync("/api/settings/scan", new { autoScanIntervalHours = 2 });
         Assert.Equal(HttpStatusCode.BadRequest, invalidAutomaticScan.StatusCode);
         var concurrentPlaybackUpdate = client.PutAsJsonAsync("/api/settings/playback", new
