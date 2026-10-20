@@ -204,11 +204,11 @@ const I18N = {
   "en-GB": "Loading…"
  },
  "lib.continue": {
-  "zh-CN": "继续观看",
-  "zh-TW": "繼續觀看",
-  "zh-HK": "繼續觀看",
-  "en-US": "Continue watching",
-  "en-GB": "Continue watching"
+  "zh-CN": "继续",
+  "zh-TW": "繼續",
+  "zh-HK": "繼續",
+  "en-US": "Continue",
+  "en-GB": "Continue"
  },
  "lib.items": {
   "zh-CN": "{0} 项",
@@ -6663,6 +6663,398 @@ const I18N = {
   "zh-HK": "CloudDrive2 {0} ({1})。",
   "en-US": "CloudDrive2 {0} ({1}).",
   "en-GB": "CloudDrive2 {0} ({1})."
+ },
+ "cd2.noOrganizePerms2": {
+  "zh-CN": "CloudDrive2 API Token 缺少媒体整理所需的列表、建目录或移动权限。",
+  "zh-TW": "CloudDrive2 API Token 缺少媒體整理所需的列表、建目錄或移動權限。",
+  "zh-HK": "CloudDrive2 API Token 缺少媒體整理所需嘅列表、建目錄或移動權限。",
+  "en-US": "CloudDrive2 API token lacks the list/mkdir/move permissions for organizing.",
+  "en-GB": "CloudDrive2 API token lacks the list/mkdir/move permissions for organising."
+ },
+ "cd2.dirsNotRoot2": {
+  "zh-CN": "CloudDrive2 下载目录和整理目录不能是根目录。",
+  "zh-TW": "CloudDrive2 下載目錄和整理目錄不能是根目錄。",
+  "zh-HK": "CloudDrive2 下載目錄同整理目錄不能係根目錄。",
+  "en-US": "CloudDrive2 download and organize directories must not be the root.",
+  "en-GB": "CloudDrive2 download and organise directories must not be the root."
+ },
+ "cd2.organizeOutside2": {
+  "zh-CN": "CloudDrive2 整理目录超出 Token 根目录。",
+  "zh-TW": "CloudDrive2 整理目錄超出 Token 根目錄。",
+  "zh-HK": "CloudDrive2 整理目錄超出 Token 根目錄。",
+  "en-US": "CloudDrive2 organize directory escapes the token root.",
+  "en-GB": "CloudDrive2 organise directory escapes the token root."
+ },
+ "cd2.organizeInInbox2": {
+  "zh-CN": "CloudDrive2 整理目录不能位于下载目录内部。",
+  "zh-TW": "CloudDrive2 整理目錄不能位於下載目錄內部。",
+  "zh-HK": "CloudDrive2 整理目錄不能位於下載目錄內部。",
+  "en-US": "CloudDrive2 organize directory must not be inside the download directory.",
+  "en-GB": "CloudDrive2 organise directory must not be inside the download directory."
+ },
+ "cd2.hasTraversal": {
+  "zh-CN": "CloudDrive2 目录包含路径遍历。",
+  "zh-TW": "CloudDrive2 目錄包含路徑遍歷。",
+  "zh-HK": "CloudDrive2 目錄包含路徑遍歷。",
+  "en-US": "CloudDrive2 directory contains path traversal.",
+  "en-GB": "CloudDrive2 directory contains path traversal."
+ },
+ "meta.batchSize": {
+  "zh-CN": "每次元数据预览需要 1 至 200 部作品。",
+  "zh-TW": "每次元數據預覽需要 1 至 200 部作品。",
+  "zh-HK": "每次元數據預覽需要 1 至 200 部作品。",
+  "en-US": "Each metadata preview needs 1 to 200 works.",
+  "en-GB": "Each metadata preview needs 1 to 200 works."
+ },
+ "meta.noEmptyItems": {
+  "zh-CN": "元数据预览不能包含空条目。",
+  "zh-TW": "元數據預覽不能包含空條目。",
+  "zh-HK": "元數據預覽不能包含空條目。",
+  "en-US": "Metadata preview must not contain empty items.",
+  "en-GB": "Metadata preview must not contain empty items."
+ },
+ "meta.dupWorks": {
+  "zh-CN": "元数据预览包含重复作品。",
+  "zh-TW": "元數據預覽包含重複作品。",
+  "zh-HK": "元數據預覽包含重複作品。",
+  "en-US": "Metadata preview contains duplicate works.",
+  "en-GB": "Metadata preview contains duplicate works."
+ },
+ "meta.targetGone": {
+  "zh-CN": "元数据目标作品已不存在，请重新扫描后预览。",
+  "zh-TW": "元數據目標作品已不存在，請重新掃描後預覽。",
+  "zh-HK": "元數據目標作品已不存在，請重新掃描後預覽。",
+  "en-US": "Metadata target work is gone; rescan and preview again.",
+  "en-GB": "Metadata target work is gone; rescan and preview again."
+ },
+ "meta.previewGone": {
+  "zh-CN": "元数据预览不存在或已过期。",
+  "zh-TW": "元數據預覽不存在或已過期。",
+  "zh-HK": "元數據預覽不存在或已過期。",
+  "en-US": "Metadata preview missing or expired.",
+  "en-GB": "Metadata preview missing or expired."
+ },
+ "meta.batchChanged": {
+  "zh-CN": "元数据批次状态已改变，请刷新后重试。",
+  "zh-TW": "元數據批次狀態已改變，請重新整理後重試。",
+  "zh-HK": "元數據批次狀態已改變，請重新整理後重試。",
+  "en-US": "Metadata batch changed; refresh and retry.",
+  "en-GB": "Metadata batch changed; refresh and retry."
+ },
+ "meta.previewExpired": {
+  "zh-CN": "元数据预览已超过 24 小时，请重新预览。",
+  "zh-TW": "元數據預覽已超過 24 小時，請重新預覽。",
+  "zh-HK": "元數據預覽已超過 24 小時，請重新預覽。",
+  "en-US": "Metadata preview is older than 24 hours; preview again.",
+  "en-GB": "Metadata preview is older than 24 hours; preview again."
+ },
+ "meta.concurrentEdit": {
+  "zh-CN": "元数据已被其他操作修改，请重新预览，避免覆盖新修改。",
+  "zh-TW": "元數據已被其他操作修改，請重新預覽，避免覆蓋新修改。",
+  "zh-HK": "元數據已被其他操作修改，請重新預覽，避免覆蓋新修改。",
+  "en-US": "Metadata was modified elsewhere; preview again to avoid overwriting.",
+  "en-GB": "Metadata was modified elsewhere; preview again to avoid overwriting."
+ },
+ "meta.workRemoved": {
+  "zh-CN": "作品已从目录移除，请重新扫描。",
+  "zh-TW": "作品已從目錄移除，請重新掃描。",
+  "zh-HK": "作品已從目錄移除，請重新掃描。",
+  "en-US": "Work removed from directory; rescan.",
+  "en-GB": "Work removed from directory; rescan."
+ },
+ "meta.scanChanged": {
+  "zh-CN": "扫描元数据已改变，请重新预览。",
+  "zh-TW": "掃描元數據已改變，請重新預覽。",
+  "zh-HK": "掃描元數據已改變，請重新預覽。",
+  "en-US": "Scanned metadata changed; preview again.",
+  "en-GB": "Scanned metadata changed; preview again."
+ },
+ "meta.batchEmpty": {
+  "zh-CN": "元数据批次为空。",
+  "zh-TW": "元數據批次為空。",
+  "zh-HK": "元數據批次為空。",
+  "en-US": "Metadata batch empty.",
+  "en-GB": "Metadata batch empty."
+ },
+ "meta.fieldLimits": {
+  "zh-CN": "元数据字段为空或超过长度限制。",
+  "zh-TW": "元數據欄位為空或超過長度限制。",
+  "zh-HK": "元數據欄位為空或超過長度限制。",
+  "en-US": "Metadata field empty or over length limit.",
+  "en-GB": "Metadata field empty or over length limit."
+ },
+ "lib.displayEpInt": {
+  "zh-CN": "第 {0:0} 集",
+  "zh-TW": "第 {0:0} 集",
+  "zh-HK": "第 {0:0} 集",
+  "en-US": "Ep {0:0}",
+  "en-GB": "Ep {0:0}"
+ },
+ "lib.displayEpFloat": {
+  "zh-CN": "第 {0:0.##} 集",
+  "zh-TW": "第 {0:0.##} 集",
+  "zh-HK": "第 {0:0.##} 集",
+  "en-US": "Ep {0:0.##}",
+  "en-GB": "Ep {0:0.##}"
+ },
+ "lib.versionCount": {
+  "zh-CN": "{0} 个版本",
+  "zh-TW": "{0} 個版本",
+  "zh-HK": "{0} 個版本",
+  "en-US": "{0} versions",
+  "en-GB": "{0} versions"
+ },
+ "lib.season1": {
+  "zh-CN": "第 1 季",
+  "zh-TW": "第 1 季",
+  "zh-HK": "第 1 季",
+  "en-US": "Season 1",
+  "en-GB": "Season 1"
+ },
+ "lib.seasonN": {
+  "zh-CN": "第 {0} 季",
+  "zh-TW": "第 {0} 季",
+  "zh-HK": "第 {0} 季",
+  "en-US": "Season {0}",
+  "en-GB": "Season {0}"
+ },
+ "lib.watchedCount": {
+  "zh-CN": "{0}/{1} 集已看",
+  "zh-TW": "{0}/{1} 集已看",
+  "zh-HK": "{0}/{1} 集已睇",
+  "en-US": "{0}/{1} watched",
+  "en-GB": "{0}/{1} watched"
+ },
+ "lib.minutes": {
+  "zh-CN": "{0} 分钟",
+  "zh-TW": "{0} 分鐘",
+  "zh-HK": "{0} 分鐘",
+  "en-US": "{0} min",
+  "en-GB": "{0} mins"
+ },
+ "lib.play": {
+  "zh-CN": "播放",
+  "zh-TW": "播放",
+  "zh-HK": "播放",
+  "en-US": "Play",
+  "en-GB": "Play"
+ },
+ "dav.notDirectory": {
+  "zh-CN": "WebDAV 地址不是可读取的目录。",
+  "zh-TW": "WebDAV 位址不是可讀取的目錄。",
+  "zh-HK": "WebDAV 位址唔係可讀取嘅目錄。",
+  "en-US": "WebDAV address is not a readable directory.",
+  "en-GB": "WebDAV address is not a readable directory."
+ },
+ "dav.tooDeep": {
+  "zh-CN": "WebDAV 目录层级超过 64 层限制。",
+  "zh-TW": "WebDAV 目錄層級超過 64 層限制。",
+  "zh-HK": "WebDAV 目錄層級超過 64 層限制。",
+  "en-US": "WebDAV directory depth exceeds the 64-level limit.",
+  "en-GB": "WebDAV directory depth exceeds the 64-level limit."
+ },
+ "dav.tooManyEntries": {
+  "zh-CN": "WebDAV 目录条目数超过 100000 限制。",
+  "zh-TW": "WebDAV 目錄項目數超過 100000 限制。",
+  "zh-HK": "WebDAV 目錄項目數超過 100000 限制。",
+  "en-US": "WebDAV directory exceeds the 100000-entry limit.",
+  "en-GB": "WebDAV directory exceeds the 100000-entry limit."
+ },
+ "dav.tooManyFiles": {
+  "zh-CN": "WebDAV 目录文件数超过 100000 限制。",
+  "zh-TW": "WebDAV 目錄檔案數超過 100000 限制。",
+  "zh-HK": "WebDAV 目錄檔案數超過 100000 限制。",
+  "en-US": "WebDAV directory exceeds the 100000-file limit.",
+  "en-GB": "WebDAV directory exceeds the 100000-file limit."
+ },
+ "dav.nfoTooLarge": {
+  "zh-CN": "远程 NFO 超过 4 MiB 限制。",
+  "zh-TW": "遠端 NFO 超過 4 MiB 限制。",
+  "zh-HK": "遠端 NFO 超過 4 MiB 限制。",
+  "en-US": "Remote NFO exceeds the 4 MiB limit.",
+  "en-GB": "Remote NFO exceeds the 4 MiB limit."
+ },
+ "dav.outsideRoot": {
+  "zh-CN": "播放地址不属于该 WebDAV 来源。",
+  "zh-TW": "播放位址不屬於該 WebDAV 來源。",
+  "zh-HK": "播放位址唔屬於該 WebDAV 來源。",
+  "en-US": "Playback address is outside this WebDAV source.",
+  "en-GB": "Playback address is outside this WebDAV source."
+ },
+ "dav.badAuth": {
+  "zh-CN": "WebDAV 用户名或密码不正确。",
+  "zh-TW": "WebDAV 使用者名稱或密碼不正確。",
+  "zh-HK": "WebDAV 用戶名或密碼不正確。",
+  "en-US": "WebDAV username or password incorrect.",
+  "en-GB": "WebDAV username or password incorrect."
+ },
+ "dav.badXml": {
+  "zh-CN": "WebDAV 目录响应不是有效 XML。",
+  "zh-TW": "WebDAV 目錄回應不是有效 XML。",
+  "zh-HK": "WebDAV 目錄回應唔係有效 XML。",
+  "en-US": "WebDAV directory response is not valid XML.",
+  "en-GB": "WebDAV directory response is not valid XML."
+ },
+ "dav.escapedPath": {
+  "zh-CN": "WebDAV 目录响应包含来源之外的路径。",
+  "zh-TW": "WebDAV 目錄回應包含來源之外的路徑。",
+  "zh-HK": "WebDAV 目錄回應包含來源之外嘅路徑。",
+  "en-US": "WebDAV directory response escapes the source root.",
+  "en-GB": "WebDAV directory response escapes the source root."
+ },
+ "dav.unsafeSegment": {
+  "zh-CN": "WebDAV 目录响应包含不安全的路径段。",
+  "zh-TW": "WebDAV 目錄回應包含不安全的路徑段。",
+  "zh-HK": "WebDAV 目錄回應包含唔安全嘅路徑段。",
+  "en-US": "WebDAV directory response has unsafe path segments.",
+  "en-GB": "WebDAV directory response has unsafe path segments."
+ },
+ "obs.decryptFailed": {
+  "zh-CN": "OpenObserve 令牌无法解密。",
+  "zh-TW": "OpenObserve 權杖無法解密。",
+  "zh-HK": "OpenObserve 權杖無法解密。",
+  "en-US": "OpenObserve token undecryptable.",
+  "en-GB": "OpenObserve token undecryptable."
+ },
+ "obs.badLength": {
+  "zh-CN": "OpenObserve 令牌长度无效。",
+  "zh-TW": "OpenObserve 權杖長度無效。",
+  "zh-HK": "OpenObserve 權杖長度無效。",
+  "en-US": "OpenObserve token length invalid.",
+  "en-GB": "OpenObserve token length invalid."
+ },
+ "obs.disabled": {
+  "zh-CN": "OpenObserve 日志上报未启用。",
+  "zh-TW": "OpenObserve 日誌上報未啟用。",
+  "zh-HK": "OpenObserve 日誌上報未啟用。",
+  "en-US": "OpenObserve log upload disabled.",
+  "en-GB": "OpenObserve log upload disabled."
+ },
+ "obs.noToken": {
+  "zh-CN": "OpenObserve 令牌尚未配置。",
+  "zh-TW": "OpenObserve 權杖尚未設定。",
+  "zh-HK": "OpenObserve 權杖尚未設定。",
+  "en-US": "OpenObserve token not configured.",
+  "en-GB": "OpenObserve token not configured."
+ },
+ "obs.noPending": {
+  "zh-CN": "没有待上报日志。",
+  "zh-TW": "沒有待上報日誌。",
+  "zh-HK": "沒有待上報日誌。",
+  "en-US": "No pending logs.",
+  "en-GB": "No pending logs."
+ },
+ "obs.uploadFailed": {
+  "zh-CN": "OpenObserve 上报失败：{0}",
+  "zh-TW": "OpenObserve 上報失敗：{0}",
+  "zh-HK": "OpenObserve 上報失敗：{0}",
+  "en-US": "OpenObserve upload failed: {0}",
+  "en-GB": "OpenObserve upload failed: {0}"
+ },
+ "obs.uploaded": {
+  "zh-CN": "已上报 {0} 条日志。",
+  "zh-TW": "已上報 {0} 條日誌。",
+  "zh-HK": "已上報 {0} 條日誌。",
+  "en-US": "Uploaded {0} logs.",
+  "en-GB": "Uploaded {0} logs."
+ },
+ "obs.timeout": {
+  "zh-CN": "OpenObserve 上报超时。",
+  "zh-TW": "OpenObserve 上報逾時。",
+  "zh-HK": "OpenObserve 上報逾時。",
+  "en-US": "OpenObserve upload timed out.",
+  "en-GB": "OpenObserve upload timed out."
+ },
+ "obs.badUrl": {
+  "zh-CN": "OpenObserve 地址必须是无凭据、查询或片段的 HTTP(S) 地址。",
+  "zh-TW": "OpenObserve 位址必須是無憑證、查詢或片段的 HTTP(S) 位址。",
+  "zh-HK": "OpenObserve 位址必須是無憑證、查詢或片段嘅 HTTP(S) 位址。",
+  "en-US": "OpenObserve endpoint must be an HTTP(S) address without credentials, query or fragment.",
+  "en-GB": "OpenObserve endpoint must be an HTTP(S) address without credentials, query or fragment."
+ },
+ "obs.badStream": {
+  "zh-CN": "OpenObserve stream 名称无效。",
+  "zh-TW": "OpenObserve stream 名稱無效。",
+  "zh-HK": "OpenObserve stream 名稱無效。",
+  "en-US": "OpenObserve stream name invalid.",
+  "en-GB": "OpenObserve stream name invalid."
+ },
+ "nfo.noRoot2": {
+  "zh-CN": "媒体目录不存在：{0}",
+  "zh-TW": "媒體目錄不存在：{0}",
+  "zh-HK": "媒體目錄不存在：{0}",
+  "en-US": "Media directory missing: {0}",
+  "en-GB": "Media directory missing: {0}"
+ },
+ "nfo.badBackup": {
+  "zh-CN": "NFO 备份后缀无效。",
+  "zh-TW": "NFO 備份後綴無效。",
+  "zh-HK": "NFO 備份後綴無效。",
+  "en-US": "NFO backup suffix invalid.",
+  "en-GB": "NFO backup suffix invalid."
+ },
+ "nfo.noRoot": {
+  "zh-CN": "NFO 缺少根节点。",
+  "zh-TW": "NFO 缺少根節點。",
+  "zh-HK": "NFO 缺少根節點。",
+  "en-US": "NFO misses root node.",
+  "en-GB": "NFO misses root node."
+ },
+ "nfo.notEpisode": {
+  "zh-CN": "NFO 根节点不是 episodedetails。",
+  "zh-TW": "NFO 根節點不是 episodedetails。",
+  "zh-HK": "NFO 根節點唔係 episodedetails。",
+  "en-US": "NFO root node is not episodedetails.",
+  "en-GB": "NFO root node is not episodedetails."
+ },
+ "nfo.notShow": {
+  "zh-CN": "NFO 根节点不是 tvshow。",
+  "zh-TW": "NFO 根節點不是 tvshow。",
+  "zh-HK": "NFO 根節點唔係 tvshow。",
+  "en-US": "NFO root node is not tvshow.",
+  "en-GB": "NFO root node is not tvshow."
+ },
+ "nfo.escaped": {
+  "zh-CN": "NFO 路径超出媒体来源根目录。",
+  "zh-TW": "NFO 路徑超出媒體來源根目錄。",
+  "zh-HK": "NFO 路徑超出媒體來源根目錄。",
+  "en-US": "NFO path escapes the media source root.",
+  "en-GB": "NFO path escapes the media source root."
+ },
+ "nfo.badDir": {
+  "zh-CN": "NFO 目录无效。",
+  "zh-TW": "NFO 目錄無效。",
+  "zh-HK": "NFO 目錄無效。",
+  "en-US": "NFO directory invalid.",
+  "en-GB": "NFO directory invalid."
+ },
+ "nfo.missing": {
+  "zh-CN": "NFO 文件不存在。",
+  "zh-TW": "NFO 檔案不存在。",
+  "zh-HK": "NFO 檔案不存在。",
+  "en-US": "NFO file missing.",
+  "en-GB": "NFO file missing."
+ },
+ "nfo.tooLarge": {
+  "zh-CN": "NFO 文件过大。",
+  "zh-TW": "NFO 檔案過大。",
+  "zh-HK": "NFO 檔案過大。",
+  "en-US": "NFO file too large.",
+  "en-GB": "NFO file too large."
+ },
+ "nfo.badXml": {
+  "zh-CN": "NFO 不是有效的安全 XML 文档。",
+  "zh-TW": "NFO 不是有效的安全 XML 文件。",
+  "zh-HK": "NFO 唔係有效嘅安全 XML 文件。",
+  "en-US": "NFO is not a valid safe XML document.",
+  "en-GB": "NFO is not a valid safe XML document."
+ },
+ "nfo.noSymlink": {
+  "zh-CN": "NFO 路径不能经过符号链接或联接点。",
+  "zh-TW": "NFO 路徑不能經過符號連結或連結點。",
+  "zh-HK": "NFO 路徑不能經過符號連結或連結點。",
+  "en-US": "NFO paths must not pass through symlinks or junctions.",
+  "en-GB": "NFO paths must not pass through symlinks or junctions."
  }
 };
 let currentLocale = 'zh-CN';

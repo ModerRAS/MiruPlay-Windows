@@ -14,10 +14,10 @@ public sealed partial class DirectoryLibraryIndex
 {
     public MetadataBatch PreviewMetadata(long sourceId, string catalogRoot, IReadOnlyList<SeriesMetadataEdit> edits)
     {
-        if (edits.Count is < 1 or > 200) throw new ArgumentException("每次元数据预览需要 1 至 200 部作品。", nameof(edits));
-        if (edits.Any(item => item is null || item.Metadata is null)) throw new ArgumentException("元数据预览不能包含空条目。", nameof(edits));
+        if (edits.Count is < 1 or > 200) throw new ArgumentException(AppStrings.Get("meta.batchSize"), nameof(edits));
+        if (edits.Any(item => item is null || item.Metadata is null)) throw new ArgumentException(AppStrings.Get("meta.noEmptyItems"), nameof(edits));
         if (edits.Select(item => item.SeriesId).Distinct(StringComparer.Ordinal).Count() != edits.Count)
-            throw new ArgumentException("元数据预览包含重复作品。", nameof(edits));
+            throw new ArgumentException(AppStrings.Get("meta.dupWorks"), nameof(edits));
         using var connection = Open();
         using var transaction = connection.BeginTransaction();
         var catalog = LoadDirectory(sourceId, catalogRoot);
@@ -25,7 +25,7 @@ public sealed partial class DirectoryLibraryIndex
         {
             ValidateMetadata(edit.Metadata);
             var series = catalog.Series.FirstOrDefault(item => item.ApiId == edit.SeriesId)
-                ?? throw new KeyNotFoundException("元数据目标作品已不存在，请重新扫描后预览。");
+                ?? throw new KeyNotFoundException(AppStrings.Get("meta.targetGone"));
             return new MetadataBatchRow(series.Uuid, new(edit.SeriesId, series.Title, edit.Metadata),
                 ReadOverride(connection, transaction, sourceId, series.Uuid), MetadataFingerprint(series));
         }).ToList();
@@ -82,24 +82,24 @@ public sealed partial class DirectoryLibraryIndex
             command.Parameters.AddWithValue("$id", id);
             command.Parameters.AddWithValue("$source", sourceId);
             using var reader = command.ExecuteReader();
-            if (!reader.Read()) throw new KeyNotFoundException("元数据预览不存在或已过期。");
+            if (!reader.Read()) throw new KeyNotFoundException(AppStrings.Get("meta.previewGone"));
             state = reader.GetString(0);
             createdAt = reader.GetInt64(1);
             rows = ReadBatchRows(reader.GetString(2));
         }
-        if (state != (undo ? "APPLIED" : "PREVIEW")) throw new InvalidOperationException("元数据批次状态已改变，请刷新后重试。");
+        if (state != (undo ? "APPLIED" : "PREVIEW")) throw new InvalidOperationException(AppStrings.Get("meta.batchChanged"));
         if (!undo && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - createdAt > TimeSpan.FromDays(1).TotalMilliseconds)
-            throw new InvalidOperationException("元数据预览已超过 24 小时，请重新预览。");
+            throw new InvalidOperationException(AppStrings.Get("meta.previewExpired"));
         var catalog = LoadDirectory(sourceId, catalogRoot);
         foreach (var row in rows)
         {
             var current = ReadOverride(connection, transaction, sourceId, row.SeriesUuid);
             var expected = undo ? JsonSerializer.Serialize(row.Change.Metadata) : row.BeforeOverride;
-            if (current != expected) throw new InvalidOperationException("元数据已被其他操作修改，请重新预览，避免覆盖新修改。");
+            if (current != expected) throw new InvalidOperationException(AppStrings.Get("meta.concurrentEdit"));
             var series = catalog.Series.FirstOrDefault(item => item.Uuid == row.SeriesUuid)
-                ?? throw new InvalidOperationException("作品已从目录移除，请重新扫描。");
+                ?? throw new InvalidOperationException(AppStrings.Get("meta.workRemoved"));
             if (!undo && MetadataFingerprint(series) != row.Fingerprint)
-                throw new InvalidOperationException("扫描元数据已改变，请重新预览。");
+                throw new InvalidOperationException(AppStrings.Get("meta.scanChanged"));
             WriteOverride(connection, transaction, sourceId, row.SeriesUuid,
                 undo ? row.BeforeOverride : JsonSerializer.Serialize(row.Change.Metadata));
         }
@@ -142,7 +142,7 @@ public sealed partial class DirectoryLibraryIndex
         JsonSerializer.Serialize(new { series.Title, series.OriginalTitle, series.Summary, series.AirDate, series.Genres, series.PosterPath, series.ExternalIds }))));
 
     private static List<MetadataBatchRow> ReadBatchRows(string json) =>
-        ReadMetadata<List<MetadataBatchRow>>(json) ?? throw new InvalidDataException("元数据批次为空。");
+        ReadMetadata<List<MetadataBatchRow>>(json) ?? throw new InvalidDataException(AppStrings.Get("meta.batchEmpty"));
 
     private static void ValidateMetadata(NfoTvShowMetadata metadata)
     {
@@ -153,7 +153,7 @@ public sealed partial class DirectoryLibraryIndex
             metadata.UniqueIds?.Count > 30 || metadata.UniqueIds?.Any(item => item is null || string.IsNullOrWhiteSpace(item.Type) || item.Type.Length > 50 ||
                 string.IsNullOrWhiteSpace(item.Value) || item.Value.Length > 300) == true ||
             metadata.Actors?.Count > 200 || metadata.Actors?.Any(item => item is null || string.IsNullOrWhiteSpace(item.Name) || item.Name.Length > 300 || item.Role is null or { Length: > 300 }) == true)
-            throw new ArgumentException("元数据字段为空或超过长度限制。", nameof(metadata));
+            throw new ArgumentException(AppStrings.Get("meta.fieldLimits"), nameof(metadata));
     }
 
     private static LibrarySeries WithMetadata(LibrarySeries series, NfoTvShowMetadata metadata) => series with

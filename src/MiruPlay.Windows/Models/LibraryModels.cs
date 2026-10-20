@@ -62,16 +62,16 @@ public sealed record LibraryEpisodeGroup(
     IReadOnlyList<LibraryEpisode> Versions)
 {
     public LibraryEpisode DefaultEpisode => Versions[0];
-    public string DisplayNumber => Number % 1 == 0 ? $"第 {Number:0} 集" : $"第 {Number:0.##} 集";
+    public string DisplayNumber => Number % 1 == 0 ? AppStrings.Get("lib.displayEpInt", Number) : AppStrings.Get("lib.displayEpFloat", Number);
     public bool HasVersions => Versions.Count > 1;
-    public string VersionText => HasVersions ? $"{Versions.Count} 个版本" : string.Empty;
+    public string VersionText => HasVersions ? AppStrings.Get("lib.versionCount", Versions.Count) : string.Empty;
 }
 
 public sealed record LibrarySeason(
     int Number,
     IReadOnlyList<LibraryEpisodeGroup> Groups)
 {
-    public string DisplayName => Number <= 1 ? "第 1 季" : $"第 {Number} 季";
+    public string DisplayName => Number <= 1 ? AppStrings.Get("lib.season1") : AppStrings.Get("lib.seasonN", Number);
     public int EpisodeCount => Groups.Count;
     public int VersionCount => Groups.Sum(group => group.Versions.Count);
 }
@@ -118,7 +118,7 @@ public sealed record LibrarySeries(
     public bool HasExtras => Extras.Count > 0;
     public long LastWatchedEpochMs => Episodes.Max(episode => episode.LastWatchedEpochMs);
     public int CompletedEpisodeCount => Episodes.Count(episode => episode.IsCompleted);
-    public string CompletionText => Episodes.Count == 0 ? string.Empty : $"{CompletedEpisodeCount}/{Episodes.Count} 集已看";
+    public string CompletionText => Episodes.Count == 0 ? string.Empty : AppStrings.Get("lib.watchedCount", CompletedEpisodeCount, Episodes.Count);
     public Uri? PosterUri => PosterPath switch
     {
         null => null,
@@ -131,7 +131,7 @@ public sealed record LibrarySeries(
     {
         AirDate ?? Year?.ToString(System.Globalization.CultureInfo.InvariantCulture),
         Genres.Count > 0 ? Genres[0] : null,
-        $"{Episodes.Count} 集",
+        AppStrings.Get("lib.episodeCount", Episodes.Count),
     }.Where(value => !string.IsNullOrWhiteSpace(value)));
 }
 
@@ -161,14 +161,14 @@ public sealed record LibraryEpisode(
 
     public string ApiId => ProgressKey;
     public string FileName => Path.GetFileName(MediaPath);
-    public string DisplayNumber => Number % 1 == 0 ? $"第 {Number:0} 集" : $"第 {Number:0.##} 集";
+    public string DisplayNumber => Number % 1 == 0 ? AppStrings.Get("lib.displayEpInt", Number) : AppStrings.Get("lib.displayEpFloat", Number);
     public string DisplayTitle => string.IsNullOrWhiteSpace(Title) ? Path.GetFileNameWithoutExtension(MediaPath) : Title;
     public string VersionLabel => Path.GetFileNameWithoutExtension(MediaPath);
-    public string DurationText => Duration <= TimeSpan.Zero ? string.Empty : $"{(int)Duration.TotalMinutes} 分钟";
+    public string DurationText => Duration <= TimeSpan.Zero ? string.Empty : AppStrings.Get("lib.minutes", (int)Duration.TotalMinutes);
     public bool IsCompleted => WatchedDurationMs > 0 && WatchedPositionMs >= WatchedDurationMs * 0.9 || WatchedDurationMs == 0 && PlayCount > 0;
     public bool IsInProgress => WatchedPositionMs > 0 && !IsCompleted;
     public double ProgressPercent => WatchedDurationMs > 0 ? Math.Clamp(WatchedPositionMs * 100d / WatchedDurationMs, 0, 100) : 0;
-    public string PlayActionLabel => IsInProgress ? "继续" : "播放";
+    public string PlayActionLabel => IsInProgress ? AppStrings.Get("lib.continue") : AppStrings.Get("lib.play");
     public string ProgressText => IsInProgress
         ? $"{TimeSpan.FromMilliseconds(WatchedPositionMs):hh\\:mm\\:ss} / {TimeSpan.FromMilliseconds(WatchedDurationMs):hh\\:mm\\:ss}"
         : string.Empty;
@@ -184,5 +184,5 @@ public sealed record LibraryExtra(
     TimeSpan Duration)
 {
     public string DisplayTitle => string.IsNullOrWhiteSpace(Title) ? Path.GetFileNameWithoutExtension(MediaPath) : Title;
-    public string DurationText => Duration <= TimeSpan.Zero ? string.Empty : $"{(int)Duration.TotalMinutes} 分钟";
+    public string DurationText => Duration <= TimeSpan.Zero ? string.Empty : AppStrings.Get("lib.minutes", (int)Duration.TotalMinutes);
 }

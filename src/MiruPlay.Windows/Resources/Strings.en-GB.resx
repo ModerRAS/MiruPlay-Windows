@@ -33,7 +33,7 @@
   <data name="toolbar.searchLibrary" xml:space="preserve"><value>Search library</value></data>
   <data name="toolbar.refresh" xml:space="preserve"><value>Refresh</value></data>
   <data name="common.loading" xml:space="preserve"><value>Loading…</value></data>
-  <data name="lib.continue" xml:space="preserve"><value>Continue watching</value></data>
+  <data name="lib.continue" xml:space="preserve"><value>Continue</value></data>
   <data name="lib.items" xml:space="preserve"><value>{0} items</value></data>
   <data name="lib.episodeTitle" xml:space="preserve"><value>Ep {0} · {1}</value></data>
   <data name="lib.seriesCount" xml:space="preserve"><value>{0} titles</value></data>
@@ -956,4 +956,60 @@
   <data name="measure.wavTooShort" xml:space="preserve"><value>WAV too short: needs a ≥ {0} s standard sweep recording (with room tail).</value></data>
   <data name="measure.wavFailed" xml:space="preserve"><value>WAV analysis failed.</value></data>
   <data name="cd2.opFailed" xml:space="preserve"><value>CloudDrive2 {0} ({1}).</value></data>
+  <data name="cd2.noOrganizePerms2" xml:space="preserve"><value>CloudDrive2 API token lacks the list/mkdir/move permissions for organising.</value></data>
+  <data name="cd2.dirsNotRoot2" xml:space="preserve"><value>CloudDrive2 download and organise directories must not be the root.</value></data>
+  <data name="cd2.organizeOutside2" xml:space="preserve"><value>CloudDrive2 organise directory escapes the token root.</value></data>
+  <data name="cd2.organizeInInbox2" xml:space="preserve"><value>CloudDrive2 organise directory must not be inside the download directory.</value></data>
+  <data name="cd2.hasTraversal" xml:space="preserve"><value>CloudDrive2 directory contains path traversal.</value></data>
+  <data name="meta.batchSize" xml:space="preserve"><value>Each metadata preview needs 1 to 200 works.</value></data>
+  <data name="meta.noEmptyItems" xml:space="preserve"><value>Metadata preview must not contain empty items.</value></data>
+  <data name="meta.dupWorks" xml:space="preserve"><value>Metadata preview contains duplicate works.</value></data>
+  <data name="meta.targetGone" xml:space="preserve"><value>Metadata target work is gone; rescan and preview again.</value></data>
+  <data name="meta.previewGone" xml:space="preserve"><value>Metadata preview missing or expired.</value></data>
+  <data name="meta.batchChanged" xml:space="preserve"><value>Metadata batch changed; refresh and retry.</value></data>
+  <data name="meta.previewExpired" xml:space="preserve"><value>Metadata preview is older than 24 hours; preview again.</value></data>
+  <data name="meta.concurrentEdit" xml:space="preserve"><value>Metadata was modified elsewhere; preview again to avoid overwriting.</value></data>
+  <data name="meta.workRemoved" xml:space="preserve"><value>Work removed from directory; rescan.</value></data>
+  <data name="meta.scanChanged" xml:space="preserve"><value>Scanned metadata changed; preview again.</value></data>
+  <data name="meta.batchEmpty" xml:space="preserve"><value>Metadata batch empty.</value></data>
+  <data name="meta.fieldLimits" xml:space="preserve"><value>Metadata field empty or over length limit.</value></data>
+  <data name="lib.displayEpInt" xml:space="preserve"><value>Ep {0:0}</value></data>
+  <data name="lib.displayEpFloat" xml:space="preserve"><value>Ep {0:0.##}</value></data>
+  <data name="lib.versionCount" xml:space="preserve"><value>{0} versions</value></data>
+  <data name="lib.season1" xml:space="preserve"><value>Season 1</value></data>
+  <data name="lib.seasonN" xml:space="preserve"><value>Season {0}</value></data>
+  <data name="lib.watchedCount" xml:space="preserve"><value>{0}/{1} watched</value></data>
+  <data name="lib.minutes" xml:space="preserve"><value>{0} mins</value></data>
+  <data name="lib.play" xml:space="preserve"><value>Play</value></data>
+  <data name="dav.notDirectory" xml:space="preserve"><value>WebDAV address is not a readable directory.</value></data>
+  <data name="dav.tooDeep" xml:space="preserve"><value>WebDAV directory depth exceeds the 64-level limit.</value></data>
+  <data name="dav.tooManyEntries" xml:space="preserve"><value>WebDAV directory exceeds the 100000-entry limit.</value></data>
+  <data name="dav.tooManyFiles" xml:space="preserve"><value>WebDAV directory exceeds the 100000-file limit.</value></data>
+  <data name="dav.nfoTooLarge" xml:space="preserve"><value>Remote NFO exceeds the 4 MiB limit.</value></data>
+  <data name="dav.outsideRoot" xml:space="preserve"><value>Playback address is outside this WebDAV source.</value></data>
+  <data name="dav.badAuth" xml:space="preserve"><value>WebDAV username or password incorrect.</value></data>
+  <data name="dav.badXml" xml:space="preserve"><value>WebDAV directory response is not valid XML.</value></data>
+  <data name="dav.escapedPath" xml:space="preserve"><value>WebDAV directory response escapes the source root.</value></data>
+  <data name="dav.unsafeSegment" xml:space="preserve"><value>WebDAV directory response has unsafe path segments.</value></data>
+  <data name="obs.decryptFailed" xml:space="preserve"><value>OpenObserve token undecryptable.</value></data>
+  <data name="obs.badLength" xml:space="preserve"><value>OpenObserve token length invalid.</value></data>
+  <data name="obs.disabled" xml:space="preserve"><value>OpenObserve log upload disabled.</value></data>
+  <data name="obs.noToken" xml:space="preserve"><value>OpenObserve token not configured.</value></data>
+  <data name="obs.noPending" xml:space="preserve"><value>No pending logs.</value></data>
+  <data name="obs.uploadFailed" xml:space="preserve"><value>OpenObserve upload failed: {0}</value></data>
+  <data name="obs.uploaded" xml:space="preserve"><value>Uploaded {0} logs.</value></data>
+  <data name="obs.timeout" xml:space="preserve"><value>OpenObserve upload timed out.</value></data>
+  <data name="obs.badUrl" xml:space="preserve"><value>OpenObserve endpoint must be an HTTP(S) address without credentials, query or fragment.</value></data>
+  <data name="obs.badStream" xml:space="preserve"><value>OpenObserve stream name invalid.</value></data>
+  <data name="nfo.noRoot2" xml:space="preserve"><value>Media directory missing: {0}</value></data>
+  <data name="nfo.badBackup" xml:space="preserve"><value>NFO backup suffix invalid.</value></data>
+  <data name="nfo.noRoot" xml:space="preserve"><value>NFO misses root node.</value></data>
+  <data name="nfo.notEpisode" xml:space="preserve"><value>NFO root node is not episodedetails.</value></data>
+  <data name="nfo.notShow" xml:space="preserve"><value>NFO root node is not tvshow.</value></data>
+  <data name="nfo.escaped" xml:space="preserve"><value>NFO path escapes the media source root.</value></data>
+  <data name="nfo.badDir" xml:space="preserve"><value>NFO directory invalid.</value></data>
+  <data name="nfo.missing" xml:space="preserve"><value>NFO file missing.</value></data>
+  <data name="nfo.tooLarge" xml:space="preserve"><value>NFO file too large.</value></data>
+  <data name="nfo.badXml" xml:space="preserve"><value>NFO is not a valid safe XML document.</value></data>
+  <data name="nfo.noSymlink" xml:space="preserve"><value>NFO paths must not pass through symlinks or junctions.</value></data>
 </root>

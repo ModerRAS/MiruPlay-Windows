@@ -30,14 +30,14 @@ public sealed class OpenObserveTokenStore
         }
         catch (CryptographicException error)
         {
-            throw new InvalidDataException("OpenObserve 令牌无法解密。", error);
+            throw new InvalidDataException(AppStrings.Get("obs.decryptFailed"), error);
         }
     }
 
     public void Save(string token)
     {
         var value = token.Trim();
-        if (value.Length is 0 or > 4_096) throw new ArgumentException("OpenObserve 令牌长度无效。", nameof(token));
+        if (value.Length is 0 or > 4_096) throw new ArgumentException(AppStrings.Get("obs.badLength"), nameof(token));
         var encrypted = ProtectedData.Protect(Encoding.UTF8.GetBytes(value), Entropy, DataProtectionScope.CurrentUser);
         var temporaryPath = $"{_path}.{Guid.NewGuid():N}.tmp";
         File.WriteAllBytes(temporaryPath, encrypted);
@@ -82,12 +82,12 @@ public sealed class OpenObserveLogService
         AppSettings settings,
         CancellationToken cancellationToken = default)
     {
-        if (!settings.LogUploadEnabled) return Result(false, 0, "OpenObserve 日志上报未启用。");
+        if (!settings.LogUploadEnabled) return Result(false, 0, AppStrings.Get("obs.disabled"));
         var endpoint = NormalizeEndpoint(settings.LogUploadEndpoint, settings.LogUploadStreamName);
         var token = _tokens.Load();
-        if (string.IsNullOrEmpty(token)) return Result(false, 0, "OpenObserve 令牌尚未配置。");
+        if (string.IsNullOrEmpty(token)) return Result(false, 0, AppStrings.Get("obs.noToken"));
         var records = _logs.ReadPending();
-        if (records.Count == 0) return Result(true, 0, "没有待上报日志。");
+        if (records.Count == 0) return Result(true, 0, AppStrings.Get("obs.noPending"));
 
         var payload = records.Select(record => new Dictionary<string, object?>
         {
@@ -114,17 +114,17 @@ public sealed class OpenObserveLogService
         {
             using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
-                return Result(false, 0, $"OpenObserve 上报失败：HTTP {(int)response.StatusCode}。");
+                return Result(false, 0, AppStrings.Get("obs.uploadFailed", (int)response.StatusCode));
             _logs.RemoveUploaded(records.Select(record => record.Id).ToHashSet(StringComparer.Ordinal));
-            return Result(true, records.Count, $"已上报 {records.Count} 条日志。");
+            return Result(true, records.Count, AppStrings.Get("obs.uploaded", records.Count));
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            return Result(false, 0, "OpenObserve 上报超时。");
+            return Result(false, 0, AppStrings.Get("obs.timeout"));
         }
         catch (HttpRequestException error)
         {
-            return Result(false, 0, $"OpenObserve 上报失败：{RotatingLocalLogStore.Redact(error.Message)}");
+            return Result(false, 0, AppStrings.Get("obs.uploadFailed", RotatingLocalLogStore.Redact(error.Message)));
         }
     }
 
@@ -133,10 +133,10 @@ public sealed class OpenObserveLogService
         var raw = endpoint.Trim().TrimEnd('/');
         if (!Uri.TryCreate(raw, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
             string.IsNullOrEmpty(uri.Host) || uri.UserInfo.Length > 0 || uri.Query.Length > 0 || uri.Fragment.Length > 0)
-            throw new ArgumentException("OpenObserve 地址必须是无凭据、查询或片段的 HTTP(S) 地址。", nameof(endpoint));
+            throw new ArgumentException(AppStrings.Get("obs.badUrl"), nameof(endpoint));
         var stream = streamName.Trim();
         if (stream.Length is 0 or > 100 || stream.Any(character => !(char.IsLetterOrDigit(character) || character is '_' or '-')))
-            throw new ArgumentException("OpenObserve stream 名称无效。", nameof(streamName));
+            throw new ArgumentException(AppStrings.Get("obs.badStream"), nameof(streamName));
         var path = uri.AbsolutePath.TrimEnd('/');
         if (path.EndsWith("/_json", StringComparison.Ordinal))
             return new UriBuilder(uri) { Path = path, Query = string.Empty, Fragment = string.Empty }.Uri.AbsoluteUri;

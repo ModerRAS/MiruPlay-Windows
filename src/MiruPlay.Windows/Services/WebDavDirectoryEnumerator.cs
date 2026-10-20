@@ -32,7 +32,7 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
         var root = WebDavMlipClient.NormalizeRoot(rootUrl);
         var responses = await ListAsync(root, credential, depth: 0, cancellationToken).ConfigureAwait(false);
         if (!responses.Any(response => response.IsCollection && IsSamePath(root, response.Uri)))
-            throw new InvalidDataException("WebDAV 地址不是可读取的目录。");
+            throw new InvalidDataException(AppStrings.Get("dav.notDirectory"));
     }
 
     public async Task<IReadOnlyList<DirectoryFileEntry>> EnumerateAsync(
@@ -52,25 +52,25 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
             cancellationToken.ThrowIfCancellationRequested();
             var (directory, depth) = pending.Dequeue();
             if (!seenDirectories.Add(directory.AbsoluteUri)) continue;
-            if (depth > MaximumDepth) throw new InvalidDataException("WebDAV 目录层级超过 64 层限制。");
+            if (depth > MaximumDepth) throw new InvalidDataException(AppStrings.Get("dav.tooDeep"));
 
             foreach (var response in await ListAsync(root, directory, credential, cancellationToken).ConfigureAwait(false))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (IsSamePath(root, response.Uri)) continue;
                 if (++entriesSeen > MaximumEntries)
-                    throw new InvalidDataException("WebDAV 目录条目数超过 100000 限制。");
+                    throw new InvalidDataException(AppStrings.Get("dav.tooManyEntries"));
                 var relativePath = RelativePath(root, response.Uri);
                 if (response.IsCollection)
                 {
-                    if (depth == MaximumDepth) throw new InvalidDataException("WebDAV 目录层级超过 64 层限制。");
+                    if (depth == MaximumDepth) throw new InvalidDataException(AppStrings.Get("dav.tooDeep"));
                     pending.Enqueue((EnsureDirectoryUri(response.Uri), depth + 1));
                     continue;
                 }
                 if (!DirectoryLibraryIndex.IsVideoFile(relativePath) && !DirectoryLibraryIndex.IsSubtitleFile(relativePath) &&
                     !DirectoryLibraryIndex.IsExternalAudioFile(relativePath) &&
                     !Path.GetExtension(relativePath).Equals(".nfo", StringComparison.OrdinalIgnoreCase)) continue;
-                if (files.Count >= MaximumEntries) throw new InvalidDataException("WebDAV 目录文件数超过 100000 限制。");
+                if (files.Count >= MaximumEntries) throw new InvalidDataException(AppStrings.Get("dav.tooManyFiles"));
                 files.Add(new RemoteFileEntry(relativePath, response.ContentLength ?? 0, response.ModifiedMs));
                 progress?.Report(new DirectoryScanProgress(files.Count, files.Count, files.Count(entry => DirectoryLibraryIndex.IsVideoFile(entry.RelativePath))));
             }
@@ -136,10 +136,10 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
             TimeSpan.FromMinutes(5), cancellationToken).ConfigureAwait(false);
         lease.Response.EnsureSuccessStatusCode();
         if (lease.Response.Content.Headers.ContentLength is > maximumBytes)
-            throw new InvalidDataException("远程 NFO 超过 4 MiB 限制。");
+            throw new InvalidDataException(AppStrings.Get("dav.nfoTooLarge"));
         await using var input = await lease.Response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         using var buffer = new MemoryStream();
-        await WebDavMlipClient.CopyBoundedAsync(input, buffer, maximumBytes, "远程 NFO 超过 4 MiB 限制。", cancellationToken).ConfigureAwait(false);
+        await WebDavMlipClient.CopyBoundedAsync(input, buffer, maximumBytes, AppStrings.Get("dav.nfoTooLarge"), cancellationToken).ConfigureAwait(false);
         buffer.Position = 0;
         return read(buffer);
     }
@@ -156,7 +156,7 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
             !string.IsNullOrEmpty(mediaUri.Query) ||
             !string.IsNullOrEmpty(mediaUri.Fragment) ||
             !root.IsBaseOf(mediaUri))
-            throw new InvalidDataException("播放地址不属于该 WebDAV 来源。");
+            throw new InvalidDataException(AppStrings.Get("dav.outsideRoot"));
         var slash = mediaUri.AbsolutePath.LastIndexOf('/');
         if (slash <= 0) return [];
         var parent = new Uri(mediaUri, mediaUri.AbsolutePath[..(slash + 1)]);
@@ -205,7 +205,7 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
             TimeSpan.FromMinutes(5),
             cancellationToken).ConfigureAwait(false);
         if (lease.Response.StatusCode == HttpStatusCode.Unauthorized)
-            throw new UnauthorizedAccessException("WebDAV 用户名或密码不正确。");
+            throw new UnauthorizedAccessException(AppStrings.Get("dav.badAuth"));
         lease.Response.EnsureSuccessStatusCode();
         await using var stream = await lease.Response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         try
@@ -214,7 +214,7 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
         }
         catch (XmlException error)
         {
-            throw new InvalidDataException("WebDAV 目录响应不是有效 XML。", error);
+            throw new InvalidDataException(AppStrings.Get("dav.badXml"), error);
         }
     }
 
@@ -266,7 +266,7 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
             !string.IsNullOrEmpty(uri.Fragment) ||
             !root.IsBaseOf(uri))
         {
-            throw new InvalidDataException("WebDAV 目录响应包含来源之外的路径。");
+            throw new InvalidDataException(AppStrings.Get("dav.escapedPath"));
         }
         _ = RelativePath(root, uri);
         return uri;
@@ -278,7 +278,7 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
         var segments = SafeUriSegments(uri.AbsolutePath);
         if (segments.Count < rootSegments.Count ||
             !segments.Take(rootSegments.Count).SequenceEqual(rootSegments, StringComparer.Ordinal))
-            throw new InvalidDataException("WebDAV 目录响应包含来源之外的路径。");
+            throw new InvalidDataException(AppStrings.Get("dav.escapedPath"));
         var relative = string.Join('/', segments.Skip(rootSegments.Count));
         return relative;
     }
@@ -290,7 +290,7 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
         {
             var segment = Uri.UnescapeDataString(raw);
             if (segment is "." or ".." || segment.IndexOfAny(['/', '\\', '\0', ':']) >= 0)
-                throw new InvalidDataException("WebDAV 目录响应包含不安全的路径段。");
+                throw new InvalidDataException(AppStrings.Get("dav.unsafeSegment"));
             result.Add(segment);
         }
         return result;

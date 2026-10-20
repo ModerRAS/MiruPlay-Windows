@@ -28,13 +28,13 @@ public sealed class CloudDriveLibraryOrganizer
         CancellationToken cancellationToken = default)
     {
         if (!tokenInfo.AllowList || !tokenInfo.AllowCreateFolder || !tokenInfo.AllowMove)
-            throw new InvalidOperationException("CloudDrive2 API Token 缺少媒体整理所需的列表、建目录或移动权限。");
+            throw new InvalidOperationException(AppStrings.Get("cd2.noOrganizePerms2"));
         var root = NormalizePath(tokenInfo.RootDir);
         var inbox = NormalizePath(config.InboxPath);
         var library = NormalizePath(config.LibraryPath);
-        if (inbox == "/" || library == "/") throw new InvalidOperationException("CloudDrive2 下载目录和整理目录不能是根目录。");
-        if (!IsSameOrChild(inbox, root) || !IsSameOrChild(library, root)) throw new InvalidOperationException("CloudDrive2 整理目录超出 Token 根目录。");
-        if (IsSameOrChild(library, inbox)) throw new InvalidOperationException("CloudDrive2 整理目录不能位于下载目录内部。");
+        if (inbox == "/" || library == "/") throw new InvalidOperationException(AppStrings.Get("cd2.dirsNotRoot2"));
+        if (!IsSameOrChild(inbox, root) || !IsSameOrChild(library, root)) throw new InvalidOperationException(AppStrings.Get("cd2.organizeOutside2"));
+        if (IsSameOrChild(library, inbox)) throw new InvalidOperationException(AppStrings.Get("cd2.organizeInInbox2"));
         var videos = await CollectVideosAsync(config.EndpointUrl, token, inbox, 0, cancellationToken).ConfigureAwait(false);
         var moved = 0;
         foreach (var video in videos)
@@ -99,7 +99,7 @@ public sealed class CloudDriveLibraryOrganizer
     private static string NormalizePath(string path)
     {
         var segments = path.Trim().Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (segments.Any(segment => segment is "." or "..")) throw new InvalidOperationException("CloudDrive2 目录包含路径遍历。");
+        if (segments.Any(segment => segment is "." or "..")) throw new InvalidOperationException(AppStrings.Get("cd2.hasTraversal"));
         return segments.Length == 0 ? "/" : $"/{string.Join('/', segments)}";
     }
 

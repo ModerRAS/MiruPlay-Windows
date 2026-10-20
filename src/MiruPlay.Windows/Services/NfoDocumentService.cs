@@ -52,14 +52,14 @@ public sealed class NfoDocumentService
     public NfoDocumentService(string localRoot, NfoWriteOptions? options = null)
     {
         _root = Path.GetFullPath(localRoot.Trim());
-        if (!Directory.Exists(_root)) throw new DirectoryNotFoundException($"媒体目录不存在：{_root}");
+        if (!Directory.Exists(_root)) throw new DirectoryNotFoundException(AppStrings.Get("nfo.noRoot2", _root));
         EnsureNoReparsePoints(_root);
         _options = options ?? new NfoWriteOptions();
         if (string.IsNullOrWhiteSpace(_options.BackupSuffix) ||
             Path.IsPathRooted(_options.BackupSuffix) ||
             _options.BackupSuffix.Contains(Path.DirectorySeparatorChar) ||
             _options.BackupSuffix.Contains(Path.AltDirectorySeparatorChar))
-            throw new ArgumentException("NFO 备份后缀无效。", nameof(options));
+            throw new ArgumentException(AppStrings.Get("nfo.badBackup"), nameof(options));
     }
 
     public string EpisodePath(string mediaPath) =>
@@ -80,9 +80,9 @@ public sealed class NfoDocumentService
 
     private static NfoEpisodeMetadata ParseEpisode(XmlDocument document)
     {
-        var root = document.DocumentElement ?? throw new InvalidDataException("NFO 缺少根节点。");
+        var root = document.DocumentElement ?? throw new InvalidDataException(AppStrings.Get("nfo.noRoot"));
         if (!root.Name.Equals("episodedetails", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("NFO 根节点不是 episodedetails。");
+            throw new InvalidDataException(AppStrings.Get("nfo.notEpisode"));
         return new NfoEpisodeMetadata(
             Text(root, "title") ?? "",
             Text(root, "showtitle"),
@@ -103,9 +103,9 @@ public sealed class NfoDocumentService
 
     private static NfoTvShowMetadata ParseTvShow(XmlDocument document)
     {
-        var root = document.DocumentElement ?? throw new InvalidDataException("NFO 缺少根节点。");
+        var root = document.DocumentElement ?? throw new InvalidDataException(AppStrings.Get("nfo.noRoot"));
         if (!root.Name.Equals("tvshow", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("NFO 根节点不是 tvshow。");
+            throw new InvalidDataException(AppStrings.Get("nfo.notShow"));
         return new NfoTvShowMetadata(
             Text(root, "title") ?? "",
             Text(root, "originaltitle") ?? Text(root, "title") ?? "",
@@ -150,14 +150,14 @@ public sealed class NfoDocumentService
         var fullPath = Path.GetFullPath(path);
         var relative = Path.GetRelativePath(_root, fullPath);
         if (relative is "." or ".." || relative.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
-            throw new InvalidDataException("NFO 路径超出媒体来源根目录。");
+            throw new InvalidDataException(AppStrings.Get("nfo.escaped"));
         EnsureNoReparsePoints(fullPath);
         return fullPath;
     }
 
     private void WriteAtomic(string path, string contents)
     {
-        var directory = Path.GetDirectoryName(path) ?? throw new InvalidDataException("NFO 目录无效。");
+        var directory = Path.GetDirectoryName(path) ?? throw new InvalidDataException(AppStrings.Get("nfo.badDir"));
         Directory.CreateDirectory(directory);
         var temporary = Path.Combine(directory, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
         try
@@ -176,8 +176,8 @@ public sealed class NfoDocumentService
     private static XmlDocument LoadXml(string path)
     {
         var info = new FileInfo(path);
-        if (!info.Exists) throw new FileNotFoundException("NFO 文件不存在。", path);
-        if (info.Length > MaximumNfoBytes) throw new InvalidDataException("NFO 文件过大。");
+        if (!info.Exists) throw new FileNotFoundException(AppStrings.Get("nfo.missing"), path);
+        if (info.Length > MaximumNfoBytes) throw new InvalidDataException(AppStrings.Get("nfo.tooLarge"));
         using var stream = File.OpenRead(path);
         return LoadXml(stream);
     }
@@ -199,7 +199,7 @@ public sealed class NfoDocumentService
         }
         catch (XmlException error)
         {
-            throw new InvalidDataException("NFO 不是有效的安全 XML 文档。", error);
+            throw new InvalidDataException(AppStrings.Get("nfo.badXml"), error);
         }
         return document;
     }
@@ -304,7 +304,7 @@ public sealed class NfoDocumentService
             {
                 var attributes = File.GetAttributes(current);
                 if (attributes.HasFlag(FileAttributes.ReparsePoint))
-                    throw new InvalidDataException("NFO 路径不能经过符号链接或联接点。");
+                    throw new InvalidDataException(AppStrings.Get("nfo.noSymlink"));
             }
             var parent = Directory.GetParent(current)?.FullName;
             if (parent is null || parent.Equals(current, StringComparison.OrdinalIgnoreCase)) break;

@@ -33,7 +33,7 @@
   <data name="toolbar.searchLibrary" xml:space="preserve"><value>搜尋片庫</value></data>
   <data name="toolbar.refresh" xml:space="preserve"><value>重新整理</value></data>
   <data name="common.loading" xml:space="preserve"><value>讀取中…</value></data>
-  <data name="lib.continue" xml:space="preserve"><value>繼續觀看</value></data>
+  <data name="lib.continue" xml:space="preserve"><value>繼續</value></data>
   <data name="lib.items" xml:space="preserve"><value>{0} 項</value></data>
   <data name="lib.episodeTitle" xml:space="preserve"><value>第 {0} 集 · {1}</value></data>
   <data name="lib.seriesCount" xml:space="preserve"><value>{0} 部</value></data>
@@ -956,4 +956,60 @@
   <data name="measure.wavTooShort" xml:space="preserve"><value>WAV 太短：需要 ≥ {0} 秒嘅標準掃頻錄音（含房間尾音）。</value></data>
   <data name="measure.wavFailed" xml:space="preserve"><value>WAV 分析失敗。</value></data>
   <data name="cd2.opFailed" xml:space="preserve"><value>CloudDrive2 {0} ({1})。</value></data>
+  <data name="cd2.noOrganizePerms2" xml:space="preserve"><value>CloudDrive2 API Token 缺少媒體整理所需嘅列表、建目錄或移動權限。</value></data>
+  <data name="cd2.dirsNotRoot2" xml:space="preserve"><value>CloudDrive2 下載目錄同整理目錄不能係根目錄。</value></data>
+  <data name="cd2.organizeOutside2" xml:space="preserve"><value>CloudDrive2 整理目錄超出 Token 根目錄。</value></data>
+  <data name="cd2.organizeInInbox2" xml:space="preserve"><value>CloudDrive2 整理目錄不能位於下載目錄內部。</value></data>
+  <data name="cd2.hasTraversal" xml:space="preserve"><value>CloudDrive2 目錄包含路徑遍歷。</value></data>
+  <data name="meta.batchSize" xml:space="preserve"><value>每次元數據預覽需要 1 至 200 部作品。</value></data>
+  <data name="meta.noEmptyItems" xml:space="preserve"><value>元數據預覽不能包含空條目。</value></data>
+  <data name="meta.dupWorks" xml:space="preserve"><value>元數據預覽包含重複作品。</value></data>
+  <data name="meta.targetGone" xml:space="preserve"><value>元數據目標作品已不存在，請重新掃描後預覽。</value></data>
+  <data name="meta.previewGone" xml:space="preserve"><value>元數據預覽不存在或已過期。</value></data>
+  <data name="meta.batchChanged" xml:space="preserve"><value>元數據批次狀態已改變，請重新整理後重試。</value></data>
+  <data name="meta.previewExpired" xml:space="preserve"><value>元數據預覽已超過 24 小時，請重新預覽。</value></data>
+  <data name="meta.concurrentEdit" xml:space="preserve"><value>元數據已被其他操作修改，請重新預覽，避免覆蓋新修改。</value></data>
+  <data name="meta.workRemoved" xml:space="preserve"><value>作品已從目錄移除，請重新掃描。</value></data>
+  <data name="meta.scanChanged" xml:space="preserve"><value>掃描元數據已改變，請重新預覽。</value></data>
+  <data name="meta.batchEmpty" xml:space="preserve"><value>元數據批次為空。</value></data>
+  <data name="meta.fieldLimits" xml:space="preserve"><value>元數據欄位為空或超過長度限制。</value></data>
+  <data name="lib.displayEpInt" xml:space="preserve"><value>第 {0:0} 集</value></data>
+  <data name="lib.displayEpFloat" xml:space="preserve"><value>第 {0:0.##} 集</value></data>
+  <data name="lib.versionCount" xml:space="preserve"><value>{0} 個版本</value></data>
+  <data name="lib.season1" xml:space="preserve"><value>第 1 季</value></data>
+  <data name="lib.seasonN" xml:space="preserve"><value>第 {0} 季</value></data>
+  <data name="lib.watchedCount" xml:space="preserve"><value>{0}/{1} 集已睇</value></data>
+  <data name="lib.minutes" xml:space="preserve"><value>{0} 分鐘</value></data>
+  <data name="lib.play" xml:space="preserve"><value>播放</value></data>
+  <data name="dav.notDirectory" xml:space="preserve"><value>WebDAV 位址唔係可讀取嘅目錄。</value></data>
+  <data name="dav.tooDeep" xml:space="preserve"><value>WebDAV 目錄層級超過 64 層限制。</value></data>
+  <data name="dav.tooManyEntries" xml:space="preserve"><value>WebDAV 目錄項目數超過 100000 限制。</value></data>
+  <data name="dav.tooManyFiles" xml:space="preserve"><value>WebDAV 目錄檔案數超過 100000 限制。</value></data>
+  <data name="dav.nfoTooLarge" xml:space="preserve"><value>遠端 NFO 超過 4 MiB 限制。</value></data>
+  <data name="dav.outsideRoot" xml:space="preserve"><value>播放位址唔屬於該 WebDAV 來源。</value></data>
+  <data name="dav.badAuth" xml:space="preserve"><value>WebDAV 用戶名或密碼不正確。</value></data>
+  <data name="dav.badXml" xml:space="preserve"><value>WebDAV 目錄回應唔係有效 XML。</value></data>
+  <data name="dav.escapedPath" xml:space="preserve"><value>WebDAV 目錄回應包含來源之外嘅路徑。</value></data>
+  <data name="dav.unsafeSegment" xml:space="preserve"><value>WebDAV 目錄回應包含唔安全嘅路徑段。</value></data>
+  <data name="obs.decryptFailed" xml:space="preserve"><value>OpenObserve 權杖無法解密。</value></data>
+  <data name="obs.badLength" xml:space="preserve"><value>OpenObserve 權杖長度無效。</value></data>
+  <data name="obs.disabled" xml:space="preserve"><value>OpenObserve 日誌上報未啟用。</value></data>
+  <data name="obs.noToken" xml:space="preserve"><value>OpenObserve 權杖尚未設定。</value></data>
+  <data name="obs.noPending" xml:space="preserve"><value>沒有待上報日誌。</value></data>
+  <data name="obs.uploadFailed" xml:space="preserve"><value>OpenObserve 上報失敗：{0}</value></data>
+  <data name="obs.uploaded" xml:space="preserve"><value>已上報 {0} 條日誌。</value></data>
+  <data name="obs.timeout" xml:space="preserve"><value>OpenObserve 上報逾時。</value></data>
+  <data name="obs.badUrl" xml:space="preserve"><value>OpenObserve 位址必須是無憑證、查詢或片段嘅 HTTP(S) 位址。</value></data>
+  <data name="obs.badStream" xml:space="preserve"><value>OpenObserve stream 名稱無效。</value></data>
+  <data name="nfo.noRoot2" xml:space="preserve"><value>媒體目錄不存在：{0}</value></data>
+  <data name="nfo.badBackup" xml:space="preserve"><value>NFO 備份後綴無效。</value></data>
+  <data name="nfo.noRoot" xml:space="preserve"><value>NFO 缺少根節點。</value></data>
+  <data name="nfo.notEpisode" xml:space="preserve"><value>NFO 根節點唔係 episodedetails。</value></data>
+  <data name="nfo.notShow" xml:space="preserve"><value>NFO 根節點唔係 tvshow。</value></data>
+  <data name="nfo.escaped" xml:space="preserve"><value>NFO 路徑超出媒體來源根目錄。</value></data>
+  <data name="nfo.badDir" xml:space="preserve"><value>NFO 目錄無效。</value></data>
+  <data name="nfo.missing" xml:space="preserve"><value>NFO 檔案不存在。</value></data>
+  <data name="nfo.tooLarge" xml:space="preserve"><value>NFO 檔案過大。</value></data>
+  <data name="nfo.badXml" xml:space="preserve"><value>NFO 唔係有效嘅安全 XML 文件。</value></data>
+  <data name="nfo.noSymlink" xml:space="preserve"><value>NFO 路徑不能經過符號連結或連結點。</value></data>
 </root>
