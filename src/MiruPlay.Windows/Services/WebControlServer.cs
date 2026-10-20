@@ -53,9 +53,9 @@ public sealed record PlaybackSubtitleTrack(
         get
         {
             var label = string.IsNullOrWhiteSpace(Title)
-                ? (string.IsNullOrWhiteSpace(Language) || Language == "und" ? $"字幕 {Id}" : Language)
+                ? (string.IsNullOrWhiteSpace(Language) || Language == "und" ? AppStrings.Get("api.subTrack", Id) : Language)
                 : Title;
-            return IsExternal ? $"{label}（外挂）" : label;
+            return IsExternal ? AppStrings.Get("api.subExternal", label) : label;
         }
     }
 }
@@ -272,7 +272,7 @@ public sealed class WebControlServer : IAsyncDisposable
             }
             if (context.Request.Path.StartsWithSegments("/api") && !IsAuthorized(context.Request))
             {
-                await WriteEnvelopeAsync(context, StatusCodes.Status401Unauthorized, null, "未授权").ConfigureAwait(false);
+                await WriteEnvelopeAsync(context, StatusCodes.Status401Unauthorized, null, AppStrings.Get("api.errUnauthorized")).ConfigureAwait(false);
                 return;
             }
 
@@ -308,7 +308,7 @@ public sealed class WebControlServer : IAsyncDisposable
             {
                 _localLogs.Write("ERROR", "Unhandled WebControl request failure", error,
                     new Dictionary<string, string> { ["path"] = context.Request.Path.Value ?? string.Empty });
-                await WriteEnvelopeAsync(context, StatusCodes.Status500InternalServerError, null, "服务器内部错误").ConfigureAwait(false);
+                await WriteEnvelopeAsync(context, StatusCodes.Status500InternalServerError, null, AppStrings.Get("api.errInternal")).ConfigureAwait(false);
             }
             finally
             {
@@ -351,7 +351,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapGet("/api/tasks", () => Success(_tasks.List()));
         app.MapGet("/api/tasks/{id}", (string id) =>
         {
-            var task = _tasks.Get(id) ?? throw new KeyNotFoundException("任务不存在。");
+            var task = _tasks.Get(id) ?? throw new KeyNotFoundException(AppStrings.Get("api.errTaskMissing"));
             return Success(task);
         });
         app.MapPost("/api/tasks/{id}/cancel", (string id) =>
@@ -372,7 +372,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPut("/api/log-upload/config", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<LogUploadConfigRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var endpoint = body.Endpoint.Trim();
             if (body.Enabled) _ = OpenObserveLogService.NormalizeEndpoint(endpoint, body.StreamName);
             var updated = await UpdateSettingsAsync(current => current with
@@ -386,7 +386,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/log-upload/token", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<LogUploadTokenRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             _openObserveLogs.SaveToken(body.Token);
             return Success(ToLogUploadDto(_getSettings()));
         });
@@ -410,7 +410,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPut("/api/app-update/config", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<AppUpdateConfigRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var manifestUrl = WindowsAppUpdater.NormalizeManifestUrl(body.ManifestUrl);
             var settings = await _updateSettings(current => current with { AppUpdateManifestUrl = manifestUrl }).ConfigureAwait(false);
             _appUpdater.ConfigureManifest(settings.AppUpdateManifestUrl);
@@ -423,19 +423,19 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/app-update/install", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<AppUpdateInstallRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
-            if (!body.Confirm) throw new BadHttpRequestException("启动 Windows 安装器前必须明确确认。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
+            if (!body.Confirm) throw new BadHttpRequestException(AppStrings.Get("api.errInstallConfirm"));
             return Success(new { accepted = _installUpdate is not null && await _installUpdate().ConfigureAwait(false) });
         });
         app.MapPost("/api/app-update/install-permission", () => UnsupportedOnWindows());
         app.MapPost("/api/app-control", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<AppControlRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var action = body.Action.Trim().ToLowerInvariant();
-            if (action is not ("restart" or "exit")) return Success(new { action, accepted = false, message = "不支持的应用控制动作。" });
+            if (action is not ("restart" or "exit")) return Success(new { action, accepted = false, message = AppStrings.Get("api.errAppAction") });
             var accepted = _appControl is not null && await _appControl(action).ConfigureAwait(false);
-            return Success(new { action, accepted, message = accepted ? "已接受应用控制请求。" : "Windows 客户端尚未连接应用生命周期处理器。" });
+            return Success(new { action, accepted, message = accepted ? AppStrings.Get("api.errAppAccepted") : AppStrings.Get("api.errNoAppHandler") });
         });
 
         app.MapGet("/api/sources", () => Success(_mediaSources.List()));
@@ -452,20 +452,20 @@ public sealed class WebControlServer : IAsyncDisposable
         });
         app.MapPut("/api/sources/{id}", async (string id, HttpRequest request) =>
         {
-            if (!long.TryParse(id, out var sourceId)) throw new BadHttpRequestException("媒体源 ID 不正确");
+            if (!long.TryParse(id, out var sourceId)) throw new BadHttpRequestException(AppStrings.Get("api.errSrcId"));
             var body = await ReadSourceRequestAsync(request).ConfigureAwait(false);
             return Success(await _mediaSources.Update(sourceId, body).ConfigureAwait(false));
         });
         app.MapDelete("/api/sources/{id}", async (string id) =>
         {
-            if (!long.TryParse(id, out var sourceId)) throw new BadHttpRequestException("媒体源 ID 不正确");
+            if (!long.TryParse(id, out var sourceId)) throw new BadHttpRequestException(AppStrings.Get("api.errSrcId"));
             await _mediaSources.Remove(sourceId).ConfigureAwait(false);
             return Success(new { });
         });
         app.MapPost("/api/sources/scan-all", async (HttpRequest request) =>
         {
             List<SourceScanResponse>? results = null;
-            _ = await _tasks.RunTrackedAsync("media-source-scan-all", "扫描全部媒体源", async token =>
+            _ = await _tasks.RunTrackedAsync("media-source-scan-all", AppStrings.Get("api.errScanAll"), async token =>
             {
                 var sources = _mediaSources.List();
                 results = [];
@@ -473,19 +473,19 @@ public sealed class WebControlServer : IAsyncDisposable
                 {
                     token.ThrowIfCancellationRequested();
                     results.Add(await _mediaSources.Scan(sources[index].Id, token).ConfigureAwait(false));
-                    _tasks.Update("media-source-scan-all", $"已扫描 {index + 1} / {sources.Count} 个来源",
+                    _tasks.Update("media-source-scan-all", AppStrings.Get("api.errScanProgress", index + 1, sources.Count),
                         (int)(100d * (index + 1) / Math.Max(1, sources.Count)));
                 }
                 if (results.Any(result => result.Error is not null))
-                    throw new InvalidOperationException("一个或多个媒体源扫描失败；请查看任务与本地日志。");
+                    throw new InvalidOperationException(AppStrings.Get("api.errScanFailed"));
             }, request.HttpContext.RequestAborted).ConfigureAwait(false);
             return Success(new { accepted = results is not null, results = results ?? [], task = _tasks.Get("media-source-scan-all") });
         });
         app.MapPost("/api/sources/{id}/scan", async (string id, HttpRequest request) =>
         {
-            if (!long.TryParse(id, out var sourceId)) throw new BadHttpRequestException("媒体源 ID 不正确");
+            if (!long.TryParse(id, out var sourceId)) throw new BadHttpRequestException(AppStrings.Get("api.errSrcId"));
             SourceScanResponse? result = null;
-            _ = await _tasks.RunTrackedAsync($"media-source-scan-{sourceId}", $"媒体源扫描 {sourceId}", async token =>
+            _ = await _tasks.RunTrackedAsync($"media-source-scan-{sourceId}", AppStrings.Get("wpf.status.taskName", sourceId), async token =>
             {
                 result = await _mediaSources.Scan(sourceId, token).ConfigureAwait(false);
                 if (result.Error is not null) throw new InvalidOperationException(result.Error);
@@ -499,14 +499,14 @@ public sealed class WebControlServer : IAsyncDisposable
             var body = await JsonSerializer.DeserializeAsync<ScanSettingsRequest>(request.Body, JsonOptions).ConfigureAwait(false)
                 ?? new ScanSettingsRequest();
             if (body.PosterWallArrangement is not null && !LibraryOrganization.ArrangementOptions.Contains(body.PosterWallArrangement))
-                throw new BadHttpRequestException("posterWallArrangement 必须是 TITLE 或 RELEASE_SEASON。");
+                throw new BadHttpRequestException(AppStrings.Get("api.errArrangement"));
             if (body.EpisodeVersionSelectionPolicy is not null && body.EpisodeVersionSelectionPolicy is not ("auto_nearest" or "manual"))
-                throw new BadHttpRequestException("episodeVersionSelectionPolicy 不正确。");
+                throw new BadHttpRequestException(AppStrings.Get("api.errVersionPolicy"));
             if (body.AutoScanIntervalHours is int intervalHours &&
                 !MediaSourceAutoScanScheduler.IntervalOptionsHours.Contains(intervalHours))
-                throw new BadHttpRequestException("autoScanIntervalHours 必须是 1、6、12 或 24。");
+                throw new BadHttpRequestException(AppStrings.Get("api.errScanInterval"));
             var requestedMode = body.CurrentAppMode;
-            if (requestedMode is not (null or "anime" or "drama")) throw new BadHttpRequestException("currentAppMode 不正确");
+            if (requestedMode is not (null or "anime" or "drama")) throw new BadHttpRequestException(AppStrings.Get("api.errAppMode"));
             var updated = await UpdateSettingsAsync(current => current with
             {
                 AutoScanEnabled = body.AutoScanEnabled ?? current.AutoScanEnabled,
@@ -526,7 +526,7 @@ public sealed class WebControlServer : IAsyncDisposable
             var endpoint = request.Query["endpointUrl"].ToString().Trim();
             if (endpoint.Length == 0) endpoint = configuredEndpoint;
             var token = _cloudDriveCredentials.LoadForEndpoint(endpoint).Token;
-            if (string.IsNullOrEmpty(token)) throw new ArgumentException("请先登录或验证 CloudDrive2 API Token。");
+            if (string.IsNullOrEmpty(token)) throw new ArgumentException(AppStrings.Get("api.errCdLogin"));
             var tokenInfo = await _cloudDriveClient.GetApiTokenInfoAsync(endpoint, token, request.HttpContext.RequestAborted).ConfigureAwait(false);
             var root = NormalizeCloudDrivePath(tokenInfo.RootDir);
             var requested = NormalizeCloudDrivePath(request.Query["path"].ToString());
@@ -548,7 +548,7 @@ public sealed class WebControlServer : IAsyncDisposable
             return Success(new
             {
                 path,
-                displayPath = path == "/" ? "CloudDrive 根目录" : path,
+                displayPath = path == "/" ? AppStrings.Get("api.errCdRoot") : path,
                 parentPath = CloudDriveParentPath(path, root),
                 entries,
             });
@@ -556,7 +556,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPut("/api/cloud-drive/config", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<CloudDriveConfigRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var current = _cloudDriveConfig.Load();
             _cloudDriveConfig.Save(new CloudDriveAutomationConfig(
                 body.EndpointUrl,
@@ -576,7 +576,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/cloud-drive/login", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<CloudDriveLoginRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var login = await _cloudDriveClient.LoginAsync(
                 body.EndpointUrl,
                 body.Username,
@@ -593,7 +593,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/cloud-drive/token", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<CloudDriveTokenRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var info = await _cloudDriveClient.GetApiTokenInfoAsync(
                 body.EndpointUrl,
                 body.Token,
@@ -609,7 +609,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapGet("/api/cloud-drive/run", () => Success(_cloudDriveRunner.Status));
         app.MapPost("/api/cloud-drive/run", async (HttpRequest request) =>
         {
-            _ = await _tasks.RunTrackedAsync("cloud-drive-rss", "CloudDrive/RSS 同步",
+            _ = await _tasks.RunTrackedAsync("cloud-drive-rss", AppStrings.Get("api.errCdSync"),
                 async token => { await _cloudDriveRunner.RunAsync(token).ConfigureAwait(false); },
                 request.HttpContext.RequestAborted).ConfigureAwait(false);
             return Success(_cloudDriveRunner.Status);
@@ -618,15 +618,15 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/cloud-drive/offline", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<CloudDriveOfflineRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var config = _cloudDriveConfig.Load();
             var token = _cloudDriveCredentials.LoadForEndpoint(config.EndpointUrl).Token;
-            if (string.IsNullOrEmpty(token)) throw new ArgumentException("请先登录或验证 CloudDrive2 API Token。");
+            if (string.IsNullOrEmpty(token)) throw new ArgumentException(AppStrings.Get("api.errCdLogin"));
             var tokenInfo = await _cloudDriveClient.GetApiTokenInfoAsync(config.EndpointUrl, token, request.HttpContext.RequestAborted).ConfigureAwait(false);
-            if (!tokenInfo.AllowAddOfflineDownload) throw new InvalidOperationException("CloudDrive2 API Token 没有离线下载权限。");
+            if (!tokenInfo.AllowAddOfflineDownload) throw new InvalidOperationException(AppStrings.Get("api.errCdNoOffline"));
             var root = NormalizeCloudDrivePath(tokenInfo.RootDir);
             var target = NormalizeCloudDrivePath(body.TargetFolder);
-            if (!IsWithinCloudDriveRoot(target, root)) throw new ArgumentException("离线下载目录超出 CloudDrive2 Token 根目录。");
+            if (!IsWithinCloudDriveRoot(target, root)) throw new ArgumentException(AppStrings.Get("api.errInboxOutside"));
             await _cloudDriveClient.AddOfflineFilesAsync(
                 config.EndpointUrl,
                 token,
@@ -639,7 +639,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/cloud-drive/rss/{id:long}/preview", async (long id, HttpRequest request) =>
         {
             var subscription = _rssSubscriptions.List().FirstOrDefault(item => item.Id == id)
-                ?? throw new KeyNotFoundException("RSS 订阅不存在。");
+                ?? throw new KeyNotFoundException(AppStrings.Get("api.errRssMissing"));
             var config = _cloudDriveConfig.Load();
             var items = await _rssFeedClient.FetchAsync(
                 subscription.Url,
@@ -676,13 +676,13 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/cloud-drive/rss", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<RssSubscriptionRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             return Success(_rssSubscriptions.Add(body));
         });
         app.MapPut("/api/cloud-drive/rss/{id:long}", async (long id, HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<RssSubscriptionRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             return Success(_rssSubscriptions.Update(id, body));
         });
         app.MapDelete("/api/cloud-drive/rss/{id:long}", (long id) =>
@@ -714,11 +714,11 @@ public sealed class WebControlServer : IAsyncDisposable
             var requestLimit = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
             if (requestLimit is { IsReadOnly: false }) requestLimit.MaxRequestBodySize = maximumRequestBytes;
             if (request.ContentLength is > maximumRequestBytes)
-                throw new BadHttpRequestException("Bangumi Archive 上传超过 2 GiB 限制。", StatusCodes.Status413PayloadTooLarge);
+                throw new BadHttpRequestException(AppStrings.Get("api.errArchiveLimit"), StatusCodes.Status413PayloadTooLarge);
             var form = await request.ReadFormAsync(request.HttpContext.RequestAborted).ConfigureAwait(false);
             var file = form.Files.GetFile("file");
             if (file is null || file.Length is <= 0 or > BangumiArchiveStore.MaxArchiveBytes)
-                throw new BadHttpRequestException("Archive 文件必须为 1 B 至 2 GiB。", StatusCodes.Status413PayloadTooLarge);
+                throw new BadHttpRequestException(AppStrings.Get("api.errArchiveSize"), StatusCodes.Status413PayloadTooLarge);
             await using var input = file.OpenReadStream();
             return Success(await _bangumiArchive.ImportAsync(input, file.FileName, file.Length,
                 cancellationToken: request.HttpContext.RequestAborted).ConfigureAwait(false));
@@ -741,7 +741,7 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var edits = await JsonSerializer.DeserializeAsync<List<SeriesMetadataEdit>>(request.Body, JsonOptions,
                 request.HttpContext.RequestAborted).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("元数据预览不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errPreviewEmpty"));
             return Success(MetadataSources().PreviewMetadata(id, edits));
         });
         app.MapPost("/api/metadata/sources/{id:long}/batches/{batchId}/apply", async (long id, string batchId) =>
@@ -783,7 +783,7 @@ public sealed class WebControlServer : IAsyncDisposable
                 ? 10
                 : int.TryParse(limitText, out var parsed)
                     ? parsed
-                    : throw new BadHttpRequestException("limit 必须是整数。");
+                    : throw new BadHttpRequestException(AppStrings.Get("api.errLimitInt"));
             return Success(await _bangumiMetadata.SearchAsync(
                 query,
                 limit,
@@ -811,7 +811,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPut("/api/metadata/bangumi/subjects/{id:int}/collection", async (int id, HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<BangumiCollectionRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var token = _metadataTokens.Load().Bangumi ?? string.Empty;
             await _bangumiMetadata.UpsertSubjectCollectionAsync(
                 id,
@@ -824,7 +824,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPut("/api/metadata/bangumi/episodes/{id:int}/collection", async (int id, HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<BangumiCollectionRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             var token = _metadataTokens.Load().Bangumi ?? string.Empty;
             await _bangumiMetadata.UpdateEpisodeCollectionAsync(id, body.Type, token, request.HttpContext.RequestAborted).ConfigureAwait(false);
             return Success(new { episodeId = id, type = body.Type });
@@ -868,7 +868,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPut("/api/settings/metadata/bangumi-token", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<MetadataTokenRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             _metadataTokens.SaveBangumi(body.Token);
             return Success(new { bangumiTokenConfigured = true });
         });
@@ -880,7 +880,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPut("/api/settings/metadata/tmdb-token", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<MetadataTokenRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             _metadataTokens.SaveTmdb(body.Token);
             return Success(new { tmdbTokenConfigured = true });
         });
@@ -893,16 +893,16 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapGet("/api/anime/{id}/poster", async (string id, HttpRequest request) =>
         {
             var series = _getSeries().FirstOrDefault(item => item.ApiId == id || item.AlternateApiIds.Contains(id, StringComparer.Ordinal))
-                ?? throw new BadHttpRequestException("番剧不存在", StatusCodes.Status404NotFound);
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errAnimeMissing"), StatusCodes.Status404NotFound);
             var path = await _resolvePosterPath(series, request.HttpContext.RequestAborted).ConfigureAwait(false);
             if (path is not null && File.Exists(path)) return Results.File(path, PosterContentType(path));
-            throw new BadHttpRequestException("海报不存在", StatusCodes.Status404NotFound);
+            throw new BadHttpRequestException(AppStrings.Get("api.errPosterMissing"), StatusCodes.Status404NotFound);
         });
 
         app.MapGet("/api/anime/{id}", (string id) =>
         {
             var series = _getSeries().FirstOrDefault(item => item.ApiId == id || item.AlternateApiIds.Contains(id, StringComparer.Ordinal))
-                ?? throw new BadHttpRequestException("番剧不存在", StatusCodes.Status404NotFound);
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errAnimeMissing"), StatusCodes.Status404NotFound);
             return Success(new
             {
                 anime = ToAnimeDto(series),
@@ -919,10 +919,10 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/playback/play", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<PlayEpisodeRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmptyBare"));
             if (!await _playEpisode(body.EpisodeId, body.StartPositionMs).ConfigureAwait(false))
             {
-                throw new BadHttpRequestException("剧集不存在", StatusCodes.Status404NotFound);
+                throw new BadHttpRequestException(AppStrings.Get("api.errEpisodeMissing"), StatusCodes.Status404NotFound);
             }
             return Success(_getPlaybackStatus());
         });
@@ -937,8 +937,8 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/playback/command", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<PlaybackCommandRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空");
-            if (string.IsNullOrWhiteSpace(body.Command)) throw new BadHttpRequestException("command 不能为空");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmptyBare"));
+            if (string.IsNullOrWhiteSpace(body.Command)) throw new BadHttpRequestException(AppStrings.Get("api.errCommandEmpty"));
             var status = await _playbackCommand(new PlaybackControlCommand(
                 body.Command,
                 body.PositionMs,
@@ -957,11 +957,11 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var body = await JsonSerializer.DeserializeAsync<PlaybackSettingsRequest>(request.Body, JsonOptions).ConfigureAwait(false)
                 ?? new PlaybackSettingsRequest();
-            if (body.EndAction is not (null or "return_to_detail" or "play_next_episode")) throw new BadHttpRequestException("endAction 不正确");
-            if (body.PreferredSubtitleLanguage is not (null or "auto" or "zh_hans" or "zh_hant" or "zh" or "en" or "ja")) throw new BadHttpRequestException("preferredSubtitleLanguage 不正确");
+            if (body.EndAction is not (null or "return_to_detail" or "play_next_episode")) throw new BadHttpRequestException(AppStrings.Get("api.errEndAction"));
+            if (body.PreferredSubtitleLanguage is not (null or "auto" or "zh_hans" or "zh_hant" or "zh" or "en" or "ja")) throw new BadHttpRequestException(AppStrings.Get("api.errSubLang"));
             if (body.FormatAwareToneMapping is not null)
             {
-                throw new BadHttpRequestException("Windows 客户端不支持 Android 色调映射设置。", StatusCodes.Status501NotImplemented);
+                throw new BadHttpRequestException(AppStrings.Get("api.errToneMap"), StatusCodes.Status501NotImplemented);
             }
             var updated = await UpdateSettingsAsync(current => current with
             {
@@ -996,7 +996,7 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var body = await JsonSerializer.DeserializeAsync<AudioDspPutRequest>(
                 request.Body, AudioDspJsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("音频 DSP 请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errDspEmpty"));
             var requestedConfig = body.Config;
             var config = requestedConfig is null ? AudioDspConfig.Neutral() : requestedConfig.Normalize();
             var errors = requestedConfig?.Validate() ?? [];
@@ -1012,7 +1012,7 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var body = await JsonSerializer.DeserializeAsync<AudioDspPreviewRequest>(
                 request.Body, AudioDspJsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("音频 DSP 预览请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errDspPreviewEmpty"));
             var config = (body.Config ?? AudioDspConfig.Neutral()).Normalize();
             var errors = config.Validate();
             if (errors.Count > 0) throw new BadHttpRequestException(string.Join("; ", errors));
@@ -1036,7 +1036,7 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var body = await JsonSerializer.DeserializeAsync<RewImportRequest>(
                 request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("REW 导入请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errRewEmpty"));
             var target = ParseAudioDspTarget(body.Target);
             var result = RewEqFileParser.Parse(body.Content ?? string.Empty);
             return Success(new
@@ -1062,7 +1062,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/topping/volume", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<ToppingVolumeRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             try
             {
                 return Success(await RequireTopping().SetVolumeAsync(
@@ -1076,7 +1076,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/topping/gain", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<ToppingGainRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             try
             {
                 return Success(await RequireTopping().SetGainAsync(body.On, request.HttpContext.RequestAborted).ConfigureAwait(false));
@@ -1089,7 +1089,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/topping/power", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<ToppingPowerRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             try
             {
                 return Success(await RequireTopping().SetPowerAsync(body.On, request.HttpContext.RequestAborted).ConfigureAwait(false));
@@ -1102,7 +1102,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/topping/preamp", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<ToppingPreampRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             try
             {
                 return Success(await RequireTopping().SetPreampAsync(body.Db, request.HttpContext.RequestAborted).ConfigureAwait(false));
@@ -1126,10 +1126,10 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapPost("/api/topping/preset", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<ToppingPresetRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
-            if (string.IsNullOrWhiteSpace(body.PresetId)) throw new BadHttpRequestException("presetId 不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
+            if (string.IsNullOrWhiteSpace(body.PresetId)) throw new BadHttpRequestException(AppStrings.Get("api.errPresetId"));
             var preset = _findAudioPreset?.Invoke(body.PresetId.Trim());
-            if (preset is null) throw new BadHttpRequestException("预设不存在。", StatusCodes.Status404NotFound);
+            if (preset is null) throw new BadHttpRequestException(AppStrings.Get("api.errPresetMissing"), StatusCodes.Status404NotFound);
             try
             {
                 var mapping = await RequireTopping().ApplyPresetAsync(preset, request.HttpContext.RequestAborted).ConfigureAwait(false);
@@ -1150,17 +1150,17 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapGet("/api/music/albums", (long sourceId) =>
         {
             var root = RequireLocalSourceRoot(sourceId);
-            var library = _musicLibrary ?? throw new BadHttpRequestException("Windows 客户端未启用音乐库。", StatusCodes.Status501NotImplemented);
+            var library = _musicLibrary ?? throw new BadHttpRequestException(AppStrings.Get("api.errNoMusic"), StatusCodes.Status501NotImplemented);
             return Success(library.Scan(root));
         });
         app.MapPost("/api/music/play", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<MusicPlayRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-                ?? throw new BadHttpRequestException("请求不能为空。");
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
             if (_playMusic is null)
-                throw new BadHttpRequestException("Windows 客户端未启用音乐库。", StatusCodes.Status501NotImplemented);
+                throw new BadHttpRequestException(AppStrings.Get("api.errNoMusic"), StatusCodes.Status501NotImplemented);
             if (!await _playMusic(body).ConfigureAwait(false))
-                throw new BadHttpRequestException("曲目不存在或不在本地来源内。", StatusCodes.Status404NotFound);
+                throw new BadHttpRequestException(AppStrings.Get("api.errTrackMissing"), StatusCodes.Status404NotFound);
             return Success(_getPlaybackStatus());
         });
 
@@ -1196,7 +1196,7 @@ public sealed class WebControlServer : IAsyncDisposable
         }
 
         app.MapFallback("/api/{**path}", () =>
-            Results.Json(Failure("接口不存在"), JsonOptions, statusCode: StatusCodes.Status404NotFound));
+            Results.Json(Failure(AppStrings.Get("api.errNoRoute")), JsonOptions, statusCode: StatusCodes.Status404NotFound));
         app.MapGet("/", () => EmbeddedWebResource("index.html", "text/html; charset=utf-8"));
         app.MapGet("/web/app.css", () => EmbeddedWebResource("app.css", "text/css; charset=utf-8"));
         app.MapGet("/web/app.js", () => EmbeddedWebResource("app.js", "text/javascript; charset=utf-8"));
@@ -1206,7 +1206,7 @@ public sealed class WebControlServer : IAsyncDisposable
     private static IResult EmbeddedWebResource(string fileName, string contentType)
     {
         var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"MiruPlay.Windows.Web.{fileName}")
-            ?? throw new InvalidOperationException($"缺少 WebUI 资源: {fileName}");
+            ?? throw new InvalidOperationException(AppStrings.Get("api.errNoWebResource", fileName));
         return Results.Stream(stream, contentType);
     }
 
@@ -1223,10 +1223,10 @@ public sealed class WebControlServer : IAsyncDisposable
     private static async Task<MediaSourceRequest> ReadSourceRequestAsync(HttpRequest request)
     {
         var body = await JsonSerializer.DeserializeAsync<MediaSourceRequest>(request.Body, JsonOptions).ConfigureAwait(false)
-            ?? throw new BadHttpRequestException("请求不能为空");
-        if (string.IsNullOrWhiteSpace(body.Name)) throw new BadHttpRequestException("name 不能为空");
-        if (string.IsNullOrWhiteSpace(body.Type)) throw new BadHttpRequestException("type 不能为空");
-        if (string.IsNullOrWhiteSpace(body.Location)) throw new BadHttpRequestException("location 不能为空");
+            ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmptyBare"));
+        if (string.IsNullOrWhiteSpace(body.Name)) throw new BadHttpRequestException(AppStrings.Get("api.errFieldEmpty", "name"));
+        if (string.IsNullOrWhiteSpace(body.Type)) throw new BadHttpRequestException(AppStrings.Get("api.errFieldEmpty", "type"));
+        if (string.IsNullOrWhiteSpace(body.Location)) throw new BadHttpRequestException(AppStrings.Get("api.errFieldEmpty", "location"));
         return body;
     }
 
@@ -1238,11 +1238,11 @@ public sealed class WebControlServer : IAsyncDisposable
             var drives = Directory.GetLogicalDrives()
                 .Select(drive => new { name = drive, path = drive, canRead = CanReadDirectory(drive) })
                 .ToList();
-            return new { path = "", displayPath = "此电脑", parentPath = (string?)null, entries = drives };
+            return new { path = "", displayPath = AppStrings.Get("api.errThisPc"), parentPath = (string?)null, entries = drives };
         }
 
         var fullPath = Path.GetFullPath(path);
-        if (!Directory.Exists(fullPath)) throw new InvalidDataException("目录不存在。");
+        if (!Directory.Exists(fullPath)) throw new InvalidDataException(AppStrings.Get("api.errDirMissing"));
         try
         {
             var entries = Directory.EnumerateDirectories(fullPath)
@@ -1264,12 +1264,12 @@ public sealed class WebControlServer : IAsyncDisposable
         }
         catch (UnauthorizedAccessException error)
         {
-            throw new InvalidDataException("无权读取该目录。", error);
+            throw new InvalidDataException(AppStrings.Get("api.errDirDenied"), error);
         }
     }
 
     private MediaSourceRegistry MetadataSources() => _metadataSources
-        ?? throw new NotSupportedException("本机未提供可写目录元数据索引。");
+        ?? throw new NotSupportedException(AppStrings.Get("api.errNoWritable"));
 
     private static bool CanReadDirectory(string path)
     {
@@ -1376,7 +1376,7 @@ public sealed class WebControlServer : IAsyncDisposable
         if (value.Length == 0) return null;
         return int.TryParse(value, out var parsed)
             ? parsed
-            : throw new BadHttpRequestException($"{name} 必须是整数。");
+            : throw new BadHttpRequestException(AppStrings.Get("api.errMustInt", name));
     }
 
     private static long? ParseOptionalLong(string value, string name)
@@ -1384,7 +1384,7 @@ public sealed class WebControlServer : IAsyncDisposable
         if (value.Length == 0) return null;
         return long.TryParse(value, out var parsed) && parsed > 0
             ? parsed
-            : throw new BadHttpRequestException($"{name} 必须是正整数。");
+            : throw new BadHttpRequestException(AppStrings.Get("api.errMustPositive", name));
     }
 
     private sealed record MetadataTokenRequest(string Token);
@@ -1436,7 +1436,7 @@ public sealed class WebControlServer : IAsyncDisposable
             "lfe" => AudioDspChannelTarget.Lfe,
             "left_surround" => AudioDspChannelTarget.LeftSurround,
             "right_surround" => AudioDspChannelTarget.RightSurround,
-            _ => throw new BadHttpRequestException("REW 目标声道不正确。"),
+            _ => throw new BadHttpRequestException(AppStrings.Get("api.errRewTarget")),
         };
 
     private static AudioDspChannelLayout AudioDspLayout(AudioDspConfig config)
@@ -1500,7 +1500,7 @@ public sealed class WebControlServer : IAsyncDisposable
     {
         var value = path.Trim().Replace('\\', '/');
         var segments = value.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (segments.Any(segment => segment is "." or "..")) throw new ArgumentException("CloudDrive2 目录不能包含路径遍历。", nameof(path));
+        if (segments.Any(segment => segment is "." or "..")) throw new ArgumentException(AppStrings.Get("api.errTraversal"), nameof(path));
         return segments.Length == 0 ? "/" : $"/{string.Join('/', segments)}";
     }
 
@@ -1561,20 +1561,20 @@ public sealed class WebControlServer : IAsyncDisposable
     }
 
     private ToppingController RequireTopping() => _topping
-        ?? throw new BadHttpRequestException("Windows 客户端未启用 Topping DAC 控制。", StatusCodes.Status501NotImplemented);
+        ?? throw new BadHttpRequestException(AppStrings.Get("api.errNoTopping"), StatusCodes.Status501NotImplemented);
 
     private string RequireLocalSourceRoot(long sourceId)
     {
         var source = _mediaSources.List().FirstOrDefault(item => item.Id == sourceId);
         if (source is null || source.Type != "LOCAL" ||
             !source.ConnectionInfo.TryGetValue("path", out var root) || string.IsNullOrWhiteSpace(root))
-            throw new BadHttpRequestException("仅本地来源支持音乐库。", StatusCodes.Status404NotFound);
+            throw new BadHttpRequestException(AppStrings.Get("api.errMusicLocal"), StatusCodes.Status404NotFound);
         return root;
     }
 
     private static IResult Success(object data) => Results.Json(new ApiEnvelope<object>(true, data, null), JsonOptions);
     private static IResult UnsupportedOnWindows() => Results.Json(
-        Failure("此操作仅适用于 Android，Windows 客户端不支持。"),
+        Failure(AppStrings.Get("api.errAndroidOnly")),
         JsonOptions,
         statusCode: StatusCodes.Status501NotImplemented);
     private static ApiEnvelope<object> Failure(string error) => new(false, null, error);

@@ -4857,6 +4857,867 @@ const I18N = {
   "zh-HK": "校準檔",
   "en-US": "Calibration file",
   "en-GB": "Calibration file"
+ },
+ "api.subTrack": {
+  "zh-CN": "字幕 {0}",
+  "zh-TW": "字幕 {0}",
+  "zh-HK": "字幕 {0}",
+  "en-US": "Subtitle {0}",
+  "en-GB": "Subtitle {0}"
+ },
+ "api.subExternal": {
+  "zh-CN": "{0}（外挂）",
+  "zh-TW": "{0}（外掛）",
+  "zh-HK": "{0}（外掛）",
+  "en-US": "{0} (external)",
+  "en-GB": "{0} (external)"
+ },
+ "api.errUnauthorized": {
+  "zh-CN": "未授权",
+  "zh-TW": "未授權",
+  "zh-HK": "未授權",
+  "en-US": "Unauthorized",
+  "en-GB": "Unauthorised"
+ },
+ "api.errInternal": {
+  "zh-CN": "服务器内部错误",
+  "zh-TW": "伺服器內部錯誤",
+  "zh-HK": "伺服器內部錯誤",
+  "en-US": "Internal server error",
+  "en-GB": "Internal server error"
+ },
+ "api.errTaskMissing": {
+  "zh-CN": "任务不存在。",
+  "zh-TW": "工作不存在。",
+  "zh-HK": "工作不存在。",
+  "en-US": "Task not found.",
+  "en-GB": "Task not found."
+ },
+ "api.errEmpty": {
+  "zh-CN": "请求不能为空。",
+  "zh-TW": "請求不能為空。",
+  "zh-HK": "請求不能為空。",
+  "en-US": "Request must not be empty.",
+  "en-GB": "Request must not be empty."
+ },
+ "api.errEmptyBare": {
+  "zh-CN": "请求不能为空",
+  "zh-TW": "請求不能為空",
+  "zh-HK": "請求不能為空",
+  "en-US": "Request must not be empty",
+  "en-GB": "Request must not be empty"
+ },
+ "api.errInstallConfirm": {
+  "zh-CN": "启动 Windows 安装器前必须明确确认。",
+  "zh-TW": "啟動 Windows 安裝程式前必須明確確認。",
+  "zh-HK": "啟動 Windows 安裝程式前必須明確確認。",
+  "en-US": "Confirm explicitly before starting the Windows installer.",
+  "en-GB": "Confirm explicitly before starting the Windows installer."
+ },
+ "api.errAppAction": {
+  "zh-CN": "不支持的应用控制动作。",
+  "zh-TW": "不支援的應用控制動作。",
+  "zh-HK": "不支援的應用控制動作。",
+  "en-US": "Unsupported app-control action.",
+  "en-GB": "Unsupported app-control action."
+ },
+ "api.errAppAccepted": {
+  "zh-CN": "已接受应用控制请求。",
+  "zh-TW": "已接受應用控制請求。",
+  "zh-HK": "已接受應用控制請求。",
+  "en-US": "App-control request accepted.",
+  "en-GB": "App-control request accepted."
+ },
+ "api.errNoAppHandler": {
+  "zh-CN": "Windows 客户端尚未连接应用生命周期处理器。",
+  "zh-TW": "Windows 客戶端尚未連接應用生命週期處理器。",
+  "zh-HK": "Windows 客戶端尚未連接應用生命週期處理器。",
+  "en-US": "Windows client has no app-lifecycle handler connected.",
+  "en-GB": "Windows client has no app-lifecycle handler connected."
+ },
+ "api.errSrcId": {
+  "zh-CN": "媒体源 ID 不正确",
+  "zh-TW": "媒體來源 ID 不正確",
+  "zh-HK": "媒體來源 ID 不正確",
+  "en-US": "Bad media source ID",
+  "en-GB": "Bad media source ID"
+ },
+ "api.errScanAll": {
+  "zh-CN": "扫描全部媒体源",
+  "zh-TW": "掃描全部媒體來源",
+  "zh-HK": "掃描全部媒體來源",
+  "en-US": "Scan all media sources",
+  "en-GB": "Scan all media sources"
+ },
+ "api.errScanProgress": {
+  "zh-CN": "已扫描 {0} / {1} 个来源",
+  "zh-TW": "已掃描 {0} / {1} 個來源",
+  "zh-HK": "已掃描 {0} / {1} 個來源",
+  "en-US": "Scanned {0} of {1} sources",
+  "en-GB": "Scanned {0} of {1} sources"
+ },
+ "api.errScanFailed": {
+  "zh-CN": "一个或多个媒体源扫描失败；请查看任务与本地日志。",
+  "zh-TW": "一或多個媒體來源掃描失敗；請查看工作與本機日誌。",
+  "zh-HK": "一個或多個媒體來源掃描失敗；請查看工作與本機日誌。",
+  "en-US": "One or more sources failed to scan; check tasks and local logs.",
+  "en-GB": "One or more sources failed to scan; check tasks and local logs."
+ },
+ "api.errArrangement": {
+  "zh-CN": "posterWallArrangement 必须是 TITLE 或 RELEASE_SEASON。",
+  "zh-TW": "posterWallArrangement 必須是 TITLE 或 RELEASE_SEASON。",
+  "zh-HK": "posterWallArrangement 必須是 TITLE 或 RELEASE_SEASON。",
+  "en-US": "posterWallArrangement must be TITLE or RELEASE_SEASON.",
+  "en-GB": "posterWallArrangement must be TITLE or RELEASE_SEASON."
+ },
+ "api.errVersionPolicy": {
+  "zh-CN": "episodeVersionSelectionPolicy 不正确。",
+  "zh-TW": "episodeVersionSelectionPolicy 不正確。",
+  "zh-HK": "episodeVersionSelectionPolicy 不正確。",
+  "en-US": "episodeVersionSelectionPolicy is invalid.",
+  "en-GB": "episodeVersionSelectionPolicy is invalid."
+ },
+ "api.errScanInterval": {
+  "zh-CN": "autoScanIntervalHours 必须是 1、6、12 或 24。",
+  "zh-TW": "autoScanIntervalHours 必須是 1、6、12 或 24。",
+  "zh-HK": "autoScanIntervalHours 必須是 1、6、12 或 24。",
+  "en-US": "autoScanIntervalHours must be 1, 6, 12 or 24.",
+  "en-GB": "autoScanIntervalHours must be 1, 6, 12 or 24."
+ },
+ "api.errAppMode": {
+  "zh-CN": "currentAppMode 不正确",
+  "zh-TW": "currentAppMode 不正確",
+  "zh-HK": "currentAppMode 不正確",
+  "en-US": "currentAppMode is invalid",
+  "en-GB": "currentAppMode is invalid"
+ },
+ "api.errCdLogin": {
+  "zh-CN": "请先登录或验证 CloudDrive2 API Token。",
+  "zh-TW": "請先登入或驗證 CloudDrive2 API Token。",
+  "zh-HK": "請先登入或驗證 CloudDrive2 API Token。",
+  "en-US": "Log in or verify a CloudDrive2 API token first.",
+  "en-GB": "Log in or verify a CloudDrive2 API token first."
+ },
+ "api.errCdRoot": {
+  "zh-CN": "CloudDrive 根目录",
+  "zh-TW": "CloudDrive 根目錄",
+  "zh-HK": "CloudDrive 根目錄",
+  "en-US": "CloudDrive root directory",
+  "en-GB": "CloudDrive root directory"
+ },
+ "api.errCdSync": {
+  "zh-CN": "CloudDrive/RSS 同步",
+  "zh-TW": "CloudDrive/RSS 同步",
+  "zh-HK": "CloudDrive/RSS 同步",
+  "en-US": "CloudDrive/RSS sync",
+  "en-GB": "CloudDrive/RSS sync"
+ },
+ "api.errCdNoOffline": {
+  "zh-CN": "CloudDrive2 API Token 没有离线下载权限。",
+  "zh-TW": "CloudDrive2 API Token 沒有離線下載權限。",
+  "zh-HK": "CloudDrive2 API Token 沒有離線下載權限。",
+  "en-US": "CloudDrive2 API token lacks offline-download permission.",
+  "en-GB": "CloudDrive2 API token lacks offline-download permission."
+ },
+ "api.errInboxOutside": {
+  "zh-CN": "离线下载目录超出 CloudDrive2 Token 根目录。",
+  "zh-TW": "離線下載目錄超出 CloudDrive2 Token 根目錄。",
+  "zh-HK": "離線下載目錄超出 CloudDrive2 Token 根目錄。",
+  "en-US": "Offline download directory escapes the CloudDrive2 token root.",
+  "en-GB": "Offline download directory escapes the CloudDrive2 token root."
+ },
+ "api.errRssMissing": {
+  "zh-CN": "RSS 订阅不存在。",
+  "zh-TW": "RSS 訂閱不存在。",
+  "zh-HK": "RSS 訂閱不存在。",
+  "en-US": "RSS subscription not found.",
+  "en-GB": "RSS subscription not found."
+ },
+ "api.errArchiveLimit": {
+  "zh-CN": "Bangumi Archive 上传超过 2 GiB 限制。",
+  "zh-TW": "Bangumi Archive 上傳超過 2 GiB 限制。",
+  "zh-HK": "Bangumi Archive 上傳超過 2 GiB 限制。",
+  "en-US": "Bangumi Archive upload exceeds the 2 GiB limit.",
+  "en-GB": "Bangumi Archive upload exceeds the 2 GiB limit."
+ },
+ "api.errArchiveSize": {
+  "zh-CN": "Archive 文件必须为 1 B 至 2 GiB。",
+  "zh-TW": "Archive 檔案必須為 1 B 至 2 GiB。",
+  "zh-HK": "Archive 檔案必須為 1 B 至 2 GiB。",
+  "en-US": "Archive file must be 1 B to 2 GiB.",
+  "en-GB": "Archive file must be 1 B to 2 GiB."
+ },
+ "api.errPreviewEmpty": {
+  "zh-CN": "元数据预览不能为空。",
+  "zh-TW": "元數據預覽不能為空。",
+  "zh-HK": "元數據預覽不能為空。",
+  "en-US": "Metadata preview must not be empty.",
+  "en-GB": "Metadata preview must not be empty."
+ },
+ "api.errLimitInt": {
+  "zh-CN": "limit 必须是整数。",
+  "zh-TW": "limit 必須是整數。",
+  "zh-HK": "limit 必須是整數。",
+  "en-US": "limit must be an integer.",
+  "en-GB": "limit must be an integer."
+ },
+ "api.errAnimeMissing": {
+  "zh-CN": "番剧不存在",
+  "zh-TW": "番劇不存在",
+  "zh-HK": "番劇不存在",
+  "en-US": "Title not found",
+  "en-GB": "Title not found"
+ },
+ "api.errPosterMissing": {
+  "zh-CN": "海报不存在",
+  "zh-TW": "海報不存在",
+  "zh-HK": "海報不存在",
+  "en-US": "Poster not found",
+  "en-GB": "Poster not found"
+ },
+ "api.errEpisodeMissing": {
+  "zh-CN": "剧集不存在",
+  "zh-TW": "劇集不存在",
+  "zh-HK": "劇集不存在",
+  "en-US": "Episode not found",
+  "en-GB": "Episode not found"
+ },
+ "api.errCommandEmpty": {
+  "zh-CN": "command 不能为空",
+  "zh-TW": "command 不能為空",
+  "zh-HK": "command 不能為空",
+  "en-US": "command must not be empty",
+  "en-GB": "command must not be empty"
+ },
+ "api.errEndAction": {
+  "zh-CN": "endAction 不正确",
+  "zh-TW": "endAction 不正確",
+  "zh-HK": "endAction 不正確",
+  "en-US": "endAction is invalid",
+  "en-GB": "endAction is invalid"
+ },
+ "api.errSubLang": {
+  "zh-CN": "preferredSubtitleLanguage 不正确",
+  "zh-TW": "preferredSubtitleLanguage 不正確",
+  "zh-HK": "preferredSubtitleLanguage 不正確",
+  "en-US": "preferredSubtitleLanguage is invalid",
+  "en-GB": "preferredSubtitleLanguage is invalid"
+ },
+ "api.errToneMap": {
+  "zh-CN": "Windows 客户端不支持 Android 色调映射设置。",
+  "zh-TW": "Windows 客戶端不支援 Android 色調映射設定。",
+  "zh-HK": "Windows 客戶端不支援 Android 色調映射設定。",
+  "en-US": "Windows client does not support Android tone-mapping settings.",
+  "en-GB": "Windows client does not support Android tone-mapping settings."
+ },
+ "api.errDspEmpty": {
+  "zh-CN": "音频 DSP 请求不能为空。",
+  "zh-TW": "音訊 DSP 請求不能為空。",
+  "zh-HK": "音頻 DSP 請求不能為空。",
+  "en-US": "Audio DSP request must not be empty.",
+  "en-GB": "Audio DSP request must not be empty."
+ },
+ "api.errDspPreviewEmpty": {
+  "zh-CN": "音频 DSP 预览请求不能为空。",
+  "zh-TW": "音訊 DSP 預覽請求不能為空。",
+  "zh-HK": "音頻 DSP 預覽請求不能為空。",
+  "en-US": "Audio DSP preview request must not be empty.",
+  "en-GB": "Audio DSP preview request must not be empty."
+ },
+ "api.errRewEmpty": {
+  "zh-CN": "REW 导入请求不能为空。",
+  "zh-TW": "REW 匯入請求不能為空。",
+  "zh-HK": "REW 匯入請求不能為空。",
+  "en-US": "REW import request must not be empty.",
+  "en-GB": "REW import request must not be empty."
+ },
+ "api.errPresetId": {
+  "zh-CN": "presetId 不能为空。",
+  "zh-TW": "presetId 不能為空。",
+  "zh-HK": "presetId 不能為空。",
+  "en-US": "presetId must not be empty.",
+  "en-GB": "presetId must not be empty."
+ },
+ "api.errPresetMissing": {
+  "zh-CN": "预设不存在。",
+  "zh-TW": "預設不存在。",
+  "zh-HK": "預設不存在。",
+  "en-US": "Preset not found.",
+  "en-GB": "Preset not found."
+ },
+ "api.errNoMusic": {
+  "zh-CN": "Windows 客户端未启用音乐库。",
+  "zh-TW": "Windows 客戶端未啟用音樂庫。",
+  "zh-HK": "Windows 客戶端未啟用音樂庫。",
+  "en-US": "Windows client has music library disabled.",
+  "en-GB": "Windows client has music library disabled."
+ },
+ "api.errTrackMissing": {
+  "zh-CN": "曲目不存在或不在本地来源内。",
+  "zh-TW": "曲目不存在或不在本機來源內。",
+  "zh-HK": "曲目不存在或唔喺本機來源內。",
+  "en-US": "Track not found or outside local sources.",
+  "en-GB": "Track not found or outside local sources."
+ },
+ "api.errNoRoute": {
+  "zh-CN": "接口不存在",
+  "zh-TW": "介面不存在",
+  "zh-HK": "介面不存在",
+  "en-US": "No such endpoint",
+  "en-GB": "No such endpoint"
+ },
+ "api.errNoWebResource": {
+  "zh-CN": "缺少 WebUI 资源: {0}",
+  "zh-TW": "缺少 WebUI 資源: {0}",
+  "zh-HK": "缺少 WebUI 資源: {0}",
+  "en-US": "Missing WebUI resource: {0}",
+  "en-GB": "Missing WebUI resource: {0}"
+ },
+ "api.errFieldEmpty": {
+  "zh-CN": "{0} 不能为空",
+  "zh-TW": "{0} 不能為空",
+  "zh-HK": "{0} 不能為空",
+  "en-US": "{0} must not be empty",
+  "en-GB": "{0} must not be empty"
+ },
+ "api.errThisPc": {
+  "zh-CN": "此电脑",
+  "zh-TW": "此電腦",
+  "zh-HK": "此電腦",
+  "en-US": "This PC",
+  "en-GB": "This PC"
+ },
+ "api.errDirMissing": {
+  "zh-CN": "目录不存在。",
+  "zh-TW": "目錄不存在。",
+  "zh-HK": "目錄不存在。",
+  "en-US": "Directory not found.",
+  "en-GB": "Directory not found."
+ },
+ "api.errDirDenied": {
+  "zh-CN": "无权读取该目录。",
+  "zh-TW": "無權讀取該目錄。",
+  "zh-HK": "無權讀取該目錄。",
+  "en-US": "Directory read denied.",
+  "en-GB": "Directory read denied."
+ },
+ "api.errNoWritable": {
+  "zh-CN": "本机未提供可写目录元数据索引。",
+  "zh-TW": "本機未提供可寫入目錄元數據索引。",
+  "zh-HK": "本機未提供可寫入目錄元數據索引。",
+  "en-US": "No writable directory metadata index on this machine.",
+  "en-GB": "No writable directory metadata index on this machine."
+ },
+ "api.errMustInt": {
+  "zh-CN": "{0} 必须是整数。",
+  "zh-TW": "{0} 必須是整數。",
+  "zh-HK": "{0} 必須是整數。",
+  "en-US": "{0} must be an integer.",
+  "en-GB": "{0} must be an integer."
+ },
+ "api.errMustPositive": {
+  "zh-CN": "{0} 必须是正整数。",
+  "zh-TW": "{0} 必須是正整數。",
+  "zh-HK": "{0} 必須是正整數。",
+  "en-US": "{0} must be a positive integer.",
+  "en-GB": "{0} must be a positive integer."
+ },
+ "api.errRewTarget": {
+  "zh-CN": "REW 目标声道不正确。",
+  "zh-TW": "REW 目標聲道不正確。",
+  "zh-HK": "REW 目標聲道不正確。",
+  "en-US": "REW target channel is invalid.",
+  "en-GB": "REW target channel is invalid."
+ },
+ "api.errTraversal": {
+  "zh-CN": "CloudDrive2 目录不能包含路径遍历。",
+  "zh-TW": "CloudDrive2 目錄不能包含路徑遍歷。",
+  "zh-HK": "CloudDrive2 目錄不能包含路徑遍歷。",
+  "en-US": "CloudDrive2 paths must not traverse.",
+  "en-GB": "CloudDrive2 paths must not traverse."
+ },
+ "api.errNoTopping": {
+  "zh-CN": "Windows 客户端未启用 Topping DAC 控制。",
+  "zh-TW": "Windows 客戶端未啟用 Topping DAC 控制。",
+  "zh-HK": "Windows 客戶端未啟用 Topping DAC 控制。",
+  "en-US": "Windows client has Topping DAC control disabled.",
+  "en-GB": "Windows client has Topping DAC control disabled."
+ },
+ "api.errMusicLocal": {
+  "zh-CN": "仅本地来源支持音乐库。",
+  "zh-TW": "僅本機來源支援音樂庫。",
+  "zh-HK": "僅本機來源支援音樂庫。",
+  "en-US": "Music library supports local sources only.",
+  "en-GB": "Music library supports local sources only."
+ },
+ "api.errAndroidOnly": {
+  "zh-CN": "此操作仅适用于 Android，Windows 客户端不支持。",
+  "zh-TW": "此操作僅適用於 Android，Windows 客戶端不支援。",
+  "zh-HK": "此操作僅適用於 Android，Windows 客戶端不支援。",
+  "en-US": "Android-only; unsupported on Windows.",
+  "en-GB": "Android-only; unsupported on Windows."
+ },
+ "reg.localDir": {
+  "zh-CN": "本地目录",
+  "zh-TW": "本機目錄",
+  "zh-HK": "本機目錄",
+  "en-US": "Local directory",
+  "en-GB": "Local directory"
+ },
+ "reg.localMlip": {
+  "zh-CN": "本地 MLIP",
+  "zh-TW": "本機 MLIP",
+  "zh-HK": "本機 MLIP",
+  "en-US": "Local MLIP",
+  "en-GB": "Local MLIP"
+ },
+ "reg.davDir": {
+  "zh-CN": "WebDAV 目录",
+  "zh-TW": "WebDAV 目錄",
+  "zh-HK": "WebDAV 目錄",
+  "en-US": "WebDAV directory",
+  "en-GB": "WebDAV directory"
+ },
+ "reg.smbDir": {
+  "zh-CN": "SMB 目录",
+  "zh-TW": "SMB 目錄",
+  "zh-HK": "SMB 目錄",
+  "en-US": "SMB directory",
+  "en-GB": "SMB directory"
+ },
+ "reg.connected": {
+  "zh-CN": "已连接",
+  "zh-TW": "已連接",
+  "zh-HK": "已連接",
+  "en-US": "Connected",
+  "en-GB": "Connected"
+ },
+ "reg.disconnected": {
+  "zh-CN": "未连接",
+  "zh-TW": "未連接",
+  "zh-HK": "未連接",
+  "en-US": "Disconnected",
+  "en-GB": "Disconnected"
+ },
+ "reg.rssAvailable": {
+  "zh-CN": "RSS 在线源可用：{0} 集，{1} 部作品",
+  "zh-TW": "RSS 線上來源可用：{0} 集，{1} 部作品",
+  "zh-HK": "RSS 線上來源可用：{0} 集，{1} 部作品",
+  "en-US": "RSS online source available: {0} episodes, {1} works",
+  "en-GB": "RSS online source available: {0} episodes, {1} works"
+ },
+ "reg.dirReadable": {
+  "zh-CN": "目录可读",
+  "zh-TW": "目錄可讀",
+  "zh-HK": "目錄可讀",
+  "en-US": "Directory readable",
+  "en-GB": "Directory readable"
+ },
+ "reg.mlipInfo": {
+  "zh-CN": "MLIP v{0}，{1} 部作品",
+  "zh-TW": "MLIP v{0}，{1} 部作品",
+  "zh-HK": "MLIP v{0}，{1} 部作品",
+  "en-US": "MLIP v{0}, {1} works",
+  "en-GB": "MLIP v{0}, {1} works"
+ },
+ "reg.srcExists": {
+  "zh-CN": "该媒体源已经存在。",
+  "zh-TW": "該媒體來源已經存在。",
+  "zh-HK": "該媒體來源已經存在。",
+  "en-US": "Media source already exists.",
+  "en-GB": "Media source already exists."
+ },
+ "reg.srcMissing": {
+  "zh-CN": "媒体源不存在。",
+  "zh-TW": "媒體來源不存在。",
+  "zh-HK": "媒體來源不存在。",
+  "en-US": "Media source not found.",
+  "en-GB": "Media source not found."
+ },
+ "reg.smbCredFailed": {
+  "zh-CN": "SMB 凭据更新失败，且无法恢复先前连接。",
+  "zh-TW": "SMB 憑證更新失敗，且無法恢復先前連接。",
+  "zh-HK": "SMB 憑證更新失敗，且無法恢復先前連接。",
+  "en-US": "SMB credential update failed and the previous connection could not be restored.",
+  "en-GB": "SMB credential update failed and the previous connection could not be restored."
+ },
+ "reg.notImplDir": {
+  "zh-CN": "Windows 客户端尚未实现 {0} 普通目录扫描。",
+  "zh-TW": "Windows 客戶端尚未實作 {0} 一般目錄掃描。",
+  "zh-HK": "Windows 客戶端尚未實作 {0} 一般目錄掃描。",
+  "en-US": "Windows client does not implement {0} directory scanning.",
+  "en-GB": "Windows client does not implement {0} directory scanning."
+ },
+ "reg.notImplSrc": {
+  "zh-CN": "Windows 客户端尚未实现 {0} 媒体源。",
+  "zh-TW": "Windows 客戶端尚未實作 {0} 媒體來源。",
+  "zh-HK": "Windows 客戶端尚未實作 {0} 媒體來源。",
+  "en-US": "Windows client does not implement {0} media sources.",
+  "en-GB": "Windows client does not implement {0} media sources."
+ },
+ "reg.dirOnly": {
+  "zh-CN": "仅普通目录来源支持本地元数据编辑；MLIP 与 RSS 保持只读。",
+  "zh-TW": "僅一般目錄來源支援本機元數據編輯；MLIP 與 RSS 保持唯讀。",
+  "zh-HK": "僅一般目錄來源支援本機元數據編輯；MLIP 與 RSS 保持唯讀。",
+  "en-US": "Only directory sources support local metadata editing; MLIP and RSS stay read-only.",
+  "en-GB": "Only directory sources support local metadata editing; MLIP and RSS stay read-only."
+ },
+ "reg.proxyOnly": {
+  "zh-CN": "只有 WebDAV 媒体源使用 HTTP 播放代理。",
+  "zh-TW": "只有 WebDAV 媒體來源使用 HTTP 播放代理。",
+  "zh-HK": "只有 WebDAV 媒體來源使用 HTTP 播放代理。",
+  "en-US": "Only WebDAV sources use the HTTP playback proxy.",
+  "en-GB": "Only WebDAV sources use the HTTP playback proxy."
+ },
+ "reg.posterOnly": {
+  "zh-CN": "只有 WebDAV 媒体源需要鉴权海报缓存。",
+  "zh-TW": "只有 WebDAV 媒體來源需要驗證海報快取。",
+  "zh-HK": "只有 WebDAV 媒體來源需要驗證海報快取。",
+  "en-US": "Only WebDAV sources need authenticated poster caching.",
+  "en-GB": "Only WebDAV sources need authenticated poster caching."
+ },
+ "reg.unknownType": {
+  "zh-CN": "未知媒体源类型: {0}",
+  "zh-TW": "未知媒體來源類型: {0}",
+  "zh-HK": "未知媒體來源類型: {0}",
+  "en-US": "Unknown media source type: {0}",
+  "en-GB": "Unknown media source type: {0}"
+ },
+ "reg.nameRequired": {
+  "zh-CN": "媒体源名称不能为空。",
+  "zh-TW": "媒體來源名稱不能為空。",
+  "zh-HK": "媒體來源名稱不能為空。",
+  "en-US": "Media source name must not be empty.",
+  "en-GB": "Media source name must not be empty."
+ },
+ "reg.typeRequired": {
+  "zh-CN": "媒体源类型不能为空。",
+  "zh-TW": "媒體來源類型不能為空。",
+  "zh-HK": "媒體來源類型不能為空。",
+  "en-US": "Media source type must not be empty.",
+  "en-GB": "Media source type must not be empty."
+ },
+ "reg.locationRequired": {
+  "zh-CN": "媒体源位置不能为空。",
+  "zh-TW": "媒體來源位置不能為空。",
+  "zh-HK": "媒體來源位置不能為空。",
+  "en-US": "Media source location must not be empty.",
+  "en-GB": "Media source location must not be empty."
+ },
+ "reg.modeAnimeDrama": {
+  "zh-CN": "内容模式必须是 ANIME 或 DRAMA。",
+  "zh-TW": "內容模式必須是 ANIME 或 DRAMA。",
+  "zh-HK": "內容模式必須是 ANIME 或 DRAMA。",
+  "en-US": "Content mode must be ANIME or DRAMA.",
+  "en-GB": "Content mode must be ANIME or DRAMA."
+ },
+ "reg.rssNoCred": {
+  "zh-CN": "RSS 在线源不接受用户名或密码。",
+  "zh-TW": "RSS 線上來源不接受使用者名稱或密碼。",
+  "zh-HK": "RSS 線上來源不接受用戶名或密碼。",
+  "en-US": "RSS online sources accept no username or password.",
+  "en-GB": "RSS online sources accept no username or password."
+ },
+ "reg.recogMode": {
+  "zh-CN": "识别模式必须是 MLIP 或 DIRECTORY。",
+  "zh-TW": "識別模式必須是 MLIP 或 DIRECTORY。",
+  "zh-HK": "識別模式必須是 MLIP 或 DIRECTORY。",
+  "en-US": "Recognition mode must be MLIP or DIRECTORY.",
+  "en-GB": "Recognition mode must be MLIP or DIRECTORY."
+ },
+ "reg.mlipMode": {
+  "zh-CN": "Windows 客户端当前仅支持 LIBRARY_DB_LOCAL_PRIORITY 元数据模式。",
+  "zh-TW": "Windows 客戶端目前僅支援 LIBRARY_DB_LOCAL_PRIORITY 元數據模式。",
+  "zh-HK": "Windows 客戶端目前僅支援 LIBRARY_DB_LOCAL_PRIORITY 元數據模式。",
+  "en-US": "Windows client currently supports only the LIBRARY_DB_LOCAL_PRIORITY metadata mode.",
+  "en-GB": "Windows client currently supports only the LIBRARY_DB_LOCAL_PRIORITY metadata mode."
+ },
+ "reg.localNoCred": {
+  "zh-CN": "本地媒体源不接受域、用户名或密码。",
+  "zh-TW": "本機媒體來源不接受網域、使用者名稱或密碼。",
+  "zh-HK": "本機媒體來源不接受域、用戶名或密碼。",
+  "en-US": "Local media sources accept no domain, username or password.",
+  "en-GB": "Local media sources accept no domain, username or password."
+ },
+ "reg.readMlip": {
+  "zh-CN": "无法读取 MLIP 媒体源：{0}",
+  "zh-TW": "無法讀取 MLIP 媒體來源：{0}",
+  "zh-HK": "無法讀取 MLIP 媒體來源：{0}",
+  "en-US": "Cannot read MLIP media source: {0}",
+  "en-GB": "Cannot read MLIP media source: {0}"
+ },
+ "reg.readDavMlip": {
+  "zh-CN": "无法读取 WebDAV MLIP 媒体源：{0}",
+  "zh-TW": "無法讀取 WebDAV MLIP 媒體來源：{0}",
+  "zh-HK": "無法讀取 WebDAV MLIP 媒體來源：{0}",
+  "en-US": "Cannot read WebDAV MLIP media source: {0}",
+  "en-GB": "Cannot read WebDAV MLIP media source: {0}"
+ },
+ "reg.readSmbMlip": {
+  "zh-CN": "无法读取 SMB MLIP 媒体源：{0}",
+  "zh-TW": "無法讀取 SMB MLIP 媒體來源：{0}",
+  "zh-HK": "無法讀取 SMB MLIP 媒體來源：{0}",
+  "en-US": "Cannot read SMB MLIP media source: {0}",
+  "en-GB": "Cannot read SMB MLIP media source: {0}"
+ },
+ "wpf.music.playTrack": {
+  "zh-CN": "播放所选曲目",
+  "zh-TW": "播放所選曲目",
+  "zh-HK": "播放所選曲目",
+  "en-US": "Play selected track",
+  "en-GB": "Play selected track"
+ },
+ "wpf.music.playAlbum": {
+  "zh-CN": "从该曲开始连播整张专辑",
+  "zh-TW": "從該曲開始連播整張專輯",
+  "zh-HK": "從該曲開始連播整張專輯",
+  "en-US": "Play album from this track",
+  "en-GB": "Play album from this track"
+ },
+ "wpf.music.localSrc": {
+  "zh-CN": "本地来源",
+  "zh-TW": "本機來源",
+  "zh-HK": "本機來源",
+  "en-US": "Local source",
+  "en-GB": "Local source"
+ },
+ "wpf.music.musicSrc": {
+  "zh-CN": "音乐来源",
+  "zh-TW": "音樂來源",
+  "zh-HK": "音樂來源",
+  "en-US": "Music source",
+  "en-GB": "Music source"
+ },
+ "wpf.music.albums": {
+  "zh-CN": "专辑",
+  "zh-TW": "專輯",
+  "zh-HK": "專輯",
+  "en-US": "Albums",
+  "en-GB": "Albums"
+ },
+ "wpf.music.albumList": {
+  "zh-CN": "专辑列表",
+  "zh-TW": "專輯列表",
+  "zh-HK": "專輯列表",
+  "en-US": "Album list",
+  "en-GB": "Album list"
+ },
+ "wpf.music.tracks": {
+  "zh-CN": "曲目",
+  "zh-TW": "曲目",
+  "zh-HK": "曲目",
+  "en-US": "Tracks",
+  "en-GB": "Tracks"
+ },
+ "wpf.music.trackList": {
+  "zh-CN": "曲目列表",
+  "zh-TW": "曲目列表",
+  "zh-HK": "曲目列表",
+  "en-US": "Track list",
+  "en-GB": "Track list"
+ },
+ "wpf.music.noLocalSrc": {
+  "zh-CN": "没有本地来源；请先在媒体源中添加本地目录。",
+  "zh-TW": "沒有本機來源；請先在媒體來源中新增本機目錄。",
+  "zh-HK": "沒有本機來源；請先在媒體來源中新增本機目錄。",
+  "en-US": "No local sources; add a local directory under media sources first.",
+  "en-GB": "No local sources; add a local directory under media sources first."
+ },
+ "wpf.music.albumTracks": {
+  "zh-CN": "{0}（{1} 首）",
+  "zh-TW": "{0}（{1} 首）",
+  "zh-HK": "{0}（{1} 首）",
+  "en-US": "{0} ({1} tracks)",
+  "en-GB": "{0} ({1} tracks)"
+ },
+ "wpf.music.scanning": {
+  "zh-CN": "正在扫描音乐目录…",
+  "zh-TW": "正在掃描音樂目錄…",
+  "zh-HK": "掃緊音樂目錄…",
+  "en-US": "Scanning music directory…",
+  "en-GB": "Scanning music directory…"
+ },
+ "wpf.music.srcUnavailable": {
+  "zh-CN": "来源路径不可用。",
+  "zh-TW": "來源路徑不可用。",
+  "zh-HK": "來源路徑不可用。",
+  "en-US": "Source path unavailable.",
+  "en-GB": "Source path unavailable."
+ },
+ "wpf.music.noAudio": {
+  "zh-CN": "该来源没有可播放的音频文件。",
+  "zh-TW": "該來源沒有可播放的音訊檔。",
+  "zh-HK": "該來源沒有可播放的音頻檔。",
+  "en-US": "This source has no playable audio files.",
+  "en-GB": "This source has no playable audio files."
+ },
+ "wpf.music.albumCount": {
+  "zh-CN": "共 {0} 张专辑。",
+  "zh-TW": "共 {0} 張專輯。",
+  "zh-HK": "共 {0} 張專輯。",
+  "en-US": "{0} albums.",
+  "en-GB": "{0} albums."
+ },
+ "wpf.music.selectTrack": {
+  "zh-CN": "请先选择一首曲目。",
+  "zh-TW": "請先選擇一首曲目。",
+  "zh-HK": "請先選擇一首曲目。",
+  "en-US": "Select a track first.",
+  "en-GB": "Select a track first."
+ },
+ "wpf.music.nowPlaying": {
+  "zh-CN": "正在播放：{0}",
+  "zh-TW": "正在播放：{0}",
+  "zh-HK": "播放緊：{0}",
+  "en-US": "Now playing: {0}",
+  "en-GB": "Now playing: {0}"
+ },
+ "wpf.music.playFailed": {
+  "zh-CN": "播放启动失败；请检查文件是否存在。",
+  "zh-TW": "播放啟動失敗；請檢查檔案是否存在。",
+  "zh-HK": "播放啟動失敗；請檢查檔案是否存在。",
+  "en-US": "Failed to start playback; check the file exists.",
+  "en-GB": "Failed to start playback; check the file exists."
+ },
+ "wpf.play2.pause": {
+  "zh-CN": "暂停",
+  "zh-TW": "暫停",
+  "zh-HK": "暫停",
+  "en-US": "Pause",
+  "en-GB": "Pause"
+ },
+ "wpf.play2.preparing": {
+  "zh-CN": "正在准备播放",
+  "zh-TW": "正在準備播放",
+  "zh-HK": "準備緊播放",
+  "en-US": "Preparing playback",
+  "en-GB": "Preparing playback"
+ },
+ "wpf.play2.queueSummary": {
+  "zh-CN": "{0} 集 · 当前 {1}",
+  "zh-TW": "{0} 集 · 目前 {1}",
+  "zh-HK": "{0} 集 · 目前 {1}",
+  "en-US": "{0} episodes · current {1}",
+  "en-GB": "{0} episodes · current {1}"
+ },
+ "wpf.play2.noAudioTrack": {
+  "zh-CN": "没有可选音轨",
+  "zh-TW": "沒有可選音軌",
+  "zh-HK": "沒有可選音軌",
+  "en-US": "No audio tracks",
+  "en-GB": "No audio tracks"
+ },
+ "wpf.play2.noSubTrack": {
+  "zh-CN": "没有可选字幕",
+  "zh-TW": "沒有可選字幕",
+  "zh-HK": "沒有可選字幕",
+  "en-US": "No subtitle tracks",
+  "en-GB": "No subtitle tracks"
+ },
+ "wpf.play2.audioTrack": {
+  "zh-CN": "音轨：{0}",
+  "zh-TW": "音軌：{0}",
+  "zh-HK": "音軌：{0}",
+  "en-US": "Audio: {0}",
+  "en-GB": "Audio: {0}"
+ },
+ "wpf.play2.subTrack": {
+  "zh-CN": "字幕：{0}",
+  "zh-TW": "字幕：{0}",
+  "zh-HK": "字幕：{0}",
+  "en-US": "Subtitles: {0}",
+  "en-GB": "Subtitles: {0}"
+ },
+ "wpf.play2.speedRate": {
+  "zh-CN": "倍速：{0}",
+  "zh-TW": "倍速：{0}",
+  "zh-HK": "倍速：{0}",
+  "en-US": "Speed: {0}",
+  "en-GB": "Speed: {0}"
+ },
+ "wpf.play2.muted": {
+  "zh-CN": "已静音",
+  "zh-TW": "已靜音",
+  "zh-HK": "已靜音",
+  "en-US": "Muted",
+  "en-GB": "Muted"
+ },
+ "wpf.play2.volPercent": {
+  "zh-CN": "音量 {0}%",
+  "zh-TW": "音量 {0}%",
+  "zh-HK": "音量 {0}%",
+  "en-US": "Volume {0}%",
+  "en-GB": "Volume {0}%"
+ },
+ "wpf.dsp.rewTextFile": {
+  "zh-CN": "REW 文本文件",
+  "zh-TW": "REW 純文字檔",
+  "zh-HK": "REW 純文字檔",
+  "en-US": "REW text file",
+  "en-GB": "REW text file"
+ },
+ "wpf.dsp.noBands": {
+  "zh-CN": "REW 文件没有可导入的启用频段。",
+  "zh-TW": "REW 檔案沒有可匯入的啟用頻段。",
+  "zh-HK": "REW 檔案沒有可匯入的啟用頻段。",
+  "en-US": "REW file has no enabled bands to import.",
+  "en-GB": "REW file has no enabled bands to import."
+ },
+ "wpf.dsp.lineError": {
+  "zh-CN": "第 {0} 行: {1}",
+  "zh-TW": "第 {0} 行: {1}",
+  "zh-HK": "第 {0} 行: {1}",
+  "en-US": "Line {0}: {1}",
+  "en-GB": "Line {0}: {1}"
+ },
+ "wpf.dsp.importedBands": {
+  "zh-CN": "已导入 {0} 个频段到 {1}。",
+  "zh-TW": "已匯入 {0} 個頻段到 {1}。",
+  "zh-HK": "已匯入 {0} 個頻段到 {1}。",
+  "en-US": "Imported {0} bands into {1}.",
+  "en-GB": "Imported {0} bands into {1}."
+ },
+ "wpf.dsp.moreErrors": {
+  "zh-CN": " 另有 {0} 个错误。",
+  "zh-TW": " 另有 {0} 個錯誤。",
+  "zh-HK": " 另有 {0} 個錯誤。",
+  "en-US": " Plus {0} errors.",
+  "en-GB": " Plus {0} errors."
+ },
+ "wpf.dsp.pushedBands": {
+  "zh-CN": "已推送 {0} 段 PEQ 到 Topping。",
+  "zh-TW": "已推送 {0} 段 PEQ 到 Topping。",
+  "zh-HK": "已推送 {0} 段 PEQ 到 Topping。",
+  "en-US": "Pushed {0} PEQ bands to Topping.",
+  "en-GB": "Pushed {0} PEQ bands to Topping."
+ },
+ "wpf.dsp.pushedWarns": {
+  "zh-CN": "已推送（{0} 条警告）：{1}",
+  "zh-TW": "已推送（{0} 條警告）：{1}",
+  "zh-HK": "已推送（{0} 條警告）：{1}",
+  "en-US": "Pushed ({0} warnings): {1}",
+  "en-GB": "Pushed ({0} warnings): {1}"
+ },
+ "wpf.dsp.wizardUnavailable": {
+  "zh-CN": "房间校准向导不可用。",
+  "zh-TW": "房間校準精靈不可用。",
+  "zh-HK": "房間校準精靈不可用。",
+  "en-US": "Room calibration wizard unavailable.",
+  "en-GB": "Room calibration wizard unavailable."
+ },
+ "wpf.dsp.noPreset": {
+  "zh-CN": "DSP 预设或目标声道未选择。",
+  "zh-TW": "DSP 預設或目標聲道未選擇。",
+  "zh-HK": "DSP 預設或目標聲道未選擇。",
+  "en-US": "DSP preset or target channel not selected.",
+  "en-GB": "DSP preset or target channel not selected."
+ },
+ "wpf.dsp.limiterDigits": {
+  "zh-CN": "限幅参数必须是数字。",
+  "zh-TW": "限幅參數必須是數字。",
+  "zh-HK": "限幅參數必須是數字。",
+  "en-US": "Limiter parameters must be numbers.",
+  "en-GB": "Limiter parameters must be numbers."
  }
 };
 let currentLocale = 'zh-CN';

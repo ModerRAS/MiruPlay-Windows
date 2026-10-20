@@ -19,18 +19,18 @@ public sealed record MediaSourceDefinition(
     [JsonIgnore]
     public string TypeLabel => (Type.ToUpperInvariant(), RecognitionMode.ToUpperInvariant()) switch
     {
-        ("LOCAL", "DIRECTORY") => "本地目录",
-        ("LOCAL", _) => "本地 MLIP",
-        ("WEBDAV", "DIRECTORY") => "WebDAV 目录",
+        ("LOCAL", "DIRECTORY") => AppStrings.Get("reg.localDir"),
+        ("LOCAL", _) => AppStrings.Get("reg.localMlip"),
+        ("WEBDAV", "DIRECTORY") => AppStrings.Get("reg.davDir"),
         ("WEBDAV", _) => "WebDAV MLIP",
-        ("SMB", "DIRECTORY") => "SMB 目录",
+        ("SMB", "DIRECTORY") => AppStrings.Get("reg.smbDir"),
         ("SMB", _) => "SMB MLIP",
-        ("RSS", _) => "RSS 在线源",
+        ("RSS", _) => AppStrings.Get("sources.rss"),
         _ => Type,
     };
 
     [JsonIgnore]
-    public string StatusText => IsConnected ? "已连接" : "未连接";
+    public string StatusText => IsConnected ? AppStrings.Get("reg.connected") : AppStrings.Get("reg.disconnected");
 }
 
 public sealed record MediaSourceRequest(
@@ -134,10 +134,10 @@ public sealed class MediaSourceRegistry : IDisposable
         {
             var validated = await ValidateAsync(request).ConfigureAwait(false);
             return validated.Type == "RSS"
-                ? new SourceTestResponse(true, $"RSS 在线源可用：{validated.EpisodeCount} 集，{validated.SeriesCount} 部作品")
+                ? new SourceTestResponse(true, AppStrings.Get("reg.rssAvailable", validated.EpisodeCount, validated.SeriesCount))
                 : validated.RecognitionMode == "DIRECTORY"
-                    ? new SourceTestResponse(true, "目录可读")
-                    : new SourceTestResponse(true, $"MLIP v{validated.SchemaVersion}，{validated.SeriesCount} 部作品");
+                    ? new SourceTestResponse(true, AppStrings.Get("reg.dirReadable"))
+                    : new SourceTestResponse(true, AppStrings.Get("reg.mlipInfo", validated.SchemaVersion, validated.SeriesCount));
         }
         catch (Exception error) when (IsSourceFailure(error))
         {
@@ -158,7 +158,7 @@ public sealed class MediaSourceRegistry : IDisposable
                     var sources = Sources(settings).ToList();
                     if (sources.Any(source => SameLocation(source.Location, validated.Location)))
                     {
-                        throw new InvalidOperationException("该媒体源已经存在。");
+                        throw new InvalidOperationException(AppStrings.Get("reg.srcExists"));
                     }
                     var sourceId = sources.Count == 0 ? 1 : sources.Max(item => item.Id) + 1;
                     addedSource = ToDefinition(request, sourceId, validated);
@@ -189,7 +189,7 @@ public sealed class MediaSourceRegistry : IDisposable
 
     public async Task<MediaSourceInfoDto> UpdateAsync(long sourceId, MediaSourceRequest request)
     {
-        var existing = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
+        var existing = Get(sourceId) ?? throw new KeyNotFoundException(AppStrings.Get("reg.srcMissing"));
         var effectiveRequest = WithFallbackCredential(sourceId, request);
         var existingCredential = _credentials.Get(sourceId);
         var replaceSmbCredentials = existing.Type == "SMB" &&
@@ -212,7 +212,7 @@ public sealed class MediaSourceRegistry : IDisposable
             catch (Exception rollbackError) when (rollbackError is IOException or InvalidOperationException or UnauthorizedAccessException)
             {
                 throw new InvalidOperationException(
-                    "SMB 凭据更新失败，且无法恢复先前连接。",
+                    AppStrings.Get("reg.smbCredFailed"),
                     new AggregateException(validationError, rollbackError));
             }
             throw;
@@ -225,10 +225,10 @@ public sealed class MediaSourceRegistry : IDisposable
             {
                 var sources = Sources(settings).ToList();
                 var index = sources.FindIndex(source => source.Id == sourceId);
-                if (index < 0) throw new KeyNotFoundException("媒体源不存在。");
+                if (index < 0) throw new KeyNotFoundException(AppStrings.Get("reg.srcMissing"));
                 if (sources.Any(source => source.Id != sourceId && SameLocation(source.Location, validated.Location)))
                 {
-                    throw new InvalidOperationException("该媒体源已经存在。");
+                    throw new InvalidOperationException(AppStrings.Get("reg.srcExists"));
                 }
                 updatedSource = ToDefinition(request, sourceId, validated);
                 SaveCredential(sourceId, updatedSource.Type, validated.Credential);
@@ -281,7 +281,7 @@ public sealed class MediaSourceRegistry : IDisposable
             {
                 var sources = Sources(settings).ToList();
                 removedSource = sources.FirstOrDefault(item => item.Id == sourceId)
-                    ?? throw new KeyNotFoundException("媒体源不存在。");
+                    ?? throw new KeyNotFoundException(AppStrings.Get("reg.srcMissing"));
                 sources.Remove(removedSource);
                 var wasActive = settings.ActiveSourceId == sourceId;
                 var currentMode = settings.CurrentAppMode.ToUpperInvariant();
@@ -337,7 +337,7 @@ public sealed class MediaSourceRegistry : IDisposable
         IProgress<DirectoryScanProgress>? progress,
         CancellationToken cancellationToken)
     {
-        var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
+        var source = Get(sourceId) ?? throw new KeyNotFoundException(AppStrings.Get("reg.srcMissing"));
         try
         {
             if (source.Type == "RSS")
@@ -366,7 +366,7 @@ public sealed class MediaSourceRegistry : IDisposable
                         source,
                         progress,
                         cancellationToken).ConfigureAwait(false),
-                    _ => throw new NotSupportedException($"Windows 客户端尚未实现 {source.Type} 普通目录扫描。"),
+                    _ => throw new NotSupportedException(AppStrings.Get("reg.notImplDir", source.Type)),
                 };
                 SetConnectionState(sourceId, connected: true, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 return new SourceScanResponse(
@@ -386,7 +386,7 @@ public sealed class MediaSourceRegistry : IDisposable
                 "SMB" => await ValidateSmbAsync(
                     source.Location,
                     _credentials.Get(sourceId)).ConfigureAwait(false),
-                _ => throw new NotSupportedException($"Windows 客户端尚未实现 {source.Type} 媒体源。"),
+                _ => throw new NotSupportedException(AppStrings.Get("reg.notImplSrc", source.Type)),
             };
             SetConnectionState(sourceId, connected: true, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             return new SourceScanResponse(sourceId, source.Name, validated.EpisodeCount, 0, 0);
@@ -431,15 +431,15 @@ public sealed class MediaSourceRegistry : IDisposable
 
     private MediaSourceDefinition WritableDirectorySource(long sourceId)
     {
-        var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
+        var source = Get(sourceId) ?? throw new KeyNotFoundException(AppStrings.Get("reg.srcMissing"));
         if (source.RecognitionMode != "DIRECTORY")
-            throw new NotSupportedException("仅普通目录来源支持本地元数据编辑；MLIP 与 RSS 保持只读。");
+            throw new NotSupportedException(AppStrings.Get("reg.dirOnly"));
         return source;
     }
 
     public LibraryCatalog LoadCatalog(long sourceId)
     {
-        var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
+        var source = Get(sourceId) ?? throw new KeyNotFoundException(AppStrings.Get("reg.srcMissing"));
         if (source.Type == "RSS")
         {
             var catalog = _rssMediaCatalogReader.LoadAsync(source.Location).GetAwaiter().GetResult();
@@ -458,7 +458,7 @@ public sealed class MediaSourceRegistry : IDisposable
                 "LOCAL" => MlipLibraryReader.Load(source.Location),
                 "WEBDAV" => _webDav.LoadCachedCatalog(source.Location),
                 "SMB" => LoadSmbCatalog(source),
-                _ => throw new NotSupportedException($"Windows 客户端尚未实现 {source.Type} 媒体源。"),
+                _ => throw new NotSupportedException(AppStrings.Get("reg.notImplSrc", source.Type)),
             };
     }
 
@@ -565,15 +565,15 @@ public sealed class MediaSourceRegistry : IDisposable
 
     internal WebDavPlaybackProxy CreatePlaybackProxy(long sourceId, LibraryEpisode episode)
     {
-        var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
-        if (source.Type != "WEBDAV") throw new NotSupportedException("只有 WebDAV 媒体源使用 HTTP 播放代理。");
+        var source = Get(sourceId) ?? throw new KeyNotFoundException(AppStrings.Get("reg.srcMissing"));
+        if (source.Type != "WEBDAV") throw new NotSupportedException(AppStrings.Get("reg.proxyOnly"));
         return new WebDavPlaybackProxy(_webDav, source.Location, _credentials.Get(sourceId), episode);
     }
 
     public Task<string> CacheArtworkAsync(long sourceId, string artworkUrl, CancellationToken cancellationToken = default)
     {
-        var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
-        if (source.Type != "WEBDAV") throw new NotSupportedException("只有 WebDAV 媒体源需要鉴权海报缓存。");
+        var source = Get(sourceId) ?? throw new KeyNotFoundException(AppStrings.Get("reg.srcMissing"));
+        if (source.Type != "WEBDAV") throw new NotSupportedException(AppStrings.Get("reg.posterOnly"));
         return _webDav.DownloadArtworkAsync(
             source.Location,
             artworkUrl,
@@ -607,34 +607,34 @@ public sealed class MediaSourceRegistry : IDisposable
             "WEBDAV" => await ValidateWebDavRequestAsync(request).ConfigureAwait(false),
             "SMB" => await ValidateSmbRequestAsync(request, replaceSmbCredentials).ConfigureAwait(false),
             "RSS" => await ValidateRssRequestAsync(request).ConfigureAwait(false),
-            _ => throw new NotSupportedException($"未知媒体源类型: {request.Type}"),
+            _ => throw new NotSupportedException(AppStrings.Get("reg.unknownType", request.Type)),
         };
     }
 
     private static void ValidateCommon(MediaSourceRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
-        if (string.IsNullOrWhiteSpace(request.Name)) throw new ArgumentException("媒体源名称不能为空。", nameof(request));
-        if (string.IsNullOrWhiteSpace(request.Type)) throw new ArgumentException("媒体源类型不能为空。", nameof(request));
-        if (string.IsNullOrWhiteSpace(request.Location)) throw new ArgumentException("媒体源位置不能为空。", nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Name)) throw new ArgumentException(AppStrings.Get("reg.nameRequired"), nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Type)) throw new ArgumentException(AppStrings.Get("reg.typeRequired"), nameof(request));
+        if (string.IsNullOrWhiteSpace(request.Location)) throw new ArgumentException(AppStrings.Get("reg.locationRequired"), nameof(request));
         if (request.ContentMode.Trim().ToUpperInvariant() is not ("ANIME" or "DRAMA"))
         {
-            throw new NotSupportedException("内容模式必须是 ANIME 或 DRAMA。");
+            throw new NotSupportedException(AppStrings.Get("reg.modeAnimeDrama"));
         }
         if (request.Type.Trim().Equals("RSS", StringComparison.OrdinalIgnoreCase))
         {
             if (!string.IsNullOrWhiteSpace(request.Username) || !string.IsNullOrEmpty(request.Password) || !string.IsNullOrWhiteSpace(request.Domain))
-                throw new NotSupportedException("RSS 在线源不接受用户名或密码。");
+                throw new NotSupportedException(AppStrings.Get("reg.rssNoCred"));
             return;
         }
         if (request.RecognitionMode.Trim().ToUpperInvariant() is not ("MLIP" or "DIRECTORY"))
         {
-            throw new NotSupportedException("识别模式必须是 MLIP 或 DIRECTORY。");
+            throw new NotSupportedException(AppStrings.Get("reg.recogMode"));
         }
         if (request.RecognitionMode.Trim().Equals("MLIP", StringComparison.OrdinalIgnoreCase) &&
             !request.MlipMetadataMode.Trim().Equals("LIBRARY_DB_LOCAL_PRIORITY", StringComparison.OrdinalIgnoreCase))
         {
-            throw new NotSupportedException("Windows 客户端当前仅支持 LIBRARY_DB_LOCAL_PRIORITY 元数据模式。");
+            throw new NotSupportedException(AppStrings.Get("reg.mlipMode"));
         }
     }
 
@@ -657,7 +657,7 @@ public sealed class MediaSourceRegistry : IDisposable
             !string.IsNullOrWhiteSpace(request.Password) ||
             !string.IsNullOrWhiteSpace(request.Domain))
         {
-            throw new NotSupportedException("本地媒体源不接受域、用户名或密码。");
+            throw new NotSupportedException(AppStrings.Get("reg.localNoCred"));
         }
         if (request.RecognitionMode.Trim().Equals("DIRECTORY", StringComparison.OrdinalIgnoreCase))
             return await ValidateLocalDirectoryAsync(request.Location).ConfigureAwait(false);
@@ -719,7 +719,7 @@ public sealed class MediaSourceRegistry : IDisposable
         }
         catch (Exception error) when (error is IOException or InvalidDataException or SqliteException or UnauthorizedAccessException)
         {
-            throw new InvalidDataException($"无法读取 MLIP 媒体源：{error.Message}", error);
+            throw new InvalidDataException(AppStrings.Get("reg.readMlip", error.Message), error);
         }
     }
 
@@ -740,7 +740,7 @@ public sealed class MediaSourceRegistry : IDisposable
         }
         catch (Exception error) when (error is HttpRequestException or IOException or InvalidDataException or SqliteException or UnauthorizedAccessException or TaskCanceledException)
         {
-            throw new InvalidDataException($"无法读取 WebDAV MLIP 媒体源：{error.Message}", error);
+            throw new InvalidDataException(AppStrings.Get("reg.readDavMlip", error.Message), error);
         }
     }
 
@@ -768,7 +768,7 @@ public sealed class MediaSourceRegistry : IDisposable
         }
         catch (Exception error) when (error is IOException or InvalidDataException or SqliteException or UnauthorizedAccessException)
         {
-            throw new InvalidDataException($"无法读取 SMB MLIP 媒体源：{error.Message}", error);
+            throw new InvalidDataException(AppStrings.Get("reg.readSmbMlip", error.Message), error);
         }
     }
 

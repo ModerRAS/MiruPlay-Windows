@@ -698,4 +698,127 @@
   <data name="wpf.measure.close" xml:space="preserve"><value>Close</value></data>
   <data name="wpf.measure.calPoints" xml:space="preserve"><value>{0} ({1} points)</value></data>
   <data name="wpf.measure.calFilter" xml:space="preserve"><value>Calibration file</value></data>
+  <data name="api.subTrack" xml:space="preserve"><value>Subtitle {0}</value></data>
+  <data name="api.subExternal" xml:space="preserve"><value>{0} (external)</value></data>
+  <data name="api.errUnauthorized" xml:space="preserve"><value>Unauthorized</value></data>
+  <data name="api.errInternal" xml:space="preserve"><value>Internal server error</value></data>
+  <data name="api.errTaskMissing" xml:space="preserve"><value>Task not found.</value></data>
+  <data name="api.errEmpty" xml:space="preserve"><value>Request must not be empty.</value></data>
+  <data name="api.errEmptyBare" xml:space="preserve"><value>Request must not be empty</value></data>
+  <data name="api.errInstallConfirm" xml:space="preserve"><value>Confirm explicitly before starting the Windows installer.</value></data>
+  <data name="api.errAppAction" xml:space="preserve"><value>Unsupported app-control action.</value></data>
+  <data name="api.errAppAccepted" xml:space="preserve"><value>App-control request accepted.</value></data>
+  <data name="api.errNoAppHandler" xml:space="preserve"><value>Windows client has no app-lifecycle handler connected.</value></data>
+  <data name="api.errSrcId" xml:space="preserve"><value>Bad media source ID</value></data>
+  <data name="api.errScanAll" xml:space="preserve"><value>Scan all media sources</value></data>
+  <data name="api.errScanProgress" xml:space="preserve"><value>Scanned {0} of {1} sources</value></data>
+  <data name="api.errScanFailed" xml:space="preserve"><value>One or more sources failed to scan; check tasks and local logs.</value></data>
+  <data name="api.errArrangement" xml:space="preserve"><value>posterWallArrangement must be TITLE or RELEASE_SEASON.</value></data>
+  <data name="api.errVersionPolicy" xml:space="preserve"><value>episodeVersionSelectionPolicy is invalid.</value></data>
+  <data name="api.errScanInterval" xml:space="preserve"><value>autoScanIntervalHours must be 1, 6, 12 or 24.</value></data>
+  <data name="api.errAppMode" xml:space="preserve"><value>currentAppMode is invalid</value></data>
+  <data name="api.errCdLogin" xml:space="preserve"><value>Log in or verify a CloudDrive2 API token first.</value></data>
+  <data name="api.errCdRoot" xml:space="preserve"><value>CloudDrive root directory</value></data>
+  <data name="api.errCdSync" xml:space="preserve"><value>CloudDrive/RSS sync</value></data>
+  <data name="api.errCdNoOffline" xml:space="preserve"><value>CloudDrive2 API token lacks offline-download permission.</value></data>
+  <data name="api.errInboxOutside" xml:space="preserve"><value>Offline download directory escapes the CloudDrive2 token root.</value></data>
+  <data name="api.errRssMissing" xml:space="preserve"><value>RSS subscription not found.</value></data>
+  <data name="api.errArchiveLimit" xml:space="preserve"><value>Bangumi Archive upload exceeds the 2 GiB limit.</value></data>
+  <data name="api.errArchiveSize" xml:space="preserve"><value>Archive file must be 1 B to 2 GiB.</value></data>
+  <data name="api.errPreviewEmpty" xml:space="preserve"><value>Metadata preview must not be empty.</value></data>
+  <data name="api.errLimitInt" xml:space="preserve"><value>limit must be an integer.</value></data>
+  <data name="api.errAnimeMissing" xml:space="preserve"><value>Title not found</value></data>
+  <data name="api.errPosterMissing" xml:space="preserve"><value>Poster not found</value></data>
+  <data name="api.errEpisodeMissing" xml:space="preserve"><value>Episode not found</value></data>
+  <data name="api.errCommandEmpty" xml:space="preserve"><value>command must not be empty</value></data>
+  <data name="api.errEndAction" xml:space="preserve"><value>endAction is invalid</value></data>
+  <data name="api.errSubLang" xml:space="preserve"><value>preferredSubtitleLanguage is invalid</value></data>
+  <data name="api.errToneMap" xml:space="preserve"><value>Windows client does not support Android tone-mapping settings.</value></data>
+  <data name="api.errDspEmpty" xml:space="preserve"><value>Audio DSP request must not be empty.</value></data>
+  <data name="api.errDspPreviewEmpty" xml:space="preserve"><value>Audio DSP preview request must not be empty.</value></data>
+  <data name="api.errRewEmpty" xml:space="preserve"><value>REW import request must not be empty.</value></data>
+  <data name="api.errPresetId" xml:space="preserve"><value>presetId must not be empty.</value></data>
+  <data name="api.errPresetMissing" xml:space="preserve"><value>Preset not found.</value></data>
+  <data name="api.errNoMusic" xml:space="preserve"><value>Windows client has music library disabled.</value></data>
+  <data name="api.errTrackMissing" xml:space="preserve"><value>Track not found or outside local sources.</value></data>
+  <data name="api.errNoRoute" xml:space="preserve"><value>No such endpoint</value></data>
+  <data name="api.errNoWebResource" xml:space="preserve"><value>Missing WebUI resource: {0}</value></data>
+  <data name="api.errFieldEmpty" xml:space="preserve"><value>{0} must not be empty</value></data>
+  <data name="api.errThisPc" xml:space="preserve"><value>This PC</value></data>
+  <data name="api.errDirMissing" xml:space="preserve"><value>Directory not found.</value></data>
+  <data name="api.errDirDenied" xml:space="preserve"><value>Directory read denied.</value></data>
+  <data name="api.errNoWritable" xml:space="preserve"><value>No writable directory metadata index on this machine.</value></data>
+  <data name="api.errMustInt" xml:space="preserve"><value>{0} must be an integer.</value></data>
+  <data name="api.errMustPositive" xml:space="preserve"><value>{0} must be a positive integer.</value></data>
+  <data name="api.errRewTarget" xml:space="preserve"><value>REW target channel is invalid.</value></data>
+  <data name="api.errTraversal" xml:space="preserve"><value>CloudDrive2 paths must not traverse.</value></data>
+  <data name="api.errNoTopping" xml:space="preserve"><value>Windows client has Topping DAC control disabled.</value></data>
+  <data name="api.errMusicLocal" xml:space="preserve"><value>Music library supports local sources only.</value></data>
+  <data name="api.errAndroidOnly" xml:space="preserve"><value>Android-only; unsupported on Windows.</value></data>
+  <data name="reg.localDir" xml:space="preserve"><value>Local directory</value></data>
+  <data name="reg.localMlip" xml:space="preserve"><value>Local MLIP</value></data>
+  <data name="reg.davDir" xml:space="preserve"><value>WebDAV directory</value></data>
+  <data name="reg.smbDir" xml:space="preserve"><value>SMB directory</value></data>
+  <data name="reg.connected" xml:space="preserve"><value>Connected</value></data>
+  <data name="reg.disconnected" xml:space="preserve"><value>Disconnected</value></data>
+  <data name="reg.rssAvailable" xml:space="preserve"><value>RSS online source available: {0} episodes, {1} works</value></data>
+  <data name="reg.dirReadable" xml:space="preserve"><value>Directory readable</value></data>
+  <data name="reg.mlipInfo" xml:space="preserve"><value>MLIP v{0}, {1} works</value></data>
+  <data name="reg.srcExists" xml:space="preserve"><value>Media source already exists.</value></data>
+  <data name="reg.srcMissing" xml:space="preserve"><value>Media source not found.</value></data>
+  <data name="reg.smbCredFailed" xml:space="preserve"><value>SMB credential update failed and the previous connection could not be restored.</value></data>
+  <data name="reg.notImplDir" xml:space="preserve"><value>Windows client does not implement {0} directory scanning.</value></data>
+  <data name="reg.notImplSrc" xml:space="preserve"><value>Windows client does not implement {0} media sources.</value></data>
+  <data name="reg.dirOnly" xml:space="preserve"><value>Only directory sources support local metadata editing; MLIP and RSS stay read-only.</value></data>
+  <data name="reg.proxyOnly" xml:space="preserve"><value>Only WebDAV sources use the HTTP playback proxy.</value></data>
+  <data name="reg.posterOnly" xml:space="preserve"><value>Only WebDAV sources need authenticated poster caching.</value></data>
+  <data name="reg.unknownType" xml:space="preserve"><value>Unknown media source type: {0}</value></data>
+  <data name="reg.nameRequired" xml:space="preserve"><value>Media source name must not be empty.</value></data>
+  <data name="reg.typeRequired" xml:space="preserve"><value>Media source type must not be empty.</value></data>
+  <data name="reg.locationRequired" xml:space="preserve"><value>Media source location must not be empty.</value></data>
+  <data name="reg.modeAnimeDrama" xml:space="preserve"><value>Content mode must be ANIME or DRAMA.</value></data>
+  <data name="reg.rssNoCred" xml:space="preserve"><value>RSS online sources accept no username or password.</value></data>
+  <data name="reg.recogMode" xml:space="preserve"><value>Recognition mode must be MLIP or DIRECTORY.</value></data>
+  <data name="reg.mlipMode" xml:space="preserve"><value>Windows client currently supports only the LIBRARY_DB_LOCAL_PRIORITY metadata mode.</value></data>
+  <data name="reg.localNoCred" xml:space="preserve"><value>Local media sources accept no domain, username or password.</value></data>
+  <data name="reg.readMlip" xml:space="preserve"><value>Cannot read MLIP media source: {0}</value></data>
+  <data name="reg.readDavMlip" xml:space="preserve"><value>Cannot read WebDAV MLIP media source: {0}</value></data>
+  <data name="reg.readSmbMlip" xml:space="preserve"><value>Cannot read SMB MLIP media source: {0}</value></data>
+  <data name="wpf.music.playTrack" xml:space="preserve"><value>Play selected track</value></data>
+  <data name="wpf.music.playAlbum" xml:space="preserve"><value>Play album from this track</value></data>
+  <data name="wpf.music.localSrc" xml:space="preserve"><value>Local source</value></data>
+  <data name="wpf.music.musicSrc" xml:space="preserve"><value>Music source</value></data>
+  <data name="wpf.music.albums" xml:space="preserve"><value>Albums</value></data>
+  <data name="wpf.music.albumList" xml:space="preserve"><value>Album list</value></data>
+  <data name="wpf.music.tracks" xml:space="preserve"><value>Tracks</value></data>
+  <data name="wpf.music.trackList" xml:space="preserve"><value>Track list</value></data>
+  <data name="wpf.music.noLocalSrc" xml:space="preserve"><value>No local sources; add a local directory under media sources first.</value></data>
+  <data name="wpf.music.albumTracks" xml:space="preserve"><value>{0} ({1} tracks)</value></data>
+  <data name="wpf.music.scanning" xml:space="preserve"><value>Scanning music directory…</value></data>
+  <data name="wpf.music.srcUnavailable" xml:space="preserve"><value>Source path unavailable.</value></data>
+  <data name="wpf.music.noAudio" xml:space="preserve"><value>This source has no playable audio files.</value></data>
+  <data name="wpf.music.albumCount" xml:space="preserve"><value>{0} albums.</value></data>
+  <data name="wpf.music.selectTrack" xml:space="preserve"><value>Select a track first.</value></data>
+  <data name="wpf.music.nowPlaying" xml:space="preserve"><value>Now playing: {0}</value></data>
+  <data name="wpf.music.playFailed" xml:space="preserve"><value>Failed to start playback; check the file exists.</value></data>
+  <data name="wpf.play2.pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="wpf.play2.preparing" xml:space="preserve"><value>Preparing playback</value></data>
+  <data name="wpf.play2.queueSummary" xml:space="preserve"><value>{0} episodes · current {1}</value></data>
+  <data name="wpf.play2.noAudioTrack" xml:space="preserve"><value>No audio tracks</value></data>
+  <data name="wpf.play2.noSubTrack" xml:space="preserve"><value>No subtitle tracks</value></data>
+  <data name="wpf.play2.audioTrack" xml:space="preserve"><value>Audio: {0}</value></data>
+  <data name="wpf.play2.subTrack" xml:space="preserve"><value>Subtitles: {0}</value></data>
+  <data name="wpf.play2.speedRate" xml:space="preserve"><value>Speed: {0}</value></data>
+  <data name="wpf.play2.muted" xml:space="preserve"><value>Muted</value></data>
+  <data name="wpf.play2.volPercent" xml:space="preserve"><value>Volume {0}%</value></data>
+  <data name="wpf.dsp.rewTextFile" xml:space="preserve"><value>REW text file</value></data>
+  <data name="wpf.dsp.noBands" xml:space="preserve"><value>REW file has no enabled bands to import.</value></data>
+  <data name="wpf.dsp.lineError" xml:space="preserve"><value>Line {0}: {1}</value></data>
+  <data name="wpf.dsp.importedBands" xml:space="preserve"><value>Imported {0} bands into {1}.</value></data>
+  <data name="wpf.dsp.moreErrors" xml:space="preserve"><value> Plus {0} errors.</value></data>
+  <data name="wpf.dsp.pushedBands" xml:space="preserve"><value>Pushed {0} PEQ bands to Topping.</value></data>
+  <data name="wpf.dsp.pushedWarns" xml:space="preserve"><value>Pushed ({0} warnings): {1}</value></data>
+  <data name="wpf.dsp.wizardUnavailable" xml:space="preserve"><value>Room calibration wizard unavailable.</value></data>
+  <data name="wpf.dsp.noPreset" xml:space="preserve"><value>DSP preset or target channel not selected.</value></data>
+  <data name="wpf.dsp.limiterDigits" xml:space="preserve"><value>Limiter parameters must be numbers.</value></data>
 </root>

@@ -14,8 +14,8 @@ public sealed class MusicLibraryWindow : Window
     private readonly ListBox _albums = new() { MinHeight = 120, MaxHeight = 220, DisplayMemberPath = nameof(AlbumItem.Label) };
     private readonly ListBox _tracks = new() { MinHeight = 140, DisplayMemberPath = nameof(TrackItem.Label) };
     private readonly TextBlock _status = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) };
-    private readonly Button _playTrackButton = new() { Content = "播放所选曲目", Margin = new Thickness(0, 0, 8, 0) };
-    private readonly Button _playAlbumButton = new() { Content = "从该曲开始连播整张专辑" };
+    private readonly Button _playTrackButton = new() { Content = AppStrings.Get("wpf.music.playTrack"), Margin = new Thickness(0, 0, 8, 0) };
+    private readonly Button _playAlbumButton = new() { Content = AppStrings.Get("wpf.music.playAlbum") };
     private IReadOnlyList<MusicLibraryService.MusicAlbum> _loadedAlbums = [];
     private long _sourceId;
 
@@ -28,7 +28,7 @@ public sealed class MusicLibraryWindow : Window
         _library = library;
         _getRoot = getRoot;
         _play = play;
-        Title = "音乐库";
+        Title = AppStrings.Get("wpf.main.musicLib");
         Width = 720;
         Height = 560;
         MinWidth = 560;
@@ -37,31 +37,31 @@ public sealed class MusicLibraryWindow : Window
 
         var root = new StackPanel { Margin = new Thickness(18) };
         var sourceRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 10) };
-        sourceRow.Children.Add(new TextBlock { Text = "本地来源", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) });
+        sourceRow.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.music.localSrc"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 10, 0) });
         _sources.ItemsSource = localSources;
         _sources.DisplayMemberPath = nameof(MediaSourceDefinition.Name);
         _sources.SelectedIndex = localSources.Count > 0 ? 0 : -1;
-        AutomationProperties.SetName(_sources, "音乐来源");
+        AutomationProperties.SetName(_sources, AppStrings.Get("wpf.music.musicSrc"));
         _sources.SelectionChanged += Sources_SelectionChanged;
         sourceRow.Children.Add(_sources);
         root.Children.Add(sourceRow);
 
-        root.Children.Add(new TextBlock { Text = "专辑", FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
-        AutomationProperties.SetName(_albums, "专辑列表");
+        root.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.music.albums"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 4) });
+        AutomationProperties.SetName(_albums, AppStrings.Get("wpf.music.albumList"));
         _albums.SelectionChanged += Albums_SelectionChanged;
         root.Children.Add(_albums);
 
-        root.Children.Add(new TextBlock { Text = "曲目", FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 10, 0, 4) });
-        AutomationProperties.SetName(_tracks, "曲目列表");
+        root.Children.Add(new TextBlock { Text = AppStrings.Get("wpf.music.tracks"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 10, 0, 4) });
+        AutomationProperties.SetName(_tracks, AppStrings.Get("wpf.music.trackList"));
         _tracks.MouseDoubleClick += async (_, _) => await PlaySelectedAsync(fromStart: false);
         root.Children.Add(_tracks);
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 12, 0, 0) };
-        AutomationProperties.SetName(_playTrackButton, "播放所选曲目");
+        AutomationProperties.SetName(_playTrackButton, AppStrings.Get("wpf.music.playTrack"));
         _playTrackButton.Click += async (_, _) => await PlaySelectedAsync(fromStart: false);
-        AutomationProperties.SetName(_playAlbumButton, "从该曲开始连播整张专辑");
+        AutomationProperties.SetName(_playAlbumButton, AppStrings.Get("wpf.music.playAlbum"));
         _playAlbumButton.Click += async (_, _) => await PlaySelectedAsync(fromStart: true);
-        var close = new Button { Content = "关闭", Margin = new Thickness(8, 0, 0, 0) };
+        var close = new Button { Content = AppStrings.Get("wpf.measure.close"), Margin = new Thickness(8, 0, 0, 0) };
         close.Click += (_, _) => Close();
         buttons.Children.Add(_playTrackButton);
         buttons.Children.Add(_playAlbumButton);
@@ -71,7 +71,7 @@ public sealed class MusicLibraryWindow : Window
         Content = new ScrollViewer { Content = root, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
 
         if (_sources.SelectedItem is MediaSourceDefinition selected) _ = LoadAsync(selected.Id);
-        else _status.Text = "没有本地来源；请先在媒体源中添加本地目录。";
+        else _status.Text = AppStrings.Get("wpf.music.noLocalSrc");
     }
 
     private async void Sources_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -86,26 +86,26 @@ public sealed class MusicLibraryWindow : Window
             .Select((track, index) => new TrackItem(index, track))
             .ToList();
         _tracks.SelectedIndex = 0;
-        _status.Text = $"{album.Label}（{album.Tracks.Count} 首）";
+        _status.Text = AppStrings.Get("wpf.music.albumTracks", album.Label, album.Tracks.Count);
     }
 
     private async Task LoadAsync(long sourceId)
     {
         _sourceId = sourceId;
-        _status.Text = "正在扫描音乐目录…";
+        _status.Text = AppStrings.Get("wpf.music.scanning");
         _albums.ItemsSource = null;
         _tracks.ItemsSource = null;
         try
         {
             var root = _getRoot(sourceId);
-            if (string.IsNullOrWhiteSpace(root)) throw new InvalidDataException("来源路径不可用。");
+            if (string.IsNullOrWhiteSpace(root)) throw new InvalidDataException(AppStrings.Get("wpf.music.srcUnavailable"));
             var albums = await Task.Run(() => _library.Scan(root));
             _loadedAlbums = albums;
             _albums.ItemsSource = albums
                 .Select(album => new AlbumItem(album.Title, album.Tracks))
                 .ToList();
             _albums.SelectedIndex = _albums.Items.Count > 0 ? 0 : -1;
-            _status.Text = albums.Count == 0 ? "该来源没有可播放的音频文件。" : $"共 {albums.Count} 张专辑。";
+            _status.Text = albums.Count == 0 ? AppStrings.Get("wpf.music.noAudio") : AppStrings.Get("wpf.music.albumCount", albums.Count);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or InvalidDataException)
         {
@@ -118,7 +118,7 @@ public sealed class MusicLibraryWindow : Window
         if (_albums.SelectedItem is not AlbumItem album) return;
         if (_tracks.SelectedItem is not TrackItem selected && !fromStart)
         {
-            _status.Text = "请先选择一首曲目。";
+            _status.Text = AppStrings.Get("wpf.music.selectTrack");
             return;
         }
         var requests = album.Tracks.Select(track => new WebControlServer.MusicPlayRequest(
@@ -131,7 +131,7 @@ public sealed class MusicLibraryWindow : Window
         var index = fromStart ? 0 : _tracks.SelectedIndex;
         if (index < 0) index = 0;
         var ok = await _play(_sourceId, requests, index);
-        _status.Text = ok ? $"正在播放：{requests[index].Title}" : "播放启动失败；请检查文件是否存在。";
+        _status.Text = ok ? AppStrings.Get("wpf.music.nowPlaying", requests[index].Title) : AppStrings.Get("wpf.music.playFailed");
     }
 
     private sealed record AlbumItem(string Label, IReadOnlyList<MusicLibraryService.MusicTrack> Tracks);

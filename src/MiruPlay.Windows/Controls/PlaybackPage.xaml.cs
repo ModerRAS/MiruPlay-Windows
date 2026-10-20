@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
@@ -38,7 +39,7 @@ public sealed class PlaybackPageActionEventArgs(PlaybackPageAction action) : Eve
 
 public partial class PlaybackPage : UserControl
 {
-    private static readonly PlaybackSubtitleOption NoSubtitles = new(null, "关闭字幕");
+    private static readonly PlaybackSubtitleOption NoSubtitles = new(null, AppStrings.Get("player.noSubs"));
     private readonly DispatcherTimer _chromeTimer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private readonly DispatcherTimer _osdTimer = new() { Interval = TimeSpan.FromSeconds(1.5) };
     private readonly Stopwatch _activity = Stopwatch.StartNew();
@@ -96,17 +97,17 @@ public partial class PlaybackPage : UserControl
             Timeline.Value = Math.Clamp(state.Transport.PositionMs, 0, Timeline.Maximum);
             ElapsedText.Text = PlaybackPagePresentation.FormatTime(state.Transport.PositionMs);
             DurationText.Text = PlaybackPagePresentation.FormatTime(state.Transport.DurationMs);
-            PlayPauseText.Text = state.Transport.IsPaused ? "播放" : "暂停";
+            PlayPauseText.Text = state.Transport.IsPaused ? AppStrings.Get("wpf.play.play") : AppStrings.Get("wpf.play2.pause");
             PlayPauseIcon.Text = state.Transport.IsPaused ? "\uE768" : "\uE769";
             PreviousButton.IsEnabled = state.Transport.CanPlayPrevious;
             NextButton.IsEnabled = state.Transport.CanPlayNext;
             StatusText.Text = state.Error is not null
-                ? "播放遇到问题"
+                ? AppStrings.Get("wpf.play2.playError")
                 : state.Transport.IsPaused
-                    ? "已暂停"
+                    ? AppStrings.Get("wpf.play2.paused")
                     : state.Transport.IsPlaying
-                        ? "正在播放"
-                        : "正在准备播放";
+                        ? AppStrings.Get("wpf.play.now")
+                        : AppStrings.Get("wpf.play2.preparing");
             ErrorText.Text = state.Error?.Message ?? string.Empty;
             ErrorPanel.Visibility = state.Error is null ? Visibility.Collapsed : Visibility.Visible;
 
@@ -122,11 +123,11 @@ public partial class PlaybackPage : UserControl
             var muteGlyph = state.Options.IsMuted || state.Options.VolumePercent <= 0 ? "\uE74F" : "\uE767";
             MuteIcon.Text = muteGlyph;
             OverflowMuteIcon.Text = muteGlyph;
-            MuteButton.ToolTip = state.Options.IsMuted ? "取消静音" : "静音";
+            MuteButton.ToolTip = state.Options.IsMuted ? AppStrings.Get("player.unmute") : AppStrings.Get("player.mute");
             OverflowMuteButton.ToolTip = MuteButton.ToolTip;
 
             EpisodeList.ItemsSource = state.EpisodeGroups;
-            QueueSummaryText.Text = $"{state.EpisodeGroups.Count} 集 · 当前 {state.Episode.DisplayNumber}";
+            QueueSummaryText.Text = AppStrings.Get("wpf.play2.queueSummary", state.EpisodeGroups.Count, state.Episode.DisplayNumber);
         }
         finally
         {
@@ -214,7 +215,7 @@ public partial class PlaybackPage : UserControl
         Timeline.Value = 0;
         Timeline.Maximum = 1;
         ErrorPanel.Visibility = Visibility.Collapsed;
-        StatusText.Text = "准备就绪";
+        StatusText.Text = AppStrings.Get("wpf.play.ready");
         StatusText.ToolTip = null;
     }
 
@@ -224,11 +225,11 @@ public partial class PlaybackPage : UserControl
     {
         if (diagnostics is null) return null;
         var properties = string.Join(" · ", diagnostics.Properties.Select(item => $"{item.Name}={item.Value}"));
-        var summary = string.IsNullOrWhiteSpace(properties) ? "无属性" : properties;
+        var summary = string.IsNullOrWhiteSpace(properties) ? AppStrings.Get("diag.noProps") : properties;
         var logs = diagnostics.RecentLogs;
         return logs.Count == 0
-            ? $"播放诊断：{summary} · 日志 0 条"
-            : $"播放诊断：{summary} · 日志 {logs.Count} 条 · {logs[^1].Text}";
+            ? AppStrings.Get("diag.summary", summary, 0, "")
+            : AppStrings.Get("diag.summary", summary, logs.Count, " · " + logs[^1].Text);
     }
 
     public bool FocusInitial() => PlayPauseButton.Focus();
@@ -238,7 +239,7 @@ public partial class PlaybackPage : UserControl
         selector.ItemsSource = options.AudioTracks;
         selector.SelectedValue = options.SelectedAudioTrackId;
         selector.IsEnabled = options.AudioTracks.Count > 0;
-        AutomationProperties.SetName(selector, options.AudioTracks.Count > 0 ? "音轨" : "没有可选音轨");
+        AutomationProperties.SetName(selector, options.AudioTracks.Count > 0 ? AppStrings.Get("player.audio") : AppStrings.Get("wpf.play2.noAudioTrack"));
     }
 
     private static void SetSubtitleOptions(ComboBox selector, PlaybackOptionsViewState options)
@@ -249,7 +250,7 @@ public partial class PlaybackPage : UserControl
         selector.ItemsSource = items;
         selector.SelectedValue = options.SelectedSubtitleTrackId;
         selector.IsEnabled = options.SubtitleTracks.Count > 0;
-        AutomationProperties.SetName(selector, options.SubtitleTracks.Count > 0 ? "字幕" : "没有可选字幕");
+        AutomationProperties.SetName(selector, options.SubtitleTracks.Count > 0 ? AppStrings.Get("player.subtitle") : AppStrings.Get("wpf.play2.noSubTrack"));
     }
 
     private static void SetSpeedOptions(ComboBox selector, PlaybackOptionsViewState options)
@@ -388,7 +389,7 @@ public partial class PlaybackPage : UserControl
         var requestId = NextRequestId();
         RaiseAction(new PlaybackSelectAudioTrackAction(track.Id, requestId));
         AudioTrackRequested?.Invoke(this, new(track.Id));
-        ShowOsd($"音轨：{track.DisplayLabel}");
+        ShowOsd(AppStrings.Get("wpf.play2.audioTrack", track.DisplayLabel));
     }
 
     private void SubtitleTrack_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -398,7 +399,7 @@ public partial class PlaybackPage : UserControl
         var requestId = NextRequestId();
         RaiseAction(new PlaybackSelectSubtitleTrackAction(option.TrackId, requestId));
         SubtitleTrackRequested?.Invoke(this, new(option.TrackId));
-        ShowOsd($"字幕：{option.DisplayLabel}");
+        ShowOsd(AppStrings.Get("wpf.play2.subTrack", option.DisplayLabel));
     }
 
     private void Speed_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -406,7 +407,7 @@ public partial class PlaybackPage : UserControl
         if (_isPresenting || sender is not ComboBox { SelectedItem: PlaybackSpeedOption option } selector) return;
         selector.IsEnabled = false;
         RaiseAction(new PlaybackSetSpeedAction(option.Value, NextRequestId()));
-        ShowOsd($"倍速：{option.DisplayLabel}");
+        ShowOsd(AppStrings.Get("wpf.play2.speedRate", option.DisplayLabel));
     }
 
     private void Mute_Click(object sender, RoutedEventArgs e)
@@ -414,7 +415,7 @@ public partial class PlaybackPage : UserControl
         if (_state is null) return;
         var muted = !_state.Options.IsMuted;
         RaiseAction(new PlaybackSetMutedAction(muted, NextRequestId()));
-        ShowOsd(muted ? "已静音" : $"音量 {_state.Options.VolumePercent:0}%");
+        ShowOsd(muted ? AppStrings.Get("wpf.play2.muted") : AppStrings.Get("wpf.play2.volPercent", _state.Options.VolumePercent.ToString("0", CultureInfo.CurrentCulture)));
     }
 
     private void Volume_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) => RaiseVolume(sender);
@@ -428,7 +429,7 @@ public partial class PlaybackPage : UserControl
     {
         if (_isPresenting || sender is not Slider slider) return;
         RaiseAction(new PlaybackSetVolumeAction(slider.Value, NextRequestId()));
-        ShowOsd($"音量 {slider.Value:0}%");
+        ShowOsd(AppStrings.Get("wpf.play2.volPercent", slider.Value.ToString("0", CultureInfo.CurrentCulture)));
     }
 
     private void Timeline_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

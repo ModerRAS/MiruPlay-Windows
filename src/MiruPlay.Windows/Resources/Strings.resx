@@ -698,4 +698,127 @@
   <data name="wpf.measure.close" xml:space="preserve"><value>关闭</value></data>
   <data name="wpf.measure.calPoints" xml:space="preserve"><value>{0}（{1} 点）</value></data>
   <data name="wpf.measure.calFilter" xml:space="preserve"><value>校准文件</value></data>
+  <data name="api.subTrack" xml:space="preserve"><value>字幕 {0}</value></data>
+  <data name="api.subExternal" xml:space="preserve"><value>{0}（外挂）</value></data>
+  <data name="api.errUnauthorized" xml:space="preserve"><value>未授权</value></data>
+  <data name="api.errInternal" xml:space="preserve"><value>服务器内部错误</value></data>
+  <data name="api.errTaskMissing" xml:space="preserve"><value>任务不存在。</value></data>
+  <data name="api.errEmpty" xml:space="preserve"><value>请求不能为空。</value></data>
+  <data name="api.errEmptyBare" xml:space="preserve"><value>请求不能为空</value></data>
+  <data name="api.errInstallConfirm" xml:space="preserve"><value>启动 Windows 安装器前必须明确确认。</value></data>
+  <data name="api.errAppAction" xml:space="preserve"><value>不支持的应用控制动作。</value></data>
+  <data name="api.errAppAccepted" xml:space="preserve"><value>已接受应用控制请求。</value></data>
+  <data name="api.errNoAppHandler" xml:space="preserve"><value>Windows 客户端尚未连接应用生命周期处理器。</value></data>
+  <data name="api.errSrcId" xml:space="preserve"><value>媒体源 ID 不正确</value></data>
+  <data name="api.errScanAll" xml:space="preserve"><value>扫描全部媒体源</value></data>
+  <data name="api.errScanProgress" xml:space="preserve"><value>已扫描 {0} / {1} 个来源</value></data>
+  <data name="api.errScanFailed" xml:space="preserve"><value>一个或多个媒体源扫描失败；请查看任务与本地日志。</value></data>
+  <data name="api.errArrangement" xml:space="preserve"><value>posterWallArrangement 必须是 TITLE 或 RELEASE_SEASON。</value></data>
+  <data name="api.errVersionPolicy" xml:space="preserve"><value>episodeVersionSelectionPolicy 不正确。</value></data>
+  <data name="api.errScanInterval" xml:space="preserve"><value>autoScanIntervalHours 必须是 1、6、12 或 24。</value></data>
+  <data name="api.errAppMode" xml:space="preserve"><value>currentAppMode 不正确</value></data>
+  <data name="api.errCdLogin" xml:space="preserve"><value>请先登录或验证 CloudDrive2 API Token。</value></data>
+  <data name="api.errCdRoot" xml:space="preserve"><value>CloudDrive 根目录</value></data>
+  <data name="api.errCdSync" xml:space="preserve"><value>CloudDrive/RSS 同步</value></data>
+  <data name="api.errCdNoOffline" xml:space="preserve"><value>CloudDrive2 API Token 没有离线下载权限。</value></data>
+  <data name="api.errInboxOutside" xml:space="preserve"><value>离线下载目录超出 CloudDrive2 Token 根目录。</value></data>
+  <data name="api.errRssMissing" xml:space="preserve"><value>RSS 订阅不存在。</value></data>
+  <data name="api.errArchiveLimit" xml:space="preserve"><value>Bangumi Archive 上传超过 2 GiB 限制。</value></data>
+  <data name="api.errArchiveSize" xml:space="preserve"><value>Archive 文件必须为 1 B 至 2 GiB。</value></data>
+  <data name="api.errPreviewEmpty" xml:space="preserve"><value>元数据预览不能为空。</value></data>
+  <data name="api.errLimitInt" xml:space="preserve"><value>limit 必须是整数。</value></data>
+  <data name="api.errAnimeMissing" xml:space="preserve"><value>番剧不存在</value></data>
+  <data name="api.errPosterMissing" xml:space="preserve"><value>海报不存在</value></data>
+  <data name="api.errEpisodeMissing" xml:space="preserve"><value>剧集不存在</value></data>
+  <data name="api.errCommandEmpty" xml:space="preserve"><value>command 不能为空</value></data>
+  <data name="api.errEndAction" xml:space="preserve"><value>endAction 不正确</value></data>
+  <data name="api.errSubLang" xml:space="preserve"><value>preferredSubtitleLanguage 不正确</value></data>
+  <data name="api.errToneMap" xml:space="preserve"><value>Windows 客户端不支持 Android 色调映射设置。</value></data>
+  <data name="api.errDspEmpty" xml:space="preserve"><value>音频 DSP 请求不能为空。</value></data>
+  <data name="api.errDspPreviewEmpty" xml:space="preserve"><value>音频 DSP 预览请求不能为空。</value></data>
+  <data name="api.errRewEmpty" xml:space="preserve"><value>REW 导入请求不能为空。</value></data>
+  <data name="api.errPresetId" xml:space="preserve"><value>presetId 不能为空。</value></data>
+  <data name="api.errPresetMissing" xml:space="preserve"><value>预设不存在。</value></data>
+  <data name="api.errNoMusic" xml:space="preserve"><value>Windows 客户端未启用音乐库。</value></data>
+  <data name="api.errTrackMissing" xml:space="preserve"><value>曲目不存在或不在本地来源内。</value></data>
+  <data name="api.errNoRoute" xml:space="preserve"><value>接口不存在</value></data>
+  <data name="api.errNoWebResource" xml:space="preserve"><value>缺少 WebUI 资源: {0}</value></data>
+  <data name="api.errFieldEmpty" xml:space="preserve"><value>{0} 不能为空</value></data>
+  <data name="api.errThisPc" xml:space="preserve"><value>此电脑</value></data>
+  <data name="api.errDirMissing" xml:space="preserve"><value>目录不存在。</value></data>
+  <data name="api.errDirDenied" xml:space="preserve"><value>无权读取该目录。</value></data>
+  <data name="api.errNoWritable" xml:space="preserve"><value>本机未提供可写目录元数据索引。</value></data>
+  <data name="api.errMustInt" xml:space="preserve"><value>{0} 必须是整数。</value></data>
+  <data name="api.errMustPositive" xml:space="preserve"><value>{0} 必须是正整数。</value></data>
+  <data name="api.errRewTarget" xml:space="preserve"><value>REW 目标声道不正确。</value></data>
+  <data name="api.errTraversal" xml:space="preserve"><value>CloudDrive2 目录不能包含路径遍历。</value></data>
+  <data name="api.errNoTopping" xml:space="preserve"><value>Windows 客户端未启用 Topping DAC 控制。</value></data>
+  <data name="api.errMusicLocal" xml:space="preserve"><value>仅本地来源支持音乐库。</value></data>
+  <data name="api.errAndroidOnly" xml:space="preserve"><value>此操作仅适用于 Android，Windows 客户端不支持。</value></data>
+  <data name="reg.localDir" xml:space="preserve"><value>本地目录</value></data>
+  <data name="reg.localMlip" xml:space="preserve"><value>本地 MLIP</value></data>
+  <data name="reg.davDir" xml:space="preserve"><value>WebDAV 目录</value></data>
+  <data name="reg.smbDir" xml:space="preserve"><value>SMB 目录</value></data>
+  <data name="reg.connected" xml:space="preserve"><value>已连接</value></data>
+  <data name="reg.disconnected" xml:space="preserve"><value>未连接</value></data>
+  <data name="reg.rssAvailable" xml:space="preserve"><value>RSS 在线源可用：{0} 集，{1} 部作品</value></data>
+  <data name="reg.dirReadable" xml:space="preserve"><value>目录可读</value></data>
+  <data name="reg.mlipInfo" xml:space="preserve"><value>MLIP v{0}，{1} 部作品</value></data>
+  <data name="reg.srcExists" xml:space="preserve"><value>该媒体源已经存在。</value></data>
+  <data name="reg.srcMissing" xml:space="preserve"><value>媒体源不存在。</value></data>
+  <data name="reg.smbCredFailed" xml:space="preserve"><value>SMB 凭据更新失败，且无法恢复先前连接。</value></data>
+  <data name="reg.notImplDir" xml:space="preserve"><value>Windows 客户端尚未实现 {0} 普通目录扫描。</value></data>
+  <data name="reg.notImplSrc" xml:space="preserve"><value>Windows 客户端尚未实现 {0} 媒体源。</value></data>
+  <data name="reg.dirOnly" xml:space="preserve"><value>仅普通目录来源支持本地元数据编辑；MLIP 与 RSS 保持只读。</value></data>
+  <data name="reg.proxyOnly" xml:space="preserve"><value>只有 WebDAV 媒体源使用 HTTP 播放代理。</value></data>
+  <data name="reg.posterOnly" xml:space="preserve"><value>只有 WebDAV 媒体源需要鉴权海报缓存。</value></data>
+  <data name="reg.unknownType" xml:space="preserve"><value>未知媒体源类型: {0}</value></data>
+  <data name="reg.nameRequired" xml:space="preserve"><value>媒体源名称不能为空。</value></data>
+  <data name="reg.typeRequired" xml:space="preserve"><value>媒体源类型不能为空。</value></data>
+  <data name="reg.locationRequired" xml:space="preserve"><value>媒体源位置不能为空。</value></data>
+  <data name="reg.modeAnimeDrama" xml:space="preserve"><value>内容模式必须是 ANIME 或 DRAMA。</value></data>
+  <data name="reg.rssNoCred" xml:space="preserve"><value>RSS 在线源不接受用户名或密码。</value></data>
+  <data name="reg.recogMode" xml:space="preserve"><value>识别模式必须是 MLIP 或 DIRECTORY。</value></data>
+  <data name="reg.mlipMode" xml:space="preserve"><value>Windows 客户端当前仅支持 LIBRARY_DB_LOCAL_PRIORITY 元数据模式。</value></data>
+  <data name="reg.localNoCred" xml:space="preserve"><value>本地媒体源不接受域、用户名或密码。</value></data>
+  <data name="reg.readMlip" xml:space="preserve"><value>无法读取 MLIP 媒体源：{0}</value></data>
+  <data name="reg.readDavMlip" xml:space="preserve"><value>无法读取 WebDAV MLIP 媒体源：{0}</value></data>
+  <data name="reg.readSmbMlip" xml:space="preserve"><value>无法读取 SMB MLIP 媒体源：{0}</value></data>
+  <data name="wpf.music.playTrack" xml:space="preserve"><value>播放所选曲目</value></data>
+  <data name="wpf.music.playAlbum" xml:space="preserve"><value>从该曲开始连播整张专辑</value></data>
+  <data name="wpf.music.localSrc" xml:space="preserve"><value>本地来源</value></data>
+  <data name="wpf.music.musicSrc" xml:space="preserve"><value>音乐来源</value></data>
+  <data name="wpf.music.albums" xml:space="preserve"><value>专辑</value></data>
+  <data name="wpf.music.albumList" xml:space="preserve"><value>专辑列表</value></data>
+  <data name="wpf.music.tracks" xml:space="preserve"><value>曲目</value></data>
+  <data name="wpf.music.trackList" xml:space="preserve"><value>曲目列表</value></data>
+  <data name="wpf.music.noLocalSrc" xml:space="preserve"><value>没有本地来源；请先在媒体源中添加本地目录。</value></data>
+  <data name="wpf.music.albumTracks" xml:space="preserve"><value>{0}（{1} 首）</value></data>
+  <data name="wpf.music.scanning" xml:space="preserve"><value>正在扫描音乐目录…</value></data>
+  <data name="wpf.music.srcUnavailable" xml:space="preserve"><value>来源路径不可用。</value></data>
+  <data name="wpf.music.noAudio" xml:space="preserve"><value>该来源没有可播放的音频文件。</value></data>
+  <data name="wpf.music.albumCount" xml:space="preserve"><value>共 {0} 张专辑。</value></data>
+  <data name="wpf.music.selectTrack" xml:space="preserve"><value>请先选择一首曲目。</value></data>
+  <data name="wpf.music.nowPlaying" xml:space="preserve"><value>正在播放：{0}</value></data>
+  <data name="wpf.music.playFailed" xml:space="preserve"><value>播放启动失败；请检查文件是否存在。</value></data>
+  <data name="wpf.play2.pause" xml:space="preserve"><value>暂停</value></data>
+  <data name="wpf.play2.preparing" xml:space="preserve"><value>正在准备播放</value></data>
+  <data name="wpf.play2.queueSummary" xml:space="preserve"><value>{0} 集 · 当前 {1}</value></data>
+  <data name="wpf.play2.noAudioTrack" xml:space="preserve"><value>没有可选音轨</value></data>
+  <data name="wpf.play2.noSubTrack" xml:space="preserve"><value>没有可选字幕</value></data>
+  <data name="wpf.play2.audioTrack" xml:space="preserve"><value>音轨：{0}</value></data>
+  <data name="wpf.play2.subTrack" xml:space="preserve"><value>字幕：{0}</value></data>
+  <data name="wpf.play2.speedRate" xml:space="preserve"><value>倍速：{0}</value></data>
+  <data name="wpf.play2.muted" xml:space="preserve"><value>已静音</value></data>
+  <data name="wpf.play2.volPercent" xml:space="preserve"><value>音量 {0}%</value></data>
+  <data name="wpf.dsp.rewTextFile" xml:space="preserve"><value>REW 文本文件</value></data>
+  <data name="wpf.dsp.noBands" xml:space="preserve"><value>REW 文件没有可导入的启用频段。</value></data>
+  <data name="wpf.dsp.lineError" xml:space="preserve"><value>第 {0} 行: {1}</value></data>
+  <data name="wpf.dsp.importedBands" xml:space="preserve"><value>已导入 {0} 个频段到 {1}。</value></data>
+  <data name="wpf.dsp.moreErrors" xml:space="preserve"><value> 另有 {0} 个错误。</value></data>
+  <data name="wpf.dsp.pushedBands" xml:space="preserve"><value>已推送 {0} 段 PEQ 到 Topping。</value></data>
+  <data name="wpf.dsp.pushedWarns" xml:space="preserve"><value>已推送（{0} 条警告）：{1}</value></data>
+  <data name="wpf.dsp.wizardUnavailable" xml:space="preserve"><value>房间校准向导不可用。</value></data>
+  <data name="wpf.dsp.noPreset" xml:space="preserve"><value>DSP 预设或目标声道未选择。</value></data>
+  <data name="wpf.dsp.limiterDigits" xml:space="preserve"><value>限幅参数必须是数字。</value></data>
 </root>

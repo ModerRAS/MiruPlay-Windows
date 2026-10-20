@@ -78,8 +78,8 @@ public partial class AudioDspDialog : Window
         if (TargetBox.SelectedItem is not AudioDspChannelTarget target) return;
         var dialog = new OpenFileDialog
         {
-            Title = "导入 REW 校准文件",
-            Filter = "REW 文本文件 (*.txt;*.req)|*.txt;*.req|所有文件 (*.*)|*.*",
+            Title = AppStrings.Get("wpf.dsp.importRew"),
+            Filter = "REW " + AppStrings.Get("wpf.dsp.rewTextFile") + " (*.txt;*.req)|*.txt;*.req|" + AppStrings.Get("wpf.common.allFiles") + " (*.*)|*.*",
             CheckFileExists = true,
         };
         if (dialog.ShowDialog(this) != true) return;
@@ -88,14 +88,14 @@ public partial class AudioDspDialog : Window
             var parsed = RewEqFileParser.Parse(await File.ReadAllTextAsync(dialog.FileName, Encoding.UTF8));
             if (parsed.Bands.Count == 0)
             {
-                StatusBox.Text = parsed.Errors.Count == 0 ? "REW 文件没有可导入的启用频段。" : string.Join("; ", parsed.Errors.Select(error => $"第 {error.LineNumber} 行: {error.Message}"));
+                StatusBox.Text = parsed.Errors.Count == 0 ? AppStrings.Get("wpf.dsp.noBands") : string.Join("; ", parsed.Errors.Select(error => AppStrings.Get("wpf.dsp.lineError", error.LineNumber, error.Message)));
                 return;
             }
             _config = AudioDspEditorState.ReplaceChannelBands(
                 CaptureConfigWithoutRows(), SelectedPreset.Id, target, parsed.Bands.Select(item => item.Band).ToArray());
             LoadRows();
-            StatusBox.Text = $"已导入 {parsed.Bands.Count} 个频段到 {target}。" +
-                (parsed.Errors.Count > 0 ? $" 另有 {parsed.Errors.Count} 个错误。" : string.Empty);
+            StatusBox.Text = AppStrings.Get("wpf.dsp.importedBands", parsed.Bands.Count, target) +
+                (parsed.Errors.Count > 0 ? AppStrings.Get("wpf.dsp.moreErrors", parsed.Errors.Count) : string.Empty);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException)
         {
@@ -107,7 +107,7 @@ public partial class AudioDspDialog : Window
     {
         if (_topping is null)
         {
-            StatusBox.Text = "Windows 客户端未启用 Topping DAC 控制。";
+            StatusBox.Text = AppStrings.Get("api.errNoTopping");
             return;
         }
         AudioDspPreset preset;
@@ -125,8 +125,8 @@ public partial class AudioDspDialog : Window
         {
             var mapping = await _topping.ApplyPresetAsync(preset);
             StatusBox.Text = mapping.Warnings.Count == 0
-                ? $"已推送 {mapping.Bands.Count(band => band.On)} 段 PEQ 到 Topping。"
-                : $"已推送（{mapping.Warnings.Count} 条警告）：{string.Join("; ", mapping.Warnings)}";
+                ? AppStrings.Get("wpf.dsp.pushedBands", mapping.Bands.Count(band => band.On))
+                : AppStrings.Get("wpf.dsp.pushedWarns", mapping.Warnings.Count, string.Join("; ", mapping.Warnings));
         }
         catch (ToppingController.ToppingCommandException error)
         {
@@ -138,7 +138,7 @@ public partial class AudioDspDialog : Window
     {
         if (_applyMeasured is null)
         {
-            StatusBox.Text = "房间校准向导不可用。";
+            StatusBox.Text = AppStrings.Get("wpf.dsp.wizardUnavailable");
             return;
         }
         var wizard = new MeasureWizardWindow(CaptureConfigWithoutRows().Normalize(), _applyMeasured)
@@ -171,13 +171,13 @@ public partial class AudioDspDialog : Window
     private AudioDspConfig CaptureConfigWithoutRows()
     {
         if (PresetBox.SelectedItem is not AudioDspPreset preset || TargetBox.SelectedItem is not AudioDspChannelTarget target)
-            throw new InvalidOperationException("DSP 预设或目标声道未选择。");
+            throw new InvalidOperationException(AppStrings.Get("wpf.dsp.noPreset"));
         BandGrid.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Cell, true);
         BandGrid.CommitEdit(System.Windows.Controls.DataGridEditingUnit.Row, true);
         var rows = BandGrid.Items.OfType<AudioDspBandRow>().Select(row => row.ToBand()).ToArray();
         if (!double.TryParse(LimiterCeilingBox.Text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var ceilingDb) ||
             !double.TryParse(LimiterReleaseBox.Text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var releaseMs))
-            throw new ArgumentException("限幅参数必须是数字。");
+            throw new ArgumentException(AppStrings.Get("wpf.dsp.limiterDigits"));
         var withControls = preset with
         {
             PhaseMode = (AudioDspPhaseMode)PhaseBox.SelectedItem,
