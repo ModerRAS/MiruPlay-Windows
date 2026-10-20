@@ -163,4 +163,52 @@
   <data name="cloud.processed" xml:space="preserve"><value>已處理</value></data>
   <data name="common.result" xml:space="preserve"><value>結果</value></data>
   <data name="common.notRun" xml:space="preserve"><value>尚未執行</value></data>
+  <data name="ops.logs" xml:space="preserve"><value>OpenObserve 日誌</value></data>
+  <data name="ops.tokenOk" xml:space="preserve"><value>權杖已設定</value></data>
+  <data name="ops.noToken" xml:space="preserve"><value>權杖未設定</value></data>
+  <data name="ops.enableUpload" xml:space="preserve"><value>啟用日誌上報</value></data>
+  <data name="ops.endpoint" xml:space="preserve"><value>OpenObserve 位址</value></data>
+  <data name="ops.stream" xml:space="preserve"><value>Stream</value></data>
+  <data name="ops.token" xml:space="preserve"><value>權杖</value></data>
+  <data name="ops.saveSettings" xml:space="preserve"><value>儲存設定</value></data>
+  <data name="ops.uploadNow" xml:space="preserve"><value>立即上報</value></data>
+  <data name="ops.clearToken" xml:space="preserve"><value>清除權杖</value></data>
+  <data name="ops.pending" xml:space="preserve"><value>待上報 {0} 條</value></data>
+  <data name="ops.neverUploaded" xml:space="preserve"><value>尚未上報</value></data>
+  <data name="ops.update" xml:space="preserve"><value>Windows 更新</value></data>
+  <data name="ops.updateAvailable" xml:space="preserve"><value>有可用更新</value></data>
+  <data name="ops.noUpdate" xml:space="preserve"><value>暫無更新</value></data>
+  <data name="ops.noManifest" xml:space="preserve"><value>未設定清單</value></data>
+  <data name="ops.manifestUrl" xml:space="preserve"><value>更新清單 URL</value></data>
+  <data name="ops.saveManifest" xml:space="preserve"><value>儲存清單</value></data>
+  <data name="ops.currentVersion" xml:space="preserve"><value>目前版本 {0}</value></data>
+  <data name="ops.latestVersion" xml:space="preserve"><value>最新版本 {0} · {1}</value></data>
+  <data name="ops.check" xml:space="preserve"><value>檢查更新</value></data>
+  <data name="ops.download" xml:space="preserve"><value>下載並暫存</value></data>
+  <data name="ops.staged" xml:space="preserve"><value>已暫存：{0}</value></data>
+  <data name="ops.install" xml:space="preserve"><value>確認安裝並重新啟動</value></data>
+  <data name="ops.installNote" xml:space="preserve"><value>安裝程式啟動前會驗證暫存檔；安裝需要再次確認。</value></data>
+  <data name="ops.restart" xml:space="preserve"><value>重新啟動 MiruPlay</value></data>
+  <data name="ops.exit" xml:space="preserve"><value>結束 MiruPlay</value></data>
+  <data name="ops.tasks" xml:space="preserve"><value>背景工作</value></data>
+  <data name="ops.noTasks" xml:space="preserve"><value>尚無背景工作。</value></data>
+  <data name="ops.cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="ops.localLogs" xml:space="preserve"><value>本機日誌</value></data>
+  <data name="ops.downloadLogs" xml:space="preserve"><value>下載 JSONL</value></data>
+  <data name="ops.logSaved" xml:space="preserve"><value>日誌上報設定已儲存</value></data>
+  <data name="ops.confirmClearToken" xml:space="preserve"><value>清除 OpenObserve 權杖？</value></data>
+  <data name="ops.tokenCleared" xml:space="preserve"><value>權杖已清除</value></data>
+  <data name="ops.manifestSaved" xml:space="preserve"><value>更新清單已儲存</value></data>
+  <data name="ops.checkDone" xml:space="preserve"><value>更新檢查完成</value></data>
+  <data name="ops.stagedToast" xml:space="preserve"><value>更新已暫存</value></data>
+  <data name="ops.notDownloaded" xml:space="preserve"><value>更新未下載</value></data>
+  <data name="ops.confirmInstall" xml:space="preserve"><value>將執行已驗證的 MiruPlay Setup 安裝程式、更新目前使用者安裝並重新啟動 MiruPlay。繼續？</value></data>
+  <data name="ops.installStarted" xml:space="preserve"><value>安裝程式已啟動，MiruPlay 將關閉並在安裝後重新啟動</value></data>
+  <data name="ops.noHandoff" xml:space="preserve"><value>目前客戶端唔支援安裝交接</value></data>
+  <data name="ops.confirmRestart" xml:space="preserve"><value>重新啟動 MiruPlay？</value></data>
+  <data name="ops.confirmExit" xml:space="preserve"><value>結束 MiruPlay？</value></data>
+  <data name="ops.restartSent" xml:space="preserve"><value>已傳送重新啟動請求</value></data>
+  <data name="ops.exitSent" xml:space="preserve"><value>已傳送結束請求</value></data>
+  <data name="ops.cancelSent" xml:space="preserve"><value>已傳送取消請求</value></data>
+  <data name="ops.taskEnded" xml:space="preserve"><value>工作已結束</value></data>
 </root>

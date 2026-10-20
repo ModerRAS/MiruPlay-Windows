@@ -163,4 +163,52 @@
   <data name="cloud.processed" xml:space="preserve"><value>Processed</value></data>
   <data name="common.result" xml:space="preserve"><value>Result</value></data>
   <data name="common.notRun" xml:space="preserve"><value>Not run yet</value></data>
+  <data name="ops.logs" xml:space="preserve"><value>OpenObserve logs</value></data>
+  <data name="ops.tokenOk" xml:space="preserve"><value>Token configured</value></data>
+  <data name="ops.noToken" xml:space="preserve"><value>Token not configured</value></data>
+  <data name="ops.enableUpload" xml:space="preserve"><value>Enable log upload</value></data>
+  <data name="ops.endpoint" xml:space="preserve"><value>OpenObserve endpoint</value></data>
+  <data name="ops.stream" xml:space="preserve"><value>Stream</value></data>
+  <data name="ops.token" xml:space="preserve"><value>Token</value></data>
+  <data name="ops.saveSettings" xml:space="preserve"><value>Save settings</value></data>
+  <data name="ops.uploadNow" xml:space="preserve"><value>Upload now</value></data>
+  <data name="ops.clearToken" xml:space="preserve"><value>Clear token</value></data>
+  <data name="ops.pending" xml:space="preserve"><value>{0} pending</value></data>
+  <data name="ops.neverUploaded" xml:space="preserve"><value>Never uploaded</value></data>
+  <data name="ops.update" xml:space="preserve"><value>Windows update</value></data>
+  <data name="ops.updateAvailable" xml:space="preserve"><value>Update available</value></data>
+  <data name="ops.noUpdate" xml:space="preserve"><value>No updates</value></data>
+  <data name="ops.noManifest" xml:space="preserve"><value>Manifest not configured</value></data>
+  <data name="ops.manifestUrl" xml:space="preserve"><value>Update manifest URL</value></data>
+  <data name="ops.saveManifest" xml:space="preserve"><value>Save manifest</value></data>
+  <data name="ops.currentVersion" xml:space="preserve"><value>Current version {0}</value></data>
+  <data name="ops.latestVersion" xml:space="preserve"><value>Latest version {0} · {1}</value></data>
+  <data name="ops.check" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="ops.download" xml:space="preserve"><value>Download and stage</value></data>
+  <data name="ops.staged" xml:space="preserve"><value>Staged: {0}</value></data>
+  <data name="ops.install" xml:space="preserve"><value>Confirm install and restart</value></data>
+  <data name="ops.installNote" xml:space="preserve"><value>The staged file is verified before the installer starts; installation needs another confirmation.</value></data>
+  <data name="ops.restart" xml:space="preserve"><value>Restart MiruPlay</value></data>
+  <data name="ops.exit" xml:space="preserve"><value>Quit MiruPlay</value></data>
+  <data name="ops.tasks" xml:space="preserve"><value>Background tasks</value></data>
+  <data name="ops.noTasks" xml:space="preserve"><value>No background tasks.</value></data>
+  <data name="ops.cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="ops.localLogs" xml:space="preserve"><value>Local logs</value></data>
+  <data name="ops.downloadLogs" xml:space="preserve"><value>Download JSONL</value></data>
+  <data name="ops.logSaved" xml:space="preserve"><value>Log upload settings saved</value></data>
+  <data name="ops.confirmClearToken" xml:space="preserve"><value>Clear the OpenObserve token?</value></data>
+  <data name="ops.tokenCleared" xml:space="preserve"><value>Token cleared</value></data>
+  <data name="ops.manifestSaved" xml:space="preserve"><value>Update manifest saved</value></data>
+  <data name="ops.checkDone" xml:space="preserve"><value>Update check complete</value></data>
+  <data name="ops.stagedToast" xml:space="preserve"><value>Update staged</value></data>
+  <data name="ops.notDownloaded" xml:space="preserve"><value>Update not downloaded</value></data>
+  <data name="ops.confirmInstall" xml:space="preserve"><value>This will run the verified MiruPlay Setup installer, update the current-user install and restart MiruPlay. Continue?</value></data>
+  <data name="ops.installStarted" xml:space="preserve"><value>Installer started; MiruPlay will close and restart after install</value></data>
+  <data name="ops.noHandoff" xml:space="preserve"><value>This client does not support install handoff</value></data>
+  <data name="ops.confirmRestart" xml:space="preserve"><value>Restart MiruPlay?</value></data>
+  <data name="ops.confirmExit" xml:space="preserve"><value>Quit MiruPlay?</value></data>
+  <data name="ops.restartSent" xml:space="preserve"><value>Restart requested</value></data>
+  <data name="ops.exitSent" xml:space="preserve"><value>Quit requested</value></data>
+  <data name="ops.cancelSent" xml:space="preserve"><value>Cancel requested</value></data>
+  <data name="ops.taskEnded" xml:space="preserve"><value>Task already ended</value></data>
 </root>
