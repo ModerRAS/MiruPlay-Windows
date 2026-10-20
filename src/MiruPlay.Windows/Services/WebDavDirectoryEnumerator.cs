@@ -67,7 +67,9 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
                     pending.Enqueue((EnsureDirectoryUri(response.Uri), depth + 1));
                     continue;
                 }
-                if (!DirectoryLibraryIndex.IsVideoFile(relativePath) && !DirectoryLibraryIndex.IsSubtitleFile(relativePath)) continue;
+                if (!DirectoryLibraryIndex.IsVideoFile(relativePath) && !DirectoryLibraryIndex.IsSubtitleFile(relativePath) &&
+                    !DirectoryLibraryIndex.IsExternalAudioFile(relativePath) &&
+                    !Path.GetExtension(relativePath).Equals(".nfo", StringComparison.OrdinalIgnoreCase)) continue;
                 if (files.Count >= MaximumEntries) throw new InvalidDataException("WebDAV 目录文件数超过 100000 限制。");
                 files.Add(new RemoteFileEntry(relativePath, response.ContentLength ?? 0, response.ModifiedMs));
                 progress?.Report(new DirectoryScanProgress(files.Count, files.Count, files.Count(entry => DirectoryLibraryIndex.IsVideoFile(entry.RelativePath))));
@@ -78,15 +80,68 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
             .Where(entry => DirectoryLibraryIndex.IsSubtitleFile(entry.RelativePath))
             .Select(entry => entry.RelativePath)
             .ToList();
-        return files
-            .Where(entry => DirectoryLibraryIndex.IsVideoFile(entry.RelativePath))
-            .OrderBy(entry => entry.RelativePath, StringComparer.OrdinalIgnoreCase)
-            .Select(entry => new DirectoryFileEntry(
-                entry.RelativePath,
-                entry.SizeBytes,
-                entry.ModifiedMs,
-                FindSubtitlePaths(subtitlePaths, entry.RelativePath)))
-            .ToList();
+        var audioPaths = files.Where(entry => DirectoryLibraryIndex.IsExternalAudioFile(entry.RelativePath))
+            .Select(entry => entry.RelativePath).ToList();
+        var nfoPaths = files.Where(entry => Path.GetExtension(entry.RelativePath).Equals(".nfo", StringComparison.OrdinalIgnoreCase))
+            .Select(entry => entry.RelativePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var seriesMetadata = new Dictionary<string, NfoTvShowMetadata>(StringComparer.OrdinalIgnoreCase);
+        var result = new List<DirectoryFileEntry>();
+        foreach (var entry in files.Where(entry => DirectoryLibraryIndex.IsVideoFile(entry.RelativePath))
+            .OrderBy(entry => entry.RelativePath, StringComparer.OrdinalIgnoreCase))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var episodeNfo = Path.ChangeExtension(entry.RelativePath, ".nfo");
+            var episodeMetadata = nfoPaths.Contains(episodeNfo)
+                ? await ReadNfoAsync(root, episodeNfo, credential, NfoDocumentService.ReadEpisode, cancellationToken).ConfigureAwait(false)
+                : null;
+            NfoTvShowMetadata? metadata = null;
+            var directory = entry.RelativePath.Contains('/') ? entry.RelativePath[..entry.RelativePath.LastIndexOf('/')] : "";
+            while (true)
+            {
+                var path = directory.Length == 0 ? "tvshow.nfo" : $"{directory}/tvshow.nfo";
+                if (nfoPaths.Contains(path))
+                {
+                    if (!seriesMetadata.TryGetValue(path, out metadata))
+                    {
+                        metadata = await ReadNfoAsync(root, path, credential, NfoDocumentService.ReadTvShow, cancellationToken).ConfigureAwait(false);
+                        seriesMetadata[path] = metadata;
+                    }
+                    break;
+                }
+                if (directory.Length == 0) break;
+                directory = directory.Contains('/') ? directory[..directory.LastIndexOf('/')] : "";
+            }
+            result.Add(new DirectoryFileEntry(entry.RelativePath, entry.SizeBytes, entry.ModifiedMs,
+                FindSubtitlePaths(subtitlePaths, entry.RelativePath), episodeMetadata, metadata,
+                ExternalAudioPathMatcher.Find(entry.RelativePath, audioPaths)));
+        }
+        return result;
+    }
+
+    private async Task<T> ReadNfoAsync<T>(
+        Uri root,
+        string relativePath,
+        MediaSourceCredential? credential,
+        Func<Stream, T> read,
+        CancellationToken cancellationToken)
+    {
+        const int maximumBytes = 4 * 1024 * 1024;
+        var uri = new Uri(root, string.Join('/', relativePath.Split('/').Select(Uri.EscapeDataString)));
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        request.Headers.UserAgent.ParseAdd("MiruPlay-Windows/1.0");
+        if (credential is { IsEmpty: false })
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic",
+                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{credential.Username}:{credential.Password}")));
+        await using var lease = await _dispatcher.SendAsync(root, WebDavRequestKind.Scanner, request,
+            TimeSpan.FromMinutes(5), cancellationToken).ConfigureAwait(false);
+        lease.Response.EnsureSuccessStatusCode();
+        if (lease.Response.Content.Headers.ContentLength is > maximumBytes)
+            throw new InvalidDataException("远程 NFO 超过 4 MiB 限制。");
+        await using var input = await lease.Response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var buffer = new MemoryStream();
+        await WebDavMlipClient.CopyBoundedAsync(input, buffer, maximumBytes, "远程 NFO 超过 4 MiB 限制。", cancellationToken).ConfigureAwait(false);
+        buffer.Position = 0;
+        return read(buffer);
     }
 
     public void Dispose()

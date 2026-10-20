@@ -34,6 +34,7 @@ internal sealed class WebDavPlaybackProxy : IAsyncDisposable
         {
             MediaPath = AddResource(port, episode.MediaPath),
             SubtitlePaths = episode.SubtitlePaths.Select(path => AddResource(port, path)).ToList(),
+            ExternalAudioPaths = episode.ExternalAudioPaths.Select(path => AddResource(port, path)).ToList(),
         };
         _server = ServeAsync();
     }

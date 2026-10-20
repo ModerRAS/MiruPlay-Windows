@@ -6,16 +6,43 @@ namespace MiruPlay.Windows.Services;
 
 internal sealed class LibMpvPlaybackSession : IPlaybackSession
 {
+    private static readonly TimeSpan ProgressSaveInterval = TimeSpan.FromSeconds(15);
     private const int MpvEventShutdown = 1;
+    private const int MpvEventLogMessage = 2;
     private const int MpvEventEndFile = 7;
     private const int MpvEventFileLoaded = 8;
+    private const int NativeLogLimit = 80;
     private const uint MpvFormatNode = 6;
+    private static readonly string[] DiagnosticPropertyNames =
+    [
+        "vo",
+        "ao",
+        "hwdec-current",
+        "video-codec",
+        "audio-codec-name",
+        "video-params/pixelformat",
+        "video-params/hw-pixelformat",
+        "video-params/primaries",
+        "video-params/gamma",
+        "video-params/sig-peak",
+        "container-fps",
+        "estimated-vf-fps",
+        "display-sync-active",
+        "decoder-frame-drop-count",
+        "frame-drop-count",
+        "cache-speed",
+        "cache-buffering-state",
+    ];
     private readonly ILibMpvClient _client;
     private readonly LibraryEpisode _episode;
-    private readonly PlaybackProgressStore _progressStore;
+    private readonly IPlaybackProgressStore _progressStore;
     private IAsyncDisposable? _transportLease;
     private readonly TaskCompletionSource<object?> _completionSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly object _stateSync = new();
+    private readonly object _disposeSync = new();
+    private readonly object _nativeLogSync = new();
+    private readonly Queue<MpvNativeLogMessage> _nativeLogs = new();
+    private readonly bool _surfaceAttached;
     private IReadOnlyList<MpvAudioTrack> _audioTracks = [];
     private IReadOnlyList<PlaybackSubtitleTrack> _subtitleTracks = [];
     private int? _selectedAudioTrackId;
@@ -23,29 +50,38 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     private long _positionMs;
     private long _durationMs;
     private double _speed = 1;
+    private double _volumePercent = 100;
     private bool _paused;
+    private bool _muted;
     private string? _fileName;
     private string? _mediaTitle;
     private string? _containerFormat;
     private string? _audioCodec;
     private MpvVideoTrackInfo? _video;
     private AudioDspFilterGraph? _appliedAudioDsp;
+    private AudioDspChannelLayout? _appliedAudioDspChannelLayout;
     private Task? _monitorTask;
     private int _ending;
     private int _explicitStop;
     private int _naturalEnd;
     private int _disposed;
+    private int _completed;
+    private long _lastPersistedPositionMs = -1;
+    private long _lastPersistedDurationMs = -1;
+    private Task? _disposeTask;
 
     internal LibMpvPlaybackSession(
         ILibMpvClient client,
         LibraryEpisode episode,
-        PlaybackProgressStore progressStore,
-        IAsyncDisposable? transportLease)
+        IPlaybackProgressStore progressStore,
+        IAsyncDisposable? transportLease,
+        bool surfaceAttached = false)
     {
         _client = client;
         _episode = episode;
         _progressStore = progressStore;
         _transportLease = transportLease;
+        _surfaceAttached = surfaceAttached;
         _durationMs = Convert.ToInt64(episode.Duration.TotalMilliseconds, CultureInfo.InvariantCulture);
     }
 
@@ -53,20 +89,28 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         ILibMpvClient client,
         LibraryEpisode episode,
         AppSettings settings,
-        PlaybackProgressStore progressStore,
+        IPlaybackProgressStore progressStore,
         bool headless,
         IntPtr? windowHandle,
         IAsyncDisposable? transportLease,
-        MpvWindowsVideoOptions? videoOptions)
+        MpvWindowsVideoOptions? videoOptions,
+        long? startPositionMs = null)
     {
-        var session = new LibMpvPlaybackSession(client, episode, progressStore, null);
+        var session = new LibMpvPlaybackSession(
+            client,
+            episode,
+            progressStore,
+            null,
+            surfaceAttached: !headless && windowHandle is { } handle && handle != IntPtr.Zero);
         try
         {
-            session.Configure(settings, headless, windowHandle, videoOptions);
+            session.Configure(settings, headless, windowHandle, videoOptions, startPositionMs);
+            client.RequestLogMessages("warn");
             EnsureNativeSuccess(client.Initialize(), "初始化 libmpv 失败");
             EnsureNativeSuccess(client.Command(["loadfile", episode.MediaPath, "replace"]), "加载媒体到 libmpv 失败");
             await session.WaitForFileLoadedAsync().ConfigureAwait(false);
             session.LoadExternalSubtitles(episode.SubtitlePaths, settings.PreferredSubtitleLanguage);
+            session.LoadExternalAudio(episode.ExternalAudioPaths);
             session._transportLease = transportLease;
             session.StartMonitoring();
             return session;
@@ -82,11 +126,12 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         string libraryPath,
         LibraryEpisode episode,
         AppSettings settings,
-        PlaybackProgressStore progressStore,
+        IPlaybackProgressStore progressStore,
         bool headless,
         IntPtr? windowHandle,
         IAsyncDisposable? transportLease,
-        MpvWindowsVideoOptions? videoOptions)
+        MpvWindowsVideoOptions? videoOptions,
+        long? startPositionMs = null)
     {
         var client = LibMpvClient.Create(libraryPath);
         try
@@ -99,7 +144,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 headless,
                 windowHandle,
                 transportLease,
-                videoOptions);
+                videoOptions,
+                startPositionMs);
         }
         catch
         {
@@ -132,10 +178,37 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         get { lock (_stateSync) return _selectedAudioTrackId; }
     }
     public double Speed => Volatile.Read(ref _speed);
+    public double VolumePercent => Volatile.Read(ref _volumePercent);
+    public bool IsMuted => Volatile.Read(ref _muted);
     public MpvPlaybackInfo PlaybackInfo => BuildPlaybackInfo();
     public AudioDspFilterGraph? AppliedAudioDsp => _appliedAudioDsp;
+    public AudioDspChannelLayout? AppliedAudioDspChannelLayout => _appliedAudioDspChannelLayout;
     public bool IsActive => !Completion.IsCompleted && Volatile.Read(ref _ending) == 0;
     public bool IsPlaying => IsActive && !IsPaused;
+    public MpvNativeDiagnostics GetNativeDiagnostics()
+    {
+        var properties = new List<MpvNativePropertySample>(DiagnosticPropertyNames.Length);
+        if (Volatile.Read(ref _disposed) == 0)
+        {
+            foreach (var name in DiagnosticPropertyNames)
+            {
+                try
+                {
+                    var value = _client.GetPropertyString(name);
+                    if (!string.IsNullOrWhiteSpace(value))
+                        properties.Add(new(name, value.Length <= 256 ? value : value[..256]));
+                }
+                catch (ObjectDisposedException)
+                {
+                    break;
+                }
+            }
+        }
+
+        MpvNativeLogMessage[] logs;
+        lock (_nativeLogSync) logs = _nativeLogs.ToArray();
+        return new(Environment.TickCount64, _surfaceAttached, properties, logs);
+    }
     public event EventHandler? SubtitleTracksChanged;
     public event EventHandler? AudioTracksChanged;
     public event EventHandler? PlaybackInfoChanged;
@@ -151,6 +224,12 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     public Task SeekRelativeAsync(long deltaMs) => ExecuteCommandAsync(new MpvPlaybackCommand("seek_relative", DeltaMs: deltaMs));
 
     public Task SetSpeedAsync(float speed) => ExecuteCommandAsync(new MpvPlaybackCommand("speed", Speed: speed));
+
+    public Task SetVolumeAsync(double volumePercent) =>
+        ExecuteCommandAsync(new MpvPlaybackCommand("set_volume", VolumePercent: volumePercent));
+
+    public Task SetMutedAsync(bool muted) =>
+        ExecuteCommandAsync(new MpvPlaybackCommand("set_mute", IsMuted: muted));
 
     public Task TogglePauseAsync() => ExecuteCommandAsync(new MpvPlaybackCommand("toggle"));
 
@@ -185,7 +264,9 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             request.DeltaMs,
             request.Speed,
             request.SubtitleTrackId,
-            request.AudioTrackId));
+            request.AudioTrackId,
+            request.VolumePercent,
+            request.IsMuted));
     }
 
     public Task ExecuteCommandAsync(MpvPlaybackCommand request)
@@ -206,6 +287,37 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             case "toggle":
                 EnsureNativeSuccess(_client.Command(["cycle", "pause"]), "切换 libmpv 暂停状态失败");
                 _paused = !_paused;
+                PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
+                break;
+            case "cycle_mute":
+                EnsureNativeSuccess(_client.Command(["cycle", "mute"]), "libmpv mute toggle failed");
+                _muted = TryReadBoolean("mute") ?? !_muted;
+                PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
+                break;
+            case "volume":
+                var volumeDelta = request.DeltaMs ?? 0;
+                EnsureNativeSuccess(
+                    _client.Command(["add", "volume", volumeDelta.ToString(CultureInfo.InvariantCulture)]),
+                    "libmpv volume adjustment failed");
+                Volatile.Write(ref _volumePercent, Math.Clamp(
+                    TryReadDouble("volume") ?? VolumePercent + volumeDelta,
+                    0,
+                    100));
+                PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
+                break;
+            case "set_volume":
+                var volumePercent = request.VolumePercent ?? throw new ArgumentException("缺少音量值。", nameof(request));
+                if (!double.IsFinite(volumePercent)) throw new ArgumentOutOfRangeException(nameof(request));
+                volumePercent = Math.Clamp(volumePercent, 0, 100);
+                SetProperty("volume", volumePercent.ToString("0.###", CultureInfo.InvariantCulture));
+                Volatile.Write(ref _volumePercent, volumePercent);
+                PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
+                break;
+            case "set_mute":
+                var muted = request.IsMuted ?? throw new ArgumentException("缺少静音状态。", nameof(request));
+                SetProperty("mute", muted ? "yes" : "no");
+                _muted = muted;
+                PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
                 break;
             case "seek":
                 SeekAbsolute(request.PositionMs ?? 0);
@@ -246,30 +358,73 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         return Task.CompletedTask;
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        if (Interlocked.Exchange(ref _disposed, 1) == 0 && IsActive)
+        lock (_disposeSync)
         {
-            try
+            return new ValueTask(_disposeTask ??= DisposeCoreAsync());
+        }
+    }
+
+    private async Task DisposeCoreAsync()
+    {
+        Interlocked.Exchange(ref _disposed, 1);
+
+        try
+        {
+            if (IsActive)
             {
-                await ExecuteCommandAsync(new MpvPlaybackCommand("stop")).ConfigureAwait(false);
+                try
+                {
+                    await ExecuteCommandAsync(new MpvPlaybackCommand("stop")).ConfigureAwait(false);
+                }
+                catch (Exception error)
+                {
+                    RecordError(error);
+                    Complete(false);
+                }
             }
-            catch (Exception error) when (error is IOException or InvalidOperationException or ObjectDisposedException)
+
+            if (_monitorTask is not null)
+            {
+                try
+                {
+                    await Completion.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                }
+                catch (TimeoutException)
+                {
+                    Complete(false);
+                }
+            }
+            else
             {
                 Complete(false);
             }
         }
+        finally
+        {
+            try
+            {
+                _client.Dispose();
+            }
+            catch (Exception error)
+            {
+                RecordError(error);
+            }
 
-        if (_monitorTask is not null)
-        {
-            await Completion.WaitAsync(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+            var transportLease = Interlocked.Exchange(ref _transportLease, null);
+            if (transportLease is not null)
+            {
+                try
+                {
+                    await transportLease.DisposeAsync().ConfigureAwait(false);
+                }
+                catch (Exception error)
+                {
+                    RecordError(error);
+                }
+            }
         }
-        else
-        {
-            Complete(false);
-        }
-        _client.Dispose();
-        if (_transportLease is not null) await _transportLease.DisposeAsync().ConfigureAwait(false);
     }
 
     private Task MonitorAsync() => Task.Run(MonitorLoop);
@@ -283,10 +438,18 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             {
                 var nativeEvent = _client.WaitEvent(0.2);
                 if (nativeEvent.EventId == MpvEventFileLoaded) return;
+                if (nativeEvent.EventId == MpvEventLogMessage && nativeEvent.LogMessage is { } loadLog)
+                {
+                    CaptureNativeLog(loadLog);
+                    continue;
+                }
                 if (nativeEvent.EventId == MpvEventShutdown)
                     throw new InvalidOperationException("libmpv 在媒体加载完成前关闭了会话。");
-                if (nativeEvent.EventId == MpvEventEndFile && nativeEvent.Error < 0)
-                    throw new InvalidOperationException($"libmpv 加载媒体失败（错误码 {nativeEvent.Error}）。");
+                if (nativeEvent.EventId == MpvEventEndFile)
+                {
+                    var error = nativeEvent.EndFile?.Error ?? nativeEvent.Error;
+                    throw new InvalidOperationException($"libmpv media load ended before file-loaded (error code {error}).");
+                }
             }
             throw new TimeoutException("libmpv 在 30 秒内没有完成媒体加载。");
         }).ConfigureAwait(false);
@@ -295,15 +458,18 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     private void MonitorLoop()
     {
         var sampleInterval = Stopwatch.StartNew();
+        var progressInterval = Stopwatch.StartNew();
         try
         {
             while (IsActive)
             {
                 var nativeEvent = _client.WaitEvent(0.2);
                 if (nativeEvent.EventId == MpvEventShutdown) break;
+                if (nativeEvent.EventId == MpvEventLogMessage && nativeEvent.LogMessage is { } logMessage)
+                    CaptureNativeLog(logMessage);
                 if (nativeEvent.EventId == MpvEventEndFile)
                 {
-                    Interlocked.Exchange(ref _naturalEnd, 1);
+                    HandleEndFile(nativeEvent);
                     break;
                 }
                 if (sampleInterval.Elapsed >= TimeSpan.FromMilliseconds(500))
@@ -311,16 +477,34 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                     SampleRuntimeState();
                     sampleInterval.Restart();
                 }
+                if (progressInterval.Elapsed >= TimeSpan.FromSeconds(15))
+                {
+                    PersistProgressIfDue(progressInterval.Elapsed);
+                    progressInterval.Restart();
+                }
             }
         }
         catch (Exception error) when (error is IOException or InvalidOperationException or ObjectDisposedException)
         {
-            LastError = $"libmpv: {error.Message}";
+            RecordError(error);
         }
         finally
         {
-            Complete(Volatile.Read(ref _explicitStop) == 0 &&
-                (Volatile.Read(ref _naturalEnd) != 0 || DurationMs > 0 && PositionMs >= DurationMs * 0.9));
+            Complete(Volatile.Read(ref _explicitStop) == 0 && Volatile.Read(ref _naturalEnd) != 0);
+        }
+    }
+
+    private void CaptureNativeLog(LibMpvLogMessage message)
+    {
+        var log = new MpvNativeLogMessage(
+            Environment.TickCount64,
+            message.Prefix,
+            message.Level,
+            RotatingLocalLogStore.Redact(message.Text));
+        lock (_nativeLogSync)
+        {
+            if (_nativeLogs.Count == NativeLogLimit) _nativeLogs.Dequeue();
+            _nativeLogs.Enqueue(log);
         }
     }
 
@@ -328,13 +512,16 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         AppSettings settings,
         bool headless,
         IntPtr? windowHandle,
-        MpvWindowsVideoOptions? videoOptions)
+        MpvWindowsVideoOptions? videoOptions,
+        long? startPositionMs)
     {
         SetOption("idle", "yes");
         SetOption("force-window", headless ? "no" : "yes");
         SetOption("keep-open", "yes");
         SetOption("resume-playback", "no");
-        SetOption("sub-ass-override", "strip");
+        SetOption("sub-ass-override", "no");
+        SetOption("audio-file-auto", _episode.ExternalAudioPaths.Count == 0 ? "fuzzy" : "no");
+        SetOption("sub-auto", "fuzzy");
         if (headless)
         {
             SetOption("vo", "null");
@@ -344,14 +531,22 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         {
             foreach (var argument in MpvWindowsVideoOptionMapper.BuildArguments(videoOptions)) SetOptionArgument(argument);
             SetOption("osc", "no");
-            SetOption("input-default-bindings", "yes");
+            SetOption("input-default-bindings", "no");
+            SetOption("input-vo-keyboard", "no");
             if (windowHandle is { } handle && handle != IntPtr.Zero)
                 SetOption("wid", handle.ToInt64().ToString(CultureInfo.InvariantCulture));
         }
 
-        var progress = _progressStore.Get(_episode.ProgressKey);
-        if (progress is { IsCompleted: false, PositionMs: > 0 })
-            SetOption("start", (progress.PositionMs / 1_000d).ToString(CultureInfo.InvariantCulture));
+        if (startPositionMs is > 0)
+        {
+            SetOption("start", (startPositionMs.Value / 1_000d).ToString(CultureInfo.InvariantCulture));
+        }
+        else
+        {
+            var progress = _progressStore.Get(_episode.ProgressKey);
+            if (progress is { IsCompleted: false, PositionMs: > 0 })
+                SetOption("start", (progress.PositionMs / 1_000d).ToString(CultureInfo.InvariantCulture));
+        }
 
         var languages = settings.PreferredSubtitleLanguage switch
         {
@@ -368,12 +563,21 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         {
             var audioDsp = settings.AudioDsp.Normalize();
             var preset = audioDsp.Presets!.First(item => item.Id.Equals(audioDsp.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
-            var graph = AudioDspFilterGraphCompiler.Compile(
-                audioDsp,
-                AudioDspChannelLayout.ForId(preset.ChannelLayoutId),
-                48_000);
+            var layout = AudioDspChannelLayout.ForId(preset.ChannelLayoutId);
+            var graph = AudioDspFilterGraphCompiler.Compile(audioDsp, layout, 48_000);
             foreach (var argument in graph.MpvArguments) SetOptionArgument(argument);
             _appliedAudioDsp = graph;
+            _appliedAudioDspChannelLayout = layout;
+        }
+    }
+
+    private void LoadExternalAudio(IEnumerable<string> audioPaths)
+    {
+        foreach (var path in audioPaths.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            if (!File.Exists(path) && !IsRemotePath(path)) continue;
+            var result = _client.Command(["audio-add", path, "auto"]);
+            if (result < 0) LastError = $"加载外挂音轨失败: {Path.GetFileName(path)}";
         }
     }
 
@@ -382,7 +586,10 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         var paths = subtitlePaths.Where(path => File.Exists(path) || IsRemotePath(path)).ToArray();
         if (paths.Length == 0) return;
         var ordered = MpvPlayerLauncher.PrioritizeSubtitlePaths(paths, preference);
-        foreach (var path in ordered) EnsureNativeSuccess(_client.Command(["sub-add", path, "select"]), "加载外挂字幕到 libmpv 失败");
+        foreach (var path in ordered) EnsureNativeSuccess(_client.Command(["sub-add", path, "auto"]), "加载外挂字幕到 libmpv 失败");
+        var preferredTrackId = FindExternalSubtitleTrackId(ordered[0]);
+        if (preferredTrackId is not null)
+            SetProperty("sid", preferredTrackId.Value.ToString(CultureInfo.InvariantCulture));
     }
 
     private void SetOptionArgument(string argument)
@@ -408,12 +615,22 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         if (TryReadDouble("duration") is { } duration) Interlocked.Exchange(ref _durationMs, ToMilliseconds(duration));
         if (TryReadBoolean("pause") is { } paused) _paused = paused;
         if (TryReadDouble("speed") is { } speed && double.IsFinite(speed)) Volatile.Write(ref _speed, speed);
+        if (TryReadDouble("volume") is { } volume && double.IsFinite(volume))
+            Volatile.Write(ref _volumePercent, Math.Clamp(volume, 0, 100));
+        if (TryReadBoolean("mute") is { } muted) _muted = muted;
         _fileName = _client.GetPropertyString("filename");
         _mediaTitle = _client.GetPropertyString("media-title");
         _containerFormat = _client.GetPropertyString("file-format");
         _audioCodec = _client.GetPropertyString("audio-codec-name");
         var videoCodec = _client.GetPropertyString("video-codec");
-        _video = videoCodec is null ? null : new(videoCodec, null, null, null, null, null);
+        var pixelFormat = _client.GetPropertyString("video-params/pixelformat");
+        var primaries = _client.GetPropertyString("video-params/primaries");
+        var transfer = _client.GetPropertyString("video-params/gamma");
+        var width = TryReadInt("video-params/w");
+        var height = TryReadInt("video-params/h");
+        _video = videoCodec is null && pixelFormat is null && primaries is null && transfer is null && width is null && height is null
+            ? null
+            : new(videoCodec, pixelFormat, primaries, transfer, width, height);
         UpdateTracks();
         PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
         if (TryReadBoolean("eof-reached") == true)
@@ -444,15 +661,21 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             if (type == "audio") audio.Add(new(id, language, title, codec, external, selected));
         }
 
+        var subtitleChanged = false;
+        var audioChanged = false;
         lock (_stateSync)
         {
+            var selectedSubtitleTrackId = ParseTrackId(_client.GetPropertyString("sid"));
+            var selectedAudioTrackId = ParseTrackId(_client.GetPropertyString("aid"));
+            subtitleChanged = !_subtitleTracks.SequenceEqual(subtitles) || _selectedSubtitleTrackId != selectedSubtitleTrackId;
+            audioChanged = !_audioTracks.SequenceEqual(audio) || _selectedAudioTrackId != selectedAudioTrackId;
             _subtitleTracks = subtitles;
             _audioTracks = audio;
-            _selectedSubtitleTrackId = ParseTrackId(_client.GetPropertyString("sid"));
-            _selectedAudioTrackId = ParseTrackId(_client.GetPropertyString("aid"));
+            _selectedSubtitleTrackId = selectedSubtitleTrackId;
+            _selectedAudioTrackId = selectedAudioTrackId;
         }
-        SubtitleTracksChanged?.Invoke(this, EventArgs.Empty);
-        AudioTracksChanged?.Invoke(this, EventArgs.Empty);
+        if (subtitleChanged) SubtitleTracksChanged?.Invoke(this, EventArgs.Empty);
+        if (audioChanged) AudioTracksChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void SeekAbsolute(long positionMs)
@@ -471,27 +694,96 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
 
     private void UpdateSelectedSubtitle(int? trackId)
     {
-        lock (_stateSync) _selectedSubtitleTrackId = trackId;
-        SubtitleTracksChanged?.Invoke(this, EventArgs.Empty);
+        var changed = false;
+        lock (_stateSync)
+        {
+            changed = _selectedSubtitleTrackId != trackId;
+            _selectedSubtitleTrackId = trackId;
+        }
+        if (changed) SubtitleTracksChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void UpdateSelectedAudio(int? trackId)
     {
-        lock (_stateSync) _selectedAudioTrackId = trackId;
-        AudioTracksChanged?.Invoke(this, EventArgs.Empty);
+        var changed = false;
+        lock (_stateSync)
+        {
+            changed = _selectedAudioTrackId != trackId;
+            _selectedAudioTrackId = trackId;
+        }
+        if (changed) AudioTracksChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void Complete(bool completed)
     {
-        if (_completionSource.Task.IsCompleted) return;
+        if (Interlocked.Exchange(ref _completed, 1) != 0) return;
         Interlocked.Exchange(ref _ending, 1);
         WasCompleted = completed;
-        SaveCurrent(completed);
-        _completionSource.TrySetResult(null);
+        try
+        {
+            TrySaveCurrent(completed);
+        }
+        finally
+        {
+            _completionSource.TrySetResult(null);
+        }
     }
 
-    private void SaveCurrent(bool completed) =>
-        _progressStore.Save(_episode.ProgressKey, PositionMs, DurationMs, completed);
+    internal bool PersistProgressIfDue(TimeSpan elapsed)
+    {
+        if (elapsed < ProgressSaveInterval) return false;
+        return TrySaveCurrent(completed: false);
+    }
+
+    private bool TrySaveCurrent(bool completed)
+    {
+        var positionMs = PositionMs;
+        var durationMs = DurationMs;
+        if (!completed && (durationMs <= 0 || positionMs == _lastPersistedPositionMs && durationMs == _lastPersistedDurationMs)) return false;
+        try
+        {
+            _progressStore.Save(_episode.ProgressKey, positionMs, durationMs, completed);
+            _lastPersistedPositionMs = positionMs;
+            _lastPersistedDurationMs = durationMs;
+            return true;
+        }
+        catch (Exception error)
+        {
+            LastError = $"播放进度保存失败：{error.Message}";
+            return false;
+        }
+    }
+
+    private void HandleEndFile(LibMpvEvent nativeEvent)
+    {
+        var endFile = nativeEvent.EndFile;
+        if (endFile?.Reason == LibMpvEndFileReason.Eof)
+        {
+            Interlocked.Exchange(ref _naturalEnd, 1);
+            return;
+        }
+
+        var error = endFile?.Error ?? nativeEvent.Error;
+        var reason = endFile?.Reason.ToString() ?? "unknown";
+        if (error < 0 || endFile?.Reason == LibMpvEndFileReason.Error)
+            LastError = $"libmpv playback ended with {reason} (error code {error}).";
+    }
+
+    private int? FindExternalSubtitleTrackId(string path)
+    {
+        var node = _client.GetPropertyNode("track-list", MpvFormatNode);
+        var values = node?.ArrayValue ?? node?.MapValue?.Values ?? [];
+        foreach (var item in values)
+        {
+            if (GetString(item, "type") != "sub") continue;
+            var externalPath = GetString(item, "external-filename");
+            if (externalPath is not null && string.Equals(externalPath, path, StringComparison.OrdinalIgnoreCase))
+                return GetInt(item, "id");
+        }
+        return null;
+    }
+
+    private void RecordError(Exception error) => LastError = $"libmpv: {error.Message}";
 
     private void EnsureActive()
     {
@@ -521,6 +813,9 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             _ => null,
         };
     }
+
+    private int? TryReadInt(string property) =>
+        int.TryParse(_client.GetPropertyString(property), NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : null;
 
     private static string? GetString(LibMpvNodeValue item, string key) =>
         item.MapValue?.GetValueOrDefault(key)?.StringValue;
@@ -555,7 +850,9 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 _audioTracks.ToArray(),
                 _subtitleTracks.ToArray(),
                 _selectedAudioTrackId,
-                _selectedSubtitleTrackId);
+                _selectedSubtitleTrackId,
+                VolumePercent,
+                IsMuted);
         }
     }
 }

@@ -8,6 +8,7 @@ public sealed record ExternalMetadataId(string Provider, string Value)
     {
         ("Bangumi", int id) => new Uri($"https://bgm.tv/subject/{id}"),
         ("TMDB", int id) => new Uri($"https://www.themoviedb.org/tv/{id}"),
+        ("TVMaze", int id) => new Uri($"https://www.tvmaze.com/shows/{id}"),
         ("AniDB", int id) => new Uri($"https://anidb.net/anime/{id}"),
         _ => null,
     };
@@ -94,6 +95,7 @@ public sealed record LibrarySeries(
     IReadOnlyList<LibraryExtra> Extras)
 {
     public IReadOnlyList<ExternalMetadataId> ExternalIds { get; init; } = [];
+    public IReadOnlyList<string> AlternateApiIds { get; init; } = [];
     public MlipArtworkReference? PosterArtwork { get; init; }
     public string ApiId => $"mlip:windows:{Uuid}";
     public ExternalMetadataId? ExternalId(string provider) =>
@@ -146,6 +148,7 @@ public sealed record LibraryEpisode(
     IReadOnlyList<string> SubtitlePaths)
 {
     public IReadOnlyList<ExternalMetadataId> ExternalIds { get; init; } = [];
+    public IReadOnlyList<string> ExternalAudioPaths { get; init; } = [];
     public long SourceId { get; init; }
     public ExternalMetadataId? ExternalId(string provider) =>
         ExternalIds.FirstOrDefault(item => item.Provider.Equals(provider, StringComparison.OrdinalIgnoreCase));

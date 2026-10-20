@@ -86,12 +86,30 @@ internal readonly record struct LibMpvEvent(
     int EventId,
     int Error,
     ulong ReplyUserdata,
-    IntPtr Data);
+    IntPtr Data,
+    LibMpvEndFileEvent? EndFile = null,
+    LibMpvLogMessage? LogMessage = null);
+
+internal readonly record struct LibMpvLogMessage(string Prefix, int Level, string Text);
+
+internal enum LibMpvEndFileReason
+{
+    Eof = 0,
+    Stop = 2,
+    Quit = 3,
+    Error = 4,
+    Redirect = 5,
+}
+
+internal readonly record struct LibMpvEndFileEvent(
+    LibMpvEndFileReason Reason,
+    int Error);
 
 internal interface ILibMpvClient : IDisposable
 {
     int SetOptionString(string name, string value);
     int Initialize();
+    void RequestLogMessages(string minimumLevel) { }
     int Command(IReadOnlyList<string> arguments);
     int SetPropertyString(string name, string value);
     string? GetPropertyString(string name);
@@ -107,6 +125,7 @@ internal sealed class LibMpvNativeApi : IDisposable
         "mpv_create",
         "mpv_set_option_string",
         "mpv_initialize",
+        "mpv_request_log_messages",
         "mpv_command",
         "mpv_set_property_string",
         "mpv_get_property_string",
@@ -123,6 +142,7 @@ internal sealed class LibMpvNativeApi : IDisposable
     private readonly MpvCreateDelegate _create;
     private readonly MpvSetOptionStringDelegate _setOptionString;
     private readonly MpvInitializeDelegate _initialize;
+    private readonly MpvRequestLogMessagesDelegate _requestLogMessages;
     private readonly MpvCommandDelegate _command;
     private readonly MpvSetPropertyStringDelegate _setPropertyString;
     private readonly MpvGetPropertyStringDelegate _getPropertyString;
@@ -144,6 +164,7 @@ internal sealed class LibMpvNativeApi : IDisposable
             _create = GetDelegate<MpvCreateDelegate>("mpv_create");
             _setOptionString = GetDelegate<MpvSetOptionStringDelegate>("mpv_set_option_string");
             _initialize = GetDelegate<MpvInitializeDelegate>("mpv_initialize");
+            _requestLogMessages = GetDelegate<MpvRequestLogMessagesDelegate>("mpv_request_log_messages");
             _command = GetDelegate<MpvCommandDelegate>("mpv_command");
             _setPropertyString = GetDelegate<MpvSetPropertyStringDelegate>("mpv_set_property_string");
             _getPropertyString = GetDelegate<MpvGetPropertyStringDelegate>("mpv_get_property_string");
@@ -171,6 +192,13 @@ internal sealed class LibMpvNativeApi : IDisposable
 
     public int Initialize(IntPtr handle) => _initialize(handle);
 
+    public void RequestLogMessages(IntPtr handle, string minimumLevel) =>
+        WithUtf8(minimumLevel, levelPointer =>
+        {
+            _requestLogMessages(handle, levelPointer);
+            return 0;
+        });
+
     public int Command(IntPtr handle, IReadOnlyList<string> arguments)
     {
         using var command = new LibMpvArgumentArray(arguments);
@@ -197,15 +225,18 @@ internal sealed class LibMpvNativeApi : IDisposable
     public LibMpvNodeValue? GetPropertyNode(IntPtr handle, string name, uint format = 6)
     {
         var node = Marshal.AllocHGlobal(16);
+        var propertyRead = false;
         try
         {
-            Marshal.WriteInt64(node, 0);
+            Marshal.Copy(new byte[16], 0, node, 16);
             var error = WithUtf8(name, namePointer => _getProperty(handle, namePointer, format, node));
-            return error < 0 ? null : LibMpvNodeDecoder.Decode(node);
+            if (error < 0) return null;
+            propertyRead = true;
+            return LibMpvNodeDecoder.Decode(node);
         }
         finally
         {
-            _freeNodeContents(node);
+            if (propertyRead) _freeNodeContents(node);
             Marshal.FreeHGlobal(node);
         }
     }
@@ -221,7 +252,22 @@ internal sealed class LibMpvNativeApi : IDisposable
         var pointer = _waitEvent(handle, timeoutSeconds);
         if (pointer == IntPtr.Zero) return new(0, 0, 0, IntPtr.Zero);
         var native = Marshal.PtrToStructure<LibMpvEventNative>(pointer);
-        return new(native.EventId, native.Error, native.ReplyUserdata, native.Data);
+        var endFile = native.EventId == 7 && native.Data != IntPtr.Zero
+            ? (LibMpvEndFileEventNative?)Marshal.PtrToStructure<LibMpvEndFileEventNative>(native.Data)
+            : null;
+        var logMessage = native.EventId == 2 && native.Data != IntPtr.Zero
+            ? (LibMpvLogMessageNative?)Marshal.PtrToStructure<LibMpvLogMessageNative>(native.Data)
+            : null;
+        return new(
+            native.EventId,
+            native.Error,
+            native.ReplyUserdata,
+            native.Data,
+            endFile is null ? null : new((LibMpvEndFileReason)endFile.Value.Reason, endFile.Value.Error),
+            logMessage is null ? null : new(
+                ReadUtf8(logMessage.Value.Prefix),
+                logMessage.Value.LogLevel,
+                ReadUtf8(logMessage.Value.Text)));
     }
 
     public void TerminateDestroy(IntPtr handle)
@@ -255,6 +301,8 @@ internal sealed class LibMpvNativeApi : IDisposable
         }
     }
 
+    private static string ReadUtf8(IntPtr pointer) => pointer == IntPtr.Zero ? string.Empty : Marshal.PtrToStringUTF8(pointer) ?? string.Empty;
+
     [StructLayout(LayoutKind.Sequential)]
     private struct LibMpvEventNative
     {
@@ -262,6 +310,25 @@ internal sealed class LibMpvNativeApi : IDisposable
         public int Error;
         public ulong ReplyUserdata;
         public IntPtr Data;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct LibMpvEndFileEventNative
+    {
+        public int Reason;
+        public int Error;
+        public long PlaylistEntryId;
+        public long PlaylistInsertId;
+        public int PlaylistInsertNum;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct LibMpvLogMessageNative
+    {
+        public IntPtr Prefix;
+        public IntPtr Level;
+        public int LogLevel;
+        public IntPtr Text;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -272,6 +339,9 @@ internal sealed class LibMpvNativeApi : IDisposable
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvInitializeDelegate(IntPtr handle);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void MpvRequestLogMessagesDelegate(IntPtr handle, IntPtr minimumLevel);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvCommandDelegate(IntPtr handle, IntPtr arguments);
@@ -332,6 +402,7 @@ internal sealed class LibMpvClient : ILibMpvClient
 
     public int SetOptionString(string name, string value) => _native.SetOptionString(Handle, name, value);
     public int Initialize() => _native.Initialize(Handle);
+    public void RequestLogMessages(string minimumLevel) => _native.RequestLogMessages(Handle, minimumLevel);
     public int Command(IReadOnlyList<string> arguments) => _native.Command(Handle, arguments);
     public int SetPropertyString(string name, string value) => _native.SetPropertyString(Handle, name, value);
     public string? GetPropertyString(string name) => _native.GetPropertyString(Handle, name);

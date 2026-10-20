@@ -29,7 +29,14 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
             .ToHashSet();
         var subtitlePath = Path.Combine(_directory, "libmpv-smoke.en.srt");
         await File.WriteAllTextAsync(subtitlePath, "1\n00:00:00,000 --> 00:00:10,000\nlibmpv subtitle smoke\n");
-        var episode = Episode(5, "libmpv-smoke-episode", "libmpv-smoke-progress", "libmpv smoke", mediaPath, subtitlePath);
+        var localMediaPath = Path.Combine(_directory, "libmpv-smoke.mp4");
+        File.Copy(mediaPath, localMediaPath);
+        var localAudioPath = Path.Combine(_directory, "libmpv-smoke.en.m4a");
+        File.Copy(mediaPath, localAudioPath);
+        var episode = Episode(5, "libmpv-smoke-episode", "libmpv-smoke-progress", "libmpv smoke", localMediaPath, subtitlePath) with
+        {
+            ExternalAudioPaths = [localAudioPath],
+        };
         var store = new PlaybackProgressStore(Path.Combine(_directory, "libmpv-state.db"));
         MpvPlaybackLaunchResult? launch = null;
         try
@@ -45,6 +52,13 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
             Assert.DoesNotContain(Process.GetProcessesByName("mpv"), process => !existingMpvProcesses.Contains(process.Id));
             await Task.Delay(TimeSpan.FromSeconds(1));
             Assert.Contains(session.SubtitleTracks, track => track.IsExternal && Path.GetFileName(track.ExternalFileName) == Path.GetFileName(subtitlePath));
+            var externalAudio = Assert.Single(session.AudioTracks, track => track.IsExternal);
+            await session.SetAudioTrackAsync(externalAudio.Id);
+            Assert.Equal(externalAudio.Id, (await session.GetPlaybackInfoAsync()).SelectedAudioTrackId);
+            await session.ExecuteCommandAsync(new PlaybackControlCommand("set_volume", VolumePercent: 37));
+            await session.ExecuteCommandAsync(new PlaybackControlCommand("set_mute", IsMuted: true));
+            Assert.Equal(37, session.VolumePercent);
+            Assert.True(session.IsMuted);
             var graph = new AudioDspFilterGraph("volume=3dB", [], "stereo", []);
             await session.ApplyAudioDspAsync(graph);
             var actualAudioFilter = await session.GetAudioFilterGraphAsync();
@@ -84,6 +98,7 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
             var remoteEpisode = Episode(3, "remote-episode", "remote-progress", "Remote IPC smoke", remoteServer.MediaUrl) with
             {
                 SourceId = 3,
+                ExternalAudioPaths = [remoteServer.AudioUrl],
             };
             using var webDav = new WebDavMlipClient(
                 cacheRoot: Path.Combine(_directory, "webdav-cache"),
@@ -104,10 +119,12 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
             Assert.NotNull(remoteSession);
             await Task.Delay(TimeSpan.FromSeconds(1));
             Assert.True(remoteSession.IsActive);
+            Assert.Contains(remoteSession.AudioTracks, track => track.IsExternal);
             await remoteSession.ExecuteCommandAsync(new PlaybackControlCommand("speed", Speed: 4f));
             await remoteSession.Completion.WaitAsync(TimeSpan.FromSeconds(20));
             Assert.True(remoteSession.WasCompleted);
             Assert.True(remoteServer.AuthorizedRequests > 0);
+            Assert.True(remoteServer.AuthorizedAudioRequests > 0);
             Assert.IsType<PlaybackProgress>(remoteStore.Get(remoteEpisode.ProgressKey));
             var secretsDirectory = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -262,6 +279,7 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
         private readonly CancellationTokenSource _cancellation = new();
         private readonly Task _serverTask;
         private int _authorizedRequests;
+        private int _authorizedAudioRequests;
 
         public AuthenticatedMediaServer(byte[] media, string username, string password)
         {
@@ -270,11 +288,14 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
             _listener.Start();
             var port = ((System.Net.IPEndPoint)_listener.LocalEndpoint).Port;
             MediaUrl = $"http://127.0.0.1:{port}/ipc-smoke.mp4";
+            AudioUrl = $"http://127.0.0.1:{port}/ipc-smoke.en.m4a";
             _serverTask = ServeAsync();
         }
 
         public string MediaUrl { get; }
+        public string AudioUrl { get; }
         public int AuthorizedRequests => Volatile.Read(ref _authorizedRequests);
+        public int AuthorizedAudioRequests => Volatile.Read(ref _authorizedAudioRequests);
 
         public async ValueTask DisposeAsync()
         {
@@ -321,6 +342,8 @@ public sealed class MpvPlaybackIntegrationTests : IDisposable
                     continue;
                 }
                 Interlocked.Increment(ref _authorizedRequests);
+                if (requestLine?.Contains("/ipc-smoke.en.m4a", StringComparison.OrdinalIgnoreCase) == true)
+                    Interlocked.Increment(ref _authorizedAudioRequests);
                 var start = ParseRangeStart(range);
                 var length = _media.Length - start;
                 var status = start > 0 ? "206 Partial Content" : "200 OK";

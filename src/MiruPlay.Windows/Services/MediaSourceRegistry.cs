@@ -25,6 +25,7 @@ public sealed record MediaSourceDefinition(
         ("WEBDAV", _) => "WebDAV MLIP",
         ("SMB", "DIRECTORY") => "SMB 目录",
         ("SMB", _) => "SMB MLIP",
+        ("RSS", _) => "RSS 在线源",
         _ => Type,
     };
 
@@ -74,6 +75,7 @@ public sealed class MediaSourceRegistry : IDisposable
     private readonly SmbConnectionManager _smbConnections;
     private readonly Lazy<DirectoryLibraryIndex> _directoryIndex;
     private readonly WebDavDirectoryEnumerator _webDavDirectory;
+    private readonly RssMediaCatalogReader _rssMediaCatalogReader;
     private readonly SemaphoreSlim _scanLock = new(1, 1);
     private readonly object _sync = new();
 
@@ -84,7 +86,8 @@ public sealed class MediaSourceRegistry : IDisposable
         WebDavMlipClient? webDav = null,
         SmbConnectionManager? smbConnections = null,
         DirectoryLibraryIndex? directoryIndex = null,
-        WebDavDirectoryEnumerator? webDavDirectory = null)
+        WebDavDirectoryEnumerator? webDavDirectory = null,
+        RssMediaCatalogReader? rssMediaCatalogReader = null)
         : this(
             getSettings,
             update =>
@@ -97,7 +100,8 @@ public sealed class MediaSourceRegistry : IDisposable
             webDav,
             smbConnections,
             directoryIndex,
-            webDavDirectory)
+            webDavDirectory,
+            rssMediaCatalogReader)
     {
     }
 
@@ -108,7 +112,8 @@ public sealed class MediaSourceRegistry : IDisposable
         WebDavMlipClient? webDav = null,
         SmbConnectionManager? smbConnections = null,
         DirectoryLibraryIndex? directoryIndex = null,
-        WebDavDirectoryEnumerator? webDavDirectory = null)
+        WebDavDirectoryEnumerator? webDavDirectory = null,
+        RssMediaCatalogReader? rssMediaCatalogReader = null)
     {
         _getSettings = getSettings;
         _updateSettings = updateSettings;
@@ -117,6 +122,7 @@ public sealed class MediaSourceRegistry : IDisposable
         _smbConnections = smbConnections ?? new SmbConnectionManager();
         _directoryIndex = new Lazy<DirectoryLibraryIndex>(() => directoryIndex ?? new DirectoryLibraryIndex());
         _webDavDirectory = webDavDirectory ?? new WebDavDirectoryEnumerator();
+        _rssMediaCatalogReader = rssMediaCatalogReader ?? new RssMediaCatalogReader();
     }
 
     public IReadOnlyList<MediaSourceInfoDto> List() =>
@@ -127,11 +133,11 @@ public sealed class MediaSourceRegistry : IDisposable
         try
         {
             var validated = await ValidateAsync(request).ConfigureAwait(false);
-            return validated.RecognitionMode == "DIRECTORY"
-                ? new SourceTestResponse(true, "目录可读")
-                : new SourceTestResponse(
-                    true,
-                    $"MLIP v{validated.SchemaVersion}，{validated.SeriesCount} 部作品");
+            return validated.Type == "RSS"
+                ? new SourceTestResponse(true, $"RSS 在线源可用：{validated.EpisodeCount} 集，{validated.SeriesCount} 部作品")
+                : validated.RecognitionMode == "DIRECTORY"
+                    ? new SourceTestResponse(true, "目录可读")
+                    : new SourceTestResponse(true, $"MLIP v{validated.SchemaVersion}，{validated.SeriesCount} 部作品");
         }
         catch (Exception error) when (IsSourceFailure(error))
         {
@@ -243,6 +249,8 @@ public sealed class MediaSourceRegistry : IDisposable
             {
                 _webDav.DeleteCache(existing.Location);
             }
+            if (existing.Type == "RSS" && !SameLocation(existing.Location, savedSource.Location))
+                _rssMediaCatalogReader.Invalidate(existing.Location);
             if (existing.Type == "SMB" &&
                 (savedSource.Type != "SMB" || !SmbPath.ShareRoot(existing.Location).Equals(
                     SmbPath.ShareRoot(savedSource.Location),
@@ -293,6 +301,7 @@ public sealed class MediaSourceRegistry : IDisposable
             _credentials.Delete(sourceId);
             if (_directoryIndex.IsValueCreated) _directoryIndex.Value.Remove(sourceId);
             if (removedSource!.Type == "WEBDAV") _webDav.DeleteCache(removedSource.Location);
+            if (removedSource.Type == "RSS") _rssMediaCatalogReader.Invalidate(removedSource.Location);
             if (removedSource.Type == "SMB" && !remainingSources.Any(item => item.Type == "SMB" &&
                     SmbPath.ShareRoot(item.Location).Equals(SmbPath.ShareRoot(removedSource.Location), StringComparison.OrdinalIgnoreCase)))
             {
@@ -331,6 +340,13 @@ public sealed class MediaSourceRegistry : IDisposable
         var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
         try
         {
+            if (source.Type == "RSS")
+            {
+                _rssMediaCatalogReader.Invalidate(source.Location);
+                var catalog = await _rssMediaCatalogReader.LoadAsync(source.Location, cancellationToken).ConfigureAwait(false);
+                SetConnectionState(sourceId, connected: true, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                return new SourceScanResponse(sourceId, source.Name, catalog.Series.Sum(item => item.Episodes.Count), 0, 0);
+            }
             if (source.RecognitionMode == "DIRECTORY")
             {
                 var result = source.Type switch
@@ -389,9 +405,52 @@ public sealed class MediaSourceRegistry : IDisposable
     public MediaSourceDefinition? Get(long sourceId) =>
         Sources(_getSettings()).FirstOrDefault(source => source.Id == sourceId);
 
+    public MetadataBatch PreviewMetadata(long sourceId, IReadOnlyList<SeriesMetadataEdit> edits)
+    {
+        var source = WritableDirectorySource(sourceId);
+        return _directoryIndex.Value.PreviewMetadata(sourceId, source.Location, edits);
+    }
+
+    public MetadataBatch ApplyMetadata(long sourceId, string batchId)
+    {
+        var source = WritableDirectorySource(sourceId);
+        return _directoryIndex.Value.ApplyMetadata(sourceId, source.Location, batchId);
+    }
+
+    public MetadataBatch UndoMetadata(long sourceId, string batchId)
+    {
+        var source = WritableDirectorySource(sourceId);
+        return _directoryIndex.Value.UndoMetadata(sourceId, source.Location, batchId);
+    }
+
+    public IReadOnlyList<MetadataBatch> MetadataHistory(long sourceId)
+    {
+        _ = WritableDirectorySource(sourceId);
+        return _directoryIndex.Value.MetadataHistory(sourceId);
+    }
+
+    private MediaSourceDefinition WritableDirectorySource(long sourceId)
+    {
+        var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
+        if (source.RecognitionMode != "DIRECTORY")
+            throw new NotSupportedException("仅普通目录来源支持本地元数据编辑；MLIP 与 RSS 保持只读。");
+        return source;
+    }
+
     public LibraryCatalog LoadCatalog(long sourceId)
     {
         var source = Get(sourceId) ?? throw new KeyNotFoundException("媒体源不存在。");
+        if (source.Type == "RSS")
+        {
+            var catalog = _rssMediaCatalogReader.LoadAsync(source.Location).GetAwaiter().GetResult();
+            return catalog with
+            {
+                Series = catalog.Series.Select(series => series with
+                {
+                    Episodes = series.Episodes.Select(episode => episode with { SourceId = sourceId }).ToList(),
+                }).ToList(),
+            };
+        }
         return source.RecognitionMode == "DIRECTORY"
             ? _directoryIndex.Value.LoadDirectory(sourceId, source.Location)
             : source.Type switch
@@ -485,6 +544,7 @@ public sealed class MediaSourceRegistry : IDisposable
             "LOCAL" => await ValidateLocalRequestAsync(request).ConfigureAwait(false),
             "WEBDAV" => await ValidateWebDavRequestAsync(request).ConfigureAwait(false),
             "SMB" => await ValidateSmbRequestAsync(request, replaceSmbCredentials).ConfigureAwait(false),
+            "RSS" => await ValidateRssRequestAsync(request).ConfigureAwait(false),
             _ => throw new NotSupportedException($"未知媒体源类型: {request.Type}"),
         };
     }
@@ -499,6 +559,12 @@ public sealed class MediaSourceRegistry : IDisposable
         {
             throw new NotSupportedException("内容模式必须是 ANIME 或 DRAMA。");
         }
+        if (request.Type.Trim().Equals("RSS", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!string.IsNullOrWhiteSpace(request.Username) || !string.IsNullOrEmpty(request.Password) || !string.IsNullOrWhiteSpace(request.Domain))
+                throw new NotSupportedException("RSS 在线源不接受用户名或密码。");
+            return;
+        }
         if (request.RecognitionMode.Trim().ToUpperInvariant() is not ("MLIP" or "DIRECTORY"))
         {
             throw new NotSupportedException("识别模式必须是 MLIP 或 DIRECTORY。");
@@ -508,6 +574,19 @@ public sealed class MediaSourceRegistry : IDisposable
         {
             throw new NotSupportedException("Windows 客户端当前仅支持 LIBRARY_DB_LOCAL_PRIORITY 元数据模式。");
         }
+    }
+
+    private async Task<ValidatedSource> ValidateRssRequestAsync(MediaSourceRequest request)
+    {
+        var catalog = await _rssMediaCatalogReader.LoadAsync(request.Location).ConfigureAwait(false);
+        return new ValidatedSource(
+            catalog.RootPath,
+            "RSS",
+            "RSS",
+            catalog.SchemaVersion,
+            catalog.Series.Count,
+            catalog.Series.Sum(series => series.Episodes.Count),
+            null);
     }
 
     private static async Task<ValidatedSource> ValidateLocalRequestAsync(MediaSourceRequest request)
@@ -737,6 +816,8 @@ public sealed class MediaSourceRegistry : IDisposable
         if (Uri.TryCreate(first, UriKind.Absolute, out var firstUri) && firstUri.Scheme is "http" or "https" &&
             Uri.TryCreate(second, UriKind.Absolute, out var secondUri) && secondUri.Scheme is "http" or "https")
         {
+            if (!string.IsNullOrEmpty(firstUri.Query) || !string.IsNullOrEmpty(secondUri.Query))
+                return firstUri.Equals(secondUri);
             return WebDavMlipClient.NormalizeRoot(firstUri.AbsoluteUri).Equals(
                 WebDavMlipClient.NormalizeRoot(secondUri.AbsoluteUri));
         }
@@ -748,7 +829,7 @@ public sealed class MediaSourceRegistry : IDisposable
 
     private static bool IsSourceFailure(Exception error) =>
         error is HttpRequestException or IOException or InvalidDataException or SqliteException or
-            NotSupportedException or UnauthorizedAccessException or TaskCanceledException;
+            ArgumentException or NotSupportedException or UnauthorizedAccessException or TaskCanceledException;
 
     private sealed record ValidatedSource(
         string Location,

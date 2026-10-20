@@ -14,8 +14,12 @@ public interface IPlaybackSession : IAsyncDisposable
     IReadOnlyList<MpvAudioTrack> AudioTracks { get; }
     int? SelectedAudioTrackId { get; }
     double Speed { get; }
+    double VolumePercent { get; }
+    bool IsMuted { get; }
     MpvPlaybackInfo PlaybackInfo { get; }
+    MpvNativeDiagnostics? GetNativeDiagnostics();
     AudioDspFilterGraph? AppliedAudioDsp { get; }
+    AudioDspChannelLayout? AppliedAudioDspChannelLayout { get; }
     bool IsActive { get; }
     bool IsPlaying { get; }
     event EventHandler? SubtitleTracksChanged;
@@ -27,6 +31,8 @@ public interface IPlaybackSession : IAsyncDisposable
     Task SeekAsync(long positionMs);
     Task SeekRelativeAsync(long deltaMs);
     Task SetSpeedAsync(float speed);
+    Task SetVolumeAsync(double volumePercent);
+    Task SetMutedAsync(bool muted);
     Task TogglePauseAsync();
     Task ApplyAudioDspAsync(AudioDspFilterGraph graph);
     Task<string?> GetAudioFilterGraphAsync();
