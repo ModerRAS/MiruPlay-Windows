@@ -821,4 +821,62 @@
   <data name="wpf.dsp.wizardUnavailable" xml:space="preserve"><value>房間校準精靈不可用。</value></data>
   <data name="wpf.dsp.noPreset" xml:space="preserve"><value>DSP 預設或目標聲道未選擇。</value></data>
   <data name="wpf.dsp.limiterDigits" xml:space="preserve"><value>限幅參數必須是數字。</value></data>
+  <data name="cd2.needCreds" xml:space="preserve"><value>CloudDrive2 使用者名稱和密碼不能為空。</value></data>
+  <data name="cd2.needToken" xml:space="preserve"><value>CloudDrive2 API Token 不能為空。</value></data>
+  <data name="cd2.inboxNotRoot" xml:space="preserve"><value>CloudDrive2 離線下載目錄不能是根目錄。</value></data>
+  <data name="cd2.uploadSize" xml:space="preserve"><value>CloudDrive2 上傳檔案必須為 1 位元組到 16 MiB。</value></data>
+  <data name="cd2.moveCount" xml:space="preserve"><value>CloudDrive2 移動檔案數量必須為 1 到 100。</value></data>
+  <data name="cd2.noMoveRoot" xml:space="preserve"><value>CloudDrive2 不能移動根目錄。</value></data>
+  <data name="cd2.targetNotRoot" xml:space="preserve"><value>CloudDrive2 移動目標不能是根目錄。</value></data>
+  <data name="cd2.loginFailed" xml:space="preserve"><value>CloudDrive2 登入失敗：{0}</value></data>
+  <data name="cd2.loginRequestFailed" xml:space="preserve"><value>CloudDrive2 登入請求失敗 ({0})。</value></data>
+  <data name="cd2.tokenVerifyFailed" xml:space="preserve"><value>CloudDrive2 API Token 驗證失敗 ({0})。</value></data>
+  <data name="cd2.listFailed" xml:space="preserve"><value>CloudDrive2 目錄讀取失敗 ({0})。</value></data>
+  <data name="cd2.tooManyEntries" xml:space="preserve"><value>CloudDrive2 目錄項目超過 10000 個。</value></data>
+  <data name="cd2.offlineFailed" xml:space="preserve"><value>CloudDrive2 離線下載提交失敗 ({0})。</value></data>
+  <data name="cd2.offlineSubmitFailed" xml:space="preserve"><value>CloudDrive2 離線下載提交失敗：{0}</value></data>
+  <data name="cd2.moveFailed" xml:space="preserve"><value>檔案移動失敗</value></data>
+  <data name="cd2.moveFileFailed" xml:space="preserve"><value>CloudDrive2 檔案移動失敗：{0}</value></data>
+  <data name="cd2.mkdirFailed" xml:space="preserve"><value>目錄建立失敗</value></data>
+  <data name="cd2.mkdirFailed2" xml:space="preserve"><value>CloudDrive2 目錄建立失敗：{0}</value></data>
+  <data name="cd2.uploadFailed" xml:space="preserve"><value>檔案上傳失敗</value></data>
+  <data name="cd2.uploadIncomplete" xml:space="preserve"><value>CloudDrive2 檔案上傳不完整。</value></data>
+  <data name="cd2.badFilename" xml:space="preserve"><value>CloudDrive2 檔名無效。</value></data>
+  <data name="cd2.urlCount" xml:space="preserve"><value>離線下載 URL 數量必須為 1 到 100。</value></data>
+  <data name="cd2.urlShape" xml:space="preserve"><value>離線下載位址必須是無嵌入憑證的 magnet 或 HTTP(S) URL。</value></data>
+  <data name="cd2.badAddress" xml:space="preserve"><value>CloudDrive2 位址格式不正確。</value></data>
+  <data name="play.noIpc" xml:space="preserve"><value>無 IPC 進度同步</value></data>
+  <data name="play.noTracks" xml:space="preserve"><value>無軌道選擇</value></data>
+  <data name="play.noSpeed" xml:space="preserve"><value>無倍速與精確跳轉</value></data>
+  <data name="play.noAutoNext" xml:space="preserve"><value>無自動連播</value></data>
+  <data name="play.noVideoFile" xml:space="preserve"><value>找不到影片檔。</value></data>
+  <data name="play.noLibmpv" xml:space="preserve"><value>找不到內建 libmpv 播放環境。</value></data>
+  <data name="play.backendFailed" xml:space="preserve"><value>內建播放器啟動失敗：{0}</value></data>
+  <data name="upd.noManifest" xml:space="preserve"><value>Windows 更新清單尚未設定。</value></data>
+  <data name="upd.checkTimeout" xml:space="preserve"><value>更新檢查逾時。</value></data>
+  <data name="upd.noUpdate" xml:space="preserve"><value>尚未取得可用更新。</value></data>
+  <data name="upd.latest" xml:space="preserve"><value>目前版本已經是最新版本。</value></data>
+  <data name="upd.badFilename" xml:space="preserve"><value>更新檔名無效。</value></data>
+  <data name="upd.sizeLimit" xml:space="preserve"><value>更新檔案大小超出限制。</value></data>
+  <data name="upd.responseLimit" xml:space="preserve"><value>更新回應大小超出限制。</value></data>
+  <data name="upd.downloadLimit" xml:space="preserve"><value>更新下載大小超出限制。</value></data>
+  <data name="upd.sizeMismatch" xml:space="preserve"><value>更新下載大小與清單不一致。</value></data>
+  <data name="upd.hashMismatch" xml:space="preserve"><value>更新檔案 SHA-256 與清單不一致。</value></data>
+  <data name="upd.noHandoff" xml:space="preserve"><value>無法啟動 Windows 安裝交接程序。</value></data>
+  <data name="upd.noStaged" xml:space="preserve"><value>尚未暫存經驗證的 Windows 安裝程式。</value></data>
+  <data name="upd.badStaged" xml:space="preserve"><value>暫存檔不是有效的 MiruPlay Setup 安裝程式。</value></data>
+  <data name="upd.noHash" xml:space="preserve"><value>更新清單未提供 SHA-256。</value></data>
+  <data name="upd.hashFailed" xml:space="preserve"><value>暫存安裝程式的 SHA-256 驗證失敗。</value></data>
+  <data name="upd.tooLarge" xml:space="preserve"><value>更新清單過大。</value></data>
+  <data name="upd.empty" xml:space="preserve"><value>更新清單為空。</value></data>
+  <data name="upd.badManifest" xml:space="preserve"><value>更新清單缺少必要欄位或 SHA-256 無效。</value></data>
+  <data name="upd.manifestUrl" xml:space="preserve"><value>更新清單位址必須是無憑證、查詢或片段的 HTTP(S) 位址。</value></data>
+  <data name="upd.downloadUrl" xml:space="preserve"><value>更新下載位址必須是 HTTP(S) 位址且不能包含嵌入憑證或片段。</value></data>
+  <data name="search.mode" xml:space="preserve"><value>mode 必須是 anime 或 drama。</value></data>
+  <data name="search.needQuery" xml:space="preserve"><value>至少需要一個可搜尋的標題或路徑樣本。</value></data>
+  <data name="search.exactTitle" xml:space="preserve"><value>標題完全相符</value></data>
+  <data name="search.similarTitle" xml:space="preserve"><value>標題相似</value></data>
+  <data name="search.yearClose" xml:space="preserve"><value>年份接近</value></data>
+  <data name="search.converge" xml:space="preserve"><value>多個來源收斂</value></data>
+  <data name="search.complete" xml:space="preserve"><value>元數據較完整</value></data>
 </root>

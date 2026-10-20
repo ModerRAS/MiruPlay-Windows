@@ -5718,6 +5718,412 @@ const I18N = {
   "zh-HK": "限幅參數必須是數字。",
   "en-US": "Limiter parameters must be numbers.",
   "en-GB": "Limiter parameters must be numbers."
+ },
+ "cd2.needCreds": {
+  "zh-CN": "CloudDrive2 用户名和密码不能为空。",
+  "zh-TW": "CloudDrive2 使用者名稱和密碼不能為空。",
+  "zh-HK": "CloudDrive2 用戶名和密碼不能為空。",
+  "en-US": "CloudDrive2 username and password must not be empty.",
+  "en-GB": "CloudDrive2 username and password must not be empty."
+ },
+ "cd2.needToken": {
+  "zh-CN": "CloudDrive2 API Token 不能为空。",
+  "zh-TW": "CloudDrive2 API Token 不能為空。",
+  "zh-HK": "CloudDrive2 API Token 不能為空。",
+  "en-US": "CloudDrive2 API token must not be empty.",
+  "en-GB": "CloudDrive2 API token must not be empty."
+ },
+ "cd2.inboxNotRoot": {
+  "zh-CN": "CloudDrive2 离线下载目录不能是根目录。",
+  "zh-TW": "CloudDrive2 離線下載目錄不能是根目錄。",
+  "zh-HK": "CloudDrive2 離線下載目錄不能是根目錄。",
+  "en-US": "CloudDrive2 offline download directory must not be the root.",
+  "en-GB": "CloudDrive2 offline download directory must not be the root."
+ },
+ "cd2.uploadSize": {
+  "zh-CN": "CloudDrive2 上传文件必须为 1 字节到 16 MiB。",
+  "zh-TW": "CloudDrive2 上傳檔案必須為 1 位元組到 16 MiB。",
+  "zh-HK": "CloudDrive2 上傳檔案必須為 1 位元組到 16 MiB。",
+  "en-US": "CloudDrive2 upload must be 1 byte to 16 MiB.",
+  "en-GB": "CloudDrive2 upload must be 1 byte to 16 MiB."
+ },
+ "cd2.moveCount": {
+  "zh-CN": "CloudDrive2 移动文件数量必须为 1 到 100。",
+  "zh-TW": "CloudDrive2 移動檔案數量必須為 1 到 100。",
+  "zh-HK": "CloudDrive2 移動檔案數量必須為 1 到 100。",
+  "en-US": "CloudDrive2 move count must be 1 to 100.",
+  "en-GB": "CloudDrive2 move count must be 1 to 100."
+ },
+ "cd2.noMoveRoot": {
+  "zh-CN": "CloudDrive2 不能移动根目录。",
+  "zh-TW": "CloudDrive2 不能移動根目錄。",
+  "zh-HK": "CloudDrive2 不能移動根目錄。",
+  "en-US": "CloudDrive2 cannot move the root directory.",
+  "en-GB": "CloudDrive2 cannot move the root directory."
+ },
+ "cd2.targetNotRoot": {
+  "zh-CN": "CloudDrive2 移动目标不能是根目录。",
+  "zh-TW": "CloudDrive2 移動目標不能是根目錄。",
+  "zh-HK": "CloudDrive2 移動目標不能是根目錄。",
+  "en-US": "CloudDrive2 move target must not be the root directory.",
+  "en-GB": "CloudDrive2 move target must not be the root directory."
+ },
+ "cd2.loginFailed": {
+  "zh-CN": "CloudDrive2 登录失败：{0}",
+  "zh-TW": "CloudDrive2 登入失敗：{0}",
+  "zh-HK": "CloudDrive2 登入失敗：{0}",
+  "en-US": "CloudDrive2 login failed: {0}",
+  "en-GB": "CloudDrive2 login failed: {0}"
+ },
+ "cd2.loginRequestFailed": {
+  "zh-CN": "CloudDrive2 登录请求失败 ({0})。",
+  "zh-TW": "CloudDrive2 登入請求失敗 ({0})。",
+  "zh-HK": "CloudDrive2 登入請求失敗 ({0})。",
+  "en-US": "CloudDrive2 login request failed ({0}).",
+  "en-GB": "CloudDrive2 login request failed ({0})."
+ },
+ "cd2.tokenVerifyFailed": {
+  "zh-CN": "CloudDrive2 API Token 验证失败 ({0})。",
+  "zh-TW": "CloudDrive2 API Token 驗證失敗 ({0})。",
+  "zh-HK": "CloudDrive2 API Token 驗證失敗 ({0})。",
+  "en-US": "CloudDrive2 API token verification failed ({0}).",
+  "en-GB": "CloudDrive2 API token verification failed ({0})."
+ },
+ "cd2.listFailed": {
+  "zh-CN": "CloudDrive2 目录读取失败 ({0})。",
+  "zh-TW": "CloudDrive2 目錄讀取失敗 ({0})。",
+  "zh-HK": "CloudDrive2 目錄讀取失敗 ({0})。",
+  "en-US": "CloudDrive2 directory read failed ({0}).",
+  "en-GB": "CloudDrive2 directory read failed ({0})."
+ },
+ "cd2.tooManyEntries": {
+  "zh-CN": "CloudDrive2 目录条目超过 10000 个。",
+  "zh-TW": "CloudDrive2 目錄項目超過 10000 個。",
+  "zh-HK": "CloudDrive2 目錄項目超過 10000 個。",
+  "en-US": "CloudDrive2 directory exceeds 10000 entries.",
+  "en-GB": "CloudDrive2 directory exceeds 10000 entries."
+ },
+ "cd2.offlineFailed": {
+  "zh-CN": "CloudDrive2 离线下载提交失败 ({0})。",
+  "zh-TW": "CloudDrive2 離線下載提交失敗 ({0})。",
+  "zh-HK": "CloudDrive2 離線下載提交失敗 ({0})。",
+  "en-US": "CloudDrive2 offline download submission failed ({0}).",
+  "en-GB": "CloudDrive2 offline download submission failed ({0})."
+ },
+ "cd2.offlineSubmitFailed": {
+  "zh-CN": "CloudDrive2 离线下载提交失败：{0}",
+  "zh-TW": "CloudDrive2 離線下載提交失敗：{0}",
+  "zh-HK": "CloudDrive2 離線下載提交失敗：{0}",
+  "en-US": "CloudDrive2 offline download submission failed: {0}",
+  "en-GB": "CloudDrive2 offline download submission failed: {0}"
+ },
+ "cd2.moveFailed": {
+  "zh-CN": "文件移动失败",
+  "zh-TW": "檔案移動失敗",
+  "zh-HK": "檔案移動失敗",
+  "en-US": "File move failed",
+  "en-GB": "File move failed"
+ },
+ "cd2.moveFileFailed": {
+  "zh-CN": "CloudDrive2 文件移动失败：{0}",
+  "zh-TW": "CloudDrive2 檔案移動失敗：{0}",
+  "zh-HK": "CloudDrive2 檔案移動失敗：{0}",
+  "en-US": "CloudDrive2 file move failed: {0}",
+  "en-GB": "CloudDrive2 file move failed: {0}"
+ },
+ "cd2.mkdirFailed": {
+  "zh-CN": "目录创建失败",
+  "zh-TW": "目錄建立失敗",
+  "zh-HK": "目錄建立失敗",
+  "en-US": "Directory creation failed",
+  "en-GB": "Directory creation failed"
+ },
+ "cd2.mkdirFailed2": {
+  "zh-CN": "CloudDrive2 目录创建失败：{0}",
+  "zh-TW": "CloudDrive2 目錄建立失敗：{0}",
+  "zh-HK": "CloudDrive2 目錄建立失敗：{0}",
+  "en-US": "CloudDrive2 directory creation failed: {0}",
+  "en-GB": "CloudDrive2 directory creation failed: {0}"
+ },
+ "cd2.uploadFailed": {
+  "zh-CN": "文件上传失败",
+  "zh-TW": "檔案上傳失敗",
+  "zh-HK": "檔案上傳失敗",
+  "en-US": "File upload failed",
+  "en-GB": "File upload failed"
+ },
+ "cd2.uploadIncomplete": {
+  "zh-CN": "CloudDrive2 文件上传不完整。",
+  "zh-TW": "CloudDrive2 檔案上傳不完整。",
+  "zh-HK": "CloudDrive2 檔案上傳不完整。",
+  "en-US": "CloudDrive2 file upload incomplete.",
+  "en-GB": "CloudDrive2 file upload incomplete."
+ },
+ "cd2.badFilename": {
+  "zh-CN": "CloudDrive2 文件名无效。",
+  "zh-TW": "CloudDrive2 檔名無效。",
+  "zh-HK": "CloudDrive2 檔名無效。",
+  "en-US": "CloudDrive2 filename invalid.",
+  "en-GB": "CloudDrive2 filename invalid."
+ },
+ "cd2.urlCount": {
+  "zh-CN": "离线下载 URL 数量必须为 1 到 100。",
+  "zh-TW": "離線下載 URL 數量必須為 1 到 100。",
+  "zh-HK": "離線下載 URL 數量必須為 1 到 100。",
+  "en-US": "Offline download URL count must be 1 to 100.",
+  "en-GB": "Offline download URL count must be 1 to 100."
+ },
+ "cd2.urlShape": {
+  "zh-CN": "离线下载地址必须是无嵌入凭据的 magnet 或 HTTP(S) URL。",
+  "zh-TW": "離線下載位址必須是無嵌入憑證的 magnet 或 HTTP(S) URL。",
+  "zh-HK": "離線下載位址必須是無嵌入憑證的 magnet 或 HTTP(S) URL。",
+  "en-US": "Offline download addresses must be credential-free magnet or HTTP(S) URLs.",
+  "en-GB": "Offline download addresses must be credential-free magnet or HTTP(S) URLs."
+ },
+ "cd2.badAddress": {
+  "zh-CN": "CloudDrive2 地址格式不正确。",
+  "zh-TW": "CloudDrive2 位址格式不正確。",
+  "zh-HK": "CloudDrive2 位址格式不正確。",
+  "en-US": "CloudDrive2 address malformed.",
+  "en-GB": "CloudDrive2 address malformed."
+ },
+ "play.noIpc": {
+  "zh-CN": "无 IPC 进度同步",
+  "zh-TW": "無 IPC 進度同步",
+  "zh-HK": "無 IPC 進度同步",
+  "en-US": "No IPC progress sync",
+  "en-GB": "No IPC progress sync"
+ },
+ "play.noTracks": {
+  "zh-CN": "无轨道选择",
+  "zh-TW": "無軌道選擇",
+  "zh-HK": "無軌道選擇",
+  "en-US": "No track selection",
+  "en-GB": "No track selection"
+ },
+ "play.noSpeed": {
+  "zh-CN": "无倍速与精确跳转",
+  "zh-TW": "無倍速與精確跳轉",
+  "zh-HK": "無倍速與精確跳轉",
+  "en-US": "No speed or precise seek",
+  "en-GB": "No speed or precise seek"
+ },
+ "play.noAutoNext": {
+  "zh-CN": "无自动连播",
+  "zh-TW": "無自動連播",
+  "zh-HK": "無自動連播",
+  "en-US": "No autoplay",
+  "en-GB": "No autoplay"
+ },
+ "play.noVideoFile": {
+  "zh-CN": "找不到视频文件。",
+  "zh-TW": "找不到影片檔。",
+  "zh-HK": "搵唔到影片檔。",
+  "en-US": "Video file not found.",
+  "en-GB": "Video file not found."
+ },
+ "play.noLibmpv": {
+  "zh-CN": "找不到内置 libmpv 播放运行时。",
+  "zh-TW": "找不到內建 libmpv 播放環境。",
+  "zh-HK": "搵唔到內建 libmpv 播放環境。",
+  "en-US": "Embedded libmpv runtime not found.",
+  "en-GB": "Embedded libmpv runtime not found."
+ },
+ "play.backendFailed": {
+  "zh-CN": "内置播放器启动失败：{0}",
+  "zh-TW": "內建播放器啟動失敗：{0}",
+  "zh-HK": "內建播放器啟動失敗：{0}",
+  "en-US": "Embedded player failed to start: {0}",
+  "en-GB": "Embedded player failed to start: {0}"
+ },
+ "upd.noManifest": {
+  "zh-CN": "Windows 更新清单尚未配置。",
+  "zh-TW": "Windows 更新清單尚未設定。",
+  "zh-HK": "Windows 更新清單尚未設定。",
+  "en-US": "Windows update manifest not configured.",
+  "en-GB": "Windows update manifest not configured."
+ },
+ "upd.checkTimeout": {
+  "zh-CN": "更新检查超时。",
+  "zh-TW": "更新檢查逾時。",
+  "zh-HK": "更新檢查逾時。",
+  "en-US": "Update check timed out.",
+  "en-GB": "Update check timed out."
+ },
+ "upd.noUpdate": {
+  "zh-CN": "尚未获取可用更新。",
+  "zh-TW": "尚未取得可用更新。",
+  "zh-HK": "尚未取得可用更新。",
+  "en-US": "No available update fetched.",
+  "en-GB": "No available update fetched."
+ },
+ "upd.latest": {
+  "zh-CN": "当前版本已经是最新版本。",
+  "zh-TW": "目前版本已經是最新版本。",
+  "zh-HK": "目前版本已經係最新版本。",
+  "en-US": "Current version is already the latest.",
+  "en-GB": "Current version is already the latest."
+ },
+ "upd.badFilename": {
+  "zh-CN": "更新文件名无效。",
+  "zh-TW": "更新檔名無效。",
+  "zh-HK": "更新檔名無效。",
+  "en-US": "Update filename invalid.",
+  "en-GB": "Update filename invalid."
+ },
+ "upd.sizeLimit": {
+  "zh-CN": "更新文件大小超出限制。",
+  "zh-TW": "更新檔案大小超出限制。",
+  "zh-HK": "更新檔案大小超出限制。",
+  "en-US": "Update file size exceeds the limit.",
+  "en-GB": "Update file size exceeds the limit."
+ },
+ "upd.responseLimit": {
+  "zh-CN": "更新响应大小超出限制。",
+  "zh-TW": "更新回應大小超出限制。",
+  "zh-HK": "更新回應大小超出限制。",
+  "en-US": "Update response size exceeds the limit.",
+  "en-GB": "Update response size exceeds the limit."
+ },
+ "upd.downloadLimit": {
+  "zh-CN": "更新下载大小超出限制。",
+  "zh-TW": "更新下載大小超出限制。",
+  "zh-HK": "更新下載大小超出限制。",
+  "en-US": "Update download size exceeds the limit.",
+  "en-GB": "Update download size exceeds the limit."
+ },
+ "upd.sizeMismatch": {
+  "zh-CN": "更新下载大小与清单不一致。",
+  "zh-TW": "更新下載大小與清單不一致。",
+  "zh-HK": "更新下載大小與清單不一致。",
+  "en-US": "Update download size disagrees with the manifest.",
+  "en-GB": "Update download size disagrees with the manifest."
+ },
+ "upd.hashMismatch": {
+  "zh-CN": "更新文件 SHA-256 与清单不一致。",
+  "zh-TW": "更新檔案 SHA-256 與清單不一致。",
+  "zh-HK": "更新檔案 SHA-256 與清單不一致。",
+  "en-US": "Update file SHA-256 disagrees with the manifest.",
+  "en-GB": "Update file SHA-256 disagrees with the manifest."
+ },
+ "upd.noHandoff": {
+  "zh-CN": "无法启动 Windows 安装交接进程。",
+  "zh-TW": "無法啟動 Windows 安裝交接程序。",
+  "zh-HK": "無法啟動 Windows 安裝交接程序。",
+  "en-US": "Cannot start the Windows installer handoff process.",
+  "en-GB": "Cannot start the Windows installer handoff process."
+ },
+ "upd.noStaged": {
+  "zh-CN": "尚未暂存经过校验的 Windows 安装器。",
+  "zh-TW": "尚未暫存經驗證的 Windows 安裝程式。",
+  "zh-HK": "尚未暫存經驗證嘅 Windows 安裝程式。",
+  "en-US": "No verified Windows installer staged.",
+  "en-GB": "No verified Windows installer staged."
+ },
+ "upd.badStaged": {
+  "zh-CN": "暂存文件不是有效的 MiruPlay Setup 安装器。",
+  "zh-TW": "暫存檔不是有效的 MiruPlay Setup 安裝程式。",
+  "zh-HK": "暫存檔唔係有效嘅 MiruPlay Setup 安裝程式。",
+  "en-US": "Staged file is not a valid MiruPlay Setup installer.",
+  "en-GB": "Staged file is not a valid MiruPlay Setup installer."
+ },
+ "upd.noHash": {
+  "zh-CN": "更新清单未提供 SHA-256。",
+  "zh-TW": "更新清單未提供 SHA-256。",
+  "zh-HK": "更新清單未提供 SHA-256。",
+  "en-US": "Update manifest provides no SHA-256.",
+  "en-GB": "Update manifest provides no SHA-256."
+ },
+ "upd.hashFailed": {
+  "zh-CN": "暂存安装器的 SHA-256 校验失败。",
+  "zh-TW": "暫存安裝程式的 SHA-256 驗證失敗。",
+  "zh-HK": "暫存安裝程式嘅 SHA-256 驗證失敗。",
+  "en-US": "Staged installer SHA-256 verification failed.",
+  "en-GB": "Staged installer SHA-256 verification failed."
+ },
+ "upd.tooLarge": {
+  "zh-CN": "更新清单过大。",
+  "zh-TW": "更新清單過大。",
+  "zh-HK": "更新清單過大。",
+  "en-US": "Update manifest too large.",
+  "en-GB": "Update manifest too large."
+ },
+ "upd.empty": {
+  "zh-CN": "更新清单为空。",
+  "zh-TW": "更新清單為空。",
+  "zh-HK": "更新清單為空。",
+  "en-US": "Update manifest empty.",
+  "en-GB": "Update manifest empty."
+ },
+ "upd.badManifest": {
+  "zh-CN": "更新清单缺少必要字段或 SHA-256 无效。",
+  "zh-TW": "更新清單缺少必要欄位或 SHA-256 無效。",
+  "zh-HK": "更新清單缺少必要欄位或 SHA-256 無效。",
+  "en-US": "Update manifest misses required fields or SHA-256 is invalid.",
+  "en-GB": "Update manifest misses required fields or SHA-256 is invalid."
+ },
+ "upd.manifestUrl": {
+  "zh-CN": "更新清单地址必须是无凭据、查询或片段的 HTTP(S) 地址。",
+  "zh-TW": "更新清單位址必須是無憑證、查詢或片段的 HTTP(S) 位址。",
+  "zh-HK": "更新清單位址必須是無憑證、查詢或片段嘅 HTTP(S) 位址。",
+  "en-US": "Update manifest URL must be an HTTP(S) address without credentials, query or fragment.",
+  "en-GB": "Update manifest URL must be an HTTP(S) address without credentials, query or fragment."
+ },
+ "upd.downloadUrl": {
+  "zh-CN": "更新下载地址必须是 HTTP(S) 地址且不能包含嵌入凭据或片段。",
+  "zh-TW": "更新下載位址必須是 HTTP(S) 位址且不能包含嵌入憑證或片段。",
+  "zh-HK": "更新下載位址必須係 HTTP(S) 位址且不能包含嵌入憑證或片段。",
+  "en-US": "Update download URL must be HTTP(S) without embedded credentials or fragment.",
+  "en-GB": "Update download URL must be HTTP(S) without embedded credentials or fragment."
+ },
+ "search.mode": {
+  "zh-CN": "mode 必须是 anime 或 drama。",
+  "zh-TW": "mode 必須是 anime 或 drama。",
+  "zh-HK": "mode 必須是 anime 或 drama。",
+  "en-US": "mode must be anime or drama.",
+  "en-GB": "mode must be anime or drama."
+ },
+ "search.needQuery": {
+  "zh-CN": "至少需要一个可搜索的标题或路径样本。",
+  "zh-TW": "至少需要一個可搜尋的標題或路徑樣本。",
+  "zh-HK": "至少需要一個可搜尋嘅標題或路徑樣本。",
+  "en-US": "At least one searchable title or path sample is required.",
+  "en-GB": "At least one searchable title or path sample is required."
+ },
+ "search.exactTitle": {
+  "zh-CN": "标题完全匹配",
+  "zh-TW": "標題完全相符",
+  "zh-HK": "標題完全相符",
+  "en-US": "Exact title match",
+  "en-GB": "Exact title match"
+ },
+ "search.similarTitle": {
+  "zh-CN": "标题相似",
+  "zh-TW": "標題相似",
+  "zh-HK": "標題相似",
+  "en-US": "Similar title",
+  "en-GB": "Similar title"
+ },
+ "search.yearClose": {
+  "zh-CN": "年份接近",
+  "zh-TW": "年份接近",
+  "zh-HK": "年份接近",
+  "en-US": "Year close",
+  "en-GB": "Year close"
+ },
+ "search.converge": {
+  "zh-CN": "多个来源收敛",
+  "zh-TW": "多個來源收斂",
+  "zh-HK": "多個來源收斂",
+  "en-US": "Multiple sources converge",
+  "en-GB": "Multiple sources converge"
+ },
+ "search.complete": {
+  "zh-CN": "元数据较完整",
+  "zh-TW": "元數據較完整",
+  "zh-HK": "元數據較完整",
+  "en-US": "Richer metadata",
+  "en-GB": "Richer metadata"
  }
 };
 let currentLocale = 'zh-CN';

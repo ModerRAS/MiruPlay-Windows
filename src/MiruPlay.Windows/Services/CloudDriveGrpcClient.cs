@@ -59,7 +59,7 @@ public sealed class CloudDriveGrpcClient
         var endpoint = ValidateEndpoint(endpointUrl);
         var user = username.Trim();
         if (user.Length == 0 || string.IsNullOrWhiteSpace(password))
-            throw new ArgumentException("CloudDrive2 用户名和密码不能为空。");
+            throw new ArgumentException(AppStrings.Get("cd2.needCreds"));
         return _login is null
             ? LoginGrpcAsync(endpoint, user, password, cancellationToken)
             : _login(endpoint, user, password, cancellationToken);
@@ -72,7 +72,7 @@ public sealed class CloudDriveGrpcClient
     {
         var endpoint = ValidateEndpoint(endpointUrl);
         var value = token.Trim();
-        if (value.Length == 0) throw new ArgumentException("CloudDrive2 API Token 不能为空。", nameof(token));
+        if (value.Length == 0) throw new ArgumentException(AppStrings.Get("cd2.needToken"), nameof(token));
         return _tokenInfo is null
             ? GetApiTokenInfoGrpcAsync(endpoint, value, cancellationToken)
             : _tokenInfo(endpoint, value, cancellationToken);
@@ -87,7 +87,7 @@ public sealed class CloudDriveGrpcClient
     {
         var endpoint = ValidateEndpoint(endpointUrl);
         var value = token.Trim();
-        if (value.Length == 0) throw new ArgumentException("CloudDrive2 API Token 不能为空。", nameof(token));
+        if (value.Length == 0) throw new ArgumentException(AppStrings.Get("cd2.needToken"), nameof(token));
         var normalizedPath = NormalizePath(path);
         return _listFolder is null
             ? ListFolderGrpcAsync(endpoint, value, normalizedPath, forceRefresh, cancellationToken)
@@ -103,10 +103,10 @@ public sealed class CloudDriveGrpcClient
     {
         var endpoint = ValidateEndpoint(endpointUrl);
         var value = token.Trim();
-        if (value.Length == 0) throw new ArgumentException("CloudDrive2 API Token 不能为空。", nameof(token));
+        if (value.Length == 0) throw new ArgumentException(AppStrings.Get("cd2.needToken"), nameof(token));
         var normalizedUrls = NormalizeOfflineUrls(urls);
         var target = NormalizePath(targetFolder);
-        if (target == "/") throw new ArgumentException("CloudDrive2 离线下载目录不能是根目录。", nameof(targetFolder));
+        if (target == "/") throw new ArgumentException(AppStrings.Get("cd2.inboxNotRoot"), nameof(targetFolder));
         return _addOfflineFiles is null
             ? AddOfflineFilesGrpcAsync(endpoint, value, normalizedUrls, target, cancellationToken)
             : _addOfflineFiles(endpoint, value, normalizedUrls, target, cancellationToken);
@@ -121,7 +121,7 @@ public sealed class CloudDriveGrpcClient
     {
         var endpoint = ValidateEndpoint(endpointUrl);
         var value = token.Trim();
-        if (value.Length == 0) throw new ArgumentException("CloudDrive2 API Token 不能为空。", nameof(token));
+        if (value.Length == 0) throw new ArgumentException(AppStrings.Get("cd2.needToken"), nameof(token));
         var parent = NormalizePath(parentPath);
         var name = NormalizeFileName(folderName, nameof(folderName));
         return _createFolder is null
@@ -137,10 +137,10 @@ public sealed class CloudDriveGrpcClient
         string fileName,
         CancellationToken cancellationToken = default)
     {
-        if (content.Length is < 1 or > 16 * 1024 * 1024) throw new ArgumentException("CloudDrive2 上传文件必须为 1 字节到 16 MiB。", nameof(content));
+        if (content.Length is < 1 or > 16 * 1024 * 1024) throw new ArgumentException(AppStrings.Get("cd2.uploadSize"), nameof(content));
         var endpoint = ValidateEndpoint(endpointUrl);
         var value = token.Trim();
-        if (value.Length == 0) throw new ArgumentException("CloudDrive2 API Token 不能为空。", nameof(token));
+        if (value.Length == 0) throw new ArgumentException(AppStrings.Get("cd2.needToken"), nameof(token));
         var parent = NormalizePath(parentPath);
         var name = NormalizeFileName(fileName, nameof(fileName));
         return _uploadFile is null
@@ -156,14 +156,14 @@ public sealed class CloudDriveGrpcClient
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(paths);
-        if (paths.Count is < 1 or > 100) throw new ArgumentException("CloudDrive2 移动文件数量必须为 1 到 100。", nameof(paths));
+        if (paths.Count is < 1 or > 100) throw new ArgumentException(AppStrings.Get("cd2.moveCount"), nameof(paths));
         var endpoint = ValidateEndpoint(endpointUrl);
         var value = token.Trim();
-        if (value.Length == 0) throw new ArgumentException("CloudDrive2 API Token 不能为空。", nameof(token));
+        if (value.Length == 0) throw new ArgumentException(AppStrings.Get("cd2.needToken"), nameof(token));
         var normalizedPaths = paths.Select(NormalizePath).ToList();
-        if (normalizedPaths.Any(path => path == "/")) throw new ArgumentException("CloudDrive2 不能移动根目录。", nameof(paths));
+        if (normalizedPaths.Any(path => path == "/")) throw new ArgumentException(AppStrings.Get("cd2.noMoveRoot"), nameof(paths));
         var destination = NormalizePath(destinationPath);
-        if (destination == "/") throw new ArgumentException("CloudDrive2 移动目标不能是根目录。", nameof(destinationPath));
+        if (destination == "/") throw new ArgumentException(AppStrings.Get("cd2.targetNotRoot"), nameof(destinationPath));
         return _moveFiles is null
             ? MoveFilesGrpcAsync(endpoint, value, normalizedPaths, destination, cancellationToken)
             : _moveFiles(endpoint, value, normalizedPaths, destination, cancellationToken);
@@ -184,12 +184,12 @@ public sealed class CloudDriveGrpcClient
                 deadline: DateTime.UtcNow.AddSeconds(20),
                 cancellationToken: cancellationToken);
             if (!response.Success || string.IsNullOrWhiteSpace(response.Token))
-                throw new InvalidOperationException($"CloudDrive2 登录失败：{response.ErrorMessage.Trim()}");
+                throw new InvalidOperationException(AppStrings.Get("cd2.loginFailed", response.ErrorMessage.Trim()));
             return new CloudDriveLoginResult(response.Token.Trim());
         }
         catch (RpcException error)
         {
-            throw new HttpRequestException($"CloudDrive2 登录请求失败 ({error.StatusCode})。", error);
+            throw new HttpRequestException(AppStrings.Get("cd2.loginRequestFailed", error.StatusCode), error);
         }
     }
 
@@ -219,7 +219,7 @@ public sealed class CloudDriveGrpcClient
         }
         catch (RpcException error)
         {
-            throw new HttpRequestException($"CloudDrive2 API Token 验证失败 ({error.StatusCode})。", error);
+            throw new HttpRequestException(AppStrings.Get("cd2.tokenVerifyFailed", error.StatusCode), error);
         }
     }
 
@@ -242,12 +242,12 @@ public sealed class CloudDriveGrpcClient
             }
             catch (RpcException retryError)
             {
-                throw new HttpRequestException($"CloudDrive2 目录读取失败 ({retryError.StatusCode})。", retryError);
+                throw new HttpRequestException(AppStrings.Get("cd2.listFailed", retryError.StatusCode), retryError);
             }
         }
         catch (RpcException error)
         {
-            throw new HttpRequestException($"CloudDrive2 目录读取失败 ({error.StatusCode})。", error);
+            throw new HttpRequestException(AppStrings.Get("cd2.listFailed", error.StatusCode), error);
         }
     }
 
@@ -271,7 +271,7 @@ public sealed class CloudDriveGrpcClient
         {
             foreach (var file in reply.SubFiles)
             {
-                if (values.Count >= 10_000) throw new InvalidDataException("CloudDrive2 目录条目超过 10000 个。");
+                if (values.Count >= 10_000) throw new InvalidDataException(AppStrings.Get("cd2.tooManyEntries"));
                 values.Add(new CloudDriveFileInfo(file.Name, file.FullPathName, file.IsDirectory, file.Size));
             }
         }
@@ -297,12 +297,12 @@ public sealed class CloudDriveGrpcClient
             }
             catch (RpcException retryError)
             {
-                throw new HttpRequestException($"CloudDrive2 离线下载提交失败 ({retryError.StatusCode})。", retryError);
+                throw new HttpRequestException(AppStrings.Get("cd2.offlineFailed", retryError.StatusCode), retryError);
             }
         }
         catch (RpcException error)
         {
-            throw new HttpRequestException($"CloudDrive2 离线下载提交失败 ({error.StatusCode})。", error);
+            throw new HttpRequestException(AppStrings.Get("cd2.offlineFailed", error.StatusCode), error);
         }
     }
 
@@ -326,7 +326,7 @@ public sealed class CloudDriveGrpcClient
             headers,
             deadline: DateTime.UtcNow.AddSeconds(20),
             cancellationToken: cancellationToken);
-        if (!response.Success) throw new InvalidOperationException($"CloudDrive2 离线下载提交失败：{response.ErrorMessage.Trim()}");
+        if (!response.Success) throw new InvalidOperationException(AppStrings.Get("cd2.offlineSubmitFailed", response.ErrorMessage.Trim()));
     }
 
     private static Task MoveFilesGrpcAsync(
@@ -338,7 +338,7 @@ public sealed class CloudDriveGrpcClient
         ExecuteWithTokenFallbackAsync(
             authorization => MoveFilesGrpcAttemptAsync(endpoint, authorization, paths, destinationPath, cancellationToken),
             token,
-            "文件移动失败");
+            AppStrings.Get("cd2.moveFailed"));
 
     private static async Task MoveFilesGrpcAttemptAsync(
         Uri endpoint,
@@ -361,7 +361,7 @@ public sealed class CloudDriveGrpcClient
             new Metadata { { "Authorization", authorization } },
             deadline: DateTime.UtcNow.AddSeconds(30),
             cancellationToken: cancellationToken);
-        if (!response.Success) throw new InvalidOperationException($"CloudDrive2 文件移动失败：{response.ErrorMessage.Trim()}");
+        if (!response.Success) throw new InvalidOperationException(AppStrings.Get("cd2.moveFileFailed", response.ErrorMessage.Trim()));
     }
 
     private static Task CreateFolderGrpcAsync(
@@ -373,7 +373,7 @@ public sealed class CloudDriveGrpcClient
         ExecuteWithTokenFallbackAsync(
             authorization => CreateFolderGrpcAttemptAsync(endpoint, authorization, parentPath, folderName, cancellationToken),
             token,
-            "目录创建失败");
+            AppStrings.Get("cd2.mkdirFailed"));
 
     private static async Task CreateFolderGrpcAttemptAsync(
         Uri endpoint,
@@ -390,7 +390,7 @@ public sealed class CloudDriveGrpcClient
             deadline: DateTime.UtcNow.AddSeconds(20),
             cancellationToken: cancellationToken);
         if (response.Result is null || !response.Result.Success)
-            throw new InvalidOperationException($"CloudDrive2 目录创建失败：{response.Result?.ErrorMessage.Trim()}");
+            throw new InvalidOperationException(AppStrings.Get("cd2.mkdirFailed2", response.Result?.ErrorMessage.Trim()));
     }
 
     private static Task<string> UploadFileGrpcAsync(
@@ -403,7 +403,7 @@ public sealed class CloudDriveGrpcClient
         ExecuteWithTokenFallbackAsync(
             authorization => UploadFileGrpcAttemptAsync(endpoint, authorization, content, parentPath, fileName, cancellationToken),
             token,
-            "文件上传失败");
+            AppStrings.Get("cd2.uploadFailed"));
 
     private static async Task<string> UploadFileGrpcAttemptAsync(
         Uri endpoint,
@@ -435,7 +435,7 @@ public sealed class CloudDriveGrpcClient
                 headers,
                 deadline: DateTime.UtcNow.AddSeconds(60),
                 cancellationToken: cancellationToken);
-            if (response.BytesWritten != (ulong)content.Length) throw new InvalidOperationException("CloudDrive2 文件上传不完整。");
+            if (response.BytesWritten != (ulong)content.Length) throw new InvalidOperationException(AppStrings.Get("cd2.uploadIncomplete"));
         }
         catch
         {
@@ -494,14 +494,14 @@ public sealed class CloudDriveGrpcClient
     {
         var name = value.Trim();
         if (name.Length is 0 or > 255 || name is "." or ".." || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-            throw new ArgumentException("CloudDrive2 文件名无效。", parameterName);
+            throw new ArgumentException(AppStrings.Get("cd2.badFilename"), parameterName);
         return name;
     }
 
     private static List<string> NormalizeOfflineUrls(IReadOnlyList<string> urls)
     {
         ArgumentNullException.ThrowIfNull(urls);
-        if (urls.Count is < 1 or > 100) throw new ArgumentException("离线下载 URL 数量必须为 1 到 100。", nameof(urls));
+        if (urls.Count is < 1 or > 100) throw new ArgumentException(AppStrings.Get("cd2.urlCount"), nameof(urls));
         var values = new List<string>(urls.Count);
         foreach (var raw in urls)
         {
@@ -509,7 +509,7 @@ public sealed class CloudDriveGrpcClient
             if (value.Length is 0 or > 4_096 || value.Contains('\r') || value.Contains('\n') ||
                 !Uri.TryCreate(value, UriKind.Absolute, out var uri) || uri.Scheme is not ("magnet" or "http" or "https") ||
                 (uri.Scheme is "http" or "https") && !string.IsNullOrEmpty(uri.UserInfo))
-                throw new ArgumentException("离线下载地址必须是无嵌入凭据的 magnet 或 HTTP(S) URL。", nameof(urls));
+                throw new ArgumentException(AppStrings.Get("cd2.urlShape"), nameof(urls));
             values.Add(value);
         }
         return values;
@@ -519,7 +519,7 @@ public sealed class CloudDriveGrpcClient
     {
         var value = path.Trim().Replace('\\', '/');
         var segments = value.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (segments.Any(segment => segment is "." or "..")) throw new ArgumentException("CloudDrive2 目录不能包含路径遍历。", nameof(path));
+        if (segments.Any(segment => segment is "." or "..")) throw new ArgumentException(AppStrings.Get("api.errTraversal"), nameof(path));
         return segments.Length == 0 ? "/" : $"/{string.Join('/', segments)}";
     }
 
@@ -529,7 +529,7 @@ public sealed class CloudDriveGrpcClient
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
             string.IsNullOrEmpty(uri.Host) || !string.IsNullOrEmpty(uri.UserInfo) ||
             uri.AbsolutePath is not ("" or "/") || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
-            throw new ArgumentException("CloudDrive2 地址格式不正确。", nameof(endpointUrl));
+            throw new ArgumentException(AppStrings.Get("cd2.badAddress"), nameof(endpointUrl));
         return new Uri(uri.GetLeftPart(UriPartial.Authority));
     }
 }

@@ -82,7 +82,7 @@ public sealed class MetadataSearchService(
         {
             "anime" => [SearchBangumiAsync(plan, cancellationToken)],
             "drama" => [SearchTmdbAsync(plan, tmdbToken, cancellationToken), SearchTvMazeAsync(plan, cancellationToken)],
-            _ => throw new ArgumentException("mode 必须是 anime 或 drama。", nameof(request)),
+            _ => throw new ArgumentException(AppStrings.Get("search.mode"), nameof(request)),
         };
         var results = await Task.WhenAll(tasks).ConfigureAwait(false);
         var candidates = results.SelectMany(item => item.Candidates).ToList();
@@ -106,7 +106,7 @@ public sealed class MetadataSearchService(
 
     public static MetadataSearchPlan Plan(MetadataSearchRequest request)
     {
-        if (request.Mode is not ("anime" or "drama")) throw new ArgumentException("mode 必须是 anime 或 drama。", nameof(request));
+        if (request.Mode is not ("anime" or "drama")) throw new ArgumentException(AppStrings.Get("search.mode"), nameof(request));
         var queries = new Dictionary<string, MetadataSearchQuery>(StringComparer.OrdinalIgnoreCase);
         void Add(string? value, string reason)
         {
@@ -138,7 +138,7 @@ public sealed class MetadataSearchService(
             if (segments.Length > 1) Add(segments[^2], "path-parent");
         }
         var planned = queries.Values.Take(10).ToList();
-        if (planned.Count == 0) throw new ArgumentException("至少需要一个可搜索的标题或路径样本。", nameof(request));
+        if (planned.Count == 0) throw new ArgumentException(AppStrings.Get("search.needQuery"), nameof(request));
         return new MetadataSearchPlan(planned, request.YearHint ?? planned.Select(item => ExtractYear(item.Text)).FirstOrDefault(value => value is not null),
             request.SeasonHint ?? planned.Select(item => ExtractSeason(item.Text)).FirstOrDefault(value => value is not null));
     }
@@ -232,11 +232,11 @@ public sealed class MetadataSearchService(
             var diversity = cluster.Select(item => item.Provider).Distinct(StringComparer.OrdinalIgnoreCase).Count() > 1;
             var score = (titleScore * .65f + yearScore * .15f + rankScore * .1f + completeness * .05f + (diversity ? .05f : 0f));
             var evidence = new List<string>();
-            if (titleScore >= .95f) evidence.Add("标题完全匹配");
-            else if (titleScore >= .66f) evidence.Add("标题相似");
-            if (plan.YearHint is not null && yearScore >= .85f) evidence.Add("年份接近");
-            if (diversity) evidence.Add("多个来源收敛");
-            if (completeness >= .6f) evidence.Add("元数据较完整");
+            if (titleScore >= .95f) evidence.Add(AppStrings.Get("search.exactTitle"));
+            else if (titleScore >= .66f) evidence.Add(AppStrings.Get("search.similarTitle"));
+            if (plan.YearHint is not null && yearScore >= .85f) evidence.Add(AppStrings.Get("search.yearClose"));
+            if (diversity) evidence.Add(AppStrings.Get("search.converge"));
+            if (completeness >= .6f) evidence.Add(AppStrings.Get("search.complete"));
             return new AggregatedMetadataCandidate(
                 request.Mode,
                 representative.Title,

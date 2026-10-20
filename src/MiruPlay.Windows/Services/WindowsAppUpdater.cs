@@ -77,7 +77,7 @@ public sealed class WindowsAppUpdater : IDisposable
     public async Task<WindowsUpdateStatus> CheckAsync(CancellationToken cancellationToken = default)
     {
         if (_manifestUri is null)
-            return _status = _status with { LastCheckedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), LastError = "Windows 更新清单尚未配置。" };
+            return _status = _status with { LastCheckedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), LastError = AppStrings.Get("upd.noManifest") };
         try
         {
             using var response = await _httpClient.GetAsync(_manifestUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
@@ -97,7 +97,7 @@ public sealed class WindowsAppUpdater : IDisposable
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            return _status = _status with { LastCheckedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), LastError = "更新检查超时。" };
+            return _status = _status with { LastCheckedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), LastError = AppStrings.Get("upd.checkTimeout") };
         }
         catch (Exception error) when (error is HttpRequestException or JsonException or InvalidDataException or ArgumentException)
         {
@@ -108,15 +108,15 @@ public sealed class WindowsAppUpdater : IDisposable
     public async Task<WindowsUpdateStatus> DownloadAsync(CancellationToken cancellationToken = default)
     {
         if (_manifestUri is null)
-            return _status = _status with { LastError = "Windows 更新清单尚未配置。" };
+            return _status = _status with { LastError = AppStrings.Get("upd.noManifest") };
         var latest = _status.Latest ?? (await CheckAsync(cancellationToken).ConfigureAwait(false)).Latest;
-        if (latest is null) return _status = _status with { LastError = "尚未获取可用更新。" };
-        if (!IsNewer(latest)) return _status = _status with { LastError = "当前版本已经是最新版本。" };
+        if (latest is null) return _status = _status with { LastError = AppStrings.Get("upd.noUpdate") };
+        if (!IsNewer(latest)) return _status = _status with { LastError = AppStrings.Get("upd.latest") };
         var downloadUri = ValidateDownloadUri(latest.DownloadUrl);
         var fileName = Path.GetFileName(latest.AssetName);
         if (fileName.Length is 0 or > 160 || fileName != latest.AssetName || fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-            throw new InvalidDataException("更新文件名无效。");
-        if (latest.AssetSizeBytes is < 1 or > MaxDownloadBytes) throw new InvalidDataException("更新文件大小超出限制。");
+            throw new InvalidDataException(AppStrings.Get("upd.badFilename"));
+        if (latest.AssetSizeBytes is < 1 or > MaxDownloadBytes) throw new InvalidDataException(AppStrings.Get("upd.sizeLimit"));
         Directory.CreateDirectory(_downloadDirectory);
         var target = Path.Combine(_downloadDirectory, fileName);
         var temporary = $"{target}.{Guid.NewGuid():N}.download";
@@ -126,7 +126,7 @@ public sealed class WindowsAppUpdater : IDisposable
             response.EnsureSuccessStatusCode();
             var contentLength = response.Content.Headers.ContentLength;
             if (contentLength is > MaxDownloadBytes || contentLength is > 0 && contentLength > latest.AssetSizeBytes * 2)
-                throw new InvalidDataException("更新响应大小超出限制。");
+                throw new InvalidDataException(AppStrings.Get("upd.responseLimit"));
             await using var input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
             using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
             await using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None, 64 * 1024, FileOptions.SequentialScan))
@@ -137,13 +137,13 @@ public sealed class WindowsAppUpdater : IDisposable
                 while ((read = await input.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
                 {
                     total += read;
-                    if (total > MaxDownloadBytes || total > latest.AssetSizeBytes * 2) throw new InvalidDataException("更新下载大小超出限制。");
+                    if (total > MaxDownloadBytes || total > latest.AssetSizeBytes * 2) throw new InvalidDataException(AppStrings.Get("upd.downloadLimit"));
                     hash.AppendData(buffer.AsSpan(0, read));
                     await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
                 }
-                if (total != latest.AssetSizeBytes) throw new InvalidDataException("更新下载大小与清单不一致。");
+                if (total != latest.AssetSizeBytes) throw new InvalidDataException(AppStrings.Get("upd.sizeMismatch"));
                 if (!CryptographicOperations.FixedTimeEquals(hash.GetHashAndReset(), Convert.FromHexString(latest.Sha256)))
-                    throw new InvalidDataException("更新文件 SHA-256 与清单不一致。");
+                    throw new InvalidDataException(AppStrings.Get("upd.hashMismatch"));
                 await output.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
             File.Move(temporary, target, true);
@@ -175,25 +175,25 @@ public sealed class WindowsAppUpdater : IDisposable
         start.ArgumentList.Add("Bypass");
         start.ArgumentList.Add("-EncodedCommand");
         start.ArgumentList.Add(encoded);
-        using var process = Process.Start(start) ?? throw new InvalidOperationException("无法启动 Windows 安装交接进程。");
+        using var process = Process.Start(start) ?? throw new InvalidOperationException(AppStrings.Get("upd.noHandoff"));
         return process.Id;
     }
 
     internal string BuildInstallerHandoffScript(string currentExecutable, int parentProcessId, bool backgroundMode = false)
     {
-        var staged = _status.StagedInstallerPath ?? throw new InvalidOperationException("尚未暂存经过校验的 Windows 安装器。");
+        var staged = _status.StagedInstallerPath ?? throw new InvalidOperationException(AppStrings.Get("upd.noStaged"));
         var fullPath = Path.GetFullPath(staged);
         var basePath = Path.GetFullPath(_downloadDirectory) + Path.DirectorySeparatorChar;
         if (!fullPath.StartsWith(basePath, StringComparison.OrdinalIgnoreCase) ||
             !Path.GetFileName(fullPath).EndsWith("-setup.exe", StringComparison.OrdinalIgnoreCase) ||
             !File.Exists(fullPath) || parentProcessId < 1)
-            throw new InvalidOperationException("暂存文件不是有效的 MiruPlay Setup 安装器。");
-        var expected = _status.Latest?.Sha256 ?? throw new InvalidOperationException("更新清单未提供 SHA-256。");
+            throw new InvalidOperationException(AppStrings.Get("upd.badStaged"));
+        var expected = _status.Latest?.Sha256 ?? throw new InvalidOperationException(AppStrings.Get("upd.noHash"));
         using (var input = File.OpenRead(fullPath))
         {
             var actual = Convert.ToHexString(SHA256.HashData(input));
             if (!CryptographicOperations.FixedTimeEquals(Convert.FromHexString(expected), Convert.FromHexString(actual)))
-                throw new InvalidDataException("暂存安装器的 SHA-256 校验失败。");
+                throw new InvalidDataException(AppStrings.Get("upd.hashFailed"));
         }
         var executable = Path.GetFullPath(currentExecutable);
         var restart = backgroundMode ? " -ArgumentList '--background'" : string.Empty;
@@ -216,11 +216,11 @@ public sealed class WindowsAppUpdater : IDisposable
         int read;
         while ((read = await stream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
         {
-            if (memory.Length + read > MaxManifestBytes) throw new InvalidDataException("更新清单过大。");
+            if (memory.Length + read > MaxManifestBytes) throw new InvalidDataException(AppStrings.Get("upd.tooLarge"));
             memory.Write(buffer, 0, read);
         }
         return JsonSerializer.Deserialize<WindowsUpdateInfo>(memory.ToArray(), JsonOptions)
-            ?? throw new InvalidDataException("更新清单为空。");
+            ?? throw new InvalidDataException(AppStrings.Get("upd.empty"));
     }
 
     private static WindowsUpdateInfo NormalizeInfo(WindowsUpdateInfo info)
@@ -228,9 +228,9 @@ public sealed class WindowsAppUpdater : IDisposable
         if (string.IsNullOrWhiteSpace(info.VersionName) || string.IsNullOrWhiteSpace(info.AssetName) ||
             string.IsNullOrWhiteSpace(info.DownloadUrl) || string.IsNullOrWhiteSpace(info.Sha256) || info.AssetSizeBytes <= 0 ||
             info.Sha256.Length != 64 || info.Sha256.Any(character => !Uri.IsHexDigit(character)))
-            throw new InvalidDataException("更新清单缺少必要字段或 SHA-256 无效。");
+            throw new InvalidDataException(AppStrings.Get("upd.badManifest"));
         _ = ValidateDownloadUri(info.DownloadUrl);
-        if (info.AssetSizeBytes > MaxDownloadBytes) throw new InvalidDataException("更新文件大小超出限制。");
+        if (info.AssetSizeBytes > MaxDownloadBytes) throw new InvalidDataException(AppStrings.Get("upd.sizeLimit"));
         return info with { VersionName = info.VersionName.Trim(), AssetName = info.AssetName.Trim() };
     }
 
@@ -243,7 +243,7 @@ public sealed class WindowsAppUpdater : IDisposable
     {
         if (!Uri.TryCreate(manifestUrl.Trim(), UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
             uri.UserInfo.Length > 0 || uri.Query.Length > 0 || uri.Fragment.Length > 0)
-            throw new ArgumentException("更新清单地址必须是无凭据、查询或片段的 HTTP(S) 地址。", nameof(manifestUrl));
+            throw new ArgumentException(AppStrings.Get("upd.manifestUrl"), nameof(manifestUrl));
         return uri;
     }
 
@@ -251,7 +251,7 @@ public sealed class WindowsAppUpdater : IDisposable
     {
         if (!Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
             uri.UserInfo.Length > 0 || uri.Fragment.Length > 0)
-            throw new InvalidDataException("更新下载地址必须是 HTTP(S) 地址且不能包含嵌入凭据或片段。");
+            throw new InvalidDataException(AppStrings.Get("upd.downloadUrl"));
         return uri;
     }
 }

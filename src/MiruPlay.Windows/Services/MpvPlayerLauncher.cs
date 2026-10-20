@@ -6,7 +6,7 @@ namespace MiruPlay.Windows.Services;
 public static class MpvPlayerLauncher
 {
     public static IReadOnlyList<string> SystemPlayerFallbackDegradations { get; } =
-        ["无 IPC 进度同步", "无轨道选择", "无倍速与精确跳转", "无自动连播"];
+        [AppStrings.Get("play.noIpc"), AppStrings.Get("play.noTracks"), AppStrings.Get("play.noSpeed"), AppStrings.Get("play.noAutoNext")];
 
     internal static async Task<IPlaybackSession?> PlayAsync(
         LibraryEpisode episode,
@@ -53,7 +53,7 @@ public static class MpvPlayerLauncher
                 !string.IsNullOrEmpty(remoteUri.UserInfo))
                 throw new InvalidOperationException("Direct playback URLs cannot contain embedded credentials.");
             if (!isRemote && !File.Exists(episode.MediaPath))
-                throw new FileNotFoundException("找不到视频文件。", episode.MediaPath);
+                throw new FileNotFoundException(AppStrings.Get("play.noVideoFile"), episode.MediaPath);
 
             var launchEpisode = playbackProxy?.Episode ?? episode;
             var libMpvPath = FindLibMpv(settings.LibMpvPath);
@@ -86,7 +86,7 @@ public static class MpvPlayerLauncher
 
             if (isRemote || headless)
                 throw new InvalidOperationException(
-                    backendError is null ? "找不到内置 libmpv 播放运行时。" : $"内置播放器启动失败：{backendError.Message}",
+                    backendError is null ? AppStrings.Get("play.noLibmpv") : AppStrings.Get("play.backendFailed", backendError.Message),
                     backendError);
             Process.Start(new ProcessStartInfo(episode.MediaPath) { UseShellExecute = true });
             return new MpvPlaybackLaunchResult(

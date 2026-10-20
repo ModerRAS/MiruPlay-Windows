@@ -821,4 +821,62 @@
   <data name="wpf.dsp.wizardUnavailable" xml:space="preserve"><value>房间校准向导不可用。</value></data>
   <data name="wpf.dsp.noPreset" xml:space="preserve"><value>DSP 预设或目标声道未选择。</value></data>
   <data name="wpf.dsp.limiterDigits" xml:space="preserve"><value>限幅参数必须是数字。</value></data>
+  <data name="cd2.needCreds" xml:space="preserve"><value>CloudDrive2 用户名和密码不能为空。</value></data>
+  <data name="cd2.needToken" xml:space="preserve"><value>CloudDrive2 API Token 不能为空。</value></data>
+  <data name="cd2.inboxNotRoot" xml:space="preserve"><value>CloudDrive2 离线下载目录不能是根目录。</value></data>
+  <data name="cd2.uploadSize" xml:space="preserve"><value>CloudDrive2 上传文件必须为 1 字节到 16 MiB。</value></data>
+  <data name="cd2.moveCount" xml:space="preserve"><value>CloudDrive2 移动文件数量必须为 1 到 100。</value></data>
+  <data name="cd2.noMoveRoot" xml:space="preserve"><value>CloudDrive2 不能移动根目录。</value></data>
+  <data name="cd2.targetNotRoot" xml:space="preserve"><value>CloudDrive2 移动目标不能是根目录。</value></data>
+  <data name="cd2.loginFailed" xml:space="preserve"><value>CloudDrive2 登录失败：{0}</value></data>
+  <data name="cd2.loginRequestFailed" xml:space="preserve"><value>CloudDrive2 登录请求失败 ({0})。</value></data>
+  <data name="cd2.tokenVerifyFailed" xml:space="preserve"><value>CloudDrive2 API Token 验证失败 ({0})。</value></data>
+  <data name="cd2.listFailed" xml:space="preserve"><value>CloudDrive2 目录读取失败 ({0})。</value></data>
+  <data name="cd2.tooManyEntries" xml:space="preserve"><value>CloudDrive2 目录条目超过 10000 个。</value></data>
+  <data name="cd2.offlineFailed" xml:space="preserve"><value>CloudDrive2 离线下载提交失败 ({0})。</value></data>
+  <data name="cd2.offlineSubmitFailed" xml:space="preserve"><value>CloudDrive2 离线下载提交失败：{0}</value></data>
+  <data name="cd2.moveFailed" xml:space="preserve"><value>文件移动失败</value></data>
+  <data name="cd2.moveFileFailed" xml:space="preserve"><value>CloudDrive2 文件移动失败：{0}</value></data>
+  <data name="cd2.mkdirFailed" xml:space="preserve"><value>目录创建失败</value></data>
+  <data name="cd2.mkdirFailed2" xml:space="preserve"><value>CloudDrive2 目录创建失败：{0}</value></data>
+  <data name="cd2.uploadFailed" xml:space="preserve"><value>文件上传失败</value></data>
+  <data name="cd2.uploadIncomplete" xml:space="preserve"><value>CloudDrive2 文件上传不完整。</value></data>
+  <data name="cd2.badFilename" xml:space="preserve"><value>CloudDrive2 文件名无效。</value></data>
+  <data name="cd2.urlCount" xml:space="preserve"><value>离线下载 URL 数量必须为 1 到 100。</value></data>
+  <data name="cd2.urlShape" xml:space="preserve"><value>离线下载地址必须是无嵌入凭据的 magnet 或 HTTP(S) URL。</value></data>
+  <data name="cd2.badAddress" xml:space="preserve"><value>CloudDrive2 地址格式不正确。</value></data>
+  <data name="play.noIpc" xml:space="preserve"><value>无 IPC 进度同步</value></data>
+  <data name="play.noTracks" xml:space="preserve"><value>无轨道选择</value></data>
+  <data name="play.noSpeed" xml:space="preserve"><value>无倍速与精确跳转</value></data>
+  <data name="play.noAutoNext" xml:space="preserve"><value>无自动连播</value></data>
+  <data name="play.noVideoFile" xml:space="preserve"><value>找不到视频文件。</value></data>
+  <data name="play.noLibmpv" xml:space="preserve"><value>找不到内置 libmpv 播放运行时。</value></data>
+  <data name="play.backendFailed" xml:space="preserve"><value>内置播放器启动失败：{0}</value></data>
+  <data name="upd.noManifest" xml:space="preserve"><value>Windows 更新清单尚未配置。</value></data>
+  <data name="upd.checkTimeout" xml:space="preserve"><value>更新检查超时。</value></data>
+  <data name="upd.noUpdate" xml:space="preserve"><value>尚未获取可用更新。</value></data>
+  <data name="upd.latest" xml:space="preserve"><value>当前版本已经是最新版本。</value></data>
+  <data name="upd.badFilename" xml:space="preserve"><value>更新文件名无效。</value></data>
+  <data name="upd.sizeLimit" xml:space="preserve"><value>更新文件大小超出限制。</value></data>
+  <data name="upd.responseLimit" xml:space="preserve"><value>更新响应大小超出限制。</value></data>
+  <data name="upd.downloadLimit" xml:space="preserve"><value>更新下载大小超出限制。</value></data>
+  <data name="upd.sizeMismatch" xml:space="preserve"><value>更新下载大小与清单不一致。</value></data>
+  <data name="upd.hashMismatch" xml:space="preserve"><value>更新文件 SHA-256 与清单不一致。</value></data>
+  <data name="upd.noHandoff" xml:space="preserve"><value>无法启动 Windows 安装交接进程。</value></data>
+  <data name="upd.noStaged" xml:space="preserve"><value>尚未暂存经过校验的 Windows 安装器。</value></data>
+  <data name="upd.badStaged" xml:space="preserve"><value>暂存文件不是有效的 MiruPlay Setup 安装器。</value></data>
+  <data name="upd.noHash" xml:space="preserve"><value>更新清单未提供 SHA-256。</value></data>
+  <data name="upd.hashFailed" xml:space="preserve"><value>暂存安装器的 SHA-256 校验失败。</value></data>
+  <data name="upd.tooLarge" xml:space="preserve"><value>更新清单过大。</value></data>
+  <data name="upd.empty" xml:space="preserve"><value>更新清单为空。</value></data>
+  <data name="upd.badManifest" xml:space="preserve"><value>更新清单缺少必要字段或 SHA-256 无效。</value></data>
+  <data name="upd.manifestUrl" xml:space="preserve"><value>更新清单地址必须是无凭据、查询或片段的 HTTP(S) 地址。</value></data>
+  <data name="upd.downloadUrl" xml:space="preserve"><value>更新下载地址必须是 HTTP(S) 地址且不能包含嵌入凭据或片段。</value></data>
+  <data name="search.mode" xml:space="preserve"><value>mode 必须是 anime 或 drama。</value></data>
+  <data name="search.needQuery" xml:space="preserve"><value>至少需要一个可搜索的标题或路径样本。</value></data>
+  <data name="search.exactTitle" xml:space="preserve"><value>标题完全匹配</value></data>
+  <data name="search.similarTitle" xml:space="preserve"><value>标题相似</value></data>
+  <data name="search.yearClose" xml:space="preserve"><value>年份接近</value></data>
+  <data name="search.converge" xml:space="preserve"><value>多个来源收敛</value></data>
+  <data name="search.complete" xml:space="preserve"><value>元数据较完整</value></data>
 </root>

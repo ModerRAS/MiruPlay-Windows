@@ -821,4 +821,62 @@
   <data name="wpf.dsp.wizardUnavailable" xml:space="preserve"><value>Room calibration wizard unavailable.</value></data>
   <data name="wpf.dsp.noPreset" xml:space="preserve"><value>DSP preset or target channel not selected.</value></data>
   <data name="wpf.dsp.limiterDigits" xml:space="preserve"><value>Limiter parameters must be numbers.</value></data>
+  <data name="cd2.needCreds" xml:space="preserve"><value>CloudDrive2 username and password must not be empty.</value></data>
+  <data name="cd2.needToken" xml:space="preserve"><value>CloudDrive2 API token must not be empty.</value></data>
+  <data name="cd2.inboxNotRoot" xml:space="preserve"><value>CloudDrive2 offline download directory must not be the root.</value></data>
+  <data name="cd2.uploadSize" xml:space="preserve"><value>CloudDrive2 upload must be 1 byte to 16 MiB.</value></data>
+  <data name="cd2.moveCount" xml:space="preserve"><value>CloudDrive2 move count must be 1 to 100.</value></data>
+  <data name="cd2.noMoveRoot" xml:space="preserve"><value>CloudDrive2 cannot move the root directory.</value></data>
+  <data name="cd2.targetNotRoot" xml:space="preserve"><value>CloudDrive2 move target must not be the root directory.</value></data>
+  <data name="cd2.loginFailed" xml:space="preserve"><value>CloudDrive2 login failed: {0}</value></data>
+  <data name="cd2.loginRequestFailed" xml:space="preserve"><value>CloudDrive2 login request failed ({0}).</value></data>
+  <data name="cd2.tokenVerifyFailed" xml:space="preserve"><value>CloudDrive2 API token verification failed ({0}).</value></data>
+  <data name="cd2.listFailed" xml:space="preserve"><value>CloudDrive2 directory read failed ({0}).</value></data>
+  <data name="cd2.tooManyEntries" xml:space="preserve"><value>CloudDrive2 directory exceeds 10000 entries.</value></data>
+  <data name="cd2.offlineFailed" xml:space="preserve"><value>CloudDrive2 offline download submission failed ({0}).</value></data>
+  <data name="cd2.offlineSubmitFailed" xml:space="preserve"><value>CloudDrive2 offline download submission failed: {0}</value></data>
+  <data name="cd2.moveFailed" xml:space="preserve"><value>File move failed</value></data>
+  <data name="cd2.moveFileFailed" xml:space="preserve"><value>CloudDrive2 file move failed: {0}</value></data>
+  <data name="cd2.mkdirFailed" xml:space="preserve"><value>Directory creation failed</value></data>
+  <data name="cd2.mkdirFailed2" xml:space="preserve"><value>CloudDrive2 directory creation failed: {0}</value></data>
+  <data name="cd2.uploadFailed" xml:space="preserve"><value>File upload failed</value></data>
+  <data name="cd2.uploadIncomplete" xml:space="preserve"><value>CloudDrive2 file upload incomplete.</value></data>
+  <data name="cd2.badFilename" xml:space="preserve"><value>CloudDrive2 filename invalid.</value></data>
+  <data name="cd2.urlCount" xml:space="preserve"><value>Offline download URL count must be 1 to 100.</value></data>
+  <data name="cd2.urlShape" xml:space="preserve"><value>Offline download addresses must be credential-free magnet or HTTP(S) URLs.</value></data>
+  <data name="cd2.badAddress" xml:space="preserve"><value>CloudDrive2 address malformed.</value></data>
+  <data name="play.noIpc" xml:space="preserve"><value>No IPC progress sync</value></data>
+  <data name="play.noTracks" xml:space="preserve"><value>No track selection</value></data>
+  <data name="play.noSpeed" xml:space="preserve"><value>No speed or precise seek</value></data>
+  <data name="play.noAutoNext" xml:space="preserve"><value>No autoplay</value></data>
+  <data name="play.noVideoFile" xml:space="preserve"><value>Video file not found.</value></data>
+  <data name="play.noLibmpv" xml:space="preserve"><value>Embedded libmpv runtime not found.</value></data>
+  <data name="play.backendFailed" xml:space="preserve"><value>Embedded player failed to start: {0}</value></data>
+  <data name="upd.noManifest" xml:space="preserve"><value>Windows update manifest not configured.</value></data>
+  <data name="upd.checkTimeout" xml:space="preserve"><value>Update check timed out.</value></data>
+  <data name="upd.noUpdate" xml:space="preserve"><value>No available update fetched.</value></data>
+  <data name="upd.latest" xml:space="preserve"><value>Current version is already the latest.</value></data>
+  <data name="upd.badFilename" xml:space="preserve"><value>Update filename invalid.</value></data>
+  <data name="upd.sizeLimit" xml:space="preserve"><value>Update file size exceeds the limit.</value></data>
+  <data name="upd.responseLimit" xml:space="preserve"><value>Update response size exceeds the limit.</value></data>
+  <data name="upd.downloadLimit" xml:space="preserve"><value>Update download size exceeds the limit.</value></data>
+  <data name="upd.sizeMismatch" xml:space="preserve"><value>Update download size disagrees with the manifest.</value></data>
+  <data name="upd.hashMismatch" xml:space="preserve"><value>Update file SHA-256 disagrees with the manifest.</value></data>
+  <data name="upd.noHandoff" xml:space="preserve"><value>Cannot start the Windows installer handoff process.</value></data>
+  <data name="upd.noStaged" xml:space="preserve"><value>No verified Windows installer staged.</value></data>
+  <data name="upd.badStaged" xml:space="preserve"><value>Staged file is not a valid MiruPlay Setup installer.</value></data>
+  <data name="upd.noHash" xml:space="preserve"><value>Update manifest provides no SHA-256.</value></data>
+  <data name="upd.hashFailed" xml:space="preserve"><value>Staged installer SHA-256 verification failed.</value></data>
+  <data name="upd.tooLarge" xml:space="preserve"><value>Update manifest too large.</value></data>
+  <data name="upd.empty" xml:space="preserve"><value>Update manifest empty.</value></data>
+  <data name="upd.badManifest" xml:space="preserve"><value>Update manifest misses required fields or SHA-256 is invalid.</value></data>
+  <data name="upd.manifestUrl" xml:space="preserve"><value>Update manifest URL must be an HTTP(S) address without credentials, query or fragment.</value></data>
+  <data name="upd.downloadUrl" xml:space="preserve"><value>Update download URL must be HTTP(S) without embedded credentials or fragment.</value></data>
+  <data name="search.mode" xml:space="preserve"><value>mode must be anime or drama.</value></data>
+  <data name="search.needQuery" xml:space="preserve"><value>At least one searchable title or path sample is required.</value></data>
+  <data name="search.exactTitle" xml:space="preserve"><value>Exact title match</value></data>
+  <data name="search.similarTitle" xml:space="preserve"><value>Similar title</value></data>
+  <data name="search.yearClose" xml:space="preserve"><value>Year close</value></data>
+  <data name="search.converge" xml:space="preserve"><value>Multiple sources converge</value></data>
+  <data name="search.complete" xml:space="preserve"><value>Richer metadata</value></data>
 </root>
