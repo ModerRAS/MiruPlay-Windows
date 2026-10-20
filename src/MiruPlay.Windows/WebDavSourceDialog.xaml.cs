@@ -34,7 +34,7 @@ public partial class WebDavSourceDialog : Window
     {
         if (SourceName.Length == 0)
         {
-            MessageBox.Show(this, "请输入媒体源名称。", "WebDAV", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, AppStrings.Get("wpf.src.enterName"), "WebDAV", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         try

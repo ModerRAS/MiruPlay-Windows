@@ -66,14 +66,14 @@ public sealed class BangumiArchiveClient : IDisposable
         ValidateHttpUrl(latestUrl);
         using var response = await _httpClient.GetAsync(latestUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        if (response.Content.Headers.ContentLength is > 256 * 1024) throw new InvalidDataException("Bangumi Archive latest.json 过大。");
+        if (response.Content.Headers.ContentLength is > 256 * 1024) throw new InvalidDataException(AppStrings.Get("archive.latestTooLarge"));
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         using var limited = new LimitedReadStream(stream, 256 * 1024);
         var latest = await JsonSerializer.DeserializeAsync<BangumiArchiveLatest>(limited, cancellationToken: cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidDataException("Bangumi Archive latest.json 为空。");
+            ?? throw new InvalidDataException(AppStrings.Get("archive.latestEmpty"));
         ValidateHttpUrl(latest.BrowserDownloadUrl);
         if (latest.Size < 0 || latest.Size > BangumiArchiveStore.MaxArchiveBytes)
-            throw new InvalidDataException("Bangumi Archive 下载大小无效。");
+            throw new InvalidDataException(AppStrings.Get("archive.badSize"));
         return latest;
     }
 
@@ -84,11 +84,11 @@ public sealed class BangumiArchiveClient : IDisposable
         CancellationToken cancellationToken = default)
     {
         ValidateHttpUrl(latest.BrowserDownloadUrl);
-        if (latest.Size > maxBytes) throw new InvalidDataException("Bangumi Archive 超过下载大小上限。");
+        if (latest.Size > maxBytes) throw new InvalidDataException(AppStrings.Get("archive.tooLarge"));
         using var response = await _httpClient.GetAsync(latest.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         if (response.Content.Headers.ContentLength is > 0 and var contentLength && contentLength > maxBytes)
-            throw new InvalidDataException("Bangumi Archive 超过下载大小上限。");
+            throw new InvalidDataException(AppStrings.Get("archive.tooLarge"));
         var directory = Path.GetDirectoryName(Path.GetFullPath(destination))!;
         Directory.CreateDirectory(directory);
         await using var input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
@@ -101,14 +101,14 @@ public sealed class BangumiArchiveClient : IDisposable
             var read = await input.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
             if (read == 0) break;
             total += read;
-            if (total > maxBytes) throw new InvalidDataException("Bangumi Archive 超过下载大小上限。");
+            if (total > maxBytes) throw new InvalidDataException(AppStrings.Get("archive.tooLarge"));
             await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
             digest.AppendData(buffer, 0, read);
         }
         await output.FlushAsync(cancellationToken).ConfigureAwait(false);
         var expected = latest.Digest?.Replace("sha256:", "", StringComparison.OrdinalIgnoreCase).Trim();
         if (!string.IsNullOrWhiteSpace(expected) && !Convert.ToHexString(digest.GetHashAndReset()).Equals(expected, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("Bangumi Archive SHA-256 校验失败。");
+            throw new InvalidDataException(AppStrings.Get("archive.hashMismatch"));
     }
 
     public void Dispose()
@@ -121,7 +121,7 @@ public sealed class BangumiArchiveClient : IDisposable
         if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
             string.IsNullOrEmpty(uri.Host) || !string.IsNullOrEmpty(uri.UserInfo) ||
             !string.IsNullOrEmpty(uri.Fragment) || !string.IsNullOrEmpty(uri.Query))
-            throw new InvalidDataException("Bangumi Archive URL 无效。");
+            throw new InvalidDataException(AppStrings.Get("archive.badUrl"));
     }
 
     private sealed class LimitedReadStream(Stream inner, long maximum) : Stream
@@ -136,7 +136,7 @@ public sealed class BangumiArchiveClient : IDisposable
         public override int Read(byte[] buffer, int offset, int count)
         {
             var remaining = maximum - _read;
-            if (remaining <= 0) throw new InvalidDataException("响应超过大小上限。");
+            if (remaining <= 0) throw new InvalidDataException(AppStrings.Get("archive.respTooLarge"));
             var read = inner.Read(buffer, offset, (int)Math.Min(count, remaining));
             _read += read;
             return read;
@@ -144,7 +144,7 @@ public sealed class BangumiArchiveClient : IDisposable
         public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
             var remaining = maximum - _read;
-            if (remaining <= 0) throw new InvalidDataException("响应超过大小上限。");
+            if (remaining <= 0) throw new InvalidDataException(AppStrings.Get("archive.respTooLarge"));
             var read = await inner.ReadAsync(buffer[..(int)Math.Min(buffer.Length, remaining)], cancellationToken).ConfigureAwait(false);
             _read += read;
             return read;
@@ -212,7 +212,7 @@ public sealed class BangumiArchiveStore : IDisposable
         long maxBytes = MaxArchiveBytes,
         CancellationToken cancellationToken = default)
     {
-        if (contentLength <= 0 || contentLength > maxBytes) throw new InvalidDataException("Bangumi Archive 上传大小无效。");
+        if (contentLength <= 0 || contentLength > maxBytes) throw new InvalidDataException(AppStrings.Get("archive.uploadSize"));
         DeleteTemporaryFiles();
         var upload = Path.Combine(_directory, "archive.raw-upload");
         var subject = Path.Combine(_directory, $"{SubjectFileName}.upload");
@@ -324,7 +324,7 @@ public sealed class BangumiArchiveStore : IDisposable
     private static void ValidateSubject(string path)
     {
         var info = new FileInfo(path);
-        if (!info.Exists || info.Length == 0 || info.Length > MaxSubjectBytes) throw new InvalidDataException("subject.jsonlines 无效。");
+        if (!info.Exists || info.Length == 0 || info.Length > MaxSubjectBytes) throw new InvalidDataException(AppStrings.Get("archive.badSubject"));
         var count = 0;
         foreach (var line in File.ReadLines(path))
         {
@@ -333,18 +333,18 @@ public sealed class BangumiArchiveStore : IDisposable
             var root = json.RootElement;
             if (!root.TryGetProperty("id", out var id) || !id.TryGetInt32(out _) ||
                 !root.TryGetProperty("type", out var type) || !type.TryGetInt32(out _))
-                throw new InvalidDataException("subject.jsonlines 缺少 Bangumi subject 字段。");
+                throw new InvalidDataException(AppStrings.Get("archive.noSubjectField"));
             if (++count >= ValidationLineLimit) break;
         }
-        if (count == 0) throw new InvalidDataException("subject.jsonlines 没有可用数据。");
+        if (count == 0) throw new InvalidDataException(AppStrings.Get("archive.noData"));
     }
 
     private static void ExtractSubject(string archive, string destination)
     {
         using var zip = ZipFile.OpenRead(archive);
         var entry = zip.Entries.FirstOrDefault(value => !string.IsNullOrEmpty(value.Name) && value.Name.Equals(SubjectFileName, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidDataException("Bangumi Archive 缺少 subject.jsonlines。");
-        if (entry.Length > MaxSubjectBytes) throw new InvalidDataException("subject.jsonlines 超过大小上限。");
+            ?? throw new InvalidDataException(AppStrings.Get("archive.noSubjectFile"));
+        if (entry.Length > MaxSubjectBytes) throw new InvalidDataException(AppStrings.Get("archive.subjectTooLarge"));
         using var input = entry.Open();
         using var output = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None);
         input.CopyTo(output, 64 * 1024);
@@ -358,9 +358,9 @@ public sealed class BangumiArchiveStore : IDisposable
         while (total < contentLength)
         {
             var read = await input.ReadAsync(buffer.AsMemory(0, (int)Math.Min(buffer.Length, contentLength - total)), cancellationToken).ConfigureAwait(false);
-            if (read == 0) throw new EndOfStreamException("Bangumi Archive 上传数据不完整。");
+            if (read == 0) throw new EndOfStreamException(AppStrings.Get("archive.incomplete"));
             total += read;
-            if (total > maxBytes) throw new InvalidDataException("Bangumi Archive 上传超过大小上限。");
+            if (total > maxBytes) throw new InvalidDataException(AppStrings.Get("archive.uploadTooLarge"));
             await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
         }
     }

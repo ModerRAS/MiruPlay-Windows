@@ -57,7 +57,7 @@ public sealed class CloudDriveRssScheduler : IDisposable, IAsyncDisposable
         try
         {
             if (_tasks is null) await _run(cancellationToken).ConfigureAwait(false);
-            else await _tasks.RunTrackedAsync("cloud-drive-rss", "CloudDrive/RSS 同步", _run, cancellationToken).ConfigureAwait(false);
+            else await _tasks.RunTrackedAsync("cloud-drive-rss", AppStrings.Get("runner.taskName"), _run, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception error) when (error is ArgumentException or HttpRequestException or InvalidDataException or InvalidOperationException)
         {

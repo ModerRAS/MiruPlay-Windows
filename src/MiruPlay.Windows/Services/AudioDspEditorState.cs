@@ -15,10 +15,10 @@ public static class AudioDspEditorState
         ArgumentNullException.ThrowIfNull(bands);
 
         var normalized = config.Normalize();
-        var presets = normalized.Presets ?? throw new InvalidOperationException("DSP 预设列表为空。");
+        var presets = normalized.Presets ?? throw new InvalidOperationException(AppStrings.Get("dsp.emptyPresets"));
         var presetIndex = presets.ToList().FindIndex(item =>
             item.Id.Equals(presetId.Trim(), StringComparison.OrdinalIgnoreCase));
-        if (presetIndex < 0) throw new KeyNotFoundException($"找不到 DSP 预设: {presetId}");
+        if (presetIndex < 0) throw new KeyNotFoundException(AppStrings.Get("dsp.presetMissing", presetId));
 
         var preset = presets[presetIndex];
         var rules = (preset.Rules ?? []).ToList();

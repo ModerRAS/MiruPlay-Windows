@@ -70,7 +70,7 @@ public sealed class RssProcessedStore
         Validate(item.SubscriptionId, item.ItemKey);
         var title = item.Title.Trim();
         var url = item.Url.Trim();
-        if (title.Length > 1_000 || url.Length is 0 or > 4_096) throw new ArgumentException("RSS 已处理条目字段长度无效。", nameof(item));
+        if (title.Length > 1_000 || url.Length is 0 or > 4_096) throw new ArgumentException(AppStrings.Get("rss.fieldLength"), nameof(item));
         using var connection = Open();
         using var command = connection.CreateCommand();
         command.CommandText = """
@@ -174,7 +174,7 @@ public sealed class RssProcessedStore
         Validate(item.SubscriptionId, item.ItemKey);
         var title = item.Title.Trim();
         var url = item.Url.Trim();
-        if (title.Length > 1_000 || url.Length is 0 or > 4_096) throw new ArgumentException("RSS 已处理条目字段长度无效。", nameof(item));
+        if (title.Length > 1_000 || url.Length is 0 or > 4_096) throw new ArgumentException(AppStrings.Get("rss.fieldLength"), nameof(item));
     }
 
     private SqliteConnection Open()
@@ -188,6 +188,6 @@ public sealed class RssProcessedStore
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(subscriptionId);
         if (string.IsNullOrWhiteSpace(itemKey) || itemKey.Length > 4_096)
-            throw new ArgumentException("RSS item key 长度无效。", nameof(itemKey));
+            throw new ArgumentException(AppStrings.Get("rss.keyLength"), nameof(itemKey));
     }
 }

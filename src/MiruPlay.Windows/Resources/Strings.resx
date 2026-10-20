@@ -1138,4 +1138,41 @@
   <data name="tvmaze.queryLong" xml:space="preserve"><value>TVMaze 搜索词必须为 1 至 100 个字符。</value></data>
   <data name="tvmaze.searchFailed" xml:space="preserve"><value>TVMaze 搜索失败 (HTTP {0})。</value></data>
   <data name="tvmaze.emptyResponse" xml:space="preserve"><value>TVMaze 搜索返回了空响应。</value></data>
+  <data name="archive.latestTooLarge" xml:space="preserve"><value>Bangumi Archive latest.json 过大。</value></data>
+  <data name="archive.latestEmpty" xml:space="preserve"><value>Bangumi Archive latest.json 为空。</value></data>
+  <data name="archive.badSize" xml:space="preserve"><value>Bangumi Archive 下载大小无效。</value></data>
+  <data name="archive.tooLarge" xml:space="preserve"><value>Bangumi Archive 超过下载大小上限。</value></data>
+  <data name="archive.hashMismatch" xml:space="preserve"><value>Bangumi Archive SHA-256 校验失败。</value></data>
+  <data name="archive.badUrl" xml:space="preserve"><value>Bangumi Archive URL 无效。</value></data>
+  <data name="archive.respTooLarge" xml:space="preserve"><value>响应超过大小上限。</value></data>
+  <data name="archive.uploadSize" xml:space="preserve"><value>Bangumi Archive 上传大小无效。</value></data>
+  <data name="archive.badSubject" xml:space="preserve"><value>subject.jsonlines 无效。</value></data>
+  <data name="archive.noSubjectField" xml:space="preserve"><value>subject.jsonlines 缺少 Bangumi subject 字段。</value></data>
+  <data name="archive.noData" xml:space="preserve"><value>subject.jsonlines 没有可用数据。</value></data>
+  <data name="archive.noSubjectFile" xml:space="preserve"><value>Bangumi Archive 缺少 subject.jsonlines。</value></data>
+  <data name="archive.subjectTooLarge" xml:space="preserve"><value>subject.jsonlines 超过大小上限。</value></data>
+  <data name="archive.incomplete" xml:space="preserve"><value>Bangumi Archive 上传数据不完整。</value></data>
+  <data name="archive.uploadTooLarge" xml:space="preserve"><value>Bangumi Archive 上传超过大小上限。</value></data>
+  <data name="dav.tooManyRespEntries" xml:space="preserve"><value>WebDAV 目录响应条目数超过 100000 限制。</value></data>
+  <data name="wav.tooLong" xml:space="preserve"><value>WAV 样本数超过 5 分钟上限。</value></data>
+  <data name="log.singleTooLarge" xml:space="preserve"><value>单条日志超过活动日志文件大小限制。</value></data>
+  <data name="measure.presetName" xml:space="preserve"><value>房间校准 {0}</value></data>
+  <data name="proxy.badAddress" xml:space="preserve"><value>代理地址必须是无路径、凭据、查询或片段的 HTTP 主机和有效端口。</value></data>
+  <data name="obs.taskName" xml:space="preserve"><value>OpenObserve 日志上报</value></data>
+  <data name="play.trackLabel" xml:space="preserve"><value>音轨 {0}</value></data>
+  <data name="store.srcCredBroken" xml:space="preserve"><value>媒体源凭据无法解密。</value></data>
+  <data name="runner.taskName" xml:space="preserve"><value>CloudDrive/RSS 同步</value></data>
+  <data name="settings.tooLarge" xml:space="preserve"><value>设置文件过大。</value></data>
+  <data name="top.hidOpen" xml:space="preserve"><value>无法打开 Topping DAC 的 HID 接口。</value></data>
+  <data name="top.writeFailed" xml:space="preserve"><value>USB 写入失败（帧未送达）。</value></data>
+  <data name="rss.fieldLength" xml:space="preserve"><value>RSS 已处理条目字段长度无效。</value></data>
+  <data name="rss.keyLength" xml:space="preserve"><value>RSS item key 长度无效。</value></data>
+  <data name="music.cueTooLarge" xml:space="preserve"><value>CUE 文件超过 1 MiB 限制。</value></data>
+  <data name="music.cueTooManyLines" xml:space="preserve"><value>CUE 文件超过 10000 行限制。</value></data>
+  <data name="mpv.hwndFailed" xml:space="preserve"><value>无法创建 mpv 视频窗口，Win32 错误 {0}。</value></data>
+  <data name="mpv.noHwnd" xml:space="preserve"><value>mpv 视频窗口尚未创建。</value></data>
+  <data name="lib.seasonBucket" xml:space="preserve"><value>{0}年{1}月新番</value></data>
+  <data name="lib.unknownDate" xml:space="preserve"><value>未识别播出日期</value></data>
+  <data name="dsp.emptyPresets" xml:space="preserve"><value>DSP 预设列表为空。</value></data>
+  <data name="dsp.presetMissing" xml:space="preserve"><value>找不到 DSP 预设: {0}</value></data>
 </root>

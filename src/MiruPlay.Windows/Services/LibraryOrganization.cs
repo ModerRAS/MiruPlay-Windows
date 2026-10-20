@@ -30,8 +30,8 @@ public static class LibraryOrganization
     }
 
     public static string ReleaseSeasonTitle(LibrarySeries series) => ReleaseSeasonKey(series) is int key
-        ? $"{key / 100}年{key % 100}月新番"
-        : "未识别播出日期";
+        ? AppStrings.Get("lib.seasonBucket", key / 100, key % 100)
+        : AppStrings.Get("lib.unknownDate");
 
     private static List<LibrarySeries> Merge(IReadOnlyList<LibrarySeries> series)
     {

@@ -214,7 +214,7 @@ public static class RoomMeasureAutoEq
         var rule = new AudioDspChannelRule(target, measured.Bands, 0); // Cut-only fit: no headroom correction.
         return new AudioDspPreset(
             $"{PresetIdPrefix}{timestampMs}",
-            presetName ?? $"房间校准 {DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).ToLocalTime():MM-dd HH:mm}",
+            presetName ?? AppStrings.Get("measure.presetName", DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).ToLocalTime().ToString("MM-dd HH:mm", System.Globalization.CultureInfo.CurrentCulture)),
             Rules: [rule]).Normalize();
     }
 

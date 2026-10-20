@@ -47,7 +47,7 @@ public sealed record MpvAudioTrack(
     bool IsSelected)
 {
     public string DisplayLabel => string.IsNullOrWhiteSpace(Title)
-        ? (string.IsNullOrWhiteSpace(Language) || Language == "und" ? $"音轨 {Id}" : Language)
+        ? (string.IsNullOrWhiteSpace(Language) || Language == "und" ? AppStrings.Get("play.trackLabel", Id) : Language)
         : Title;
 }
 

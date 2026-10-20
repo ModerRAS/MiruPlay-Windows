@@ -25,7 +25,7 @@ public static class MusicCueSheet
     public static CueSheet Parse(string content, string albumFallback = "")
     {
         if (content.Length > MaxCharacters)
-            throw new InvalidDataException("CUE 文件超过 1 MiB 限制。");
+            throw new InvalidDataException(AppStrings.Get("music.cueTooLarge"));
         string? file = null;
         var title = "";
         var performer = "";
@@ -38,7 +38,7 @@ public static class MusicCueSheet
         foreach (var raw in content.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
         {
             if (++lines > MaxLines)
-                throw new InvalidDataException("CUE 文件超过 10000 行限制。");
+                throw new InvalidDataException(AppStrings.Get("music.cueTooManyLines"));
             var line = raw.Trim();
             if (line.Length == 0 || line.StartsWith("REM", StringComparison.OrdinalIgnoreCase)) continue;
             var firstSpace = line.IndexOf(' ');

@@ -1138,4 +1138,41 @@
   <data name="tvmaze.queryLong" xml:space="preserve"><value>TVMaze query must be 1 to 100 characters.</value></data>
   <data name="tvmaze.searchFailed" xml:space="preserve"><value>TVMaze search failed (HTTP {0}).</value></data>
   <data name="tvmaze.emptyResponse" xml:space="preserve"><value>TVMaze search returned an empty response.</value></data>
+  <data name="archive.latestTooLarge" xml:space="preserve"><value>Bangumi Archive latest.json too large.</value></data>
+  <data name="archive.latestEmpty" xml:space="preserve"><value>Bangumi Archive latest.json empty.</value></data>
+  <data name="archive.badSize" xml:space="preserve"><value>Bangumi Archive download size invalid.</value></data>
+  <data name="archive.tooLarge" xml:space="preserve"><value>Bangumi Archive exceeds the download size limit.</value></data>
+  <data name="archive.hashMismatch" xml:space="preserve"><value>Bangumi Archive SHA-256 verification failed.</value></data>
+  <data name="archive.badUrl" xml:space="preserve"><value>Bangumi Archive URL invalid.</value></data>
+  <data name="archive.respTooLarge" xml:space="preserve"><value>Response exceeds the size limit.</value></data>
+  <data name="archive.uploadSize" xml:space="preserve"><value>Bangumi Archive upload size invalid.</value></data>
+  <data name="archive.badSubject" xml:space="preserve"><value>subject.jsonlines invalid.</value></data>
+  <data name="archive.noSubjectField" xml:space="preserve"><value>subject.jsonlines misses the Bangumi subject field.</value></data>
+  <data name="archive.noData" xml:space="preserve"><value>subject.jsonlines has no usable data.</value></data>
+  <data name="archive.noSubjectFile" xml:space="preserve"><value>Bangumi Archive misses subject.jsonlines.</value></data>
+  <data name="archive.subjectTooLarge" xml:space="preserve"><value>subject.jsonlines exceeds the size limit.</value></data>
+  <data name="archive.incomplete" xml:space="preserve"><value>Bangumi Archive upload incomplete.</value></data>
+  <data name="archive.uploadTooLarge" xml:space="preserve"><value>Bangumi Archive upload exceeds the size limit.</value></data>
+  <data name="dav.tooManyRespEntries" xml:space="preserve"><value>WebDAV directory response exceeds the 100000-entry limit.</value></data>
+  <data name="wav.tooLong" xml:space="preserve"><value>WAV samples exceed the 5-minute limit.</value></data>
+  <data name="log.singleTooLarge" xml:space="preserve"><value>Single log entry exceeds the active log file size limit.</value></data>
+  <data name="measure.presetName" xml:space="preserve"><value>Room calibration {0}</value></data>
+  <data name="proxy.badAddress" xml:space="preserve"><value>Proxy address must be an HTTP host with a valid port and no path, credentials, query or fragment.</value></data>
+  <data name="obs.taskName" xml:space="preserve"><value>OpenObserve log upload</value></data>
+  <data name="play.trackLabel" xml:space="preserve"><value>Track {0}</value></data>
+  <data name="store.srcCredBroken" xml:space="preserve"><value>Media source credentials undecryptable.</value></data>
+  <data name="runner.taskName" xml:space="preserve"><value>CloudDrive/RSS sync</value></data>
+  <data name="settings.tooLarge" xml:space="preserve"><value>Settings file too large.</value></data>
+  <data name="top.hidOpen" xml:space="preserve"><value>Cannot open the Topping DAC HID interface.</value></data>
+  <data name="top.writeFailed" xml:space="preserve"><value>USB write failed (frame not delivered).</value></data>
+  <data name="rss.fieldLength" xml:space="preserve"><value>RSS processed-entry field length invalid.</value></data>
+  <data name="rss.keyLength" xml:space="preserve"><value>RSS item key length invalid.</value></data>
+  <data name="music.cueTooLarge" xml:space="preserve"><value>CUE file exceeds the 1 MiB limit.</value></data>
+  <data name="music.cueTooManyLines" xml:space="preserve"><value>CUE file exceeds the 10000-line limit.</value></data>
+  <data name="mpv.hwndFailed" xml:space="preserve"><value>Cannot create mpv video window, Win32 error {0}.</value></data>
+  <data name="mpv.noHwnd" xml:space="preserve"><value>mpv video window not created.</value></data>
+  <data name="lib.seasonBucket" xml:space="preserve"><value>{0}/{1} new season</value></data>
+  <data name="lib.unknownDate" xml:space="preserve"><value>Unrecognised air date</value></data>
+  <data name="dsp.emptyPresets" xml:space="preserve"><value>DSP preset list empty.</value></data>
+  <data name="dsp.presetMissing" xml:space="preserve"><value>DSP preset not found: {0}</value></data>
 </root>

@@ -245,7 +245,7 @@ public sealed class WebDavDirectoryEnumerator : IDisposable
             var size = prop.Descendants().FirstOrDefault(element => element.Name.LocalName == "getcontentlength")?.Value;
             var modified = prop.Descendants().FirstOrDefault(element => element.Name.LocalName == "getlastmodified")?.Value;
             if (entries.Count >= MaximumEntries)
-                throw new InvalidDataException("WebDAV 目录响应条目数超过 100000 限制。");
+                throw new InvalidDataException(AppStrings.Get("dav.tooManyRespEntries"));
             entries.Add(new RemoteResponseEntry(
                 uri,
                 collection,

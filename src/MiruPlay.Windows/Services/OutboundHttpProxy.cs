@@ -40,7 +40,7 @@ public static class OutboundHttpProxy
             !Uri.TryCreate(new UriBuilder(Uri.UriSchemeHttp, value, port).Uri.AbsoluteUri, UriKind.Absolute, out var uri) ||
             uri.Scheme != Uri.UriSchemeHttp || uri.UserInfo.Length != 0 || uri.Query.Length != 0 || uri.Fragment.Length != 0 ||
             uri.AbsolutePath != "/")
-            throw new ArgumentException("代理地址必须是无路径、凭据、查询或片段的 HTTP 主机和有效端口。", nameof(host));
+            throw new ArgumentException(AppStrings.Get("proxy.badAddress"), nameof(host));
         return uri;
     }
 }

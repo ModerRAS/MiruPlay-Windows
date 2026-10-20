@@ -38,7 +38,7 @@ public sealed class OpenObserveLogScheduler : IAsyncDisposable
         var dueBasis = Math.Max(settings.LastLogUploadAt, Interlocked.Read(ref _lastAttemptAt));
         if (dueBasis > 0 && nowUnixMilliseconds - dueBasis < UploadInterval.TotalMilliseconds) return false;
         Interlocked.Exchange(ref _lastAttemptAt, nowUnixMilliseconds);
-        return await _tasks.RunTrackedAsync("openobserve-log-upload", "OpenObserve 日志上报", async token =>
+        return await _tasks.RunTrackedAsync("openobserve-log-upload", AppStrings.Get("obs.taskName"), async token =>
         {
             var result = await _logs.UploadAsync(settings, token).ConfigureAwait(false);
             _updateSettings(current => current with

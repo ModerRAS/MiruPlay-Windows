@@ -37,7 +37,7 @@ public partial class SmbSourceDialog : Window
     {
         if (SourceName.Length == 0)
         {
-            MessageBox.Show(this, "请输入媒体源名称。", "SMB", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, AppStrings.Get("wpf.src.enterName"), "SMB", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         try

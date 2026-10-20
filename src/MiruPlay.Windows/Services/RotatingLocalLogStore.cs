@@ -162,7 +162,7 @@ public sealed class RotatingLocalLogStore
         };
         line = JsonSerializer.Serialize(compact, JsonOptions) + Environment.NewLine;
         if (Encoding.UTF8.GetByteCount(line) > _maxActiveBytes)
-            throw new InvalidDataException("单条日志超过活动日志文件大小限制。");
+            throw new InvalidDataException(AppStrings.Get("log.singleTooLarge"));
         return line;
     }
 

@@ -12,7 +12,7 @@ public static class WavFile
     {
         ArgumentNullException.ThrowIfNull(samples);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sampleRateHz);
-        if (samples.Length > MaxSamples) throw new ArgumentException("WAV 样本数超过 5 分钟上限。");
+        if (samples.Length > MaxSamples) throw new ArgumentException(AppStrings.Get("wav.tooLong"));
         using var output = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
         using var writer = new BinaryWriter(output, System.Text.Encoding.ASCII, leaveOpen: false);
         var dataSize = samples.Length * 2;
@@ -81,7 +81,7 @@ public static class WavFile
                     break;
                 case "data":
                     if (channels <= 0) throw new InvalidDataException("fmt chunk missing");
-                    if (size / 2 / channels > MaxSamples) throw new InvalidDataException("WAV 样本数超过 5 分钟上限。");
+                    if (size / 2 / channels > MaxSamples) throw new InvalidDataException(AppStrings.Get("wav.tooLong"));
                     var frames = size / 2 / channels;
                     samples = new double[frames];
                     for (var i = 0; i < frames; i++)

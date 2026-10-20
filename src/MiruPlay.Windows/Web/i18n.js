@@ -7937,6 +7937,265 @@ const I18N = {
   "zh-HK": "TVMaze 搜尋返回咗空回應。",
   "en-US": "TVMaze search returned an empty response.",
   "en-GB": "TVMaze search returned an empty response."
+ },
+ "archive.latestTooLarge": {
+  "zh-CN": "Bangumi Archive latest.json 过大。",
+  "zh-TW": "Bangumi Archive latest.json 過大。",
+  "zh-HK": "Bangumi Archive latest.json 過大。",
+  "en-US": "Bangumi Archive latest.json too large.",
+  "en-GB": "Bangumi Archive latest.json too large."
+ },
+ "archive.latestEmpty": {
+  "zh-CN": "Bangumi Archive latest.json 为空。",
+  "zh-TW": "Bangumi Archive latest.json 為空。",
+  "zh-HK": "Bangumi Archive latest.json 為空。",
+  "en-US": "Bangumi Archive latest.json empty.",
+  "en-GB": "Bangumi Archive latest.json empty."
+ },
+ "archive.badSize": {
+  "zh-CN": "Bangumi Archive 下载大小无效。",
+  "zh-TW": "Bangumi Archive 下載大小無效。",
+  "zh-HK": "Bangumi Archive 下載大小無效。",
+  "en-US": "Bangumi Archive download size invalid.",
+  "en-GB": "Bangumi Archive download size invalid."
+ },
+ "archive.tooLarge": {
+  "zh-CN": "Bangumi Archive 超过下载大小上限。",
+  "zh-TW": "Bangumi Archive 超過下載大小上限。",
+  "zh-HK": "Bangumi Archive 超過下載大小上限。",
+  "en-US": "Bangumi Archive exceeds the download size limit.",
+  "en-GB": "Bangumi Archive exceeds the download size limit."
+ },
+ "archive.hashMismatch": {
+  "zh-CN": "Bangumi Archive SHA-256 校验失败。",
+  "zh-TW": "Bangumi Archive SHA-256 驗證失敗。",
+  "zh-HK": "Bangumi Archive SHA-256 驗證失敗。",
+  "en-US": "Bangumi Archive SHA-256 verification failed.",
+  "en-GB": "Bangumi Archive SHA-256 verification failed."
+ },
+ "archive.badUrl": {
+  "zh-CN": "Bangumi Archive URL 无效。",
+  "zh-TW": "Bangumi Archive URL 無效。",
+  "zh-HK": "Bangumi Archive URL 無效。",
+  "en-US": "Bangumi Archive URL invalid.",
+  "en-GB": "Bangumi Archive URL invalid."
+ },
+ "archive.respTooLarge": {
+  "zh-CN": "响应超过大小上限。",
+  "zh-TW": "回應超過大小上限。",
+  "zh-HK": "回應超過大小上限。",
+  "en-US": "Response exceeds the size limit.",
+  "en-GB": "Response exceeds the size limit."
+ },
+ "archive.uploadSize": {
+  "zh-CN": "Bangumi Archive 上传大小无效。",
+  "zh-TW": "Bangumi Archive 上傳大小無效。",
+  "zh-HK": "Bangumi Archive 上傳大小無效。",
+  "en-US": "Bangumi Archive upload size invalid.",
+  "en-GB": "Bangumi Archive upload size invalid."
+ },
+ "archive.badSubject": {
+  "zh-CN": "subject.jsonlines 无效。",
+  "zh-TW": "subject.jsonlines 無效。",
+  "zh-HK": "subject.jsonlines 無效。",
+  "en-US": "subject.jsonlines invalid.",
+  "en-GB": "subject.jsonlines invalid."
+ },
+ "archive.noSubjectField": {
+  "zh-CN": "subject.jsonlines 缺少 Bangumi subject 字段。",
+  "zh-TW": "subject.jsonlines 缺少 Bangumi subject 欄位。",
+  "zh-HK": "subject.jsonlines 缺少 Bangumi subject 欄位。",
+  "en-US": "subject.jsonlines misses the Bangumi subject field.",
+  "en-GB": "subject.jsonlines misses the Bangumi subject field."
+ },
+ "archive.noData": {
+  "zh-CN": "subject.jsonlines 没有可用数据。",
+  "zh-TW": "subject.jsonlines 沒有可用資料。",
+  "zh-HK": "subject.jsonlines 冇可用資料。",
+  "en-US": "subject.jsonlines has no usable data.",
+  "en-GB": "subject.jsonlines has no usable data."
+ },
+ "archive.noSubjectFile": {
+  "zh-CN": "Bangumi Archive 缺少 subject.jsonlines。",
+  "zh-TW": "Bangumi Archive 缺少 subject.jsonlines。",
+  "zh-HK": "Bangumi Archive 缺少 subject.jsonlines。",
+  "en-US": "Bangumi Archive misses subject.jsonlines.",
+  "en-GB": "Bangumi Archive misses subject.jsonlines."
+ },
+ "archive.subjectTooLarge": {
+  "zh-CN": "subject.jsonlines 超过大小上限。",
+  "zh-TW": "subject.jsonlines 超過大小上限。",
+  "zh-HK": "subject.jsonlines 超過大小上限。",
+  "en-US": "subject.jsonlines exceeds the size limit.",
+  "en-GB": "subject.jsonlines exceeds the size limit."
+ },
+ "archive.incomplete": {
+  "zh-CN": "Bangumi Archive 上传数据不完整。",
+  "zh-TW": "Bangumi Archive 上傳資料不完整。",
+  "zh-HK": "Bangumi Archive 上傳資料不完整。",
+  "en-US": "Bangumi Archive upload incomplete.",
+  "en-GB": "Bangumi Archive upload incomplete."
+ },
+ "archive.uploadTooLarge": {
+  "zh-CN": "Bangumi Archive 上传超过大小上限。",
+  "zh-TW": "Bangumi Archive 上傳超過大小上限。",
+  "zh-HK": "Bangumi Archive 上傳超過大小上限。",
+  "en-US": "Bangumi Archive upload exceeds the size limit.",
+  "en-GB": "Bangumi Archive upload exceeds the size limit."
+ },
+ "dav.tooManyRespEntries": {
+  "zh-CN": "WebDAV 目录响应条目数超过 100000 限制。",
+  "zh-TW": "WebDAV 目錄回應項目數超過 100000 限制。",
+  "zh-HK": "WebDAV 目錄回應項目數超過 100000 限制。",
+  "en-US": "WebDAV directory response exceeds the 100000-entry limit.",
+  "en-GB": "WebDAV directory response exceeds the 100000-entry limit."
+ },
+ "wav.tooLong": {
+  "zh-CN": "WAV 样本数超过 5 分钟上限。",
+  "zh-TW": "WAV 樣本數超過 5 分鐘上限。",
+  "zh-HK": "WAV 樣本數超過 5 分鐘上限。",
+  "en-US": "WAV samples exceed the 5-minute limit.",
+  "en-GB": "WAV samples exceed the 5-minute limit."
+ },
+ "log.singleTooLarge": {
+  "zh-CN": "单条日志超过活动日志文件大小限制。",
+  "zh-TW": "單條日誌超過活動日誌檔案大小限制。",
+  "zh-HK": "單條日誌超過活動日誌檔案大小限制。",
+  "en-US": "Single log entry exceeds the active log file size limit.",
+  "en-GB": "Single log entry exceeds the active log file size limit."
+ },
+ "measure.presetName": {
+  "zh-CN": "房间校准 {0}",
+  "zh-TW": "房間校準 {0}",
+  "zh-HK": "房間校準 {0}",
+  "en-US": "Room calibration {0}",
+  "en-GB": "Room calibration {0}"
+ },
+ "proxy.badAddress": {
+  "zh-CN": "代理地址必须是无路径、凭据、查询或片段的 HTTP 主机和有效端口。",
+  "zh-TW": "代理位址必須是無路徑、憑證、查詢或片段的 HTTP 主機和有效埠。",
+  "zh-HK": "代理位址必須係無路徑、憑證、查詢或片段嘅 HTTP 主機同有效埠。",
+  "en-US": "Proxy address must be an HTTP host with a valid port and no path, credentials, query or fragment.",
+  "en-GB": "Proxy address must be an HTTP host with a valid port and no path, credentials, query or fragment."
+ },
+ "obs.taskName": {
+  "zh-CN": "OpenObserve 日志上报",
+  "zh-TW": "OpenObserve 日誌上報",
+  "zh-HK": "OpenObserve 日誌上報",
+  "en-US": "OpenObserve log upload",
+  "en-GB": "OpenObserve log upload"
+ },
+ "play.trackLabel": {
+  "zh-CN": "音轨 {0}",
+  "zh-TW": "音軌 {0}",
+  "zh-HK": "音軌 {0}",
+  "en-US": "Track {0}",
+  "en-GB": "Track {0}"
+ },
+ "store.srcCredBroken": {
+  "zh-CN": "媒体源凭据无法解密。",
+  "zh-TW": "媒體來源憑證無法解密。",
+  "zh-HK": "媒體來源憑證無法解密。",
+  "en-US": "Media source credentials undecryptable.",
+  "en-GB": "Media source credentials undecryptable."
+ },
+ "runner.taskName": {
+  "zh-CN": "CloudDrive/RSS 同步",
+  "zh-TW": "CloudDrive/RSS 同步",
+  "zh-HK": "CloudDrive/RSS 同步",
+  "en-US": "CloudDrive/RSS sync",
+  "en-GB": "CloudDrive/RSS sync"
+ },
+ "settings.tooLarge": {
+  "zh-CN": "设置文件过大。",
+  "zh-TW": "設定檔過大。",
+  "zh-HK": "設定檔過大。",
+  "en-US": "Settings file too large.",
+  "en-GB": "Settings file too large."
+ },
+ "top.hidOpen": {
+  "zh-CN": "无法打开 Topping DAC 的 HID 接口。",
+  "zh-TW": "無法開啟 Topping DAC 的 HID 介面。",
+  "zh-HK": "無法開啟 Topping DAC 嘅 HID 介面。",
+  "en-US": "Cannot open the Topping DAC HID interface.",
+  "en-GB": "Cannot open the Topping DAC HID interface."
+ },
+ "top.writeFailed": {
+  "zh-CN": "USB 写入失败（帧未送达）。",
+  "zh-TW": "USB 寫入失敗（幀未送達）。",
+  "zh-HK": "USB 寫入失敗（幀未送達）。",
+  "en-US": "USB write failed (frame not delivered).",
+  "en-GB": "USB write failed (frame not delivered)."
+ },
+ "rss.fieldLength": {
+  "zh-CN": "RSS 已处理条目字段长度无效。",
+  "zh-TW": "RSS 已處理條目欄位長度無效。",
+  "zh-HK": "RSS 已處理條目欄位長度無效。",
+  "en-US": "RSS processed-entry field length invalid.",
+  "en-GB": "RSS processed-entry field length invalid."
+ },
+ "rss.keyLength": {
+  "zh-CN": "RSS item key 长度无效。",
+  "zh-TW": "RSS item key 長度無效。",
+  "zh-HK": "RSS item key 長度無效。",
+  "en-US": "RSS item key length invalid.",
+  "en-GB": "RSS item key length invalid."
+ },
+ "music.cueTooLarge": {
+  "zh-CN": "CUE 文件超过 1 MiB 限制。",
+  "zh-TW": "CUE 檔案超過 1 MiB 限制。",
+  "zh-HK": "CUE 檔案超過 1 MiB 限制。",
+  "en-US": "CUE file exceeds the 1 MiB limit.",
+  "en-GB": "CUE file exceeds the 1 MiB limit."
+ },
+ "music.cueTooManyLines": {
+  "zh-CN": "CUE 文件超过 10000 行限制。",
+  "zh-TW": "CUE 檔案超過 10000 行限制。",
+  "zh-HK": "CUE 檔案超過 10000 行限制。",
+  "en-US": "CUE file exceeds the 10000-line limit.",
+  "en-GB": "CUE file exceeds the 10000-line limit."
+ },
+ "mpv.hwndFailed": {
+  "zh-CN": "无法创建 mpv 视频窗口，Win32 错误 {0}。",
+  "zh-TW": "無法建立 mpv 影片視窗，Win32 錯誤 {0}。",
+  "zh-HK": "無法建立 mpv 影片視窗，Win32 錯誤 {0}。",
+  "en-US": "Cannot create mpv video window, Win32 error {0}.",
+  "en-GB": "Cannot create mpv video window, Win32 error {0}."
+ },
+ "mpv.noHwnd": {
+  "zh-CN": "mpv 视频窗口尚未创建。",
+  "zh-TW": "mpv 影片視窗尚未建立。",
+  "zh-HK": "mpv 影片視窗尚未建立。",
+  "en-US": "mpv video window not created.",
+  "en-GB": "mpv video window not created."
+ },
+ "lib.seasonBucket": {
+  "zh-CN": "{0}年{1}月新番",
+  "zh-TW": "{0}年{1}月新番",
+  "zh-HK": "{0}年{1}月新番",
+  "en-US": "{0}/{1} new season",
+  "en-GB": "{0}/{1} new season"
+ },
+ "lib.unknownDate": {
+  "zh-CN": "未识别播出日期",
+  "zh-TW": "未識別播出日期",
+  "zh-HK": "未識別播出日期",
+  "en-US": "Unrecognized air date",
+  "en-GB": "Unrecognised air date"
+ },
+ "dsp.emptyPresets": {
+  "zh-CN": "DSP 预设列表为空。",
+  "zh-TW": "DSP 預設列表為空。",
+  "zh-HK": "DSP 預設列表為空。",
+  "en-US": "DSP preset list empty.",
+  "en-GB": "DSP preset list empty."
+ },
+ "dsp.presetMissing": {
+  "zh-CN": "找不到 DSP 预设: {0}",
+  "zh-TW": "找不到 DSP 預設: {0}",
+  "zh-HK": "搵唔到 DSP 預設: {0}",
+  "en-US": "DSP preset not found: {0}",
+  "en-GB": "DSP preset not found: {0}"
  }
 };
 let currentLocale = 'zh-CN';

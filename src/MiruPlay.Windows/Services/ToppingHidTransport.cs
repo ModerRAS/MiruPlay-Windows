@@ -74,7 +74,7 @@ public sealed class WindowsHidTransport : IToppingHidTransport
         var handle = CreateFile(device.DevicePath, GenericRead | GenericWrite, FileShareRead | FileShareWrite,
             IntPtr.Zero, OpenExisting, 0, IntPtr.Zero);
         if (handle == new IntPtr(-1))
-            throw new InvalidOperationException("无法打开 Topping DAC 的 HID 接口。");
+            throw new InvalidOperationException(AppStrings.Get("top.hidOpen"));
         try
         {
             // Interrupt-OUT first (exact wire bytes, toppingctl parity), then SET_REPORT.
@@ -83,7 +83,7 @@ public sealed class WindowsHidTransport : IToppingHidTransport
                 return;
             if (HidD_SetOutputReport(handle, wireBytes, (uint)wireBytes.Length))
                 return;
-            throw new InvalidOperationException("USB 写入失败（帧未送达）。");
+            throw new InvalidOperationException(AppStrings.Get("top.writeFailed"));
         }
         finally
         {

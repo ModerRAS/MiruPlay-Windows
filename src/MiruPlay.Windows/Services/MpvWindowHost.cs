@@ -40,7 +40,7 @@ public sealed class MpvWindowHost : HwndHost
             IntPtr.Zero,
             IntPtr.Zero);
         if (Handle == IntPtr.Zero)
-            throw new InvalidOperationException($"无法创建 mpv 视频窗口，Win32 错误 {Marshal.GetLastWin32Error()}。");
+            throw new InvalidOperationException(AppStrings.Get("mpv.hwndFailed", Marshal.GetLastWin32Error()));
         return new HandleRef(this, Handle);
     }
 
@@ -67,7 +67,7 @@ public sealed class MpvWindowHost : HwndHost
     public void ValidateForMpv()
     {
         if (Handle == IntPtr.Zero || !NativeMethods.IsWindow(Handle))
-            throw new InvalidOperationException("mpv 视频窗口尚未创建。");
+            throw new InvalidOperationException(AppStrings.Get("mpv.noHwnd"));
     }
 
     private static class NativeMethods

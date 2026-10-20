@@ -35,7 +35,7 @@ public sealed class MediaSourceCredentialStore
         }
         catch (Exception error) when (error is CryptographicException or JsonException)
         {
-            throw new InvalidDataException("媒体源凭据无法解密。", error);
+            throw new InvalidDataException(AppStrings.Get("store.srcCredBroken"), error);
         }
     }
 

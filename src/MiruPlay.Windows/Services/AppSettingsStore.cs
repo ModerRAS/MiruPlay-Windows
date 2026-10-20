@@ -56,7 +56,7 @@ public sealed class AppSettingsStore
         try
         {
             var fileInfo = new FileInfo(_settingsPath);
-            if (fileInfo.Length > MaxSettingsBytes) throw new InvalidDataException("设置文件过大。");
+            if (fileInfo.Length > MaxSettingsBytes) throw new InvalidDataException(AppStrings.Get("settings.tooLarge"));
             var json = File.ReadAllText(_settingsPath);
             var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions)
                 ?? new AppSettings();
@@ -165,7 +165,7 @@ public sealed class AppSettingsStore
     {
         var json = JsonSerializer.Serialize(settings, JsonOptions);
         if (Encoding.UTF8.GetByteCount(json) > MaxSettingsBytes)
-            throw new InvalidDataException("设置文件过大。");
+            throw new InvalidDataException(AppStrings.Get("settings.tooLarge"));
         var tempPath = $"{_settingsPath}.{Guid.NewGuid():N}.tmp";
         File.WriteAllText(tempPath, json, Encoding.UTF8);
         File.Move(tempPath, _settingsPath, true);
