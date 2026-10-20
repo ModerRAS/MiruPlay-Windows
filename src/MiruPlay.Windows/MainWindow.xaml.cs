@@ -1768,7 +1768,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
     private async void OpenAudioDsp_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new AudioDspDialog(_settings.AudioDsp ?? AudioDspConfig.Neutral(), _topping)
+        var dialog = new AudioDspDialog(_settings.AudioDsp ?? AudioDspConfig.Neutral(), _topping, ApplyMeasuredPresetAsync)
         {
             Owner = this,
         };
@@ -1786,6 +1786,18 @@ public partial class MainWindow : Window, IAsyncDisposable
         {
             StatusText.Text = $"音频 DSP 应用失败：{error.Message}";
         }
+    }
+
+    private async Task ApplyMeasuredPresetAsync(AudioDspConfig config)
+    {
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            await ApplyAudioDspConfigAsync(config);
+            _settings = _settings with { AudioDsp = config };
+            _settingsStore.Save(_settings);
+            ApplySettingsToView();
+            StatusText.Text = "房间校准预设已应用并选中。";
+        }).Task.Unwrap();
     }
 
     private void ShowPage(bool showSettings)

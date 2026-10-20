@@ -14,12 +14,14 @@ public partial class AudioDspDialog : Window
 
     private AudioDspConfig _config;
     private readonly ToppingController? _topping;
+    private readonly Func<AudioDspConfig, Task>? _applyMeasured;
     private bool _loading;
 
-    public AudioDspDialog(AudioDspConfig config, ToppingController? topping = null)
+    public AudioDspDialog(AudioDspConfig config, ToppingController? topping = null, Func<AudioDspConfig, Task>? applyMeasured = null)
     {
         InitializeComponent();
         _topping = topping;
+        _applyMeasured = applyMeasured;
         _config = (config ?? AudioDspConfig.Neutral()).Normalize();
         _loading = true;
         EnabledBox.IsChecked = _config.Enabled;
@@ -130,6 +132,20 @@ public partial class AudioDspDialog : Window
         {
             StatusBox.Text = error.Message;
         }
+    }
+
+    private void MeasureWizard_Click(object sender, RoutedEventArgs e)
+    {
+        if (_applyMeasured is null)
+        {
+            StatusBox.Text = "房间校准向导不可用。";
+            return;
+        }
+        var wizard = new MeasureWizardWindow(CaptureConfigWithoutRows().Normalize(), _applyMeasured)
+        {
+            Owner = this,
+        };
+        wizard.ShowDialog();
     }
 
     private void Apply_Click(object sender, RoutedEventArgs e)
