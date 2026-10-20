@@ -9,6 +9,14 @@ public sealed class MusicLibraryServiceTests : IDisposable
     public MusicLibraryServiceTests() => Directory.CreateDirectory(_root);
 
     [Fact]
+    public void CancelledScanThrowsImmediately()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        Assert.Throws<OperationCanceledException>(() => new MusicLibraryService().Scan(_root, cts.Token));
+    }
+
+    [Fact]
     public void ScanGroupsCueVirtualTracksAndLoneAudioByDirectory()
     {
         var album = Path.Combine(_root, "Symphony");
