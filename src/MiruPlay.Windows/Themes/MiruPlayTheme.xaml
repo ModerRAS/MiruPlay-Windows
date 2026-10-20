@@ -146,6 +146,8 @@
         </Setter>
     </Style>
 
+    <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}" />
+
     <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
         <Setter Property="Background" Value="{StaticResource CardBackground}" />

@@ -1,0 +1,257 @@
+<UserControl x:Class="MiruPlay.Windows.Controls.PlaybackPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:services="clr-namespace:MiruPlay.Windows.Services"
+             Focusable="True"
+             Loaded="PlaybackRoot_Loaded"
+             Unloaded="PlaybackRoot_Unloaded"
+             SizeChanged="PlaybackRoot_SizeChanged"
+             PreviewKeyDown="PlaybackRoot_PreviewKeyDown"
+             PreviewMouseMove="PlaybackRoot_PreviewMouseMove">
+    <Grid x:Name="PlaybackRoot" Background="#FF090909">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="WindowHeader" Margin="18,14,18,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="BackButton" Style="{StaticResource IconButton}" Click="Back_Click" ToolTip="返回详情" AutomationProperties.Name="返回详情">
+                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE72B;" />
+            </Button>
+            <StackPanel Grid.Column="1" Margin="14,0,14,0" VerticalAlignment="Center">
+                <TextBlock x:Name="TitleText" Text="正在播放" FontSize="19" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Name="MediaInfoText" Text="正在准备播放器" Style="{StaticResource SecondaryText}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button x:Name="EpisodeDrawerButton" Style="{StaticResource IconButton}" Click="EpisodeDrawer_Click" ToolTip="选集" AutomationProperties.Name="打开选集抽屉">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE8A9;" />
+                </Button>
+                <Button x:Name="FullscreenButton" Style="{StaticResource IconButton}" Margin="8,0,0,0" Click="Fullscreen_Click" ToolTip="全屏" AutomationProperties.Name="切换全屏">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE740;" />
+                </Button>
+                <Button x:Name="StopButton" Style="{StaticResource IconButton}" Margin="8,0,0,0" Click="Stop_Click" ToolTip="停止播放" AutomationProperties.Name="停止播放">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71A;" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Border x:Name="VideoBorder" Grid.Row="1" Background="#FF000000" SnapsToDevicePixels="True">
+            <services:MpvWindowHost x:Name="MpvHost" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        </Border>
+
+        <Border x:Name="WindowChromeHost" Grid.Row="2" Background="Transparent">
+            <Border x:Name="ChromePanel"
+                    Background="#F0202020"
+                    BorderBrush="{StaticResource SubtleBorder}"
+                    BorderThickness="0,1,0,0"
+                    Padding="16,10,16,12"
+                    PreviewKeyDown="PlaybackRoot_PreviewKeyDown"
+                    PreviewMouseMove="PlaybackRoot_PreviewMouseMove">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="ElapsedText" Text="0:00" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                        <Slider x:Name="Timeline"
+                                Grid.Column="1"
+                                Margin="12,0"
+                                Minimum="0"
+                                Maximum="1"
+                                VerticalAlignment="Center"
+                                PreviewMouseLeftButtonUp="Timeline_MouseLeftButtonUp"
+                                PreviewKeyUp="Timeline_PreviewKeyUp"
+                                AutomationProperties.Name="播放进度" />
+                        <TextBlock x:Name="DurationText" Grid.Column="2" Text="0:00" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <DockPanel Grid.Row="1" Margin="0,9,0,0" LastChildFill="False">
+                        <WrapPanel x:Name="TransportPanel" DockPanel.Dock="Left" VerticalAlignment="Center">
+                            <Button x:Name="PreviousButton" Style="{StaticResource IconButton}" Click="Previous_Click" ToolTip="上一集" AutomationProperties.Name="上一集">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE892;" />
+                            </Button>
+                            <Button Style="{StaticResource SecondaryButton}" Margin="7,0,0,0" Padding="11,8" Click="BackSeek_Click" ToolTip="后退 10 秒" AutomationProperties.Name="后退 10 秒">
+                                <TextBlock Text="-10" FontWeight="SemiBold" />
+                            </Button>
+                            <Button x:Name="PlayPauseButton" Style="{StaticResource PrimaryButton}" MinWidth="96" Margin="7,0,0,0" Click="PlayPause_Click" AutomationProperties.Name="播放或暂停">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PlayPauseIcon" FontFamily="Segoe Fluent Icons" Text="&#xE768;" Margin="0,0,6,0" />
+                                    <TextBlock x:Name="PlayPauseText" Text="播放" />
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource SecondaryButton}" Margin="7,0,0,0" Padding="11,8" Click="ForwardSeek_Click" ToolTip="前进 30 秒" AutomationProperties.Name="前进 30 秒">
+                                <TextBlock Text="+30" FontWeight="SemiBold" />
+                            </Button>
+                            <Button x:Name="NextButton" Style="{StaticResource IconButton}" Margin="7,0,0,0" Click="Next_Click" ToolTip="下一集" AutomationProperties.Name="下一集">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE893;" />
+                            </Button>
+                        </WrapPanel>
+
+                        <WrapPanel x:Name="InlineOptionsPanel" DockPanel.Dock="Right" Margin="14,0,0,0" VerticalAlignment="Center">
+                            <ComboBox x:Name="AudioTrackSelector" Width="142" DisplayMemberPath="DisplayLabel" SelectedValuePath="Id" SelectionChanged="AudioTrack_SelectionChanged" ToolTip="音轨" AutomationProperties.Name="音轨" />
+                            <ComboBox x:Name="SubtitleTrackSelector" Width="142" Margin="7,0,0,0" DisplayMemberPath="DisplayLabel" SelectedValuePath="TrackId" SelectionChanged="SubtitleTrack_SelectionChanged" ToolTip="字幕" AutomationProperties.Name="字幕" />
+                            <ComboBox x:Name="SpeedSelector" Width="86" Margin="7,0,0,0" DisplayMemberPath="DisplayLabel" SelectedValuePath="Value" SelectionChanged="Speed_SelectionChanged" ToolTip="播放速度" AutomationProperties.Name="播放速度" />
+                            <Button x:Name="MuteButton" Style="{StaticResource IconButton}" Margin="7,0,0,0" Click="Mute_Click" ToolTip="静音" AutomationProperties.Name="切换静音">
+                                <TextBlock x:Name="MuteIcon" FontFamily="Segoe Fluent Icons" Text="&#xE767;" />
+                            </Button>
+                            <Slider x:Name="VolumeSlider" Width="105" Margin="7,0,0,0" Minimum="0" Maximum="100" PreviewMouseLeftButtonUp="Volume_MouseLeftButtonUp" PreviewKeyUp="Volume_PreviewKeyUp" AutomationProperties.Name="音量" />
+                        </WrapPanel>
+
+                        <Button x:Name="OptionsOverflowButton" DockPanel.Dock="Right" Style="{StaticResource IconButton}" Margin="12,0,0,0" Click="OptionsOverflow_Click" ToolTip="播放选项" AutomationProperties.Name="打开播放选项">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE712;" />
+                        </Button>
+                    </DockPanel>
+
+                    <Grid Grid.Row="2" Margin="0,8,0,0">
+                        <TextBlock x:Name="StatusText" Text="准备就绪" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis" />
+                        <StackPanel x:Name="ErrorPanel" Orientation="Horizontal" HorizontalAlignment="Right" Visibility="Collapsed">
+                            <TextBlock x:Name="ErrorText" Foreground="{StaticResource ErrorBrush}" TextTrimming="CharacterEllipsis" MaxWidth="440" VerticalAlignment="Center" />
+                            <Button Style="{StaticResource SecondaryButton}" Margin="10,0,0,0" Padding="10,5" Click="Retry_Click" AutomationProperties.Name="重试播放">重试</Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Border>
+
+        <Popup x:Name="PlaybackOsdPopup"
+               PlacementTarget="{Binding ElementName=PlaybackRoot}"
+               Placement="Center"
+               AllowsTransparency="True"
+               StaysOpen="True"
+               IsHitTestVisible="False">
+            <Border Background="#F02C2C2C" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="1" CornerRadius="6" Padding="18,12">
+                <TextBlock x:Name="PlaybackOsdText" FontSize="16" FontWeight="SemiBold" />
+            </Border>
+        </Popup>
+
+        <Popup x:Name="FullscreenChromePopup"
+               PlacementTarget="{Binding ElementName=PlaybackRoot}"
+               Placement="Relative"
+               AllowsTransparency="True"
+               StaysOpen="True" />
+
+        <Popup x:Name="EpisodeDrawerPopup"
+               PlacementTarget="{Binding ElementName=PlaybackRoot}"
+               Placement="Relative"
+               AllowsTransparency="True"
+               StaysOpen="False"
+               Closed="EpisodeDrawerPopup_Closed">
+            <Border x:Name="EpisodeDrawer"
+                    Width="360"
+                    Background="#FA242424"
+                    BorderBrush="{StaticResource SubtleBorder}"
+                    BorderThickness="1,0,0,0"
+                    Padding="16,14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBlock Text="选集" Style="{StaticResource SectionTitle}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Click="EpisodeDrawerClose_Click" ToolTip="关闭选集" AutomationProperties.Name="关闭选集">
+                            <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE711;" />
+                        </Button>
+                    </Grid>
+                    <TextBlock x:Name="QueueSummaryText" Grid.Row="1" Style="{StaticResource SecondaryText}" Margin="0,3,0,12" />
+                    <ListView x:Name="EpisodeList"
+                              Grid.Row="2"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              AutomationProperties.Name="播放队列">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,0,0,8" />
+                                <Setter Property="Focusable" Value="False" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border x:Name="EpisodeGroupBorder" Background="{StaticResource CardBackground}" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="1" CornerRadius="6" Padding="11,9">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding DisplayLabel}" FontWeight="SemiBold" />
+                                        <ItemsControl ItemsSource="{Binding Versions}" Margin="0,7,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Tag="{Binding Episode}"
+                                                            Click="Episode_Click"
+                                                            HorizontalContentAlignment="Left"
+                                                            Margin="0,0,0,5"
+                                                            Padding="9,6"
+                                                            AutomationProperties.Name="{Binding AccessibleName}">
+                                                        <TextBlock Text="{Binding Episode.VersionLabel}" TextTrimming="CharacterEllipsis" />
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                                        <Setter Property="BorderBrush" Value="{StaticResource AnimeRed}" />
+                                                                        <Setter Property="Background" Value="{StaticResource ControlPressed}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                        <Setter TargetName="EpisodeGroupBorder" Property="BorderBrush" Value="{StaticResource AnimeRed}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="OptionsOverflowPopup"
+               PlacementTarget="{Binding ElementName=OptionsOverflowButton}"
+               Placement="Top"
+               AllowsTransparency="True"
+               StaysOpen="False"
+               Closed="OptionsOverflowPopup_Closed">
+            <Border Background="#FC2C2C2C" BorderBrush="{StaticResource SubtleBorder}" BorderThickness="1" CornerRadius="6" Padding="14" Width="300">
+                <StackPanel>
+                    <TextBlock Text="播放选项" FontWeight="SemiBold" Margin="0,0,0,10" />
+                    <TextBlock Text="音轨" Style="{StaticResource SecondaryText}" />
+                    <ComboBox x:Name="OverflowAudioTrackSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="Id" SelectionChanged="AudioTrack_SelectionChanged" AutomationProperties.Name="音轨" />
+                    <TextBlock Text="字幕" Style="{StaticResource SecondaryText}" />
+                    <ComboBox x:Name="OverflowSubtitleTrackSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="TrackId" SelectionChanged="SubtitleTrack_SelectionChanged" AutomationProperties.Name="字幕" />
+                    <TextBlock Text="倍速" Style="{StaticResource SecondaryText}" />
+                    <ComboBox x:Name="OverflowSpeedSelector" Margin="0,4,0,10" DisplayMemberPath="DisplayLabel" SelectedValuePath="Value" SelectionChanged="Speed_SelectionChanged" AutomationProperties.Name="播放速度" />
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <Button x:Name="OverflowMuteButton" Style="{StaticResource IconButton}" Click="Mute_Click" ToolTip="静音" AutomationProperties.Name="切换静音">
+                            <TextBlock x:Name="OverflowMuteIcon" FontFamily="Segoe Fluent Icons" Text="&#xE767;" />
+                        </Button>
+                        <Slider x:Name="OverflowVolumeSlider" Grid.Column="1" Margin="10,0" Minimum="0" Maximum="100" PreviewMouseLeftButtonUp="Volume_MouseLeftButtonUp" PreviewKeyUp="Volume_PreviewKeyUp" AutomationProperties.Name="音量" />
+                        <TextBlock x:Name="VolumeText" Grid.Column="2" Text="100%" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

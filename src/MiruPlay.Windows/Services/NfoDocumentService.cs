@@ -74,17 +74,20 @@ public sealed class NfoDocumentService
     public void WriteTvShow(string showDirectory, NfoTvShowMetadata metadata) =>
         WriteAtomic(TvShowPath(showDirectory), BuildTvShowXml(metadata));
 
-    public NfoEpisodeMetadata ReadEpisode(string nfoPath)
+    public NfoEpisodeMetadata ReadEpisode(string nfoPath) => ParseEpisode(LoadXml(ResolveBounded(nfoPath)));
+
+    internal static NfoEpisodeMetadata ReadEpisode(Stream stream) => ParseEpisode(LoadXml(stream));
+
+    private static NfoEpisodeMetadata ParseEpisode(XmlDocument document)
     {
-        var document = LoadXml(ResolveBounded(nfoPath));
         var root = document.DocumentElement ?? throw new InvalidDataException("NFO 缺少根节点。");
         if (!root.Name.Equals("episodedetails", StringComparison.OrdinalIgnoreCase))
             throw new InvalidDataException("NFO 根节点不是 episodedetails。");
         return new NfoEpisodeMetadata(
             Text(root, "title") ?? "",
             Text(root, "showtitle"),
-            ParseInt(Text(root, "season"), 1),
-            ParseInt(Text(root, "episode"), 1),
+            ParseInt(Text(root, "season"), -1),
+            ParseInt(Text(root, "episode"), -1),
             Text(root, "plot") ?? "",
             Text(root, "premiered"),
             ParseDouble(Text(root, "rating")),
@@ -94,9 +97,12 @@ public sealed class NfoDocumentService
             ReadIds(root));
     }
 
-    public NfoTvShowMetadata ReadTvShow(string nfoPath)
+    public NfoTvShowMetadata ReadTvShow(string nfoPath) => ParseTvShow(LoadXml(ResolveBounded(nfoPath)));
+
+    internal static NfoTvShowMetadata ReadTvShow(Stream stream) => ParseTvShow(LoadXml(stream));
+
+    private static NfoTvShowMetadata ParseTvShow(XmlDocument document)
     {
-        var document = LoadXml(ResolveBounded(nfoPath));
         var root = document.DocumentElement ?? throw new InvalidDataException("NFO 缺少根节点。");
         if (!root.Name.Equals("tvshow", StringComparison.OrdinalIgnoreCase))
             throw new InvalidDataException("NFO 根节点不是 tvshow。");
@@ -172,6 +178,12 @@ public sealed class NfoDocumentService
         var info = new FileInfo(path);
         if (!info.Exists) throw new FileNotFoundException("NFO 文件不存在。", path);
         if (info.Length > MaximumNfoBytes) throw new InvalidDataException("NFO 文件过大。");
+        using var stream = File.OpenRead(path);
+        return LoadXml(stream);
+    }
+
+    private static XmlDocument LoadXml(Stream stream)
+    {
         var settings = new XmlReaderSettings
         {
             DtdProcessing = DtdProcessing.Prohibit,
@@ -180,8 +192,15 @@ public sealed class NfoDocumentService
             MaxCharactersFromEntities = 0,
         };
         var document = new XmlDocument { XmlResolver = null };
-        using var reader = XmlReader.Create(path, settings);
-        document.Load(reader);
+        using var reader = XmlReader.Create(stream, settings);
+        try
+        {
+            document.Load(reader);
+        }
+        catch (XmlException error)
+        {
+            throw new InvalidDataException("NFO 不是有效的安全 XML 文档。", error);
+        }
         return document;
     }
 
@@ -189,7 +208,7 @@ public sealed class NfoDocumentService
         node.SelectSingleNode(name)?.InnerText.Trim();
 
     private static List<NfoUniqueId> ReadIds(XmlNode root) =>
-        root.SelectNodes("id")?.OfType<XmlElement>().Select(element => new NfoUniqueId(
+        root.SelectNodes("id | uniqueid")?.OfType<XmlElement>().Select(element => new NfoUniqueId(
             element.GetAttribute("type"), element.InnerText.Trim(),
             element.GetAttribute("default").Equals("true", StringComparison.OrdinalIgnoreCase)))
             .Where(id => id.Value.Length > 0).ToList() ?? [];

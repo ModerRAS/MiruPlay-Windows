@@ -36,6 +36,8 @@ public sealed class MpvPlaybackQueue
 
     public IReadOnlyList<MpvPlaybackQueueEntry> Entries => _entries;
     public MpvPlaybackQueueEntry? Current => _index >= 0 ? _entries[_index] : null;
+    public MpvPlaybackQueueEntry? PreviousEntry => CanPlayPrevious ? _entries[_index - 1] : null;
+    public MpvPlaybackQueueEntry? NextEntry => CanPlayNext ? _entries[_index + 1] : null;
     public LibraryEpisode? CurrentVersion => _selectedVersion ?? Current?.DefaultVersion;
     public bool CanPlayPrevious => _index > 0;
     public bool CanPlayNext => _index >= 0 && _index + 1 < _entries.Count;

@@ -53,9 +53,9 @@ public sealed class BangumiArchiveClient : IDisposable
     private readonly HttpClient _httpClient;
     private readonly bool _disposeClient;
 
-    public BangumiArchiveClient(HttpClient? httpClient = null)
+    public BangumiArchiveClient(HttpClient? httpClient = null, HttpMessageHandler? handler = null)
     {
-        _httpClient = httpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+        _httpClient = httpClient ?? new HttpClient(handler ?? new HttpClientHandler()) { Timeout = TimeSpan.FromMinutes(5) };
         _disposeClient = httpClient is null;
     }
 
