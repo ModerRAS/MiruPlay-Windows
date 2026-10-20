@@ -98,6 +98,8 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly Func<MpvNativeDiagnostics?> _getPlaybackDiagnostics;
     private readonly ToppingController? _topping;
     private readonly Func<string, AudioDspPreset?>? _findAudioPreset;
+    private readonly MusicLibraryService? _musicLibrary;
+    private readonly Func<MusicPlayRequest, Task<bool>>? _playMusic;
     private readonly Func<string, long?, Task<bool>> _playEpisode;
     private readonly Func<PlaybackControlCommand, Task<PlaybackRuntimeStatus>> _playbackCommand;
     private readonly Func<AppSettings> _getSettings;
@@ -167,7 +169,9 @@ public sealed class WebControlServer : IAsyncDisposable
         MetadataSearchService? metadataSearch = null,
         Func<MpvNativeDiagnostics?>? getPlaybackDiagnostics = null,
         ToppingController? topping = null,
-        Func<string, AudioDspPreset?>? findAudioPreset = null)
+        Func<string, AudioDspPreset?>? findAudioPreset = null,
+        MusicLibraryService? musicLibrary = null,
+        Func<MusicPlayRequest, Task<bool>>? playMusic = null)
     {
         _port = port;
         _tokens = tokens;
@@ -176,6 +180,8 @@ public sealed class WebControlServer : IAsyncDisposable
         _getPlaybackDiagnostics = getPlaybackDiagnostics ?? (() => null);
         _topping = topping;
         _findAudioPreset = findAudioPreset;
+        _musicLibrary = musicLibrary;
+        _playMusic = playMusic;
         _playEpisode = playEpisode;
         _playbackCommand = playbackCommand;
         _getSettings = getSettings;
@@ -1122,6 +1128,23 @@ public sealed class WebControlServer : IAsyncDisposable
             }
         });
 
+        app.MapGet("/api/music/albums", (long sourceId) =>
+        {
+            var root = RequireLocalSourceRoot(sourceId);
+            var library = _musicLibrary ?? throw new BadHttpRequestException("Windows 客户端未启用音乐库。", StatusCodes.Status501NotImplemented);
+            return Success(library.Scan(root));
+        });
+        app.MapPost("/api/music/play", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<MusicPlayRequest>(request.Body, JsonOptions).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException("请求不能为空。");
+            if (_playMusic is null)
+                throw new BadHttpRequestException("Windows 客户端未启用音乐库。", StatusCodes.Status501NotImplemented);
+            if (!await _playMusic(body).ConfigureAwait(false))
+                throw new BadHttpRequestException("曲目不存在或不在本地来源内。", StatusCodes.Status404NotFound);
+            return Success(_getPlaybackStatus());
+        });
+
         app.MapGet("/api/web-control/access", () => Success(new
         {
             enabled = _getSettings().WebControlEnabled,
@@ -1520,6 +1543,15 @@ public sealed class WebControlServer : IAsyncDisposable
     private ToppingController RequireTopping() => _topping
         ?? throw new BadHttpRequestException("Windows 客户端未启用 Topping DAC 控制。", StatusCodes.Status501NotImplemented);
 
+    private string RequireLocalSourceRoot(long sourceId)
+    {
+        var source = _mediaSources.List().FirstOrDefault(item => item.Id == sourceId);
+        if (source is null || source.Type != "LOCAL" ||
+            !source.ConnectionInfo.TryGetValue("path", out var root) || string.IsNullOrWhiteSpace(root))
+            throw new BadHttpRequestException("仅本地来源支持音乐库。", StatusCodes.Status404NotFound);
+        return root;
+    }
+
     private static IResult Success(object data) => Results.Json(new ApiEnvelope<object>(true, data, null), JsonOptions);
     private static IResult UnsupportedOnWindows() => Results.Json(
         Failure("此操作仅适用于 Android，Windows 客户端不支持。"),
@@ -1552,6 +1584,7 @@ public sealed class WebControlServer : IAsyncDisposable
 
     private sealed record ApiEnvelope<T>(bool Ok, T? Data, string? Error);
     private sealed record PlayEpisodeRequest(string EpisodeId, long? StartPositionMs = null);
+    public sealed record MusicPlayRequest(long SourceId, string File, int Number, string Title, long StartMs, long EndMs);
     private sealed record ToppingVolumeRequest(double Db, bool Confirm = false, double? StepDb = null);
     private sealed record ToppingGainRequest(bool On);
     private sealed record ToppingPowerRequest(bool On);

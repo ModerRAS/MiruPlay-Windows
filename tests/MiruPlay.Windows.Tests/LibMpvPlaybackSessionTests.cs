@@ -362,6 +362,50 @@ public sealed class LibMpvPlaybackSessionTests : IDisposable
         await session.DisposeAsync();
     }
 
+    [Fact]
+    public async Task AudioSrcBypassAndCueEndMapToNativeOptions()
+    {
+        async Task<Dictionary<string, string>> StartWith(AppSettings settings, long? start = null, long? end = null)
+        {
+            var client = new FakeLibMpvClient();
+            await using var session = await LibMpvPlaybackSession.StartAsync(
+                client,
+                CreateEpisode(Path.Combine(_directory, $"src-{Guid.NewGuid():N}.mkv")),
+                settings,
+                new PlaybackProgressStore(Path.Combine(_directory, $"src-{Guid.NewGuid():N}.db")),
+                headless: true,
+                windowHandle: null,
+                transportLease: null,
+                videoOptions: null,
+                startPositionMs: start,
+                endPositionMs: end);
+            await session.DisposeAsync();
+            return client.Options;
+        }
+
+        var software = await StartWith(new AppSettings(AudioSrcBypass: "software", AudioOutputSampleRate: 44100));
+        Assert.Equal("44100", software["audio-samplerate"]);
+
+        var direct = await StartWith(new AppSettings(AudioSrcBypass: "direct"));
+        Assert.Equal("wasapi", direct["ao"]);
+        Assert.Equal("yes", direct["ao-wasapi-exclusive"]);
+        Assert.False(direct.ContainsKey("audio-samplerate"));
+
+        var dspFallback = await StartWith(new AppSettings(
+            AudioSrcBypass: "direct",
+            AudioDsp: new AudioDspConfig(Enabled: true)));
+        Assert.Equal("48000", dspFallback["audio-samplerate"]);
+        Assert.False(dspFallback.ContainsKey("ao-wasapi-exclusive"));
+
+        var system = await StartWith(new AppSettings(AudioSrcBypass: "system"));
+        Assert.False(system.ContainsKey("audio-samplerate"));
+        Assert.False(system.ContainsKey("ao-wasapi-exclusive"));
+
+        var cue = await StartWith(new AppSettings(), start: 1_000, end: 2_000);
+        Assert.Equal("1", cue["start"]);
+        Assert.Equal("2", cue["end"]);
+    }
+
     private static LibraryEpisode CreateEpisode(string mediaPath, IReadOnlyList<string>? subtitles = null) => new(
         1,
         "episode-uuid",

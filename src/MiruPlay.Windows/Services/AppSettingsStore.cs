@@ -26,7 +26,9 @@ public sealed record AppSettings(
     bool MergeSameAnimeEnabled = false,
     string PosterWallArrangement = "TITLE",
     string EpisodeVersionSelectionPolicy = "auto_nearest",
-    string AppUpdateManifestUrl = "");
+    string AppUpdateManifestUrl = "",
+    string AudioSrcBypass = "software",
+    int AudioOutputSampleRate = 48000);
 
 public sealed class AppSettingsStore
 {
@@ -114,6 +116,17 @@ public sealed class AppSettingsStore
                 settings = settings with { EpisodeVersionSelectionPolicy = "auto_nearest" };
                 needsCleanup = true;
             }
+            var normalizedSrcBypass = NormalizeAudioSrcBypass(settings.AudioSrcBypass);
+            var normalizedSampleRate = NormalizeAudioOutputSampleRate(settings.AudioOutputSampleRate);
+            if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate)
+            {
+                settings = settings with
+                {
+                    AudioSrcBypass = normalizedSrcBypass,
+                    AudioOutputSampleRate = normalizedSampleRate,
+                };
+                needsCleanup = true;
+            }
             if (settings.ActiveSourceId is null && settings.MediaSources is { Count: > 0 })
             {
                 var mode = normalizedMode.ToUpperInvariant();
@@ -135,6 +148,14 @@ public sealed class AppSettingsStore
                 AudioDsp: AudioDspConfig.Neutral());
         }
     }
+
+    public static string NormalizeAudioSrcBypass(string? value) => value?.Trim().ToLowerInvariant() switch
+    {
+        "system" or "software" or "direct" => value.Trim().ToLowerInvariant(),
+        _ => "software",
+    };
+
+    public static int NormalizeAudioOutputSampleRate(int value) => value is >= 8_000 and <= 384_000 ? value : 48000;
 
     public void Save(AppSettings settings)
     {

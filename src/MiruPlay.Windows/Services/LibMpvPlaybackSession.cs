@@ -94,7 +94,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         IntPtr? windowHandle,
         IAsyncDisposable? transportLease,
         MpvWindowsVideoOptions? videoOptions,
-        long? startPositionMs = null)
+        long? startPositionMs = null,
+        long? endPositionMs = null)
     {
         var session = new LibMpvPlaybackSession(
             client,
@@ -104,7 +105,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             surfaceAttached: !headless && windowHandle is { } handle && handle != IntPtr.Zero);
         try
         {
-            session.Configure(settings, headless, windowHandle, videoOptions, startPositionMs);
+            session.Configure(settings, headless, windowHandle, videoOptions, startPositionMs, endPositionMs);
             client.RequestLogMessages("warn");
             EnsureNativeSuccess(client.Initialize(), "初始化 libmpv 失败");
             EnsureNativeSuccess(client.Command(["loadfile", episode.MediaPath, "replace"]), "加载媒体到 libmpv 失败");
@@ -131,7 +132,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         IntPtr? windowHandle,
         IAsyncDisposable? transportLease,
         MpvWindowsVideoOptions? videoOptions,
-        long? startPositionMs = null)
+        long? startPositionMs = null,
+        long? endPositionMs = null)
     {
         var client = LibMpvClient.Create(libraryPath);
         try
@@ -145,7 +147,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 windowHandle,
                 transportLease,
                 videoOptions,
-                startPositionMs);
+                startPositionMs,
+                endPositionMs);
         }
         catch
         {
@@ -513,7 +516,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         bool headless,
         IntPtr? windowHandle,
         MpvWindowsVideoOptions? videoOptions,
-        long? startPositionMs)
+        long? startPositionMs,
+        long? endPositionMs)
     {
         SetOption("idle", "yes");
         SetOption("force-window", headless ? "no" : "yes");
@@ -548,6 +552,9 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 SetOption("start", (progress.PositionMs / 1_000d).ToString(CultureInfo.InvariantCulture));
         }
 
+        if (endPositionMs is > 0)
+            SetOption("end", (endPositionMs.Value / 1_000d).ToString(CultureInfo.InvariantCulture));
+
         var languages = settings.PreferredSubtitleLanguage switch
         {
             "zh_hans" => "zh-Hans,zh-CN,chs,sc,chi,zho",
@@ -559,6 +566,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         };
         if (languages is not null) SetOption("slang", languages);
 
+        ApplyAudioSrcBypass(settings);
+
         if (settings.AudioDsp?.Enabled == true)
         {
             var audioDsp = settings.AudioDsp.Normalize();
@@ -569,6 +578,24 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             _appliedAudioDsp = graph;
             _appliedAudioDspChannelLayout = layout;
         }
+    }
+
+    /// <summary>Sample-rate-converter output policy: system lets the device decide,
+    /// software resamples to a fixed rate, direct requests exclusive WASAPI.
+    /// Direct falls back to software mapping while DSP is enabled.</summary>
+    private void ApplyAudioSrcBypass(AppSettings settings)
+    {
+        var dspEnabled = settings.AudioDsp?.Enabled == true;
+        var mode = AppSettingsStore.NormalizeAudioSrcBypass(settings.AudioSrcBypass);
+        if (mode == "direct" && !dspEnabled)
+        {
+            SetOption("ao", "wasapi");
+            SetOption("ao-wasapi-exclusive", "yes");
+            return;
+        }
+        if (mode == "software" || (mode == "direct" && dspEnabled))
+            SetOption("audio-samplerate", AppSettingsStore.NormalizeAudioOutputSampleRate(settings.AudioOutputSampleRate)
+                .ToString(CultureInfo.InvariantCulture));
     }
 
     private void LoadExternalAudio(IEnumerable<string> audioPaths)

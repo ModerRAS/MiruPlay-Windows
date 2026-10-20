@@ -34,6 +34,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     private readonly OpenObserveLogScheduler _openObserveLogScheduler;
     private readonly WindowsAppUpdater _appUpdater;
     private readonly ToppingController _topping = new();
+    private readonly MusicLibraryService _musicLibrary = new();
     private readonly HeadlessTaskScheduler _tasks = new();
     private readonly WebControlServer _webControlServer;
     private const int SeriesPageSize = 40;
@@ -156,7 +157,9 @@ public partial class MainWindow : Window, IAsyncDisposable
             installUpdate: HandleAppUpdateInstallAsync,
             getPlaybackDiagnostics: GetPlaybackNativeDiagnostics,
             topping: _topping,
-            findAudioPreset: FindAudioPreset);
+            findAudioPreset: FindAudioPreset,
+            musicLibrary: _musicLibrary,
+            playMusic: PlayMusicFromWebAsync);
         ApplySettingsToView();
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
@@ -650,7 +653,8 @@ public partial class MainWindow : Window, IAsyncDisposable
     private async Task<bool> PlayEpisodeAsync(
         LibraryEpisode episode,
         long? startPositionMs = null,
-        bool showErrorDialog = true)
+        bool showErrorDialog = true,
+        long? endPositionMs = null)
     {
         var launchGeneration = Interlocked.Increment(ref _playbackGeneration);
         await _playbackStartLock.WaitAsync();
@@ -705,7 +709,8 @@ public partial class MainWindow : Window, IAsyncDisposable
                 playbackProxy: playbackProxy,
                 windowHandle: windowHandle,
                 videoOptions: new MpvWindowsVideoOptions(),
-                allowDirectHttp: source?.Type == "RSS");
+                allowDirectHttp: source?.Type == "RSS",
+                endPositionMs: endPositionMs);
             var session = launch.Session;
             if (launchGeneration != Interlocked.Read(ref _playbackGeneration))
             {
@@ -1069,6 +1074,51 @@ public partial class MainWindow : Window, IAsyncDisposable
         var next = queue.Next();
         if (selectedPath is not null) next = queue.SelectVersion(selectedPath);
         return next is not null && await PlayEpisodeAsync(next, showErrorDialog: false);
+    }
+
+    private async Task<bool> PlayMusicFromWebAsync(WebControlServer.MusicPlayRequest request)
+    {
+        var source = _mediaSourceRegistry.Get(request.SourceId);
+        if (source is null || source.Type != "LOCAL") return false;
+        var root = Path.GetFullPath(source.Location);
+        string full;
+        try
+        {
+            full = Path.GetFullPath(request.File);
+        }
+        catch (Exception error) when (error is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return false;
+        }
+        if (!full.StartsWith(root.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+            !File.Exists(full) ||
+            !MusicLibraryService.IsAudioFile(full))
+            return false;
+        var relative = Path.GetRelativePath(root, full);
+        var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes($"{request.SourceId}:{relative}:{request.StartMs}")))[..16];
+        var title = string.IsNullOrWhiteSpace(request.Title) ? Path.GetFileNameWithoutExtension(full) ?? full : request.Title;
+        var episode = new LibraryEpisode(
+            0,
+            $"music-{hash}",
+            $"music:{request.SourceId}:{relative}:{request.StartMs}",
+            1,
+            Math.Max(1, request.Number),
+            Math.Max(1, request.Number),
+            title,
+            full,
+            request.EndMs > request.StartMs
+                ? TimeSpan.FromMilliseconds(request.EndMs - request.StartMs)
+                : TimeSpan.Zero,
+            []) with
+        {
+            SourceId = request.SourceId,
+        };
+        return await Dispatcher.InvokeAsync(() => PlayEpisodeAsync(
+            episode,
+            request.StartMs > 0 ? request.StartMs : null,
+            showErrorDialog: false,
+            endPositionMs: request.EndMs > request.StartMs ? request.EndMs : null)).Task.Unwrap();
     }
 
     private async Task<bool> PlayEpisodeFromWebAsync(string episodeId, long? startPositionMs)
