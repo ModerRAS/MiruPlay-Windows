@@ -77,7 +77,11 @@ public sealed class PlaybackControlsTests
 
                 var audio = (ComboBox)playback.FindName("SpeedSelector");
                 audio.Focus(); // Best effort: headless CI agents may not grant OS focus to composite controls.
-                Assert.True(audio.IsVisible && audio.IsEnabled && audio.Focusable);
+                Assert.True(audio.IsVisible && audio.IsEnabled && audio.Focusable,
+                    $"SpeedSelector state: IsVisible={audio.IsVisible}, IsEnabled={audio.IsEnabled}, Focusable={audio.Focusable}, " +
+                    $"ActualWidth={audio.ActualWidth}, InlinePanel={((FrameworkElement)playback.FindName("InlineOptionsPanel")).Visibility}, " +
+                    $"OverflowBtn={((FrameworkElement)playback.FindName("OptionsOverflowButton")).Visibility}, " +
+                    $"KeyboardFocused={Keyboard.FocusedElement?.GetType().Name ?? "null"}");
                 // F11/Escape resolve identically in Button and SelectionControl contexts here;
                 // the SelectionControl key matrix itself is owned by PlaybackInputTests.
                 var f11 = RaisePreviewKey(playback, window, Key.F11);
