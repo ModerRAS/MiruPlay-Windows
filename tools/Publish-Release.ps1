@@ -140,7 +140,7 @@ if (-not (Test-Path $libMpvPath)) {
     if ($SkipLibMpvDownload) { throw "libmpv runtime is missing: $libMpvPath" }
     Invoke-Checked { & (Join-Path $PSScriptRoot 'Get-LibMpvRuntime.ps1') -Destination $libMpvDirectory } 'libmpv runtime download failed'
 }
-$expectedLibMpvHash = '5c876d79e070529128331591b48f87846fb30557f19c11280df9c6ee9b6dbafa'
+$expectedLibMpvHash = '04e4d27dc385dc18ddd93fbe69c75e635b864f3c6ec53a9122df54c2f7842f4a'
 $actualLibMpvHash = (Get-FileHash -Algorithm SHA256 $libMpvPath).Hash.ToLowerInvariant()
 if ($actualLibMpvHash -ne $expectedLibMpvHash) {
     throw "libmpv runtime digest mismatch: $actualLibMpvHash"
@@ -200,7 +200,7 @@ $manifest = [ordered]@{
     sourceRevision = $sourceRevision
     signing = if ($signed) { 'authenticode' } else { 'unsigned' }
     libmpv = [ordered]@{
-        version = '20260610-git-304426c'
+        version = '20261021-git-e471496c56'
         library = 'runtime/libmpv/libmpv-2.dll'
         librarySha256 = $actualLibMpvHash
         distribution = 'shinchiro/mpv-winbuild-cmake'

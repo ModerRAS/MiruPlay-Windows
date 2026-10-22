@@ -5,16 +5,16 @@ MiruPlay Windows is distributed under GPL-3.0-or-later. The release package also
 ## mpv/libmpv Windows build
 
 - Project: mpv
-- Upstream source: https://github.com/mpv-player/mpv/tree/304426c39
+- Upstream source: https://github.com/mpv-player/mpv/tree/e471496c56f0f49c133bd88b50aed62b845f1909
 - Windows build source: https://github.com/shinchiro/mpv-winbuild-cmake
 - License information: https://github.com/mpv-player/mpv/blob/master/Copyright
 
 The matching development archive also supplies the in-process library:
 
-- Asset: `mpv-dev-x86_64-20260610-git-304426c.7z`
-- Archive SHA-256: `8cbb25ea784f01afbb3f904217cab1317430a8bcfd5680fd827a866367f71cc9`
+- Asset: `mpv-dev-x86_64-20261021-git-e471496c56.7z`
+- Archive SHA-256: `efc719eff3dc5954b4a5efc800632808bcec01cc9034940dd14e5eb7fe9ea633`
 - Packaged file: `runtime/libmpv/libmpv-2.dll`
-- DLL SHA-256: `5c876d79e070529128331591b48f87846fb30557f19c11280df9c6ee9b6dbafa`
+- DLL SHA-256: `04e4d27dc385dc18ddd93fbe69c75e635b864f3c6ec53a9122df54c2f7842f4a`
 
 The pinned build includes FFmpeg and other libraries. Their exact configuration and corresponding source revisions are published by the Windows build project above. MiruPlay loads the matching `libmpv-2.dll` in-process. The package's `licenses` directory includes the matching mpv copyright statement and GPL/LGPL texts plus FFmpeg's license summary and GPL/LGPL texts.
 

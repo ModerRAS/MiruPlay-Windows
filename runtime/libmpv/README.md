@@ -3,10 +3,10 @@
 Release builds bundle the matching shared libmpv library downloaded by
 `tools/Get-LibMpvRuntime.ps1`:
 
-- Asset: `mpv-dev-x86_64-20260610-git-304426c.7z`
-- Archive SHA-256: `8cbb25ea784f01afbb3f904217cab1317430a8bcfd5680fd827a866367f71cc9`
-- `libmpv-2.dll` SHA-256: `5c876d79e070529128331591b48f87846fb30557f19c11280df9c6ee9b6dbafa`
-- Source: https://github.com/shinchiro/mpv-winbuild-cmake/releases/tag/20260610
+- Asset: `mpv-dev-x86_64-20261021-git-e471496c56.7z`
+- Archive SHA-256: `efc719eff3dc5954b4a5efc800632808bcec01cc9034940dd14e5eb7fe9ea633`
+- `libmpv-2.dll` SHA-256: `04e4d27dc385dc18ddd93fbe69c75e635b864f3c6ec53a9122df54c2f7842f4a`
+- Source: https://github.com/shinchiro/mpv-winbuild-cmake/releases/tag/20261021
 
 The DLL is excluded from Git and is acquired during release packaging. It is
 loaded in-process by MiruPlay. When it is unavailable or incompatible, local
