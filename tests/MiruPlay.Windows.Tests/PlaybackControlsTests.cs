@@ -79,7 +79,7 @@ public sealed class PlaybackControlsTests
                 audio.Focus(); // Best effort: headless CI agents may not grant OS focus to composite controls.
                 Assert.True(audio.IsVisible && audio.IsEnabled && audio.Focusable,
                     $"SpeedSelector state: IsVisible={audio.IsVisible}, IsEnabled={audio.IsEnabled}, Focusable={audio.Focusable}, " +
-                    $"ActualWidth={audio.ActualWidth}, PageWidth={playback.ActualWidth}, InlinePanel={((FrameworkElement)playback.FindName("InlineOptionsPanel")).Visibility}, " +
+                    $"ActualWidth={audio.ActualWidth}, PageWidth={playback.ActualWidth}, WindowWidth={window.ActualWidth}, Screen={SystemParameters.PrimaryScreenWidth}x{SystemParameters.PrimaryScreenHeight}, InlinePanel={((FrameworkElement)playback.FindName("InlineOptionsPanel")).Visibility}, " +
                     $"OverflowBtn={((FrameworkElement)playback.FindName("OptionsOverflowButton")).Visibility}, " +
                     $"KeyboardFocused={Keyboard.FocusedElement?.GetType().Name ?? "null"}");
                 // F11/Escape resolve identically in Button and SelectionControl contexts here;
