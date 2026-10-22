@@ -66,6 +66,13 @@ public sealed class PlaybackControlsTests
             window.Show();
             try
             {
+                // Settle layout: responsive visibility below depends on the real window
+                // size, and small/headless screens resolve a narrower mode than Wide.
+                Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+                var inlinePanel = (FrameworkElement)playback.FindName("InlineOptionsPanel");
+                var overflowButton = (FrameworkElement)playback.FindName("OptionsOverflowButton");
+                var inlineVisible = inlinePanel.Visibility == Visibility.Visible;
+                Assert.NotEqual(inlineVisible, overflowButton.Visibility == Visibility.Visible);
                 var actions = new List<PlaybackPageAction>();
                 playback.ActionRequested += (_, e) => actions.Add(e.Action);
 
@@ -76,12 +83,15 @@ public sealed class PlaybackControlsTests
                 Assert.Empty(actions);
 
                 var audio = (ComboBox)playback.FindName("SpeedSelector");
-                audio.Focus(); // Best effort: headless CI agents may not grant OS focus to composite controls.
-                Assert.True(audio.IsVisible && audio.IsEnabled && audio.Focusable,
-                    $"SpeedSelector state: IsVisible={audio.IsVisible}, IsEnabled={audio.IsEnabled}, Focusable={audio.Focusable}, " +
-                    $"ActualWidth={audio.ActualWidth}, PageWidth={playback.ActualWidth}, WindowWidth={window.ActualWidth}, Screen={SystemParameters.PrimaryScreenWidth}x{SystemParameters.PrimaryScreenHeight}, InlinePanel={((FrameworkElement)playback.FindName("InlineOptionsPanel")).Visibility}, " +
-                    $"OverflowBtn={((FrameworkElement)playback.FindName("OptionsOverflowButton")).Visibility}, " +
-                    $"KeyboardFocused={Keyboard.FocusedElement?.GetType().Name ?? "null"}");
+                if (inlineVisible)
+                {
+                    audio.Focus(); // Best effort: headless CI agents may not grant OS focus.
+                    Assert.True(audio.IsVisible && audio.IsEnabled && audio.Focusable);
+                }
+                else
+                {
+                    Assert.False(audio.IsVisible);
+                }
                 // F11/Escape resolve identically in Button and SelectionControl contexts here;
                 // the SelectionControl key matrix itself is owned by PlaybackInputTests.
                 var f11 = RaisePreviewKey(playback, window, Key.F11);
