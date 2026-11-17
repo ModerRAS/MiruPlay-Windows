@@ -1,0 +1,83 @@
+<Window x:Class="MiruPlay.Windows.Tv.TvShellWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MiruPlay TV"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="#FF0B0B0D"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiruPlay.Windows;component/Tv/TvTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid x:Name="RootGrid" Background="{StaticResource TvBackgroundBrush}" Cursor="None" Focusable="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border x:Name="NavRail" Grid.Column="0" Width="72" Background="#FF111114" ClipToBounds="True">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="0,22,0,0">
+                    <Grid Height="40">
+                        <TextBlock x:Name="BrandMark" Text="M" FontSize="26" FontWeight="Bold"
+                                   Foreground="{StaticResource TvAccentBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+                <StackPanel x:Name="NavItemsPanel" DockPanel.Dock="Top" Margin="0,22,0,0" />
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,22">
+                    <TextBlock x:Name="ClockText" FontSize="17" HorizontalAlignment="Center"
+                               Foreground="{StaticResource TvTextMutedBrush}" Visibility="Collapsed" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid x:Name="ContentHostGrid" Grid.Column="1" Background="{StaticResource TvBackgroundBrush}">
+            <ContentControl x:Name="ScreenHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Focusable="False" />
+            <Border x:Name="HintBar" VerticalAlignment="Bottom" Height="46" Background="#D90B0B0D"
+                    Padding="64,0" Visibility="Collapsed">
+                <TextBlock x:Name="HintTextBlock" Style="{StaticResource TvHintText}" />
+            </Border>
+
+            <Border x:Name="LoadingOverlay" Background="{StaticResource TvBackgroundBrush}">
+                <StackPanel x:Name="LoadingPanel" VerticalAlignment="Center" HorizontalAlignment="Center" />
+            </Border>
+
+            <Border x:Name="Toast" Background="#F01D1D24" CornerRadius="10" Padding="26,12"
+                    VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,96"
+                    Visibility="Collapsed" IsHitTestVisible="False">
+                <TextBlock x:Name="ToastText" FontSize="20" Foreground="{StaticResource TvTextBrush}" />
+            </Border>
+
+            <Border x:Name="ExitHoldOverlay" Background="#B0000000" Visibility="Collapsed">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock x:Name="ExitHoldTitle" Text="" FontSize="30" FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                    <ProgressBar x:Name="ExitHoldProgressBar" Width="460" Height="8" Margin="0,22,0,0"
+                                 Style="{StaticResource TvProgressBar}" Maximum="100" />
+                    <TextBlock x:Name="ExitHoldHint" Text="" FontSize="18" Margin="0,18,0,0"
+                               Foreground="{StaticResource TvTextMutedBrush}" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="DemoBadge" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,24,36,0"
+                    Background="#CC111116" BorderBrush="{StaticResource TvAccentBrush}" BorderThickness="2"
+                    CornerRadius="9" Padding="18,8" Visibility="Collapsed" IsHitTestVisible="False">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE7C9;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                               Foreground="{StaticResource TvAccentBrush}" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DemoBadgeText" FontSize="17" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

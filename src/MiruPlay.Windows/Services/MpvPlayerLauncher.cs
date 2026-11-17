@@ -18,7 +18,8 @@ public static class MpvPlayerLauncher
         IntPtr? windowHandle = null,
         MpvWindowsVideoOptions? videoOptions = null,
         bool allowDirectHttp = false,
-        long? endPositionMs = null) =>
+        long? endPositionMs = null,
+        bool forceStartPosition = false) =>
         (await PlayDetailedAsync(
             episode,
             settings,
@@ -29,7 +30,8 @@ public static class MpvPlayerLauncher
             windowHandle,
             videoOptions,
             allowDirectHttp,
-            endPositionMs).ConfigureAwait(false)).Session;
+            endPositionMs,
+            forceStartPosition).ConfigureAwait(false)).Session;
 
     internal static async Task<MpvPlaybackLaunchResult> PlayDetailedAsync(
         LibraryEpisode episode,
@@ -41,7 +43,8 @@ public static class MpvPlayerLauncher
         IntPtr? windowHandle = null,
         MpvWindowsVideoOptions? videoOptions = null,
         bool allowDirectHttp = false,
-        long? endPositionMs = null)
+        long? endPositionMs = null,
+        bool forceStartPosition = false)
     {
         var isRemote = IsRemoteUri(episode.MediaPath);
         Exception? backendError = null;
@@ -71,7 +74,8 @@ public static class MpvPlayerLauncher
                         playbackProxy,
                         videoOptions,
                         startPositionMs,
-                        endPositionMs).ConfigureAwait(false);
+                        endPositionMs,
+                        forceStartPosition).ConfigureAwait(false);
                     playbackProxy = null;
                     return new MpvPlaybackLaunchResult(
                         embeddedSession,

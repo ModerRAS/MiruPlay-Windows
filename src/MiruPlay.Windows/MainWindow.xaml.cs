@@ -2254,6 +2254,18 @@ public partial class MainWindow : Window, IAsyncDisposable
         public string AccessibleName => AppStrings.Get("wpf.status.continuePlay", SeriesTitle, Episode.DisplayNumber);
     }
 
+    private void EnterTvMode_Click(object sender, RoutedEventArgs e)
+    {
+        if (Application.Current is App app) app.EnterTvMode(demo: false);
+    }
+
+    private void TvModeEnabled_Click(object sender, RoutedEventArgs e)
+    {
+        _settings = _settings with { TvModeEnabled = TvModeEnabledCheckBox.IsChecked == true };
+        _settingsStore.Save(_settings);
+        StatusText.Text = AppStrings.Get(_settings.TvModeEnabled ? "tv.settings.startWithTv" : "tv.settings.exitTv");
+    }
+
     private void ApplySettingsToView()
     {
         _loadingSettings = true;
@@ -2307,6 +2319,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .OfType<ComboBoxItem>()
                 .FirstOrDefault(item => Equals(item.Tag, _settings.PreferredSubtitleLanguage))
                 ?? SubtitlePreference.Items[0];
+            TvModeEnabledCheckBox.IsChecked = _settings.TvModeEnabled;
         }
         finally
         {

@@ -372,6 +372,23 @@
                     </Grid>
 
                     <Separator Background="{StaticResource SubtleBorder}" />
+                    <TextBlock Text="{services:Loc tv.settings.entry}" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <Grid Margin="0,14,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{services:Loc tv.settings.entryTitle}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc tv.settings.entryHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="{services:Loc tv.settings.enter}" Click="EnterTvMode_Click"
+                                AutomationProperties.Name="{services:Loc tv.settings.enter}" VerticalAlignment="Center" />
+                    </Grid>
+                    <CheckBox x:Name="TvModeEnabledCheckBox" Content="{services:Loc tv.settings.startWithTv}"
+                              Foreground="{StaticResource TextPrimary}" Click="TvModeEnabled_Click" Margin="0,0,0,28" />
+
+                    <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="WebUI" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
                     <Grid Margin="0,14,0,14">
                         <Grid.ColumnDefinitions>
