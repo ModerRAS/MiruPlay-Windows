@@ -406,6 +406,73 @@ public sealed class LibMpvPlaybackSessionTests : IDisposable
         Assert.Equal("2", cue["end"]);
     }
 
+    [Fact]
+    public async Task ExplicitFromStartPlaybackIgnoresStoredProgress()
+    {
+        var store = new PlaybackProgressStore(Path.Combine(_directory, $"from-start-{Guid.NewGuid():N}.db"));
+        store.Save("episode-progress", 600_000, 1_440_000);
+        var client = new FakeLibMpvClient();
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(Path.Combine(_directory, "from-start.mkv")),
+            new AppSettings(),
+            store,
+            headless: true,
+            windowHandle: null,
+            transportLease: null,
+            videoOptions: null,
+            startPositionMs: 0,
+            endPositionMs: null,
+            forceStartPosition: true);
+
+        Assert.Equal("0", client.Options["start"]);
+        await session.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task DefaultStartPlaybackResumesStoredProgress()
+    {
+        var store = new PlaybackProgressStore(Path.Combine(_directory, $"resume-{Guid.NewGuid():N}.db"));
+        store.Save("episode-progress", 600_000, 1_440_000);
+        var client = new FakeLibMpvClient();
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(Path.Combine(_directory, "resume.mkv")),
+            new AppSettings(),
+            store,
+            headless: true,
+            windowHandle: null,
+            transportLease: null,
+            videoOptions: null);
+
+        Assert.Equal("600", client.Options["start"]);
+        await session.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task ExplicitProgressStartOverridesStoredProgress()
+    {
+        var store = new PlaybackProgressStore(Path.Combine(_directory, $"explicit-{Guid.NewGuid():N}.db"));
+        store.Save("episode-progress", 600_000, 1_440_000);
+        var client = new FakeLibMpvClient();
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(Path.Combine(_directory, "explicit.mkv")),
+            new AppSettings(),
+            store,
+            headless: true,
+            windowHandle: null,
+            transportLease: null,
+            videoOptions: null,
+            startPositionMs: 120_000);
+
+        Assert.Equal("120", client.Options["start"]);
+        await session.DisposeAsync();
+    }
+
     private static LibraryEpisode CreateEpisode(string mediaPath, IReadOnlyList<string>? subtitles = null) => new(
         1,
         "episode-uuid",

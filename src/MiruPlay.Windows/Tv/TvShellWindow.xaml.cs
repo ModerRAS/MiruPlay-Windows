@@ -49,7 +49,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
     private bool _closingForExit;
     private bool _exitOverlayVisible;
     private Action? _exitRequested;
-    private int _exitOverlayTicks;
 
     public TvShellWindow() : this(new TvShellOptions()) { }
 
@@ -71,7 +70,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
         _clockTimer.Tick += (_, _) => UpdateClock();
         _exitOverlayTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(40) };
         _exitOverlayTimer.Tick += (_, _) => UpdateExitOverlay();
-        _demoBadgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
+        _demoBadgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
         _demoBadgeTimer.Tick += (_, _) =>
         {
             _demoBadgeTimer.Stop();
@@ -112,15 +111,15 @@ public sealed partial class TvShellWindow : Window, IDisposable
     private void Shell_SourceInitialized(object? sender, EventArgs e)
     {
         if (PresentationSource.FromVisual(this) is HwndSource source)
+        {
             source.AddHook(Shell_WndProcHook);
+            NativeCursor.ImmAssociateContext(source.Handle, IntPtr.Zero);
+        }
         _ = NativeCursor.ShowCursor(false);
-        LogKey("shell source initialized");
     }
 
     private static IntPtr Shell_WndProcHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg is 0x0100 or 0x0104)
-            LogKey($"wm_keydown {wParam}");
         if (msg == 0x0020)
         {
             NativeCursor.SetCursor(IntPtr.Zero);
@@ -276,9 +275,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
         if (_currentScreen is TvSearchScreen search) search.SetRemoteText(text);
     }
 
-    internal bool IsPlayerActive => _playerScreen is not null;
-
-    internal string CurrentScreenName => _navigator.Current.ToString();
 
     private void ShowCurrentScreen(bool activate, bool focusContent = false)
     {
@@ -311,7 +307,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
         if (!ReferenceEquals(_currentScreen, screen) && _currentScreen is not null)
             _navigator.RememberFocus(_currentScreen.Id, _currentScreen.OnDeactivating());
         _currentScreen = screen;
-        LogKey("set screen " + screen.Id);
         ScreenHost.Content = screen;
         _navFocused = false;
         ExpandNavigation(false);
@@ -356,7 +351,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
     {
         if (_exitOverlayVisible) return;
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
-        LogKey($"preview {key} repeat={e.IsRepeat} focused={Keyboard.FocusedElement?.GetType().Name}");
         if (_input.HandleKeyDown(key, Keyboard.Modifiers))
         {
             e.Handled = true;
@@ -404,18 +398,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
         _input.HandleKeyUp(key);
     }
 
-    internal static void LogKey(string message)
-    {
-        try
-        {
-            File.AppendAllText(Path.Combine(Path.GetTempPath(), "miruplay-tv-keys.log"), $"{DateTime.Now:HH:mm:ss.fff} {message}\n");
-        }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
-        {
-            // Diagnostics only.
-        }
-    }
-
     private void Input_ActionInvoked(object? sender, TvInputActionEventArgs e)
     {
         if (_options.DemoMode) ShowDemoBadge(e.Action);
@@ -424,7 +406,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
     internal void DispatchAction(TvInputAction action)
     {
-        LogKey($"dispatch {action} screen={_currentScreen?.Id} navFocused={_navFocused} loaded={_libraryLoaded} failed={_loadFailed} player={_playerScreen is not null}");
         if (_disposed) return;
         if (_exitOverlayVisible) return;
         if (_loadFailed)
@@ -443,19 +424,16 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
         try
         {
-            LogKey("before screen handle " + _currentScreen?.GetType().Name);
-            var handled = _currentScreen?.HandleAction(action) == true;
-            LogKey($"screen {_currentScreen?.GetType().Name} handled={handled}");
-            if (handled)
+            if (_currentScreen?.HandleAction(action) == true)
             {
                 UpdateHint();
                 return;
             }
         }
-        catch (Exception ex)
+        catch (Exception error) when (error is InvalidOperationException or ArgumentException)
         {
-            LogKey("screen action exception " + ex);
-            throw;
+            ShowToast(error.Message);
+            return;
         }
 
         switch (action)
@@ -739,7 +717,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
         ExitHoldTitle.Text = AppStrings.Get("tv.exit.hold");
         ExitHoldHint.Text = AppStrings.Get("tv.exit.hint");
         ExitHoldProgressBar.Value = 0;
-        _exitOverlayTicks = 0;
         _exitOverlayTimer.Start();
     }
 
@@ -756,7 +733,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
             HideExitHoldOverlay();
             return;
         }
-        _exitOverlayTicks++;
     }
 
     private void HideExitHoldOverlay()
@@ -806,6 +782,9 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern IntPtr SetCursor(IntPtr handle);
+
+        [System.Runtime.InteropServices.DllImport("imm32.dll")]
+        public static extern IntPtr ImmAssociateContext(IntPtr hwnd, IntPtr himc);
     }
 
     internal void UpdateOsdGeometry()
@@ -817,7 +796,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
     internal TvOsdWindow EnsureOsd()
     {
         _osd ??= new TvOsdWindow();
-        TvPlayerScreen.LogPlayer("ensure osd visible=" + _osd.IsVisible);
         if (!_osd.IsVisible)
         {
             _osd.Show();

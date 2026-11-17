@@ -60,27 +60,10 @@ public sealed partial class TvOsdWindow : Window
         };
     }
 
-    private static void LogOsd(string message)
-    {
-        try
-        {
-            File.AppendAllText(Path.Combine(Path.GetTempPath(), "miruplay-tv-osd.log"), $"{DateTime.Now:HH:mm:ss.fff} {message}\n");
-        }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
-        {
-            // OSD diagnostics only.
-        }
-    }
-
     public void Present(TvOsdState state)
     {
         _lastState = state;
-        if (!_initialized)
-        {
-            LogOsd("present before init visible=" + state.Visible);
-            return;
-        }
-        LogOsd($"present visible={state.Visible} rootVisibility={RootLayer.Visibility} opacity={RootLayer.Opacity:0.00} actual={ActualWidth:0}x{ActualHeight:0} left={Left:0} top={Top:0} isVisible={IsVisible}");
+        if (!_initialized) return;
         if (!state.Visible)
         if (state.Error is not null)
         {

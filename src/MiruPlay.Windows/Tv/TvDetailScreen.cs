@@ -70,7 +70,11 @@ public sealed class TvDetailScreen : TvScreenBase
         else FocusInitial();
     }
 
-    private void Context_LibraryChanged(object? sender, EventArgs e) => RefreshFromContext();
+    private void Context_LibraryChanged(object? sender, EventArgs e)
+    {
+        if (!IsVisible) return;
+        RefreshFromContext();
+    }
 
     private void Build()
     {
@@ -331,12 +335,20 @@ public sealed class TvDetailScreen : TvScreenBase
         if (index < 0 || index >= _episodePanel.Children.Count) return;
         var card = (FrameworkElement)_episodePanel.Children[index];
         card.BringIntoView();
-        var transform = card.TransformToAncestor(_episodeScroller);
-        var bounds = transform.TransformBounds(new Rect(0, 0, card.ActualWidth, card.ActualHeight));
-        if (bounds.Right > _episodeScroller.ViewportWidth)
-            _episodeScroller.ScrollToHorizontalOffset(_episodeScroller.HorizontalOffset + bounds.Right - _episodeScroller.ViewportWidth + 40);
-        else if (bounds.Left < 0)
-            _episodeScroller.ScrollToHorizontalOffset(_episodeScroller.HorizontalOffset + bounds.Left - 40);
+        if (!_episodeScroller.IsAncestorOf(card)) return;
+        try
+        {
+            var transform = card.TransformToAncestor(_episodeScroller);
+            var bounds = transform.TransformBounds(new Rect(0, 0, card.ActualWidth, card.ActualHeight));
+            if (bounds.Right > _episodeScroller.ViewportWidth)
+                _episodeScroller.ScrollToHorizontalOffset(_episodeScroller.HorizontalOffset + bounds.Right - _episodeScroller.ViewportWidth + 40);
+            else if (bounds.Left < 0)
+                _episodeScroller.ScrollToHorizontalOffset(_episodeScroller.HorizontalOffset + bounds.Left - 40);
+        }
+        catch (InvalidOperationException)
+        {
+            // Visual tree is rebuilding; BringIntoView above is the safe fallback.
+        }
     }
 
     private static bool IsInProgress(LibraryEpisode? episode) => episode is { IsInProgress: true };

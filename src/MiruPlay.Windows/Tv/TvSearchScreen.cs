@@ -248,8 +248,8 @@ public sealed class TvSearchScreen : TvScreenBase
                 PosterSource = TvImages.Load(series.PosterPath),
                 TitleText = series.Title,
                 SubtitleText = TvPresentation.MetadataLine(series),
-                PosterWidth = 170,
-                PosterHeight = 255,
+                PosterWidth = 160,
+                PosterHeight = 240,
                 ShowProgress = percent > 0,
                 ProgressPercent = percent,
                 BadgeText = completed ? "✓" : percent > 0 ? label : string.Empty,
@@ -305,17 +305,24 @@ public sealed class TvSearchScreen : TvScreenBase
         if (index < 0 || index >= _resultsPanel.Children.Count) return;
         var card = (FrameworkElement)_resultsPanel.Children[index];
         card.BringIntoView();
-        var transform = card.TransformToAncestor(_resultsScroller);
-        var bounds = transform.TransformBounds(new Rect(0, 0, card.ActualWidth, card.ActualHeight));
-        if (bounds.Right > _resultsScroller.ViewportWidth)
-            _resultsScroller.ScrollToHorizontalOffset(_resultsScroller.HorizontalOffset + bounds.Right - _resultsScroller.ViewportWidth + 30);
-        else if (bounds.Left < 0)
-            _resultsScroller.ScrollToHorizontalOffset(_resultsScroller.HorizontalOffset + bounds.Left - 30);
+        if (!_resultsScroller.IsAncestorOf(card)) return;
+        try
+        {
+            var transform = card.TransformToAncestor(_resultsScroller);
+            var bounds = transform.TransformBounds(new Rect(0, 0, card.ActualWidth, card.ActualHeight));
+            if (bounds.Right > _resultsScroller.ViewportWidth)
+                _resultsScroller.ScrollToHorizontalOffset(_resultsScroller.HorizontalOffset + bounds.Right - _resultsScroller.ViewportWidth + 30);
+            else if (bounds.Left < 0)
+                _resultsScroller.ScrollToHorizontalOffset(_resultsScroller.HorizontalOffset + bounds.Left - 30);
+        }
+        catch (InvalidOperationException)
+        {
+            // Visual tree is rebuilding; BringIntoView above is the safe fallback.
+        }
     }
 
     protected override bool OnMoveOutOfZone(TvInputAction direction)
     {
-        var index = ZoneIndexOf(ActiveZone);
         if (direction == TvInputAction.Down && ActiveZone == _keyZone)
         {
             FocusZone(_actionZone!, 0);
@@ -346,7 +353,6 @@ public sealed class TvSearchScreen : TvScreenBase
             FocusZone(_keyZone!, 0);
             return true;
         }
-        _ = index;
         return false;
     }
 }

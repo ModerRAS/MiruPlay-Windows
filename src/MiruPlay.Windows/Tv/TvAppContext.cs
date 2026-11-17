@@ -91,8 +91,6 @@ public sealed class TvAppContext : IAsyncDisposable
         LibraryChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void Refresh() => RefreshProgress();
-
     public void ReloadSettings() => Settings = _settingsStore.Load();
 
     public void SaveSettings(AppSettings settings)
@@ -121,8 +119,6 @@ public sealed class TvAppContext : IAsyncDisposable
     }
 
     public LibrarySeries? FindSeries(long seriesId) => AllSeries.FirstOrDefault(series => series.Id == seriesId);
-
-    public static long SeriesIdOf(LibrarySeries series) => series.Id;
 
     /// <summary>Progress for a series card: the furthest along in-progress episode, else completed count.</summary>
     public static (double Percent, string Label, bool Completed) SeriesProgress(LibrarySeries series)
@@ -239,13 +235,21 @@ public sealed class TvAppContext : IAsyncDisposable
 /// <summary>Shared value formatting for TV cards.</summary>
 public static class TvPresentation
 {
-    public static string MetadataLine(LibrarySeries series) => string.Join("  ·  ", new[]
+    public static string MetadataLine(LibrarySeries series)
     {
-        series.Year?.ToString(System.Globalization.CultureInfo.InvariantCulture),
-        series.Genres.Count > 0 ? series.Genres[0] : null,
-        AppStrings.Get("tv.card.episodes", series.Episodes.Count),
-        series.CompletionText is { Length: > 0 } completion ? completion : null,
-    }.Where(value => !string.IsNullOrWhiteSpace(value)));
+        var year = series.Year?.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var genre = series.Genres.FirstOrDefault(item =>
+            !string.IsNullOrWhiteSpace(item) &&
+            !string.Equals(item, year, StringComparison.Ordinal) &&
+            !string.Equals(item, series.AirDate, StringComparison.Ordinal));
+        return string.Join("  ·  ", new[]
+        {
+            year,
+            genre,
+            AppStrings.Get("tv.card.episodes", series.Episodes.Count),
+            series.CompletionText is { Length: > 0 } completion ? completion : null,
+        }.Where(value => !string.IsNullOrWhiteSpace(value)));
+    }
 
     public static string SeasonLine(IReadOnlyList<LibraryEpisode> episodes)
     {

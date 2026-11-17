@@ -118,7 +118,7 @@ public sealed record LibrarySeries(
     public IReadOnlyList<LibraryEpisode> OrderedEpisodes => Seasons.SelectMany(season => season.Groups.SelectMany(group => group.Versions)).ToList();
     public bool HasMultipleVersions => Seasons.Any(season => season.Groups.Any(group => group.HasVersions));
     public bool HasExtras => Extras.Count > 0;
-    public long LastWatchedEpochMs => Episodes.Max(episode => episode.LastWatchedEpochMs);
+    public long LastWatchedEpochMs => Episodes.Count == 0 ? 0 : Episodes.Max(episode => episode.LastWatchedEpochMs);
     public int CompletedEpisodeCount => Episodes.Count(episode => episode.IsCompleted);
     public string CompletionText => Episodes.Count == 0 ? string.Empty : AppStrings.Get("lib.watchedCount", CompletedEpisodeCount, Episodes.Count);
     public Uri? PosterUri => PosterPath switch

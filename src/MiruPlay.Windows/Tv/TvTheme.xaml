@@ -490,4 +490,31 @@
         <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
         <Setter Property="Focusable" Value="False" />
     </Style>
+
+    <!-- Settings / info row: full-width content with focus ring. -->
+    <Style x:Key="TvRowButton" TargetType="Button">
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="Height" Value="62" />
+        <Setter Property="Cursor" Value="None" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="Root" Background="{StaticResource TvSurfaceBrush}" CornerRadius="8"
+                                BorderBrush="{StaticResource TvBorderBrush}" BorderThickness="1">
+                            <ContentPresenter Margin="24,0" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                        </Border>
+                        <Border x:Name="Ring" Margin="-4" CornerRadius="11" BorderThickness="3"
+                                BorderBrush="{StaticResource TvAccentBrush}" Opacity="0" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource TvSurfaceHoverBrush}" />
+                            <Setter TargetName="Ring" Property="Opacity" Value="1" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

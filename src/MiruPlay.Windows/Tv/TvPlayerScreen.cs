@@ -93,22 +93,9 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
         await StartEpisodeAsync(episode, resume).ConfigureAwait(true);
     }
 
-    internal static void LogPlayer(string message)
-    {
-        try
-        {
-            File.AppendAllText("C:/WorkSpace/Claw/scratch/tvmode/player-debug.log", $"{DateTime.Now:HH:mm:ss.fff} {message}\n");
-        }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
-        {
-            // Playback diagnostics only.
-        }
-    }
-
     private async Task StartEpisodeAsync(LibraryEpisode episode, bool resume)
     {
         if (_disposed) return;
-        LogPlayer($"start episode={episode.DisplayNumber} path={episode.MediaPath} resume={resume} handle={_videoHost.NativeHandle}");
         _starting = true;
         _error = null;
         _episode = episode;
@@ -142,11 +129,9 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
             }
             if (launch.Session is null)
             {
-                LogPlayer("launch degraded: " + string.Join(" · ", launch.DegradedCapabilities));
                 ShowError(AppStrings.Get("tv.player.error.degraded", string.Join(" · ", launch.DegradedCapabilities)));
                 return;
             }
-            LogPlayer($"session started durationMs={launch.Session.DurationMs}");
             _session = launch.Session;
             _session.SubtitleTracksChanged += Session_Changed;
             _session.AudioTracksChanged += Session_Changed;
@@ -154,18 +139,14 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
             _shell.FocusShellForPlayback();
             _starting = false;
             _loadingText.Visibility = Visibility.Collapsed;
-            if (!string.Equals(Environment.GetEnvironmentVariable("MIRUPLAY_TV_NO_OSD"), "1", StringComparison.Ordinal))
-            {
-                _osd = _shell.EnsureOsd();
-                ShowOsd();
-            }
+            _osd = _shell.EnsureOsd();
+            ShowOsd();
             _tickTimer.Start();
             _ = MonitorSessionAsync(_session);
         }
         catch (Exception error) when (error is IOException or InvalidOperationException or NotSupportedException
             or System.ComponentModel.Win32Exception or UnauthorizedAccessException or ArgumentException)
         {
-            LogPlayer("start failed: " + error);
             ShowError(error.Message);
         }
     }
@@ -186,7 +167,6 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
     private async Task MonitorSessionAsync(IPlaybackSession session)
     {
         await session.Completion.ConfigureAwait(true);
-        LogPlayer($"session completed wasCompleted={session.WasCompleted} lastError={session.LastError}");
         if (_disposed || !ReferenceEquals(_session, session)) return;
         var completed = session.WasCompleted;
         var lastError = session.LastError;
@@ -213,8 +193,6 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
 
     public override bool HandleAction(TvInputAction action)
     {
-        try { File.AppendAllText("C:/WorkSpace/Claw/scratch/tvmode/player-debug.log", $"{DateTime.Now:HH:mm:ss.fff} ENTER action={action}\n"); } catch (Exception) { }
-        LogPlayer($"action={action} error={_error is not null} starting={_starting} drawer={_drawer?.Title} row={_focusRow} index={_focusIndex} osd={_osdVisible} focus={_osdFocusMode}");
         if (_disposed) return true;
         if (_error is not null)
         {
@@ -521,7 +499,6 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
 
     private void ActivateFocus()
     {
-        LogPlayer($"activate focus row={_focusRow} index={_focusIndex}");
         if (_focusRow == 0)
         {
             switch (_focusIndex)
@@ -545,7 +522,6 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
 
     private void OpenDrawer(DrawerSection section)
     {
-        LogPlayer("open drawer " + section);
         _drawerSection = section;
         _drawerFocus = 0;
         _osdFocusMode = false;

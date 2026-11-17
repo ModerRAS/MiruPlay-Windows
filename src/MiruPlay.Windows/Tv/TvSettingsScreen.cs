@@ -118,7 +118,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         };
         var row = new Button
         {
-            Style = TvTheme.Style(this, "TvSecondaryButton"),
+            Style = TvTheme.Style(this, "TvRowButton"),
             FocusVisualStyle = null,
             Height = 62,
             Margin = new Thickness(0, 0, 0, 8),
@@ -150,7 +150,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         };
         var row = new Button
         {
-            Style = TvTheme.Style(this, "TvSecondaryButton"),
+            Style = TvTheme.Style(this, "TvRowButton"),
             FocusVisualStyle = null,
             Height = 62,
             Margin = new Thickness(0, 0, 0, 8),

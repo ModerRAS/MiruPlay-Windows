@@ -14,11 +14,9 @@ public sealed class TvHomeScreen : TvScreenBase
     private readonly ScrollViewer _scroller;
     private readonly StackPanel _content = new();
     private readonly List<TvZone> _rowZones = [];
-    private readonly List<(string Title, ScrollViewer Scroller, StackPanel Panel, FrameworkElement FirstCard)> _rowInfo = [];
     private TvZone? _heroZone;
     private TvContinueItem? _heroContinue;
     private LibrarySeries? _heroSeries;
-    private bool _built;
 
     public TvHomeScreen(TvAppContext context, TvShellWindow shell)
     {
@@ -65,7 +63,25 @@ public sealed class TvHomeScreen : TvScreenBase
         else FocusInitial();
     }
 
-    private void Context_LibraryChanged(object? sender, EventArgs e) => Rebuild();
+    private bool _dirty;
+
+    private void Context_LibraryChanged(object? sender, EventArgs e)
+    {
+        if (!IsVisible)
+        {
+            _dirty = true;
+            return;
+        }
+        Rebuild();
+    }
+
+    public override void OnActivated(string? focusKey)
+    {
+        base.OnActivated(focusKey);
+        if (!_dirty) return;
+        _dirty = false;
+        Rebuild();
+    }
 
     private void Build()
     {
@@ -79,28 +95,6 @@ public sealed class TvHomeScreen : TvScreenBase
         BuildRecentlyAddedRow(home);
         BuildGenreRow(home);
         BuildAllRow(home);
-        _built = true;
-        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, new Action(DumpLayout));
-    }
-
-    private void DumpLayout()
-    {
-        try
-        {
-            var lines = new List<string>
-            {
-                $"SELF {ActualWidth}x{ActualHeight}",
-                $"SCROLLER extent={_scroller.ExtentHeight:0} viewport={_scroller.ViewportHeight:0} offset={_scroller.VerticalOffset:0} scrollable={_scroller.ScrollableHeight:0}",
-                $"FOCUS zone={ActiveZone?.Id} index={ActiveIndex}",
-            };
-            foreach (var (title, scroller, panel, firstCard) in _rowInfo)
-                lines.Add($"ROW {title} scroller={scroller.ActualHeight:0} viewport={scroller.ViewportHeight:0} extent={scroller.ExtentHeight:0} panel={panel.ActualHeight:0} card={firstCard.ActualHeight:0}");
-            File.AppendAllText(Path.Combine(Path.GetTempPath(), "miruplay-tv-layout.log"), string.Join("\n", lines) + "\n---\n");
-        }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
-        {
-            // Layout diagnostics only.
-        }
     }
 
     private void BuildHero()
@@ -348,16 +342,11 @@ public sealed class TvHomeScreen : TvScreenBase
         scroller.Content = panel;
         outer.Children.Add(scroller);
         _content.Children.Add(outer);
-        _rowInfo.Add((titleKey, scroller, panel, cards[0]));
         var zone = new TvZone(
             "row:" + titleKey,
             TvZoneKind.Horizontal,
             cards,
-            onFocusChanged: index =>
-            {
-                BringCardIntoView(scroller, cards[index]);
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, new Action(DumpLayout));
-            });
+            onFocusChanged: index => BringCardIntoView(scroller, cards[index]));
         RegisterZone(zone);
         _rowZones.Add(zone);
     }
@@ -365,11 +354,19 @@ public sealed class TvHomeScreen : TvScreenBase
     private static void BringCardIntoView(ScrollViewer scroller, FrameworkElement card)
     {
         card.BringIntoView();
-        var transform = card.TransformToAncestor(scroller);
-        var bounds = transform.TransformBounds(new Rect(0, 0, card.ActualWidth, card.ActualHeight));
-        if (bounds.Left < 0) scroller.ScrollToHorizontalOffset(scroller.HorizontalOffset + bounds.Left - 64);
-        else if (bounds.Right > scroller.ViewportWidth)
-            scroller.ScrollToHorizontalOffset(scroller.HorizontalOffset + bounds.Right - scroller.ViewportWidth + 64);
+        if (!scroller.IsAncestorOf(card)) return;
+        try
+        {
+            var transform = card.TransformToAncestor(scroller);
+            var bounds = transform.TransformBounds(new Rect(0, 0, card.ActualWidth, card.ActualHeight));
+            if (bounds.Left < 0) scroller.ScrollToHorizontalOffset(scroller.HorizontalOffset + bounds.Left - 64);
+            else if (bounds.Right > scroller.ViewportWidth)
+                scroller.ScrollToHorizontalOffset(scroller.HorizontalOffset + bounds.Right - scroller.ViewportWidth + 64);
+        }
+        catch (InvalidOperationException)
+        {
+            // Visual tree is rebuilding; BringIntoView above is the safe fallback.
+        }
     }
 
     protected override bool OnMoveOutOfZone(TvInputAction direction)
@@ -389,10 +386,4 @@ public sealed class TvHomeScreen : TvScreenBase
         return false;
     }
 
-    protected override void OnVisualParentChanged(DependencyObject oldParent)
-    {
-        base.OnVisualParentChanged(oldParent);
-        if (!_built) return;
-        _scroller.ScrollToVerticalOffset(_scroller.VerticalOffset);
-    }
 }

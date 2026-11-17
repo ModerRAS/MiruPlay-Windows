@@ -73,13 +73,14 @@
                 </StackPanel>
             </Border>
 
-            <Border x:Name="DemoBadge" Grid.RowSpan="2" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,26,68,0"
-                    Background="#CC111116" BorderBrush="{StaticResource TvAccentBrush}" BorderThickness="2"
-                    CornerRadius="9" Padding="18,8" Visibility="Collapsed" IsHitTestVisible="False">
+            <Border x:Name="DemoBadge" Grid.RowSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                    Margin="0,0,0,108" Background="#F2111116" BorderBrush="{StaticResource TvAccentBrush}"
+                    BorderThickness="3" CornerRadius="16" Padding="40,16" Visibility="Collapsed" IsHitTestVisible="False">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="&#xE765;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                    <TextBlock Text="&#xE765;" FontFamily="Segoe MDL2 Assets" FontSize="30"
                                Foreground="{StaticResource TvAccentBrush}" VerticalAlignment="Center" />
-                    <TextBlock x:Name="DemoBadgeText" FontSize="17" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DemoBadgeText" FontSize="32" FontWeight="SemiBold" Margin="18,0,0,0"
+                               VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
         </Grid>
