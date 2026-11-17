@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using MiruPlay.Windows.Services;
 using System.Windows.Media;
@@ -42,6 +43,7 @@ public sealed partial class TvOsdWindow : Window
     {
         InitializeComponent();
         Cursor = System.Windows.Input.Cursors.None;
+        InputMethod.SetIsInputMethodEnabled(this, false);
         _transport = [Transport0, Transport1, Transport2, Transport3, Transport4];
         _transportText = [TransportText0, TransportText1, TransportText2, TransportText3, TransportText4];
         _chips = [Chip0, Chip1, Chip2, Chip3];
@@ -64,19 +66,6 @@ public sealed partial class TvOsdWindow : Window
     {
         _lastState = state;
         if (!_initialized) return;
-        if (!state.Visible)
-        if (state.Error is not null)
-        {
-            ErrorLayer.Visibility = Visibility.Visible;
-            ErrorTitle.Text = AppStrings.Get("tv.player.error.title");
-            ErrorMessage.Text = state.Error;
-            ErrorHint.Text = AppStrings.Get("tv.player.error.hint");
-        }
-        else
-        {
-            ErrorLayer.Visibility = Visibility.Collapsed;
-        }
-
         if (!state.Visible)
         {
             SetPanelVisible(false);
@@ -162,6 +151,7 @@ public sealed partial class TvOsdWindow : Window
     private void OsdWindow_SourceInitialized(object? sender, EventArgs e)
     {
         var handle = new WindowInteropHelper(this).Handle;
+        _ = ImmAssociateContext(handle, IntPtr.Zero);
         var style = GetWindowLongPtr(handle, GwlExStyle).ToInt64();
         style |= WsExLayered | WsExToolWindow | WsExNoActivate | WsExTransparent;
         SetWindowLongPtr(handle, GwlExStyle, new IntPtr(style));
@@ -269,6 +259,9 @@ public sealed partial class TvOsdWindow : Window
         border.Effect = new DropShadowEffect { Color = Colors.Black, BlurRadius = 14, ShadowDepth = 0, Opacity = 0.7 };
         if (border.Child is TextBlock text) text.Foreground = (Brush)FindResource("TvTextBrush");
     }
+
+    [DllImport("imm32.dll")]
+    private static extern IntPtr ImmAssociateContext(IntPtr hwnd, IntPtr himc);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct Rect32

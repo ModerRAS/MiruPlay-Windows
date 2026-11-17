@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using MiruPlay.Windows.Models;
@@ -49,6 +50,7 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
         _context = context;
         _shell = shell;
         TvTheme.Apply(this);
+        InputMethod.SetIsInputMethodEnabled(this, false);
         _root.Background = Brushes.Black;
         _videoHost.HorizontalAlignment = HorizontalAlignment.Stretch;
         _videoHost.VerticalAlignment = VerticalAlignment.Stretch;
@@ -738,7 +740,6 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
             FocusIndex = _focusIndex,
             Drawer = _drawer,
             Status = _status,
-            Error = _error,
         };
     }
 

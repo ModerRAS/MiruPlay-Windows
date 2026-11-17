@@ -145,7 +145,9 @@ public sealed class TvSettingsScreen : TvScreenBase
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Right,
             TextTrimming = TextTrimming.CharacterEllipsis,
+            TextAlignment = TextAlignment.Right,
             MaxWidth = 720,
+            Margin = new Thickness(40, 0, 0, 0),
             Foreground = (Brush)FindResource("TvTextMutedBrush"),
         };
         var row = new Button
@@ -173,6 +175,7 @@ public sealed class TvSettingsScreen : TvScreenBase
             Text = AppStrings.Get(labelKey),
             FontSize = 19,
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 24, 0),
         };
         grid.Children.Add(label);
         Grid.SetColumn(valueText, 1);

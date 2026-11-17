@@ -23,6 +23,5 @@ public sealed record TvOsdState
     public int FocusIndex { get; init; }
     public TvOsdDrawer? Drawer { get; init; }
     public string? Status { get; init; }
-    public string? Error { get; init; }
     public string? NextEpisode { get; init; }
 }

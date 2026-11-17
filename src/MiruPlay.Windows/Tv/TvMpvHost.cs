@@ -79,6 +79,7 @@ public sealed class TvMpvHost : HwndHost
         if (NativeHandle == IntPtr.Zero)
             throw new InvalidOperationException(AppStrings.Get("mpv.hwndFailed", Marshal.GetLastWin32Error()));
         NativeMethods.SetClassLongPtr(NativeHandle, GclpHbrBackground, NativeMethods.GetStockObject(BlackBrush));
+        NativeMethods.ImmAssociateContext(NativeHandle, IntPtr.Zero);
         return new HandleRef(this, NativeHandle);
     }
 
@@ -152,5 +153,8 @@ public sealed class TvMpvHost : HwndHost
 
         [DllImport("gdi32.dll")]
         public static extern IntPtr GetStockObject(int index);
+
+        [DllImport("imm32.dll")]
+        public static extern IntPtr ImmAssociateContext(IntPtr hwnd, IntPtr himc);
     }
 }

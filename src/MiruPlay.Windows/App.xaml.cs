@@ -32,8 +32,9 @@ public partial class App : Application, IDisposable
         }
         ShutdownMode = ShutdownMode.OnMainWindowClose;
         var background = e.Args.Contains("--background", StringComparer.OrdinalIgnoreCase);
-        _tvDemo = e.Args.Contains("--tv-demo", StringComparer.OrdinalIgnoreCase);
-        var forceTv = _tvDemo || e.Args.Contains("--tv", StringComparer.OrdinalIgnoreCase);
+        var tvLaunch = TvLaunchArguments.Parse(e.Args);
+        _tvDemo = tvLaunch.DemoBadge;
+        var forceTv = tvLaunch.StartTv;
         AppLocale.Apply(new AppSettingsStore().Load().AppLanguage);
         _desktopWindow = new MainWindow(background);
         MainWindow = _desktopWindow;
@@ -42,7 +43,7 @@ public partial class App : Application, IDisposable
             var settings = new AppSettingsStore().Load();
             if (settings.TvModeEnabled) forceTv = true;
         }
-        if (forceTv) EnterTvMode(_tvDemo || e.Args.Contains("--tv", StringComparer.OrdinalIgnoreCase));
+        if (forceTv) EnterTvMode(tvLaunch.DemoBadge);
         else _desktopWindow.Show();
     }
 
