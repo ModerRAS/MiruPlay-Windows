@@ -13,6 +13,10 @@ public partial class MainWindow : Window, IAsyncDisposable
     private readonly PlaybackProgressStore _progressStore = new();
     private readonly WebControlTokenStore _webControlTokens = new();
     private readonly MetadataTokenStore _metadataTokens = new();
+    private readonly BangumiOAuthCredentialStore _bangumiOAuthCredentials = new();
+    private readonly BangumiOAuthCoordinator _bangumiOAuth;
+    private readonly BangumiOAuthRefreshScheduler _bangumiOAuthRefreshScheduler;
+    private readonly BangumiWebConsoleLogin _bangumiWebLogin;
     private readonly CloudDriveAutomationStore _cloudDriveConfig = new();
     private readonly BangumiMetadataClient _bangumiMetadata;
     private readonly BangumiArchiveStore _bangumiArchive;
@@ -89,6 +93,16 @@ public partial class MainWindow : Window, IAsyncDisposable
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiruPlay", "bangumi-archive"), archiveClient);
         _appUpdater = new WindowsAppUpdater(manifestUrl: _settings.AppUpdateManifestUrl);
         _metadataSearch = new MetadataSearchService(_bangumiMetadata, _tmdbMetadata, _tvMazeMetadata);
+        _bangumiOAuth = new BangumiOAuthCoordinator(
+            _metadataTokens,
+            () => BangumiOAuthCredentialsProvider.Resolve(_bangumiOAuthCredentials),
+            () => OutboundHttpProxy.CreateHandler(() => _cloudDriveConfig.Load()));
+        _bangumiWebLogin = new BangumiWebConsoleLogin(
+            _bangumiOAuth,
+            () => new BangumiPasswordLoginClient(handler: OutboundHttpProxy.CreateHandler(() => _cloudDriveConfig.Load())),
+            () => !string.IsNullOrEmpty(_metadataTokens.Load().Bangumi),
+            () => _metadataTokens.Load().BangumiExpiresAtMillis);
+        _bangumiOAuthRefreshScheduler = new BangumiOAuthRefreshScheduler(_bangumiOAuth);
         _bangumiPlaybackSync = new BangumiPlaybackSyncService(
             _metadataTokens,
             _bangumiMetadata.UpdateEpisodeCollectionAsync);
@@ -150,6 +164,10 @@ public partial class MainWindow : Window, IAsyncDisposable
             resolvePosterPath: ResolvePosterForWebAsync,
             applyAudioDsp: ApplyAudioDspFromWebAsync,
             applyPlaybackSettings: ApplyPlaybackAudioFromWebAsync,
+            bangumiOAuth: _bangumiOAuth,
+            bangumiOAuthCredentials: _bangumiOAuthCredentials,
+            bangumiWebLogin: _bangumiWebLogin,
+            getBangumiToken: cancellationToken => _bangumiOAuth.EnsureValidTokenAsync(cancellationToken),
             metadataSources: _mediaSourceRegistry,
             refreshSource: RefreshSourceAfterMetadataAsync,
             bangumiArchive: _bangumiArchive,
@@ -223,6 +241,7 @@ public partial class MainWindow : Window, IAsyncDisposable
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        _bangumiOAuthRefreshScheduler.Start();
         _localLogs.Write("INFO", _backgroundMode ? "MiruPlay background mode started" : "MiruPlay started", attributes: new Dictionary<string, string>
         {
             ["mode"] = CurrentContentMode,
@@ -968,6 +987,9 @@ public partial class MainWindow : Window, IAsyncDisposable
             session.PlaybackInfoChanged -= ActiveSession_PlaybackInfoChanged;
             await session.DisposeAsync();
         }
+        await _bangumiOAuthRefreshScheduler.DisposeAsync();
+        _bangumiWebLogin.Dispose();
+        _bangumiOAuth.Dispose();
         await _mediaSourceAutoScanScheduler.DisposeAsync();
         await _cloudDriveScheduler.DisposeAsync();
         await _openObserveLogScheduler.DisposeAsync();
@@ -1877,6 +1899,94 @@ public partial class MainWindow : Window, IAsyncDisposable
         BangumiTokenStatusText.Text = AppStrings.Get("wpf.main.noBangumi");
     }
 
+    private async void StartBangumiOAuth_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var url = _bangumiOAuth.StartAuthorize();
+            if (url is null)
+            {
+                UpdateBangumiOAuthView();
+                StatusText.Text = AppStrings.Get("oauth.notConfigured");
+                return;
+            }
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception error) when (error is System.ComponentModel.Win32Exception or InvalidOperationException or IOException)
+            {
+                StatusText.Text = error.Message;
+            }
+            BangumiOAuthStatusText.Text = AppStrings.Get("oauth.waiting");
+            var result = await _bangumiOAuth.WaitForResultAsync();
+            UpdateBangumiOAuthView();
+            StatusText.Text = result.Succeeded
+                ? AppStrings.Get("oauth.success")
+                : result.Error ?? AppStrings.Get("oauth.failed");
+        }
+        catch (Exception error) when (error is InvalidOperationException or IOException or HttpRequestException or InvalidDataException)
+        {
+            UpdateBangumiOAuthView();
+            StatusText.Text = error.Message;
+        }
+    }
+
+    private void BangumiOAuthLogout_Click(object sender, RoutedEventArgs e)
+    {
+        _bangumiOAuth.Logout();
+        UpdateBangumiOAuthView();
+        StatusText.Text = AppStrings.Get("oauth.loggedOut");
+    }
+
+    private void SaveBangumiOAuthCredentials_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            _bangumiOAuthCredentials.Save(BangumiOAuthClientIdBox.Text, BangumiOAuthClientSecretBox.Password);
+            BangumiOAuthClientSecretBox.Clear();
+            UpdateBangumiOAuthView();
+            StatusText.Text = AppStrings.Get("oauth.credentialsSaved");
+        }
+        catch (Exception error) when (error is ArgumentException or IOException or UnauthorizedAccessException)
+        {
+            StatusText.Text = error.Message;
+        }
+    }
+
+    private void ClearBangumiOAuthCredentials_Click(object sender, RoutedEventArgs e)
+    {
+        _bangumiOAuthCredentials.Clear();
+        UpdateBangumiOAuthView();
+        StatusText.Text = AppStrings.Get("oauth.credentialsCleared");
+    }
+
+    private void UpdateBangumiOAuthView()
+    {
+        try
+        {
+            BangumiOAuthClientIdBox.Text = _bangumiOAuthCredentials.Load()?.ClientId ?? string.Empty;
+        }
+        catch (InvalidDataException)
+        {
+            BangumiOAuthClientIdBox.Clear();
+        }
+        BangumiOAuthClientSecretBox.Clear();
+        var credentials = BangumiOAuthCredentialsProvider.Resolve(_bangumiOAuthCredentials);
+        BangumiOAuthCredentialStatusText.Text = credentials is null
+            ? AppStrings.Get("oauth.notConfigured")
+            : AppStrings.Get("oauth.configured", credentials.Source == "environment"
+                ? AppStrings.Get("oauth.sourceEnvironment")
+                : AppStrings.Get("oauth.sourceSettings"));
+        var tokens = _metadataTokens.Load();
+        BangumiOAuthStatusText.Text = string.IsNullOrEmpty(tokens.Bangumi)
+            ? AppStrings.Get("oauth.statusLoggedOut")
+            : tokens.BangumiExpiresAtMillis > 0
+                ? AppStrings.Get("oauth.statusExpires",
+                    DateTimeOffset.FromUnixTimeMilliseconds(tokens.BangumiExpiresAtMillis).ToLocalTime().ToString("g", System.Globalization.CultureInfo.CurrentCulture))
+                : AppStrings.Get("oauth.statusLoggedIn");
+    }
+
     private void SaveTmdbToken_Click(object sender, RoutedEventArgs e)
     {
         var token = TmdbTokenBox.Password;
@@ -2297,6 +2407,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             SettingsAppMode.SelectedItem = SettingsAppMode.Items
                 .OfType<ComboBoxItem>()
                 .First(item => Equals(item.Tag, _settings.CurrentAppMode));
+            UpdateBangumiOAuthView();
             var metadataTokens = _metadataTokens.Load();
             BangumiTokenStatusText.Text = string.IsNullOrEmpty(metadataTokens.Bangumi)
                 ? AppStrings.Get("wpf.main.noBangumi")

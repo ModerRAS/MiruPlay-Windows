@@ -116,6 +116,10 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly TvMazeMetadataClient _tvMazeMetadata;
     private readonly MetadataSearchService _metadataSearch;
     private readonly MetadataTokenStore _metadataTokens;
+    private readonly IBangumiOAuthFlow? _bangumiOAuth;
+    private readonly BangumiOAuthCredentialStore? _bangumiOAuthCredentials;
+    private readonly BangumiWebConsoleLogin? _bangumiWebLogin;
+    private readonly Func<CancellationToken, Task<string?>>? _getBangumiToken;
     private readonly RssSubscriptionStore _rssSubscriptions;
     private readonly CloudDriveAutomationStore _cloudDriveConfig;
     private readonly CloudDriveCredentialStore _cloudDriveCredentials;
@@ -173,7 +177,11 @@ public sealed class WebControlServer : IAsyncDisposable
         Func<string, AudioDspPreset?>? findAudioPreset = null,
         MusicLibraryService? musicLibrary = null,
         Func<MusicPlayRequest, Task<bool>>? playMusic = null,
-        Func<AppSettings, Task>? applyPlaybackSettings = null)
+        Func<AppSettings, Task>? applyPlaybackSettings = null,
+        IBangumiOAuthFlow? bangumiOAuth = null,
+        BangumiOAuthCredentialStore? bangumiOAuthCredentials = null,
+        BangumiWebConsoleLogin? bangumiWebLogin = null,
+        Func<CancellationToken, Task<string?>>? getBangumiToken = null)
     {
         _port = port;
         _tokens = tokens;
@@ -200,6 +208,10 @@ public sealed class WebControlServer : IAsyncDisposable
         _tvMazeMetadata = tvMazeMetadata ?? new TvMazeMetadataClient();
         _metadataSearch = metadataSearch ?? new MetadataSearchService(_bangumiMetadata, _tmdbMetadata, _tvMazeMetadata);
         _metadataTokens = metadataTokens ?? new MetadataTokenStore();
+        _bangumiOAuth = bangumiOAuth;
+        _bangumiOAuthCredentials = bangumiOAuthCredentials;
+        _bangumiWebLogin = bangumiWebLogin;
+        _getBangumiToken = getBangumiToken;
         _rssSubscriptions = rssSubscriptions ?? new RssSubscriptionStore();
         _cloudDriveConfig = cloudDriveConfig ?? new CloudDriveAutomationStore();
         _cloudDriveCredentials = cloudDriveCredentials ?? new CloudDriveCredentialStore();
@@ -801,7 +813,7 @@ public sealed class WebControlServer : IAsyncDisposable
 
         app.MapGet("/api/metadata/bangumi/me", async (HttpRequest request) =>
         {
-            var token = _metadataTokens.Load().Bangumi ?? string.Empty;
+            var token = await ResolveBangumiTokenAsync(request.HttpContext.RequestAborted).ConfigureAwait(false) ?? string.Empty;
             return Success(await _bangumiMetadata.GetCurrentUserAsync(
                 token,
                 request.HttpContext.RequestAborted).ConfigureAwait(false));
@@ -809,7 +821,7 @@ public sealed class WebControlServer : IAsyncDisposable
 
         app.MapGet("/api/metadata/bangumi/subjects/{id:int}/collection", async (int id, HttpRequest request) =>
         {
-            var token = _metadataTokens.Load().Bangumi ?? string.Empty;
+            var token = await ResolveBangumiTokenAsync(request.HttpContext.RequestAborted).ConfigureAwait(false) ?? string.Empty;
             var collection = await _bangumiMetadata.GetSubjectCollectionAsync(
                 id,
                 token,
@@ -821,7 +833,7 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var body = await JsonSerializer.DeserializeAsync<BangumiCollectionRequest>(request.Body, JsonOptions).ConfigureAwait(false)
                 ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
-            var token = _metadataTokens.Load().Bangumi ?? string.Empty;
+            var token = await ResolveBangumiTokenAsync(request.HttpContext.RequestAborted).ConfigureAwait(false) ?? string.Empty;
             await _bangumiMetadata.UpsertSubjectCollectionAsync(
                 id,
                 body.Type,
@@ -834,16 +846,88 @@ public sealed class WebControlServer : IAsyncDisposable
         {
             var body = await JsonSerializer.DeserializeAsync<BangumiCollectionRequest>(request.Body, JsonOptions).ConfigureAwait(false)
                 ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
-            var token = _metadataTokens.Load().Bangumi ?? string.Empty;
+            var token = await ResolveBangumiTokenAsync(request.HttpContext.RequestAborted).ConfigureAwait(false) ?? string.Empty;
             await _bangumiMetadata.UpdateEpisodeCollectionAsync(id, body.Type, token, request.HttpContext.RequestAborted).ConfigureAwait(false);
             return Success(new { episodeId = id, type = body.Type });
         });
 
         app.MapGet("/api/metadata/bangumi/subjects/{id:int}/episodes", async (int id, HttpRequest request) =>
         {
-            var token = _metadataTokens.Load().Bangumi ?? string.Empty;
+            var token = await ResolveBangumiTokenAsync(request.HttpContext.RequestAborted).ConfigureAwait(false) ?? string.Empty;
             return Success(await _bangumiMetadata.GetEpisodeCollectionsAsync(id, token, request.HttpContext.RequestAborted).ConfigureAwait(false));
         });
+
+        app.MapGet("/api/metadata/bangumi/oauth", () => Success(ToBangumiOAuthStatus()));
+        app.MapPost("/api/metadata/bangumi/oauth/start", () =>
+        {
+            var oauth = RequireBangumiOAuth();
+            string? url;
+            try
+            {
+                url = oauth.StartAuthorize();
+            }
+            catch (InvalidOperationException error)
+            {
+                throw new BadHttpRequestException(error.Message, StatusCodes.Status409Conflict);
+            }
+            return Success(new
+            {
+                configured = oauth.IsConfigured,
+                state = oauth.State.StatusValue,
+                authorizeUrl = url,
+                message = oauth.State.Message,
+            });
+        });
+        app.MapPost("/api/metadata/bangumi/oauth/cancel", () =>
+        {
+            RequireBangumiOAuth().Cancel();
+            return Success(ToBangumiOAuthStatus());
+        });
+        app.MapPost("/api/metadata/bangumi/oauth/logout", () =>
+        {
+            RequireBangumiOAuth().Logout();
+            return Success(ToBangumiOAuthStatus());
+        });
+        app.MapGet("/api/settings/metadata/oauth", () =>
+        {
+            var credentials = _bangumiOAuthCredentials is null
+                ? null
+                : BangumiOAuthCredentialsProvider.Resolve(_bangumiOAuthCredentials);
+            return Success(new { configured = credentials is not null, source = credentials?.Source });
+        });
+        app.MapPut("/api/settings/metadata/oauth", async (HttpRequest request) =>
+        {
+            var store = RequireBangumiOAuthCredentials();
+            var body = await JsonSerializer.DeserializeAsync<BangumiOAuthCredentialsRequest>(
+                request.Body, JsonOptions, request.HttpContext.RequestAborted).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmpty"));
+            store.Save(body.ClientId ?? string.Empty, body.ClientSecret ?? string.Empty);
+            var credentials = BangumiOAuthCredentialsProvider.Resolve(store);
+            return Success(new { configured = credentials is not null, source = credentials?.Source });
+        });
+        app.MapDelete("/api/settings/metadata/oauth", () =>
+        {
+            var store = RequireBangumiOAuthCredentials();
+            store.Clear();
+            return Success(new { configured = BangumiOAuthCredentialsProvider.Resolve(store) is not null });
+        });
+        app.MapPost("/api/metadata/bangumi/login/start", async (HttpRequest request) =>
+            Success(await RequireBangumiWebLogin().StartAsync(request.HttpContext.RequestAborted).ConfigureAwait(false)));
+        app.MapPost("/api/metadata/bangumi/login/captcha", async (HttpRequest request) =>
+            Success(await RequireBangumiWebLogin().RefreshCaptchaAsync(request.HttpContext.RequestAborted).ConfigureAwait(false)));
+        app.MapPost("/api/metadata/bangumi/login", async (HttpRequest request) =>
+        {
+            var body = await JsonSerializer.DeserializeAsync<BangumiLoginRequest>(
+                request.Body, JsonOptions, request.HttpContext.RequestAborted).ConfigureAwait(false)
+                ?? throw new BadHttpRequestException(AppStrings.Get("api.errEmptyBare"));
+            return Success(await RequireBangumiWebLogin().SubmitAsync(
+                body.Email ?? string.Empty,
+                body.Password ?? string.Empty,
+                body.Captcha ?? string.Empty,
+                request.HttpContext.RequestAborted).ConfigureAwait(false));
+        });
+        app.MapPost("/api/metadata/bangumi/login/cancel", async (HttpRequest request) =>
+            Success(await RequireBangumiWebLogin().CancelAsync(request.HttpContext.RequestAborted).ConfigureAwait(false)));
 
         app.MapGet("/api/metadata/tmdb/search", async (HttpRequest request) =>
         {
@@ -872,6 +956,8 @@ public sealed class WebControlServer : IAsyncDisposable
             {
                 bangumiTokenConfigured = !string.IsNullOrEmpty(tokens.Bangumi),
                 tmdbTokenConfigured = !string.IsNullOrEmpty(tokens.Tmdb),
+                bangumiOAuthConfigured = _bangumiOAuth?.IsConfigured ?? false,
+                bangumiTokenExpiresAtMillis = tokens.BangumiExpiresAtMillis,
             });
         });
         app.MapPut("/api/settings/metadata/bangumi-token", async (HttpRequest request) =>
@@ -1226,6 +1312,7 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapGet("/web/app.css", () => EmbeddedWebResource("app.css", "text/css; charset=utf-8"));
         app.MapGet("/web/app.js", () => EmbeddedWebResource("app.js", "text/javascript; charset=utf-8"));
         app.MapGet("/web/i18n.js", () => EmbeddedWebResource("i18n.js", "text/javascript; charset=utf-8"));
+        app.MapGet("/web/bangumi-login.js", () => EmbeddedWebResource("bangumi-login.js", "text/javascript; charset=utf-8"));
     }
 
     private static IResult EmbeddedWebResource(string fileName, string contentType)
@@ -1295,6 +1382,35 @@ public sealed class WebControlServer : IAsyncDisposable
 
     private MediaSourceRegistry MetadataSources() => _metadataSources
         ?? throw new NotSupportedException(AppStrings.Get("api.errNoWritable"));
+
+    private IBangumiOAuthFlow RequireBangumiOAuth() => _bangumiOAuth
+        ?? throw new NotSupportedException(AppStrings.Get("api.errNoBangumiOAuth"));
+
+    private BangumiOAuthCredentialStore RequireBangumiOAuthCredentials() => _bangumiOAuthCredentials
+        ?? throw new NotSupportedException(AppStrings.Get("api.errNoBangumiOAuth"));
+
+    private BangumiWebConsoleLogin RequireBangumiWebLogin() => _bangumiWebLogin
+        ?? throw new NotSupportedException(AppStrings.Get("api.errNoBangumiOAuth"));
+
+    private async Task<string?> ResolveBangumiTokenAsync(CancellationToken cancellationToken) =>
+        _getBangumiToken is null
+            ? _metadataTokens.Load().Bangumi
+            : await _getBangumiToken(cancellationToken).ConfigureAwait(false);
+
+    private object ToBangumiOAuthStatus()
+    {
+        var tokens = _metadataTokens.Load();
+        return new
+        {
+            configured = _bangumiOAuth?.IsConfigured ?? false,
+            state = _bangumiOAuth?.State.StatusValue ?? "idle",
+            authorizeUrl = _bangumiOAuth?.State.AuthorizeUrl,
+            message = _bangumiOAuth?.State.Message,
+            loggedIn = !string.IsNullOrEmpty(tokens.Bangumi),
+            expiresAtMillis = tokens.BangumiExpiresAtMillis,
+            tokenConfigured = !string.IsNullOrEmpty(tokens.Bangumi),
+        };
+    }
 
     private static bool CanReadDirectory(string path)
     {
@@ -1655,6 +1771,8 @@ public sealed class WebControlServer : IAsyncDisposable
         double? VolumePercent = null,
         bool? IsMuted = null,
         string? VersionEpisodeId = null);
+    private sealed record BangumiOAuthCredentialsRequest(string? ClientId = null, string? ClientSecret = null);
+    private sealed record BangumiLoginRequest(string? Email = null, string? Password = null, string? Captcha = null);
     private sealed record PlaybackSettingsRequest(
         string? EndAction = null,
         string? PreferredSubtitleLanguage = null,
