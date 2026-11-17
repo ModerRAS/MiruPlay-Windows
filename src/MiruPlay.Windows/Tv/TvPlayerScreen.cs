@@ -93,9 +93,22 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
         await StartEpisodeAsync(episode, resume).ConfigureAwait(true);
     }
 
+    internal static void LogPlayer(string message)
+    {
+        try
+        {
+            File.AppendAllText("C:/WorkSpace/Claw/scratch/tvmode/player-debug.log", $"{DateTime.Now:HH:mm:ss.fff} {message}\n");
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            // Playback diagnostics only.
+        }
+    }
+
     private async Task StartEpisodeAsync(LibraryEpisode episode, bool resume)
     {
         if (_disposed) return;
+        LogPlayer($"start episode={episode.DisplayNumber} path={episode.MediaPath} resume={resume} handle={_videoHost.NativeHandle}");
         _starting = true;
         _error = null;
         _episode = episode;
@@ -105,6 +118,9 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
         await DisposeSessionAsync();
         try
         {
+            UpdateLayout();
+            for (var attempt = 0; attempt < 60 && _videoHost.NativeHandle == IntPtr.Zero; attempt++)
+                await Task.Delay(50).ConfigureAwait(true);
             _videoHost.ValidateForMpv();
             var source = episode.SourceId > 0 ? _context.MediaSources.Get(episode.SourceId) : null;
             var proxy = source?.Type == "WEBDAV" ? _context.MediaSources.CreatePlaybackProxy(source.Id, EpisodeWithSidecars(episode)) : null;
@@ -126,23 +142,30 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
             }
             if (launch.Session is null)
             {
+                LogPlayer("launch degraded: " + string.Join(" · ", launch.DegradedCapabilities));
                 ShowError(AppStrings.Get("tv.player.error.degraded", string.Join(" · ", launch.DegradedCapabilities)));
                 return;
             }
+            LogPlayer($"session started durationMs={launch.Session.DurationMs}");
             _session = launch.Session;
             _session.SubtitleTracksChanged += Session_Changed;
             _session.AudioTracksChanged += Session_Changed;
             _session.PlaybackInfoChanged += Session_Changed;
+            _shell.FocusShellForPlayback();
             _starting = false;
             _loadingText.Visibility = Visibility.Collapsed;
-            _osd = _shell.EnsureOsd();
+            if (!string.Equals(Environment.GetEnvironmentVariable("MIRUPLAY_TV_NO_OSD"), "1", StringComparison.Ordinal))
+            {
+                _osd = _shell.EnsureOsd();
+                ShowOsd();
+            }
             _tickTimer.Start();
-            ShowOsd();
             _ = MonitorSessionAsync(_session);
         }
         catch (Exception error) when (error is IOException or InvalidOperationException or NotSupportedException
             or System.ComponentModel.Win32Exception or UnauthorizedAccessException or ArgumentException)
         {
+            LogPlayer("start failed: " + error);
             ShowError(error.Message);
         }
     }
@@ -154,11 +177,16 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
         return sidecars.Count > 0 ? episode with { ExternalAudioPaths = sidecars } : episode;
     }
 
-    private void Session_Changed(object? sender, EventArgs e) => UpdateOsd();
+    private void Session_Changed(object? sender, EventArgs e)
+    {
+        if (_disposed) return;
+        _ = Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(UpdateOsd));
+    }
 
     private async Task MonitorSessionAsync(IPlaybackSession session)
     {
         await session.Completion.ConfigureAwait(true);
+        LogPlayer($"session completed wasCompleted={session.WasCompleted} lastError={session.LastError}");
         if (_disposed || !ReferenceEquals(_session, session)) return;
         var completed = session.WasCompleted;
         var lastError = session.LastError;
@@ -185,6 +213,8 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
 
     public override bool HandleAction(TvInputAction action)
     {
+        try { File.AppendAllText("C:/WorkSpace/Claw/scratch/tvmode/player-debug.log", $"{DateTime.Now:HH:mm:ss.fff} ENTER action={action}\n"); } catch (Exception) { }
+        LogPlayer($"action={action} error={_error is not null} starting={_starting} drawer={_drawer?.Title} row={_focusRow} index={_focusIndex} osd={_osdVisible} focus={_osdFocusMode}");
         if (_disposed) return true;
         if (_error is not null)
         {
@@ -491,6 +521,7 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
 
     private void ActivateFocus()
     {
+        LogPlayer($"activate focus row={_focusRow} index={_focusIndex}");
         if (_focusRow == 0)
         {
             switch (_focusIndex)
@@ -514,6 +545,7 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
 
     private void OpenDrawer(DrawerSection section)
     {
+        LogPlayer("open drawer " + section);
         _drawerSection = section;
         _drawerFocus = 0;
         _osdFocusMode = false;
@@ -573,7 +605,8 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
                         foreach (var track in session.SubtitleTracks)
                         {
                             var trackId = track.Id;
-                            items.Add(new TvOsdDrawerItem(track.DisplayLabel, track.IsExternal ? AppStrings.Get("tv.player.external") : null,
+                            items.Add(new TvOsdDrawerItem(FriendlyTrackLabel(track.DisplayLabel, track.Language),
+                                track.IsExternal ? AppStrings.Get("tv.player.external") : track.Codec,
                                 IsFocusable: true, IsSelected: selected == trackId));
                             _drawerActions.Add(() => _ = SetSubtitleAsync(trackId));
                         }
@@ -588,7 +621,8 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
                         foreach (var track in session.AudioTracks)
                         {
                             var trackId = track.Id;
-                            items.Add(new TvOsdDrawerItem(track.DisplayLabel, track.Codec, IsFocusable: true, IsSelected: selected == trackId));
+                            items.Add(new TvOsdDrawerItem(FriendlyTrackLabel(track.DisplayLabel, track.Language), track.Codec,
+                                IsFocusable: true, IsSelected: selected == trackId));
                             _drawerActions.Add(() => _ = SetAudioAsync(trackId));
                         }
                     }
@@ -737,7 +771,22 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
         var session = _session;
         if (session?.SelectedSubtitleTrackId is not int id) return AppStrings.Get("tv.player.subtitleOff");
         var track = session.SubtitleTracks.FirstOrDefault(item => item.Id == id);
-        return track?.DisplayLabel ?? AppStrings.Get("tv.player.subtitleOn");
+        return track is null ? AppStrings.Get("tv.player.subtitleOn") : FriendlyTrackLabel(track.DisplayLabel, track.Language);
+    }
+
+    internal static string FriendlyTrackLabel(string label, string? language)
+    {
+        var mapped = language?.Trim().ToLowerInvariant() switch
+        {
+            "zh-hans" or "zh-cn" or "chs" or "zh" => AppStrings.Get("tv.settings.subtitle.zhHans"),
+            "zh-hant" or "zh-tw" or "cht" => AppStrings.Get("tv.settings.subtitle.zhHant"),
+            "en" or "eng" => AppStrings.Get("tv.settings.subtitle.en"),
+            "ja" or "jpn" => AppStrings.Get("tv.settings.subtitle.ja"),
+            _ => null,
+        };
+        if (!string.IsNullOrWhiteSpace(label) && label is not "und" &&
+            !label.Equals(language, StringComparison.OrdinalIgnoreCase)) return label;
+        return mapped ?? (string.IsNullOrWhiteSpace(label) || label == "und" ? AppStrings.Get("tv.player.audioDefault") : label);
     }
 
     private string AudioLabel()
@@ -745,7 +794,7 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
         var session = _session;
         if (session?.SelectedAudioTrackId is not int id) return AppStrings.Get("tv.player.audioDefault");
         var track = session.AudioTracks.FirstOrDefault(item => item.Id == id);
-        return track?.DisplayLabel ?? AppStrings.Get("tv.player.audioDefault");
+        return track is null ? AppStrings.Get("tv.player.audioDefault") : FriendlyTrackLabel(track.DisplayLabel, track.Language);
     }
 
     private enum DrawerSection

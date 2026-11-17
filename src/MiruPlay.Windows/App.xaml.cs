@@ -20,6 +20,8 @@ public partial class App : Application, IDisposable
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        DispatcherUnhandledException += (_, args) => LogCrash("dispatcher", args.Exception);
+        AppDomain.CurrentDomain.UnhandledException += (_, args) => LogCrash("domain", args.ExceptionObject as Exception);
         _instanceMutex = new Mutex(true, $"Local\\MiruPlay.Windows.{System.Security.Principal.WindowsIdentity.GetCurrent().User?.Value}", out var isFirstInstance);
         if (!isFirstInstance)
         {
@@ -77,6 +79,19 @@ public partial class App : Application, IDisposable
         _shuttingDown = true;
         Dispose();
         base.OnExit(e);
+    }
+
+    private static void LogCrash(string source, Exception? error)
+    {
+        try
+        {
+            var path = Path.Combine(Path.GetTempPath(), "miruplay-crash.log");
+            File.AppendAllText(path, $"[{DateTime.Now:O}] {source}: {error}\n\n");
+        }
+        catch (Exception logError) when (logError is IOException or UnauthorizedAccessException)
+        {
+            // Crash logging must never mask the original failure.
+        }
     }
 
     public void Dispose()

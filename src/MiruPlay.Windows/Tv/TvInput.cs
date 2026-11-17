@@ -247,6 +247,9 @@ public sealed class TvInputService : IDisposable
     /// <summary>Raised once the Back key has been held long enough to exit TV mode.</summary>
     public event EventHandler? BackHoldCompleted;
 
+    /// <summary>Raised when Back is released early, before the long-press threshold.</summary>
+    public event EventHandler? BackHoldCancelled;
+
     public bool HandleKeyDown(Key key, ModifierKeys modifiers)
     {
         var action = TvKeyMap.Resolve(Preset, key, modifiers);
@@ -293,6 +296,7 @@ public sealed class TvInputService : IDisposable
             return;
         }
         BackHoldProgress = 0;
+        BackHoldCancelled?.Invoke(this, EventArgs.Empty);
         Raise(TvInputAction.Back);
     }
 

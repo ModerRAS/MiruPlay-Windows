@@ -178,11 +178,11 @@ public sealed class TvLibraryScreen : TvScreenBase
             PosterSource = TvImages.Load(series.PosterPath),
             TitleText = series.Title,
             SubtitleText = series.Genres.Count > 0 ? series.Genres[0] : string.Empty,
-            PosterWidth = 176,
-            PosterHeight = 264,
+            PosterWidth = 156,
+            PosterHeight = 234,
             ShowProgress = percent > 0,
             ProgressPercent = percent,
-            BadgeText = completed ? "✓" : label,
+            BadgeText = completed ? "✓" : percent > 0 ? label : string.Empty,
             Margin = new Thickness(10, 8, 10, 8),
         };
         card.Click += (_, _) => _shell.ShowDetail(series);

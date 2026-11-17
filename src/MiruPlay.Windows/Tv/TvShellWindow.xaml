@@ -13,7 +13,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/MiruPlay.Windows;component/Tv/TvTheme.xaml" />
+                <ResourceDictionary Source="/MiruPlay;component/Tv/TvTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -41,24 +41,28 @@
         </Border>
 
         <Grid x:Name="ContentHostGrid" Grid.Column="1" Background="{StaticResource TvBackgroundBrush}">
-            <ContentControl x:Name="ScreenHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            Focusable="False" />
-            <Border x:Name="HintBar" VerticalAlignment="Bottom" Height="46" Background="#D90B0B0D"
-                    Padding="64,0" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <ContentControl x:Name="ScreenHost" Grid.Row="0" HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch" Focusable="False" />
+            <Border x:Name="HintBar" Grid.Row="1" Height="48" Background="#D90B0B0D"
+                    Padding="68,0" Visibility="Collapsed">
                 <TextBlock x:Name="HintTextBlock" Style="{StaticResource TvHintText}" />
             </Border>
 
-            <Border x:Name="LoadingOverlay" Background="{StaticResource TvBackgroundBrush}">
+            <Border x:Name="LoadingOverlay" Grid.RowSpan="2" Background="{StaticResource TvBackgroundBrush}">
                 <StackPanel x:Name="LoadingPanel" VerticalAlignment="Center" HorizontalAlignment="Center" />
             </Border>
 
-            <Border x:Name="Toast" Background="#F01D1D24" CornerRadius="10" Padding="26,12"
-                    VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,96"
+            <Border x:Name="Toast" Grid.RowSpan="2" Background="#F01D1D24" CornerRadius="10" Padding="26,12"
+                    VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,110"
                     Visibility="Collapsed" IsHitTestVisible="False">
                 <TextBlock x:Name="ToastText" FontSize="20" Foreground="{StaticResource TvTextBrush}" />
             </Border>
 
-            <Border x:Name="ExitHoldOverlay" Background="#B0000000" Visibility="Collapsed">
+            <Border x:Name="ExitHoldOverlay" Grid.RowSpan="2" Background="#B0000000" Visibility="Collapsed">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock x:Name="ExitHoldTitle" Text="" FontSize="30" FontWeight="SemiBold"
                                HorizontalAlignment="Center" />
@@ -69,11 +73,11 @@
                 </StackPanel>
             </Border>
 
-            <Border x:Name="DemoBadge" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,24,36,0"
+            <Border x:Name="DemoBadge" Grid.RowSpan="2" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,26,68,0"
                     Background="#CC111116" BorderBrush="{StaticResource TvAccentBrush}" BorderThickness="2"
                     CornerRadius="9" Padding="18,8" Visibility="Collapsed" IsHitTestVisible="False">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="&#xE7C9;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                    <TextBlock Text="&#xE765;" FontFamily="Segoe MDL2 Assets" FontSize="16"
                                Foreground="{StaticResource TvAccentBrush}" VerticalAlignment="Center" />
                     <TextBlock x:Name="DemoBadgeText" FontSize="17" Margin="8,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>

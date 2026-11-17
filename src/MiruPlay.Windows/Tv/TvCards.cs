@@ -217,7 +217,7 @@ public sealed class TvEpisodeCard : Button
 public static class TvTheme
 {
     private static readonly Uri ThemeSource = new(
-        "pack://application:,,,/MiruPlay.Windows;component/Tv/TvTheme.xaml", UriKind.Absolute);
+        "pack://application:,,,/MiruPlay;component/Tv/TvTheme.xaml", UriKind.Absolute);
 
     public static void Apply(FrameworkElement element)
     {

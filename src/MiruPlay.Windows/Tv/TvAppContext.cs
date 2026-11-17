@@ -262,9 +262,13 @@ public static class TvPresentation
                 ? AppStrings.Get("tv.detail.progress", episode.ProgressPercent.ToString("0", System.Globalization.CultureInfo.CurrentCulture))
                 : string.Empty;
 
-    public static string FormatTime(long milliseconds) => TimeSpan
-        .FromMilliseconds(Math.Max(0, milliseconds))
-        .ToString(milliseconds >= 3_600_000 ? @"h:mm:ss" : @"m:ss", System.Globalization.CultureInfo.InvariantCulture);
+    public static string FormatTime(long milliseconds)
+    {
+        var span = TimeSpan.FromMilliseconds(Math.Max(0, milliseconds));
+        return span.TotalHours >= 1
+            ? $"{(int)span.TotalHours}:{span.Minutes:00}:{span.Seconds:00}"
+            : $"{(int)span.TotalMinutes}:{span.Seconds:00}";
+    }
 
     public static string FormatSpeed(double speed) =>
         speed.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "x";

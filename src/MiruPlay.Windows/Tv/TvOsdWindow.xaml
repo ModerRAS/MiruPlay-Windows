@@ -16,7 +16,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/MiruPlay.Windows;component/Tv/TvTheme.xaml" />
+                <ResourceDictionary Source="/MiruPlay;component/Tv/TvTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <Style x:Key="OsdButton" TargetType="Border">
                 <Setter Property="Background" Value="Transparent" />
@@ -32,15 +32,17 @@
 
     <Grid x:Name="RootLayer" Opacity="0" IsHitTestVisible="False">
         <!-- top bar -->
-        <Grid VerticalAlignment="Top" Margin="64,42,64,0" IsHitTestVisible="False">
+        <Grid VerticalAlignment="Top" Margin="68,48,68,0" IsHitTestVisible="False">
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock x:Name="TitleText" FontSize="30" FontWeight="SemiBold" />
                 <TextBlock x:Name="SubtitleText" FontSize="17" Margin="0,5,0,0"
                            Foreground="{StaticResource TvTextSecondaryBrush}" />
             </StackPanel>
             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                <TextBlock x:Name="MetaText" FontSize="16" VerticalAlignment="Center"
-                           Foreground="{StaticResource TvTextMutedBrush}" Margin="0,0,20,0" />
+                <Border Background="#990B0B0D" CornerRadius="8" Padding="12,7" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <TextBlock x:Name="MetaText" FontSize="16" VerticalAlignment="Center"
+                               Foreground="{StaticResource TvTextSecondaryBrush}" />
+                </Border>
                 <Border Background="#B3121216" CornerRadius="8" Padding="14,7" VerticalAlignment="Center">
                     <TextBlock x:Name="BackHintText" FontSize="16" IsHitTestVisible="False" />
                 </Border>
@@ -48,7 +50,7 @@
         </Grid>
 
         <!-- bottom control panel -->
-        <Border x:Name="BottomPanel" VerticalAlignment="Bottom" Margin="48,0,48,48"
+        <Border x:Name="BottomPanel" VerticalAlignment="Bottom" Margin="68,0,68,56"
                 Background="#F0121216" CornerRadius="16" Padding="34,22,30,18"
                 BorderBrush="#26FFFFFF" BorderThickness="1" IsHitTestVisible="False">
             <StackPanel>

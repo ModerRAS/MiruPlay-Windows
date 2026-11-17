@@ -14,6 +14,7 @@ public sealed class TvHomeScreen : TvScreenBase
     private readonly ScrollViewer _scroller;
     private readonly StackPanel _content = new();
     private readonly List<TvZone> _rowZones = [];
+    private readonly List<(string Title, ScrollViewer Scroller, StackPanel Panel, FrameworkElement FirstCard)> _rowInfo = [];
     private TvZone? _heroZone;
     private TvContinueItem? _heroContinue;
     private LibrarySeries? _heroSeries;
@@ -31,7 +32,7 @@ public sealed class TvHomeScreen : TvScreenBase
             VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
         };
-        _content.Margin = new Thickness(0, 0, 0, 30);
+        _content.Margin = new Thickness(0, 0, 0, 56);
         _scroller.Content = _content;
         Content = _scroller;
         _context.LibraryChanged += Context_LibraryChanged;
@@ -79,6 +80,27 @@ public sealed class TvHomeScreen : TvScreenBase
         BuildGenreRow(home);
         BuildAllRow(home);
         _built = true;
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, new Action(DumpLayout));
+    }
+
+    private void DumpLayout()
+    {
+        try
+        {
+            var lines = new List<string>
+            {
+                $"SELF {ActualWidth}x{ActualHeight}",
+                $"SCROLLER extent={_scroller.ExtentHeight:0} viewport={_scroller.ViewportHeight:0} offset={_scroller.VerticalOffset:0} scrollable={_scroller.ScrollableHeight:0}",
+                $"FOCUS zone={ActiveZone?.Id} index={ActiveIndex}",
+            };
+            foreach (var (title, scroller, panel, firstCard) in _rowInfo)
+                lines.Add($"ROW {title} scroller={scroller.ActualHeight:0} viewport={scroller.ViewportHeight:0} extent={scroller.ExtentHeight:0} panel={panel.ActualHeight:0} card={firstCard.ActualHeight:0}");
+            File.AppendAllText(Path.Combine(Path.GetTempPath(), "miruplay-tv-layout.log"), string.Join("\n", lines) + "\n---\n");
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            // Layout diagnostics only.
+        }
     }
 
     private void BuildHero()
@@ -123,7 +145,13 @@ public sealed class TvHomeScreen : TvScreenBase
         };
         hero.Children.Add(bottomFade);
 
-        var info = new StackPanel { VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(64, 0, 64, 40), MaxWidth = 1050 };
+        var info = new StackPanel
+        {
+            VerticalAlignment = VerticalAlignment.Bottom,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(68, 0, 68, 42),
+            MaxWidth = 1050,
+        };
         info.Children.Add(new TextBlock
         {
             Text = AppStrings.Get(_heroContinue is null ? "tv.home.hero.featured" : "tv.home.hero.continue"),
@@ -289,7 +317,7 @@ public sealed class TvHomeScreen : TvScreenBase
             PosterHeight = height,
             ShowProgress = percent > 0,
             ProgressPercent = percent,
-            BadgeText = completed ? "✓" : label,
+            BadgeText = completed ? "✓" : percent > 0 ? label : string.Empty,
         };
     }
 
@@ -320,11 +348,16 @@ public sealed class TvHomeScreen : TvScreenBase
         scroller.Content = panel;
         outer.Children.Add(scroller);
         _content.Children.Add(outer);
+        _rowInfo.Add((titleKey, scroller, panel, cards[0]));
         var zone = new TvZone(
             "row:" + titleKey,
             TvZoneKind.Horizontal,
             cards,
-            onFocusChanged: index => BringCardIntoView(scroller, cards[index]));
+            onFocusChanged: index =>
+            {
+                BringCardIntoView(scroller, cards[index]);
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, new Action(DumpLayout));
+            });
         RegisterZone(zone);
         _rowZones.Add(zone);
     }

@@ -219,6 +219,15 @@ public sealed class TvSearchScreen : TvScreenBase
         ApplyFilter();
     }
 
+    /// <summary>Hardware keyboard / phone remote characters arrive here (on-screen keyboard still primary).</summary>
+    public void AppendCharacter(char character)
+    {
+        if (char.IsControl(character)) return;
+        Append(character.ToString());
+    }
+
+    public void RemoveLastCharacter() => Backspace();
+
     private void Backspace()
     {
         if (_query.Length > 0) _query = _query[..^1];
@@ -243,7 +252,7 @@ public sealed class TvSearchScreen : TvScreenBase
                 PosterHeight = 255,
                 ShowProgress = percent > 0,
                 ProgressPercent = percent,
-                BadgeText = completed ? "✓" : label,
+                BadgeText = completed ? "✓" : percent > 0 ? label : string.Empty,
                 Margin = new Thickness(0, 0, 18, 0),
             };
             card.Click += (_, _) => OpenResult(series);

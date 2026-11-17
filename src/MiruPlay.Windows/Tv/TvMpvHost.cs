@@ -28,6 +28,9 @@ public sealed class TvMpvHost : HwndHost
     private const int WmSysKeyDown = 0x0104;
     private const int WmSysKeyUp = 0x0105;
     private const int WmSetCursor = 0x0020;
+    private const int WmEraseBackground = 0x0014;
+    private const int GclpHbrBackground = -10;
+    private const int BlackBrush = 4;
 
     public IntPtr NativeHandle { get; private set; }
 
@@ -51,6 +54,9 @@ public sealed class TvMpvHost : HwndHost
                 NativeMethods.SetCursor(IntPtr.Zero);
                 handled = true;
                 return IntPtr.Zero;
+            case WmEraseBackground:
+                handled = true;
+                return new IntPtr(1);
         }
         return base.WndProc(hwnd, msg, wParam, lParam, ref handled);
     }
@@ -72,6 +78,7 @@ public sealed class TvMpvHost : HwndHost
             IntPtr.Zero);
         if (NativeHandle == IntPtr.Zero)
             throw new InvalidOperationException(AppStrings.Get("mpv.hwndFailed", Marshal.GetLastWin32Error()));
+        NativeMethods.SetClassLongPtr(NativeHandle, GclpHbrBackground, NativeMethods.GetStockObject(BlackBrush));
         return new HandleRef(this, NativeHandle);
     }
 
@@ -139,5 +146,11 @@ public sealed class TvMpvHost : HwndHost
 
         [DllImport("user32.dll")]
         public static extern IntPtr SetCursor(IntPtr handle);
+
+        [DllImport("user32.dll", EntryPoint = "SetClassLongPtrW")]
+        public static extern IntPtr SetClassLongPtr(IntPtr hWnd, int index, IntPtr value);
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr GetStockObject(int index);
     }
 }

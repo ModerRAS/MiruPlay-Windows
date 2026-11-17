@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -35,6 +36,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
     private readonly DispatcherTimer _toastTimer;
     private readonly DispatcherTimer _clockTimer;
     private readonly DispatcherTimer _exitOverlayTimer;
+    private readonly DispatcherTimer _demoBadgeTimer;
     private TvOsdWindow? _osd;
     private TvScreenBase? _currentScreen;
     private TvDetailScreen? _detailScreen;
@@ -58,6 +60,8 @@ public sealed partial class TvShellWindow : Window, IDisposable
         _context = options.Context ?? new TvAppContext();
         InitializeComponent();
         TvTheme.Apply(this);
+        InputMethod.SetIsInputMethodEnabled(this, false);
+        Cursor = Cursors.None;
         _input = new TvInputService(
             TvKeyMap.ParsePreset(_context.Settings.TvRemotePreset),
             _context.Settings.TvExitLongPressMs);
@@ -67,9 +71,16 @@ public sealed partial class TvShellWindow : Window, IDisposable
         _clockTimer.Tick += (_, _) => UpdateClock();
         _exitOverlayTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(40) };
         _exitOverlayTimer.Tick += (_, _) => UpdateExitOverlay();
+        _demoBadgeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
+        _demoBadgeTimer.Tick += (_, _) =>
+        {
+            _demoBadgeTimer.Stop();
+            DemoBadge.Visibility = Visibility.Collapsed;
+        };
         BuildNavigation();
         _input.ActionInvoked += Input_ActionInvoked;
         _input.BackHoldStarted += (_, _) => ShowExitHoldOverlay();
+        _input.BackHoldCancelled += (_, _) => HideExitHoldOverlay();
         _input.BackHoldProgressChanged += (_, args) => UpdateExitHoldProgress(args.Progress);
         _input.BackHoldCompleted += (_, _) =>
         {
@@ -77,6 +88,8 @@ public sealed partial class TvShellWindow : Window, IDisposable
             ExitTvMode();
         };
         PreviewKeyDown += Shell_PreviewKeyDown;
+        PreviewKeyUp += Shell_PreviewKeyUp;
+        SourceInitialized += Shell_SourceInitialized;
         Loaded += Shell_Loaded;
         Closing += Shell_Closing;
         Activated += (_, _) => RestoreFocus();
@@ -96,6 +109,27 @@ public sealed partial class TvShellWindow : Window, IDisposable
     /// <summary>Tangent for automated tests and the demo key overlay.</summary>
     internal void SimulateAction(TvInputAction action) => DispatchAction(action);
 
+    private void Shell_SourceInitialized(object? sender, EventArgs e)
+    {
+        if (PresentationSource.FromVisual(this) is HwndSource source)
+            source.AddHook(Shell_WndProcHook);
+        _ = NativeCursor.ShowCursor(false);
+        LogKey("shell source initialized");
+    }
+
+    private static IntPtr Shell_WndProcHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg is 0x0100 or 0x0104)
+            LogKey($"wm_keydown {wParam}");
+        if (msg == 0x0020)
+        {
+            NativeCursor.SetCursor(IntPtr.Zero);
+            handled = true;
+            return IntPtr.Zero;
+        }
+        return IntPtr.Zero;
+    }
+
     private void Shell_Loaded(object sender, RoutedEventArgs e)
     {
         if (_libraryLoaded) return;
@@ -104,7 +138,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
         ClockText.Visibility = _context.Settings.TvClockVisible ? Visibility.Visible : Visibility.Collapsed;
         UpdateClock();
         _clockTimer.Start();
-        if (_options.DemoMode) DemoBadge.Visibility = Visibility.Visible;
         FocusRoot();
         _ = LoadLibraryAsync();
     }
@@ -226,6 +259,11 @@ public sealed partial class TvShellWindow : Window, IDisposable
         UpdateClock();
     }
 
+    internal void FocusShellForPlayback()
+    {
+        FocusRoot();
+    }
+
     internal void ProcessRawKeyDown(Key key)
     {
         if (_input.HandleKeyDown(key, ModifierKeys.None)) { }
@@ -273,6 +311,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
         if (!ReferenceEquals(_currentScreen, screen) && _currentScreen is not null)
             _navigator.RememberFocus(_currentScreen.Id, _currentScreen.OnDeactivating());
         _currentScreen = screen;
+        LogKey("set screen " + screen.Id);
         ScreenHost.Content = screen;
         _navFocused = false;
         ExpandNavigation(false);
@@ -317,7 +356,64 @@ public sealed partial class TvShellWindow : Window, IDisposable
     {
         if (_exitOverlayVisible) return;
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
-        if (_input.HandleKeyDown(key, Keyboard.Modifiers)) e.Handled = true;
+        LogKey($"preview {key} repeat={e.IsRepeat} focused={Keyboard.FocusedElement?.GetType().Name}");
+        if (_input.HandleKeyDown(key, Keyboard.Modifiers))
+        {
+            e.Handled = true;
+            return;
+        }
+        if (!_navFocused && _currentScreen is TvSearchScreen search)
+        {
+            if (key == Key.Back)
+            {
+                search.RemoveLastCharacter();
+                e.Handled = true;
+            }
+            else if (TryPrintableCharacter(key, out var character))
+            {
+                search.AppendCharacter(character);
+                e.Handled = true;
+            }
+        }
+    }
+
+    private static bool TryPrintableCharacter(Key key, out char character)
+    {
+        character = '\0';
+        if (key is >= Key.A and <= Key.Z)
+        {
+            character = (char)('a' + (key - Key.A));
+            return true;
+        }
+        if (key is >= Key.D0 and <= Key.D9)
+        {
+            character = (char)('0' + (key - Key.D0));
+            return true;
+        }
+        if (key == Key.Space)
+        {
+            character = ' ';
+            return true;
+        }
+        return false;
+    }
+
+    private void Shell_PreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        _input.HandleKeyUp(key);
+    }
+
+    internal static void LogKey(string message)
+    {
+        try
+        {
+            File.AppendAllText(Path.Combine(Path.GetTempPath(), "miruplay-tv-keys.log"), $"{DateTime.Now:HH:mm:ss.fff} {message}\n");
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            // Diagnostics only.
+        }
     }
 
     private void Input_ActionInvoked(object? sender, TvInputActionEventArgs e)
@@ -328,6 +424,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
     internal void DispatchAction(TvInputAction action)
     {
+        LogKey($"dispatch {action} screen={_currentScreen?.Id} navFocused={_navFocused} loaded={_libraryLoaded} failed={_loadFailed} player={_playerScreen is not null}");
         if (_disposed) return;
         if (_exitOverlayVisible) return;
         if (_loadFailed)
@@ -344,10 +441,21 @@ public sealed partial class TvShellWindow : Window, IDisposable
             return;
         }
 
-        if (_currentScreen?.HandleAction(action) == true)
+        try
         {
-            UpdateHint();
-            return;
+            LogKey("before screen handle " + _currentScreen?.GetType().Name);
+            var handled = _currentScreen?.HandleAction(action) == true;
+            LogKey($"screen {_currentScreen?.GetType().Name} handled={handled}");
+            if (handled)
+            {
+                UpdateHint();
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            LogKey("screen action exception " + ex);
+            throw;
         }
 
         switch (action)
@@ -470,6 +578,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
         _navigator.Push(TvScreenId.Player);
         _playerScreen = new TvPlayerScreen(_context, this);
         ShowCurrentScreen(activate: true, focusContent: false);
+        UpdateLayout();
         await _playerScreen.BeginAsync(series, episode, resume);
     }
 
@@ -535,7 +644,9 @@ public sealed partial class TvShellWindow : Window, IDisposable
         _clockTimer.Stop();
         _toastTimer.Stop();
         _exitOverlayTimer.Stop();
+        _demoBadgeTimer.Stop();
         _input.Dispose();
+        _ = NativeCursor.ShowCursor(true);
         Mouse.OverrideCursor = null;
         _osd?.Close();
         _osd = null;
@@ -660,6 +771,8 @@ public sealed partial class TvShellWindow : Window, IDisposable
         if (!_options.DemoMode) return;
         DemoBadgeText.Text = TvActionLabel(action);
         DemoBadge.Visibility = Visibility.Visible;
+        _demoBadgeTimer.Stop();
+        _demoBadgeTimer.Start();
     }
 
     internal static string TvActionLabel(TvInputAction action) => action switch
@@ -686,6 +799,15 @@ public sealed partial class TvShellWindow : Window, IDisposable
         ClockText.Visibility = _context.Settings.TvClockVisible ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    private static class NativeCursor
+    {
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern int ShowCursor(bool show);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern IntPtr SetCursor(IntPtr handle);
+    }
+
     internal void UpdateOsdGeometry()
     {
         if (_osd is null) return;
@@ -695,6 +817,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
     internal TvOsdWindow EnsureOsd()
     {
         _osd ??= new TvOsdWindow();
+        TvPlayerScreen.LogPlayer("ensure osd visible=" + _osd.IsVisible);
         if (!_osd.IsVisible)
         {
             _osd.Show();
