@@ -19,7 +19,13 @@ public sealed class AudioBalanceTests : IDisposable
         var graph = AudioDspFilterGraphCompiler.Compile(
             AudioDspConfig.Neutral(), AudioDspChannelLayout.Stereo, 48_000, AudioBalanceLevel.Off);
         Assert.Empty(graph.MpvArguments);
+        Assert.Equal(string.Empty, graph.AfValue);
         Assert.Equal("disabled", graph.EffectiveRoute);
+
+        // C3 hard regression: DSP off + balance off must be byte-identical to the master graph.
+        var master = AudioDspFilterGraphCompiler.Compile(
+            AudioDspConfig.Neutral(), AudioDspChannelLayout.Stereo, 48_000);
+        Assert.Equal(master, graph);
     }
 
     [Fact]
