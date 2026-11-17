@@ -1292,14 +1292,14 @@
   <data name="tv.player.error.hint" xml:space="preserve"><value>OK Retry   Back Return</value></data>
   <data name="tv.player.error.degraded" xml:space="preserve"><value>System player fallback is unavailable in TV mode: {0}</value></data>
   <data name="tv.search.title" xml:space="preserve"><value>Search</value></data>
-  <data name="tv.search.placeholder" xml:space="preserve"><value>Type a title (use your phone for Chinese)</value></data>
+  <data name="tv.search.placeholder" xml:space="preserve"><value>Type a title (Chinese input isn't available on TV; use a physical keyboard)</value></data>
   <data name="tv.search.space" xml:space="preserve"><value>Space</value></data>
   <data name="tv.search.clear" xml:space="preserve"><value>Clear</value></data>
   <data name="tv.search.recent" xml:space="preserve"><value>Recent searches</value></data>
   <data name="tv.search.results" xml:space="preserve"><value>Results</value></data>
   <data name="tv.search.empty" xml:space="preserve"><value>No matching titles</value></data>
   <data name="tv.settings.title" xml:space="preserve"><value>Settings</value></data>
-  <data name="tv.settings.subtitle" xml:space="preserve"><value>TV mode settings; text fields are edited from the phone WebUI</value></data>
+  <data name="tv.settings.subtitle" xml:space="preserve"><value>TV mode settings; edit text fields in desktop mode</value></data>
   <data name="tv.settings.group.playback" xml:space="preserve"><value>Playback</value></data>
   <data name="tv.settings.group.tv" xml:space="preserve"><value>TV &amp; remote</value></data>
   <data name="tv.settings.group.source" xml:space="preserve"><value>Media source</value></data>
@@ -1321,14 +1321,14 @@
   <data name="tv.settings.exitHold" xml:space="preserve"><value>Hold Back to exit</value></data>
   <data name="tv.settings.exitHoldValue" xml:space="preserve"><value>{0} ms</value></data>
   <data name="tv.settings.clock" xml:space="preserve"><value>Clock</value></data>
-  <data name="tv.settings.sound" xml:space="preserve"><value>Focus sounds</value></data>
+  <data name="tv.settings.sound" xml:space="preserve"><value>Focus sounds (reserved, not enabled yet)</value></data>
   <data name="tv.settings.on" xml:space="preserve"><value>On</value></data>
   <data name="tv.settings.off" xml:space="preserve"><value>Off</value></data>
   <data name="tv.settings.source" xml:space="preserve"><value>Active source</value></data>
   <data name="tv.settings.sourcePath" xml:space="preserve"><value>Location</value></data>
   <data name="tv.settings.sourceNone" xml:space="preserve"><value>No source configured</value></data>
-  <data name="tv.settings.sourceEdit" xml:space="preserve"><value>Edit text settings from the phone WebUI</value></data>
-  <data name="tv.settings.sourceEditHint" xml:space="preserve"><value>No keyboard on TV: fill this from your phone</value></data>
+  <data name="tv.settings.sourceEdit" xml:space="preserve"><value>Edit text settings in desktop mode</value></data>
+  <data name="tv.settings.sourceEditHint" xml:space="preserve"><value>No keyboard on TV; edit this in desktop mode</value></data>
   <data name="tv.settings.version" xml:space="preserve"><value>Version</value></data>
   <data name="tv.settings.appMode" xml:space="preserve"><value>Content mode</value></data>
   <data name="tv.settings.modeAnime" xml:space="preserve"><value>Anime</value></data>
@@ -1336,7 +1336,7 @@
   <data name="tv.settings.diagnostics" xml:space="preserve"><value>Remote diagnostics</value></data>
   <data name="tv.settings.diagnosticsHint" xml:space="preserve"><value>Keys show in the demo badge (--tv-demo)</value></data>
   <data name="tv.settings.exitTv" xml:space="preserve"><value>Exit TV mode</value></data>
-  <data name="tv.settings.phoneHint" xml:space="preserve"><value>Please fill this from the phone WebUI</value></data>
+  <data name="tv.settings.phoneHint" xml:space="preserve"><value>Not editable on TV; please use desktop mode</value></data>
   <data name="tv.settings.restartHint" xml:space="preserve"><value>Takes effect after restarting MiruPlay</value></data>
   <data name="tv.exit.hold" xml:space="preserve"><value>Keep holding Back to exit TV mode</value></data>
   <data name="tv.exit.hint" xml:space="preserve"><value>Release to cancel</value></data>

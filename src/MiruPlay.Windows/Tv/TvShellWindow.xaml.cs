@@ -97,6 +97,19 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
     internal TvNavigator Navigator => _navigator;
 
+    /// <summary>
+    /// Deterministic smoke-test entry point: performs the post-load shell setup
+    /// (library-loaded flag, hide loading overlay, build the first screen) without
+    /// creating an HWND or waiting for the Window.Loaded event. Used by unit tests
+    /// so they do not race the real message pump or other WPF tests' Application.
+    /// </summary>
+    internal void InitializeForSmokeTest()
+    {
+        _libraryLoaded = true;
+        HideLoading();
+        ShowCurrentScreen(activate: true);
+    }
+
     internal TvScreenBase? CurrentScreen => _currentScreen;
 
     internal TvAppContext Context => _context;

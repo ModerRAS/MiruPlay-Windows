@@ -1292,14 +1292,14 @@
   <data name="tv.player.error.hint" xml:space="preserve"><value>OK 重试   Back 返回</value></data>
   <data name="tv.player.error.degraded" xml:space="preserve"><value>无法在电视模式下使用系统播放器降级：{0}</value></data>
   <data name="tv.search.title" xml:space="preserve"><value>搜索</value></data>
-  <data name="tv.search.placeholder" xml:space="preserve"><value>输入作品名称（可用手机扫码输入中文）</value></data>
+  <data name="tv.search.placeholder" xml:space="preserve"><value>输入作品名称（电视端暂不支持中文输入，请用实体键盘）</value></data>
   <data name="tv.search.space" xml:space="preserve"><value>空格</value></data>
   <data name="tv.search.clear" xml:space="preserve"><value>清空</value></data>
   <data name="tv.search.recent" xml:space="preserve"><value>最近搜索</value></data>
   <data name="tv.search.results" xml:space="preserve"><value>结果</value></data>
   <data name="tv.search.empty" xml:space="preserve"><value>没有匹配的作品</value></data>
   <data name="tv.settings.title" xml:space="preserve"><value>设置</value></data>
-  <data name="tv.settings.subtitle" xml:space="preserve"><value>电视模式设置；文本类配置请用手机 WebUI 代填</value></data>
+  <data name="tv.settings.subtitle" xml:space="preserve"><value>电视模式设置；文本类配置请在桌面模式修改</value></data>
   <data name="tv.settings.group.playback" xml:space="preserve"><value>播放</value></data>
   <data name="tv.settings.group.tv" xml:space="preserve"><value>电视与遥控器</value></data>
   <data name="tv.settings.group.source" xml:space="preserve"><value>媒体源</value></data>
@@ -1321,14 +1321,14 @@
   <data name="tv.settings.exitHold" xml:space="preserve"><value>长按返回退出时长</value></data>
   <data name="tv.settings.exitHoldValue" xml:space="preserve"><value>{0} 毫秒</value></data>
   <data name="tv.settings.clock" xml:space="preserve"><value>首页时钟</value></data>
-  <data name="tv.settings.sound" xml:space="preserve"><value>焦点音效</value></data>
+  <data name="tv.settings.sound" xml:space="preserve"><value>焦点音效（预留，暂未启用）</value></data>
   <data name="tv.settings.on" xml:space="preserve"><value>开</value></data>
   <data name="tv.settings.off" xml:space="preserve"><value>关</value></data>
   <data name="tv.settings.source" xml:space="preserve"><value>当前来源</value></data>
   <data name="tv.settings.sourcePath" xml:space="preserve"><value>位置</value></data>
   <data name="tv.settings.sourceNone" xml:space="preserve"><value>未配置来源</value></data>
-  <data name="tv.settings.sourceEdit" xml:space="preserve"><value>文本配置请在手机 WebUI 修改</value></data>
-  <data name="tv.settings.sourceEditHint" xml:space="preserve"><value>电视端不弹出键盘，扫码用手机填写</value></data>
+  <data name="tv.settings.sourceEdit" xml:space="preserve"><value>文本配置请在桌面模式修改</value></data>
+  <data name="tv.settings.sourceEditHint" xml:space="preserve"><value>电视端不弹出键盘，请在桌面模式编辑</value></data>
   <data name="tv.settings.version" xml:space="preserve"><value>版本</value></data>
   <data name="tv.settings.appMode" xml:space="preserve"><value>内容模式</value></data>
   <data name="tv.settings.modeAnime" xml:space="preserve"><value>动画</value></data>
@@ -1336,7 +1336,7 @@
   <data name="tv.settings.diagnostics" xml:space="preserve"><value>遥控器诊断</value></data>
   <data name="tv.settings.diagnosticsHint" xml:space="preserve"><value>按键会显示在演示角标（--tv-demo）</value></data>
   <data name="tv.settings.exitTv" xml:space="preserve"><value>退出电视模式</value></data>
-  <data name="tv.settings.phoneHint" xml:space="preserve"><value>请用手机打开 WebUI 填写</value></data>
+  <data name="tv.settings.phoneHint" xml:space="preserve"><value>电视端暂不支持编辑，请在桌面模式修改</value></data>
   <data name="tv.settings.restartHint" xml:space="preserve"><value>重启 MiruPlay 后生效</value></data>
   <data name="tv.exit.hold" xml:space="preserve"><value>继续按住 Back 退出电视模式</value></data>
   <data name="tv.exit.hint" xml:space="preserve"><value>松开取消</value></data>

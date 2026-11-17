@@ -1,14 +1,22 @@
-using System.Windows;
 using System.Windows.Threading;
 using MiruPlay.Windows.Tv;
 
 namespace MiruPlay.Windows.Tests;
 
+[CollectionDefinition("WpfUi", DisableParallelization = true)]
+public sealed class WpfUiCollectionDefinition
+{
+}
+
 /// <summary>
-/// Creates the real borderless TV shell on an STA thread with a temporary
-/// settings/state database (no user data), then drives it through the same
-/// action path remote keys use.
+/// Smoke test for the real borderless TV shell: constructs it on an STA thread
+/// with a temporary settings/state database (no user data) and drives it through
+/// the same action path remote keys use. It uses the deterministic smoke entry
+/// point instead of creating an HWND, so the assertions do not depend on the WPF
+/// message pump racing other tests (Application/Dispatcher state in the shared
+/// test host).
 /// </summary>
+[Collection("WpfUi")]
 public sealed class TvShellSmokeTests
 {
     [Fact]
@@ -42,12 +50,12 @@ public sealed class TvShellSmokeTests
         var shell = new TvShellWindow(new TvShellOptions { Context = context, LoadLibrary = false });
         try
         {
-            shell.Show();
-            Pump();
+            shell.InitializeForSmokeTest();
 
             Assert.Equal(TvScreenId.Home, shell.Navigator.Current);
             Assert.Equal(TvScreenId.Home, shell.CurrentScreen?.Id);
             Assert.NotNull(shell.CurrentScreen?.ActiveZone);
+            Pump();
 
             shell.SimulateAction(TvInputAction.Down); // hero -> continue row
             shell.SimulateAction(TvInputAction.Up);   // back to hero
@@ -70,7 +78,7 @@ public sealed class TvShellSmokeTests
         }
         finally
         {
-            shell.Close();
+            shell.Dispose();
             Pump();
         }
     }
