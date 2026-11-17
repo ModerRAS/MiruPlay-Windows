@@ -1,5 +1,11 @@
 namespace MiruPlay.Windows.Services;
 
+/// <summary>
+/// Periodically rescans configured media sources. Scans are feed/directory work only:
+/// they never consult the offline Bangumi archive (matching Android ScanCoordinator's
+/// <c>includeArchive = false</c> auto-scan fix); archive matching stays on the explicit
+/// metadata-search path so a large offline archive cannot stall unattended scans.
+/// </summary>
 public sealed class MediaSourceAutoScanScheduler : IDisposable, IAsyncDisposable
 {
     public static readonly IReadOnlyList<int> IntervalOptionsHours = [1, 6, 12, 24];

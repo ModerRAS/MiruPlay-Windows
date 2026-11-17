@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,6 +9,7 @@ using MiruPlay.Windows.Services;
 
 namespace MiruPlay.Windows;
 
+[SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "WPF owns the window lifetime; the archive cancellation source is disposed in OnClosed.")]
 public sealed class MetadataEditorWindow : Window
 {
     private static readonly string[] MetadataProviders = ["bangumi", "tmdb", "tvmaze"];
@@ -35,6 +37,7 @@ public sealed class MetadataEditorWindow : Window
     private readonly TextBox _bangumiEpisodeId = new() { MinWidth = 120, MaxLength = 20 };
     private readonly ComboBox _episodeCollectionType = new() { Width = 150 };
     private readonly TextBlock _status = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 8) };
+    private readonly CancellationTokenSource _archiveCancellation = new();
     private MetadataBatch? _batch;
 
     public MetadataEditorWindow(
@@ -295,7 +298,7 @@ public sealed class MetadataEditorWindow : Window
     {
         try
         {
-            var snapshot = await _archive.DownloadLatestAsync();
+            var snapshot = await _archive.DownloadLatestAsync(cancellationToken: _archiveCancellation.Token);
             _status.Text = AppStrings.Get("wpf.edit.archiveUpdated", snapshot.SubjectFileSizeBytes.ToString("N0", CultureInfo.CurrentCulture));
         }
         catch (Exception error) when (error is HttpRequestException or IOException or InvalidDataException or OperationCanceledException)
@@ -316,7 +319,11 @@ public sealed class MetadataEditorWindow : Window
         try
         {
             await using var input = File.OpenRead(dialog.FileName);
-            var snapshot = await _archive.ImportAsync(input, Path.GetFileName(dialog.FileName), input.Length);
+            var snapshot = await _archive.ImportAsync(
+                input,
+                Path.GetFileName(dialog.FileName),
+                input.Length,
+                cancellationToken: _archiveCancellation.Token);
             _status.Text = AppStrings.Get("wpf.edit.archiveImported", snapshot.SubjectFileSizeBytes.ToString("N0", CultureInfo.CurrentCulture));
         }
         catch (Exception error) when (error is IOException or InvalidDataException or OperationCanceledException)
@@ -325,19 +332,22 @@ public sealed class MetadataEditorWindow : Window
         }
     }
 
-    private Task SearchArchive()
+    private async Task SearchArchive()
     {
         try
         {
-            var hits = _archive.Search(_archiveQuery.Text, 20);
+            var query = _archiveQuery.Text;
+            var cancellationToken = _archiveCancellation.Token;
+            var hits = await Task.Run(
+                () => _archive.Search(query, 20, cancellationToken: cancellationToken),
+                cancellationToken);
             _archiveResults.ItemsSource = hits.Select(hit => new ArchiveHit(hit)).ToList();
             _status.Text = hits.Count == 0 ? AppStrings.Get("wpf.edit.archiveNoMatch") : AppStrings.Get("wpf.edit.archiveFound", hits.Count);
         }
-        catch (Exception error) when (error is ArgumentException or InvalidDataException or IOException)
+        catch (Exception error) when (error is ArgumentException or InvalidDataException or IOException or OperationCanceledException)
         {
             _status.Text = error.Message;
         }
-        return Task.CompletedTask;
     }
 
     private static void AddCollectionOptions(ComboBox combo, params (int Value, string Label)[] options)
@@ -511,6 +521,13 @@ public sealed class MetadataEditorWindow : Window
         {
             _status.Text = error.Message;
         }
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _archiveCancellation.Cancel();
+        _archiveCancellation.Dispose();
+        base.OnClosed(e);
     }
 
     private sealed record EpisodeCollectionItem(BangumiEpisodeCollectionState State)

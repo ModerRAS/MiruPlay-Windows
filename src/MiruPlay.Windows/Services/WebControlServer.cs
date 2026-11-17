@@ -723,9 +723,15 @@ public sealed class WebControlServer : IAsyncDisposable
             return Success(await _bangumiArchive.ImportAsync(input, file.FileName, file.Length,
                 cancellationToken: request.HttpContext.RequestAborted).ConfigureAwait(false));
         });
-        app.MapGet("/api/metadata/archive/search", (HttpRequest request) =>
-            Success(_bangumiArchive.Search(request.Query["query"].ToString(),
-                ParseOptionalInt(request.Query["limit"].ToString(), "limit") ?? 20)));
+        app.MapGet("/api/metadata/archive/search", async (HttpRequest request) =>
+        {
+            var cancellationToken = request.HttpContext.RequestAborted;
+            var query = request.Query["query"].ToString();
+            var limit = ParseOptionalInt(request.Query["limit"].ToString(), "limit") ?? 20;
+            return Success(await Task.Run(
+                () => _bangumiArchive.Search(query, limit, cancellationToken: cancellationToken),
+                cancellationToken).ConfigureAwait(false));
+        });
 
         app.MapGet("/api/metadata/sources", () => Success((_getSettings().MediaSources ?? [])
             .Where(source => source.RecognitionMode == "DIRECTORY")
