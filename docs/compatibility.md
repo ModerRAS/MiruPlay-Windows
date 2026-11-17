@@ -2,8 +2,8 @@
 
 ## 对照基线
 
-- 最后完整审计：2026-08-04。本节以下为 2026-10-19 对 Android 2.17.0 的增量对照，未重审所有既有条目。
-- Android 对照基线：`feat/ani-online-source@5ea3c174dd446cb3ab4945f36942a1a254ea5136`（2026-10-19，2.17.0）。该分支包含通用只读 RSS 在线媒体源；2026-08 后还增加音乐/CUE 播放、五语言切换、外置音轨发现、播放性能诊断、房间测量/校准及 Topping DAC USB HID 控制。
+- 最后完整审计：2026-08-04。以下为 2026-11-18 对 Android 2.18.798 的增量对照，未重审所有既有条目；历史增量记录保留在本文件后部。
+- Android 对照基线：`master@f34dbf7d`（v2.18.798，2026-11-17）。相对上一对照基线 `feat/ani-online-source@5ea3c17`（2.17.0），新增 #95-#100：Bangumi OAuth 直连登录（回环回调）、OAuth 出站代理、网页控制台账号密码+验证码登录、授权表单空 action 修复、mpv 侧音频平衡（响度 AGC）与 RSS/archive 修复。Android 仓库此后还有 `7aec15ca`（Bangumi 同步语义），不在本次对照范围内。
 - Android 字幕补充基线：`fix/subtitle-bilingual-overlap@a39dfb2e0f571cd276081ebbc6788b62847cce5e`（基础版本 2.5.0），包含尚未合入上述对照分支的 Matroska zlib 字幕读取、密集普通对话 cue 去上限/去重、Media3 span 层和样式/作者定位保真，并补齐单一字幕变换流、`PlayerView` 释放、陈旧监听隔离和控制栏安全区测试；目前没有对应实机验收。
 - Windows 基线：`master@dde9a01da05252fe0403e083d433002e8b30c82a`（2026-08-05）；本次对照包含当前未提交的工作区改动。
 - Android 字幕补充基线是独立分支，不代表 2.17.0 对照版本已包含这些补丁。
@@ -28,6 +28,8 @@
 | 多版本剧集与特典 | 导入 MLIP 多版本和 extras，支持版本选择策略、详情选择及连续播放 | 对齐 | WPF/WebUI 设置支持自动相近路径与 manual；WPF 手动下一集及自然播放结束显示原生选择器，WebControl 返回下一集版本并由 WebUI 选择后提交不透明 episode ID。WPF 取消不前进、自然结束选定 720p、WebUI 选定 1080p 均以真实临时媒体验证；extras 和版本队列有自动化测试 |
 | 文件名识别与 NFO | 规则与 AniFileBERT ONNX 识别，NFO 参与本地元数据流程 | 部分对齐 | DIRECTORY 继续共用 `OnnxAnimeFilenameParser`；安全有界 `NfoDocumentService` 已接入 Local/SMB/WebDAV 扫描和自有索引，覆盖 series/episode metadata 与增量更新测试。Local 真实 NFO、SMB 映射网络共享，以及本地隔离 WebDAV 协议服务均实际扫描 NFO，并验证 override 在重扫后保留、undo 恢复 NFO；WebDAV 验证使用本地协议 fixture，不代表用户外部 WebDAV 服务器认证已验收。 |
 | 在线元数据搜索与匹配 | Anime 当前用户流程接入 Bangumi；AniList provider 存在但未注入。Drama 接入 TMDB+TVMaze；共享 query plan、聚类、重排和手动/批量流程 | 部分对齐 | 新增 provider-neutral `/api/metadata/search`：Anime 使用 Bangumi，Drama 使用 TMDB+TVMaze；依据模式、标题/原名/别名、路径样本、年份和季号构造最多 10 条查询，按 provider ID 去重，只跨 provider 合并相容候选，保留同源不同作品和季号冲突，按标题/年份/upstream rank/完整度/多源收敛重排并返回证据与 recommendation，成功结果缓存 10 分钟。WebUI/WPF 提供全部来源搜索，仍需用户确认候选后才预览/应用。Local/SMB/WebDAV DIRECTORY 使用自有 SQLite override；WPF/WebUI 支持批量预览、应用与历史撤销，刷新后重载列表；MLIP/RSS 只读。WPF/WebUI 均可导入/搜索 Archive 并回填。仍缺 provider-ref detail lookup、上游本地候选缓存、完整 Drama 季集/艺术图补充；TMDB 真实凭据及候选匹配质量仍需真实数据验收；AniList 未接线不列为当前要求 |
+| Bangumi OAuth 登录 | OAuth2 直连授权（回环回调 + state 校验）、刷新令牌轮换、7 天访问令牌自动续期，WebView 登录页走出站代理 | 对齐（无真实凭据实测） | `BangumiOAuthClient`/`BangumiOAuthLoopbackServer`/`BangumiOAuthCoordinator`/`BangumiOAuthRefreshScheduler` 提供授权 URL、`127.0.0.1:13712/callback` 回环、一次性 state、coordinator 统一 10 分钟超时（超时置 failed 并释放回环监听，WPF/WebControl/网页登录入口一致）、code 换 token、24 小时临期自动轮换、DPAPI 保存 access/refresh/expiry、登出清零，以及环境变量 `BANGUMI_CLIENT_ID/BANGUMI_CLIENT_SECRET` 优先、DPAPI 设置兜底、未配置时明确降级；WPF 与 WebControl API 入口可用，网页端 OAuth 需与 MiruPlay 同机（远程浏览器会回调到用户自己的 `127.0.0.1`，WebUI 会禁用该入口并提示改用账号密码登录），手动粘贴 token 不受影响。回环只绑 127.0.0.1 且不经代理，token/用户信息请求复用统一出站代理（loopback 显式 bypass）。自动化：`BangumiOAuthClientTests`（同一文件含 `BangumiOAuthCredentialStoreTests`、`OutboundHttpProxyTests` 两个测试类）、`BangumiOAuthLoopbackTests`、`BangumiOAuthCoordinatorTests`（含 WPF 无关的超时/重启与错 state 重试回归）、`BangumiLoginApiTests`（含 WebControl 入口超时/重启回归）；本机无真实 OAuth 应用，真实授权/刷新未实测 |
+| 网页控制台账号密码登录 | 网页提交 Bangumi 邮箱/密码/验证码，设备代登录并完成 OAuth 授权；密码不落盘；授权表单无 action 时回提交授权页 URL | 对齐（fake HTTP 契约测试） | `BangumiPasswordLoginClient` 移植登录页 formhash/验证码/表单提交/同站重定向/cookie 会话，并实现 #100 修复（空 action 时 POST 回授权页完整 URL）；`BangumiWebConsoleLogin` 提供 10 分钟会话 TTL、错误后保留会话换验证码、失败/超时丢弃临时会话、密码不回声；`/api/metadata/bangumi/login*` 走现有 WebControl token 鉴权。密码只进入当次 POST body，不写盘/不回声/不落日志；未配置 OAuth 时在提交密码前返回 not_configured。WebUI 提供账号/验证码表单并保留手动 token 与 Archive。自动化：`BangumiPasswordLoginClientTests`、`BangumiWebConsoleLoginTests`、`BangumiLoginApiTests` |
 | Bangumi 收藏与观看状态 | 收藏读写、分集状态同步，并在自然播放完成后标记已看 | 部分对齐 | WebAPI、WebUI 和 WPF 元数据编辑器均支持作品收藏及分集状态读取/写入；WPF 按 episode ID 显示已收藏分集，并允许手动输入未标记 episode ID，状态值符合官方 schema。`BangumiPlaybackSyncService` 在自然完成后标记已看。本机无 Bangumi token，外部账号读写未实测 |
 | Bangumi Archive | 下载/导入离线 archive，并用于本地搜索和匹配 | 对齐 | `BangumiArchiveStore` 提供有界下载、JSONL/ZIP 导入和本地搜索；WPF/WebUI 均有导入、搜索、候选回填入口。WebUI 真实上传 236 字节样例、WPF 真实导入 231 字节样例并搜索回填均通过；multipart 和大小边界有 HTTP 集成测试。测试文件已精确清理；未下载完整上游档案做端到端验证 |
 
@@ -40,6 +42,7 @@
 | HDR/SDR 与色调映射 | 按 SDR、HDR10、HDR10+、Dolby Vision、未知 HDR 保存后端与 tone-mapping 规则 | 部分对齐 | mpv 使用 `gpu-next`/D3D11，已有 SDR tone-map、HDR passthrough、曲线和目标亮度参数映射测试；当前只启用默认 `Auto`，缺按信号持久化的 WPF/WebUI 设置与共享 DTO 支持 |
 | 内封/外挂字幕与语言偏好 | 轨道自动/手动选择、关闭、透明背景和分层 ASS；补充分支增加 zlib Matroska 解压，移除密集普通对话的固定 cue 上限，保留非默认/作者定位、位图、Ruby/强调/Voice 等 span 与样式差异，并统一字幕变换流、释放旧视图、隔离陈旧监听及为控制栏留出安全区 | 部分对齐 | mpv 原生处理内封/外挂、ASS/libass 与 Matroska zlib，WPF/WebControl 共用轨道状态和语言偏好；缺 `subtitleBackgroundTransparent` 设置。Media3 cue 布局与 `PlayerView` 生命周期属于 Android 专属实现，不移植 |
 | 播放进度、播完动作与队列 | 断点续播、完成判定、返回详情/自动下一集及逻辑上一集/下一集 | 对齐 | `state.db` 提供 15 秒保存、90% 完成判定和继续观看；WPF/WebControl/WebUI 共享逻辑上一集/下一集，WPF 会话在自然完成后按设置自动下一集。实机验证前后集和只读状态轮询；系统播放器降级不具备这些会话能力 |
+| 音频平衡（响度 AGC） | Exo/Media3 PCM 处理器按 off/low/medium/high 做流式响度平衡（RMS 目标、attack/release、噪声门、峰值上限） | 对齐（平台等价） | Windows 以 mpv/FFmpeg `dynaudnorm` 实现 off/low/medium/high（存储值小写，未知值归 OFF），参数按等级单调（boost 上限/帧窗/平滑窗/峰值目标），固定排在现有 PEQ/DSP 链（含 downmix、limiter）之后；DSP 关闭且平衡 OFF 时不插入任何滤镜，af 与 master 逐字节一致。设置持久化到 `AppSettings.AudioBalance`，`/api/settings/playback` 与 WPF/WebUI 双入口，改动对运行中会话立即生效并用于下次播放；视频与音乐播放共用同一 mpv 会话配置。自动化：`AudioBalanceTests`、`AudioDspFilterGraphCompilerTests`；未做听感实测，Exo 与 mpv 数值不逐位相同（属平台差异） |
 | 音频 PEQ / DSP | Android `master` 支持 PEQ、最小相位/线性相位 FIR、通道规则、limiter、保留/立体声/HRTF 输出、TV 投影和完整 WebUI | 部分对齐 | Windows 0.1.4 对齐模型语义和数值范围，提供 WPF/WebAPI/WebUI、频响预览、REW 导入、mpv `lavfi` 运行时应用及自动化测试；目前只作用于 mpv，WebUI 缺完整预设 CRUD/JSON 导入导出，且 C# 枚举的设置/API 序列化尚未对齐 Android 字符串存储值 |
 
 ## WebControl、自动化与发布
@@ -52,6 +55,15 @@
 | 本地日志与 OpenObserve | 有界本地日志、下载、平台加密 Token 和自动/手动上报 | 部分对齐 | `RotatingLocalLogStore` 有界轮转并脱敏；记录 WebControl 请求耗时/状态、播放器生命周期、扫描结果与启动事件。CurrentUser DPAPI Token 支持手动及 opt-in 每小时后台上报；上报失败留在本地并写入持久任务状态，不影响播放/扫描。外部 OpenObserve 账号未验收 |
 | 应用更新与远程生命周期 | 检查、下载、安装授权/系统安装器，以及远程重启/退出 | 部分对齐 | `tools/Publish-Release.ps1` 生成与 updater schema 一致的 `windows-update.json`，`Test-ReleaseArtifacts.ps1` 校验其 HTTPS 资产 URL/长度/SHA-256。WebUI 可配置无凭据清单；下载有界并强制 hash，安装交接前重验。用户确认后，Windows 隐藏 PowerShell 交接进程等待应用安全退出、静默运行 `*-setup.exe` 并重启当前客户端；WebControl 远程重启/退出已在 Release `--background` 进程上实际验证，重启保持隐藏，退出可正常关闭。安装器脚本只做校验/构造测试，未实际运行安装器或发布；Windows 安装权限 API仍不适用 |
 | 安装包与发布 | Android 生成并校验签名 APK、静态更新清单与设备安装流程 | 平台差异 | Windows 生成自包含 win-x64 便携包、每用户 Inno Setup、符号包、manifest、SHA-256 和许可清单；固定 mpv 来源并支持可选 Authenticode，详见 [distribution.md](distribution.md) |
+
+## Android 2.18.798 增量对照（#95-#100）
+
+| Android 更新 | Windows 当前状态 | 证据 / 差距 |
+|---|---|---|
+| #95 OAuth 直连登录（回环回调 + 7 天自动轮换）；#98 OAuth 登录页走应用出站代理 | 对齐（无真实凭据实测） | 授权 URL/state/回环/超时/token/refresh/DPAPI 与 WPF/WebControl API 全部落地；网页端 OAuth 仅限与客户端同机的浏览器（WebUI 远程访问时禁用入口并提示，远程请用账号密码登录）；回环只绑 127.0.0.1、不经代理，代理对公开主机生效（`OutboundHttpProxy` loopback bypass）。单元与进程内 HTTP 契约测试通过；真实 Bangumi 授权需用户提供 OAuth 应用凭据 |
+| #99 网页控制台账号密码验证码登录；#100 授权表单无 action 回提交授权页 URL | 对齐（fake HTTP 契约测试） | 登录页解析、验证码刷新、POST 登录、cookie 会话、授权表单提交与 #100 回归全部有测试；10 分钟 TTL、密码不落盘/不回声/不落日志、未配置先拒绝均验证。需要真实账号才能完成端到端登录 |
+| #97 Exo 音频平衡（响度 AGC） | 对齐（平台等价实现） | mpv `dynaudnorm` 四等级、与 DSP 链组合顺序、OFF 无滤镜（与 master af 逐字节一致）、设置/API/WPF/WebUI 往返均有测试；无听感/声学实测 |
+| #96 自动扫描跳过离线 archive、archive 流式可取消、URL 噪音系列名 | 对齐 + 平台差异 | archive 搜索改为流式有界 top-k + CancellationToken，下载/导入全链路可取消且取消后无 staging 残留；自动扫描与 archive 解耦并有锁文件回归测试；URL 噪音语义落在父目录回退过滤（扫描输入为相对路径，不解析完整 URL） |
 
 ## Android 2.17.0 增量对照
 
@@ -66,6 +78,8 @@
 | Topping DAC USB HID 音量、增益、电源与 PEQ 推送 | 硬件确认协议移植（CRC/帧/11 寄存器/Q25）、原生 HID 传输（产品字符串匹配、仅确认型号可写）、写缓存控制器（确认门限/pace/commit）、WebControl 全套路由、WebUI 与 WPF DSP 对话框推送入口 | 部分对齐；无 DAC 硬件实测，未连接路径已测，不向未知 VID 相同设备写命令 |
 
 
+- 音频平衡不移植 Exo PCM 处理器：Windows 用 mpv/FFmpeg `dynaudnorm`（流式 RMS 归一化 + 峰值限制）实现平台等价语义，等级参数单调而非数值等价；DSP 链顺序固定为 PEQ→downmix→limiter→balance，二者同开时最终峰值上限取 `dynaudnorm` 的 peak 目标，已在测试中固定。
+- URL 噪音系列名：Windows DIRECTORY 扫描/云盘整理只传入相对路径与文件名，不解析完整 URL，因此不复制 Android 的 modelPathText 全路径解析；等价语义落在 `VideoFilenameInference` 的父目录回退过滤（scheme/host/日期/百分号编码段不作为系列名），有 `AnimeVideoClassifierTests` 回归。自动扫描与离线 Bangumi archive 解耦：扫描只做目录/Feed 工作，离线 archive 仅服务显式元数据搜索/匹配（`ScanArchiveIsolationTests` 在 archive 文件被独占锁定时验证扫描仍成功）。
 - Android 的 APK 安装授权、Media3/Exo、ijkplayer、Android Surface/字幕层和原生播放器诊断接口不会在 Windows 上返回假成功；不适用接口返回明确的 unsupported 结果。
 - Windows 的系统播放器回退不具备进度、轨道、DSP、HDR 策略或 WebControl 会话能力，必须继续标记为降级模式。
 - 两端不共享可执行播放器代码。可复用的一致性依据是 MLIP fixtures、WebControl DTO/存储值、行为测试和用户可观察结果；Windows UI 遵循 Fluent、键鼠与窗口行为，不复制 TV 布局。
@@ -98,6 +112,22 @@
 - 真实 HTTP WebDAV 显式凭据和匿名 401 重试均通过进程内 libmpv 播放，进度分别推进 1625/1708 ms（总长 18000 ms）；匿名场景触发 3 次 401，Range 均为 `bytes=0-`。来源缓存及临时鉴权文件已清理。可通过 `node tools/Test-WebDavPlayback.mjs` 和附加 `--anonymous` 复现；结果见 `artifacts/verification/webdav-credential-playback.log`、`webdav-anonymous-playback.log`。
 - WebUI 实际操作验证音量、静音、1.25× 倍速及前后集切换；连续状态轮询保持当前队列位置。1280px/390px 浏览器验证无横向溢出，播放栏实际高度与预留空间一致，长标题省略显示。截图为 `output/playwright/rss-player-1280.png`、`rss-player-390.png`。
 - 删除正在播放的 RSS 来源后回到 IDLE，原媒体库恢复；测试来源、临时媒体和精确定位的测试进度均已清理。原设置已逐字节恢复，重启后只保留来源 1，当前读取 343 部作品且没有测试标题；见 `artifacts/verification/restored-user-state.log`。未提交、推送或发布。
+
+本次 Android 2.18.798 增量验证（2026-11-18）：
+
+- `dotnet test MiruPlay.Windows.slnx`：**452/452 通过，0 跳过，11 秒**；结果见 `artifacts/verification/android-218-full-tests.log`。`dotnet build MiruPlay.Windows.slnx -c Release`：**0 警告、0 错误**；见 `artifacts/verification/android-218-release-build.log`。
+- i18n：1262 键 × 5 locale（zh-CN/zh-TW/zh-HK/en-US/en-GB），`node tools/i18n/build.js --check` 通过；见 `artifacts/verification/android-218-i18n-check.log`。`node --check` 通过 `Web/app.js`、`Web/bangumi-login.js`，`git diff --check` 通过。
+- 新增/扩充测试：`AudioBalanceTests`、`BangumiArchiveCancellationTests`、`BangumiArchiveStreamingTests`、`ScanArchiveIsolationTests`、`BangumiOAuthClientTests`、`BangumiOAuthLoopbackTests`、`BangumiOAuthCoordinatorTests`、`BangumiPasswordLoginClientTests`、`BangumiWebConsoleLoginTests`、`BangumiLoginApiTests`，并扩充 `AnimeVideoClassifierTests`、`MetadataTokenStoreTests`；全部使用注入式 `HttpMessageHandler`、随机空闲端口与临时目录，不依赖公网或真实账号。
+- 已知限制：本机无 Bangumi OAuth client_id/secret 与真实账号，OAuth 真实授权、网页真实登录与令牌刷新只能在 fake HTTP/进程内测试中验证；本轮未做 WPF UIA/截图冒烟与 WebUI 浏览器实测；mpv 音频平衡未做听感实测；未对照 Android 真机行为。
+
+本次 PR 验收跟进（2026-11-18，F1-F5）：
+
+- F1：OAuth 10 分钟授权超时从 `WaitForResultAsync` 下沉到 `BangumiOAuthCoordinator` 的后台 flow，WPF、`/api/metadata/bangumi/oauth/start` 与 `/api/metadata/bangumi/login/start` 共用同一超时；到期置 `failed`、释放回环监听并允许立即重新开始。新增“无 UI 等待也超时/可重启”与“WebControl 入口超时/重启”回归。
+- F2：WebUI 在非同机浏览器（host 不是 127.0.0.1/localhost/::1）禁用 OAuth 入口并提示改用账号密码登录；文档与 Android“OAuth 为 TV-only”事实对齐——WebControl API 可用，网页端 OAuth 需与客户端同机。
+- F3：回环回调改为队列语义，错误 state 回调被丢弃后继续等待真实回调直至超时；新增错 state 后真实回调成功、多次回调排队回归。
+- F4：WebUI 验证码错误时保留邮箱/密码，仅清空验证码输入（对齐 Android）；终态失败仍清空密码。
+- F5：修正文档中的测试类引用为真实文件与测试类名。
+- 验证：`dotnet test MiruPlay.Windows.slnx` **456/456 通过，0 跳过，13 秒**；`dotnet build MiruPlay.Windows.slnx -c Release` **0 警告、0 错误**；`node tools/i18n/build.js --check`：**1263 keys × 5 locale**、`app.js` 333 键；`node --check` 通过 `Web/app.js`、`Web/bangumi-login.js`。
 
 后续兼容状态更新至少运行：
 

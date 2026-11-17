@@ -4,7 +4,11 @@ using System.Text.Json;
 
 namespace MiruPlay.Windows.Services;
 
-public sealed record MetadataTokens(string? Bangumi = null, string? Tmdb = null);
+public sealed record MetadataTokens(
+    string? Bangumi = null,
+    string? Tmdb = null,
+    string? BangumiRefreshToken = null,
+    long BangumiExpiresAtMillis = 0);
 
 public sealed class MetadataTokenStore
 {
@@ -38,10 +42,31 @@ public sealed class MetadataTokenStore
     public void SaveBangumi(string token)
     {
         var value = ValidateToken(token, "Bangumi Access Token");
-        Save(Load() with { Bangumi = value });
+        // A manually pasted token has no refresh/expiry metadata; clear stale OAuth state.
+        Save(Load() with { Bangumi = value, BangumiRefreshToken = null, BangumiExpiresAtMillis = 0 });
     }
 
-    public void ClearBangumi() => Save(Load() with { Bangumi = null });
+    /// <summary>Persists an OAuth token pair (access token + rotating refresh token) with the
+    /// absolute expiry timestamp. Values stay DPAPI-protected inside the same vault file.</summary>
+    public void SaveBangumiSession(string accessToken, string refreshToken, long expiresAtMillis)
+    {
+        var access = ValidateToken(accessToken, "Bangumi Access Token");
+        var refresh = refreshToken?.Trim() ?? string.Empty;
+        if (refresh.Length > 4_096) throw new ArgumentException(AppStrings.Get("meta.tokenLength", "Bangumi Refresh Token"), nameof(refreshToken));
+        Save(Load() with
+        {
+            Bangumi = access,
+            BangumiRefreshToken = refresh.Length == 0 ? null : refresh,
+            BangumiExpiresAtMillis = expiresAtMillis > 0 ? expiresAtMillis : 0,
+        });
+    }
+
+    public void ClearBangumi() => Save(Load() with
+    {
+        Bangumi = null,
+        BangumiRefreshToken = null,
+        BangumiExpiresAtMillis = 0,
+    });
 
     public void SaveTmdb(string token)
     {

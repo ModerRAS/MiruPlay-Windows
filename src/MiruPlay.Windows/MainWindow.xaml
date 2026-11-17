@@ -453,6 +453,43 @@
                         <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.clearBangumi}" Click="ClearBangumiToken_Click" Margin="8,0,0,0" />
                     </Grid>
                     <TextBlock x:Name="BangumiTokenStatusText" Text="{services:Loc wpf.main.noBangumi}" Style="{StaticResource SecondaryText}" Margin="0,0,0,12" />
+                    <TextBlock Text="{services:Loc oauth.heading}" FontWeight="SemiBold" Margin="0,10,0,0" />
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Content="{services:Loc oauth.start}" Click="StartBangumiOAuth_Click" AutomationProperties.Name="{services:Loc oauth.start}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="{services:Loc oauth.logout}" Click="BangumiOAuthLogout_Click" Margin="8,0,0,0" AutomationProperties.Name="{services:Loc oauth.logout}" />
+                        <TextBlock x:Name="BangumiOAuthStatusText" Grid.Column="2" Text="{services:Loc oauth.statusLoggedOut}" Style="{StaticResource SecondaryText}" Margin="12,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    </Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{services:Loc oauth.clientId}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                        <TextBox x:Name="BangumiOAuthClientIdBox" Grid.Column="1" AutomationProperties.Name="{services:Loc oauth.clientId}" />
+                    </Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{services:Loc oauth.clientSecret}" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" />
+                        <PasswordBox x:Name="BangumiOAuthClientSecretBox" Grid.Column="1" Padding="10,8" AutomationProperties.Name="{services:Loc oauth.clientSecret}" />
+                    </Grid>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Content="{services:Loc oauth.saveCredentials}" Click="SaveBangumiOAuthCredentials_Click" AutomationProperties.Name="{services:Loc oauth.saveCredentials}" />
+                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="{services:Loc oauth.clearCredentials}" Click="ClearBangumiOAuthCredentials_Click" Margin="8,0,0,0" AutomationProperties.Name="{services:Loc oauth.clearCredentials}" />
+                        <TextBlock x:Name="BangumiOAuthCredentialStatusText" Grid.Column="2" Text="{services:Loc oauth.notConfigured}" Style="{StaticResource SecondaryText}" Margin="12,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    </Grid>
                     <TextBlock Text="TMDB Read Access Token" FontWeight="SemiBold" Margin="0,6,0,0" />
                     <Grid Margin="0,8,0,14">
                         <Grid.ColumnDefinitions>
@@ -683,6 +720,22 @@
                             <ComboBoxItem Tag="zh"><TextBlock Text="{services:Loc sub.zh}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                             <ComboBoxItem Tag="en"><TextBlock Text="{services:Loc sub.en}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                             <ComboBoxItem Tag="ja"><TextBlock Text="{services:Loc sub.ja}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                    <Grid Margin="0,0,0,28">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{services:Loc playback.balance}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc playback.balanceHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="AudioBalanceBox" Grid.Column="1" SelectionChanged="AudioBalance_SelectionChanged" AutomationProperties.Name="{services:Loc playback.balance}">
+                            <ComboBoxItem Tag="off"><TextBlock Text="{services:Loc playback.balanceOff}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="low"><TextBlock Text="{services:Loc playback.balanceLow}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="medium"><TextBlock Text="{services:Loc playback.balanceMedium}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="high"><TextBlock Text="{services:Loc playback.balanceHigh}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
                     <Grid Margin="0,0,0,28">

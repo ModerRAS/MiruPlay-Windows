@@ -578,12 +578,16 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
 
         ApplyAudioSrcBypass(settings);
 
-        if (settings.AudioDsp?.Enabled == true)
+        var audioDsp = (settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
+        var preset = audioDsp.Presets!.First(item => item.Id.Equals(audioDsp.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
+        var layout = AudioDspChannelLayout.ForId(preset.ChannelLayoutId);
+        var graph = AudioDspFilterGraphCompiler.Compile(
+            audioDsp,
+            layout,
+            48_000,
+            AudioBalanceLevels.FromStorageValue(settings.AudioBalance));
+        if (graph.MpvArguments.Count > 0)
         {
-            var audioDsp = settings.AudioDsp.Normalize();
-            var preset = audioDsp.Presets!.First(item => item.Id.Equals(audioDsp.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
-            var layout = AudioDspChannelLayout.ForId(preset.ChannelLayoutId);
-            var graph = AudioDspFilterGraphCompiler.Compile(audioDsp, layout, 48_000);
             foreach (var argument in graph.MpvArguments) SetOptionArgument(argument);
             _appliedAudioDsp = graph;
             _appliedAudioDspChannelLayout = layout;

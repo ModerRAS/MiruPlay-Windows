@@ -1359,4 +1359,87 @@
   <data name="tv.settings.enter" xml:space="preserve"><value>Enter TV mode</value></data>
   <data name="tv.settings.startWithTv" xml:space="preserve"><value>Start in TV mode</value></data>
   <data name="tv.player.error.retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="playback.balance" xml:space="preserve"><value>Loudness balance</value></data>
+  <data name="playback.balanceHint" xml:space="preserve"><value>Automatically lowers loud passages and lifts quiet ones. Applies to embedded mpv playback only; changes take effect immediately while playing.</value></data>
+  <data name="playback.balanceOff" xml:space="preserve"><value>Off</value></data>
+  <data name="playback.balanceLow" xml:space="preserve"><value>Low</value></data>
+  <data name="playback.balanceMedium" xml:space="preserve"><value>Medium</value></data>
+  <data name="playback.balanceHigh" xml:space="preserve"><value>High</value></data>
+  <data name="api.errAudioBalance" xml:space="preserve"><value>Invalid audio balance level.</value></data>
+  <data name="oauth.heading" xml:space="preserve"><value>Bangumi OAuth sign-in</value></data>
+  <data name="oauth.start" xml:space="preserve"><value>Sign in with browser</value></data>
+  <data name="oauth.logout" xml:space="preserve"><value>Sign out</value></data>
+  <data name="oauth.statusLoggedOut" xml:space="preserve"><value>Not signed in</value></data>
+  <data name="oauth.statusLoggedIn" xml:space="preserve"><value>Signed in</value></data>
+  <data name="oauth.statusExpires" xml:space="preserve"><value>Signed in; token valid until {0}</value></data>
+  <data name="oauth.waiting" xml:space="preserve"><value>Browser opened; complete the authorization there…</value></data>
+  <data name="oauth.success" xml:space="preserve"><value>Bangumi OAuth sign-in succeeded.</value></data>
+  <data name="oauth.failed" xml:space="preserve"><value>Bangumi OAuth sign-in failed.</value></data>
+  <data name="oauth.loggedOut" xml:space="preserve"><value>Signed out of Bangumi.</value></data>
+  <data name="oauth.notConfigured" xml:space="preserve"><value>Bangumi OAuth client_id/secret is not configured.</value></data>
+  <data name="oauth.configured" xml:space="preserve"><value>Configured ({0})</value></data>
+  <data name="oauth.sourceEnvironment" xml:space="preserve"><value>environment variables</value></data>
+  <data name="oauth.sourceSettings" xml:space="preserve"><value>local settings</value></data>
+  <data name="oauth.clientId" xml:space="preserve"><value>OAuth Client ID</value></data>
+  <data name="oauth.clientSecret" xml:space="preserve"><value>OAuth Client Secret</value></data>
+  <data name="oauth.saveCredentials" xml:space="preserve"><value>Save OAuth credentials</value></data>
+  <data name="oauth.clearCredentials" xml:space="preserve"><value>Clear OAuth credentials</value></data>
+  <data name="oauth.credentialsSaved" xml:space="preserve"><value>OAuth credentials saved.</value></data>
+  <data name="oauth.credentialsCleared" xml:space="preserve"><value>OAuth credentials cleared.</value></data>
+  <data name="bgmOauth.notConfigured" xml:space="preserve"><value>Bangumi OAuth is not configured (client_id/secret).</value></data>
+  <data name="bgmOauth.tokenHttp" xml:space="preserve"><value>Bangumi token exchange failed (HTTP {0}).</value></data>
+  <data name="bgmOauth.tokenMissing" xml:space="preserve"><value>Bangumi token response is missing access_token.</value></data>
+  <data name="bgmOauth.timeout" xml:space="preserve"><value>Authorization timed out after 10 minutes; please sign in again.</value></data>
+  <data name="bgmOauth.missingCode" xml:space="preserve"><value>Authorization callback is missing the code.</value></data>
+  <data name="bgmOauth.failed" xml:space="preserve"><value>Bangumi OAuth sign-in failed.</value></data>
+  <data name="bgmOauth.loopbackStarted" xml:space="preserve"><value>The OAuth loopback server is already running.</value></data>
+  <data name="bgmOauth.portBusy" xml:space="preserve"><value>OAuth loopback port {0} is in use; close the other program and retry.</value></data>
+  <data name="bgmOauth.credentialsBroken" xml:space="preserve"><value>Bangumi OAuth credentials are corrupted; please configure them again.</value></data>
+  <data name="bgmOauth.clientIdInvalid" xml:space="preserve"><value>OAuth Client ID is invalid.</value></data>
+  <data name="bgmOauth.clientSecretInvalid" xml:space="preserve"><value>OAuth Client Secret is invalid.</value></data>
+  <data name="bgmOauth.responseTooLarge" xml:space="preserve"><value>Bangumi response is too large.</value></data>
+  <data name="bgmOauth.loginPageFailed" xml:space="preserve"><value>Bangumi login page failed to load (HTTP {0}).</value></data>
+  <data name="bgmOauth.loginFormMissing" xml:space="preserve"><value>Bangumi login page did not return a form.</value></data>
+  <data name="bgmOauth.captchaFailed" xml:space="preserve"><value>Could not fetch the Bangumi captcha.</value></data>
+  <data name="bgmOauth.captchaTooLarge" xml:space="preserve"><value>Bangumi captcha response is too large.</value></data>
+  <data name="bgmOauth.needChallenge" xml:space="preserve"><value>Request a captcha first.</value></data>
+  <data name="bgmOauth.networkFailed" xml:space="preserve"><value>Could not reach Bangumi; check the outbound proxy or network.</value></data>
+  <data name="bgmOauth.credentialsInvalid" xml:space="preserve"><value>Incorrect email, password, or captcha.</value></data>
+  <data name="bgmOauth.loginNotKept" xml:space="preserve"><value>Bangumi did not keep the login session; please retry.</value></data>
+  <data name="bgmOauth.authFormMissing" xml:space="preserve"><value>Bangumi authorization page did not return a submittable form.</value></data>
+  <data name="bgmOauth.authNoCode" xml:space="preserve"><value>Bangumi authorization did not return a code.</value></data>
+  <data name="bgmOauth.fieldsRequired" xml:space="preserve"><value>Enter email, password, and captcha.</value></data>
+  <data name="bgmOauth.fieldsTooLong" xml:space="preserve"><value>Email, password, or captcha is too long.</value></data>
+  <data name="bgmOauth.loginExpired" xml:space="preserve"><value>The captcha session expired; please request a new one.</value></data>
+  <data name="bgmOauth.callbackRejected" xml:space="preserve"><value>Authorization verification failed; please sign in again.</value></data>
+  <data name="api.errNoBangumiOAuth" xml:space="preserve"><value>Bangumi sign-in is unavailable.</value></data>
+  <data name="meta.oauthTitle" xml:space="preserve"><value>Bangumi OAuth</value></data>
+  <data name="meta.oauthStart" xml:space="preserve"><value>Open browser to authorize</value></data>
+  <data name="meta.oauthLogout" xml:space="preserve"><value>Sign out</value></data>
+  <data name="meta.oauthLoggedIn" xml:space="preserve"><value>Signed in; token valid until {0}</value></data>
+  <data name="meta.oauthLoggedOut" xml:space="preserve"><value>Not signed in</value></data>
+  <data name="meta.oauthConfiguredBadge" xml:space="preserve"><value>Configured</value></data>
+  <data name="meta.oauthNotConfiguredBadge" xml:space="preserve"><value>Not configured</value></data>
+  <data name="meta.oauthCredentialsTitle" xml:space="preserve"><value>OAuth app credentials</value></data>
+  <data name="meta.oauthClientId" xml:space="preserve"><value>Client ID</value></data>
+  <data name="meta.oauthClientSecret" xml:space="preserve"><value>Client Secret</value></data>
+  <data name="meta.oauthSaveCredentials" xml:space="preserve"><value>Save credentials</value></data>
+  <data name="meta.oauthClearCredentials" xml:space="preserve"><value>Clear credentials</value></data>
+  <data name="meta.oauthCredentialHint" xml:space="preserve"><value>BANGUMI_CLIENT_ID / BANGUMI_CLIENT_SECRET environment variables win; secrets are stored but never echoed.</value></data>
+  <data name="meta.oauthWaiting" xml:space="preserve"><value>Browser opened; waiting for authorization…</value></data>
+  <data name="meta.oauthSuccess" xml:space="preserve"><value>OAuth sign-in succeeded.</value></data>
+  <data name="meta.oauthFailed" xml:space="preserve"><value>OAuth sign-in failed.</value></data>
+  <data name="meta.accountLogin" xml:space="preserve"><value>Email &amp; password sign-in</value></data>
+  <data name="meta.accountLoginHint" xml:space="preserve"><value>The password is used only for this submission and is never stored on the client.</value></data>
+  <data name="meta.email" xml:space="preserve"><value>Email</value></data>
+  <data name="meta.password" xml:space="preserve"><value>Password</value></data>
+  <data name="meta.captcha" xml:space="preserve"><value>Captcha</value></data>
+  <data name="meta.captchaRefresh" xml:space="preserve"><value>Click to refresh the captcha</value></data>
+  <data name="meta.loginSubmit" xml:space="preserve"><value>Sign in</value></data>
+  <data name="meta.loginCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="meta.loginStart" xml:space="preserve"><value>Get captcha</value></data>
+  <data name="meta.loginStateChallenge" xml:space="preserve"><value>Waiting for captcha</value></data>
+  <data name="meta.loginFailedNotice" xml:space="preserve"><value>Sign-in failed: {0}</value></data>
+  <data name="meta.loginSucceeded" xml:space="preserve"><value>Signed in to Bangumi.</value></data>
+  <data name="meta.oauthLocalOnly" xml:space="preserve"><value>OAuth browser sign-in must run on the computer hosting MiruPlay. From a remote browser, use email &amp; password sign-in, or complete OAuth on the client.</value></data>
 </root>

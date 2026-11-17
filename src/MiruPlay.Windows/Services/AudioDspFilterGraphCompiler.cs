@@ -15,10 +15,17 @@ public static class AudioDspFilterGraphCompiler
     private const int GraphSampleCount = 65;
     private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
+    /// <summary>
+    /// Builds the mpv filter chain. Order is fixed: PEQ/DSP graph (including downmix and
+    /// limiter) first, then optional loudness balance AGC. Balance therefore sees the
+    /// already-EQ'd signal, and its own peak ceiling becomes the final ceiling when the
+    /// DSP limiter is also enabled (documented in docs/compatibility.md).
+    /// </summary>
     public static AudioDspFilterGraph Compile(
         AudioDspConfig config,
         AudioDspChannelLayout layout,
-        int sampleRateHz)
+        int sampleRateHz,
+        AudioBalanceLevel audioBalance = AudioBalanceLevel.Off)
     {
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(layout);
@@ -28,8 +35,12 @@ public static class AudioDspFilterGraphCompiler
         var errors = normalized.Validate();
         if (errors.Count > 0)
             throw new InvalidOperationException(AppStrings.Get("dsp.configInvalid", string.Join("; ", errors)));
+        var balance = AudioBalanceFilterCompiler.Compile(audioBalance, sampleRateHz);
         if (!normalized.Enabled)
-            return new AudioDspFilterGraph("", [], "disabled", []);
+        {
+            if (balance is null) return new AudioDspFilterGraph("", [], "disabled", []);
+            return new AudioDspFilterGraph(balance.FilterValue, BuildArguments(balance.FilterValue), "balance", []);
+        }
 
         var preset = normalized.Presets!
             .First(item => item.Id.Equals(normalized.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
@@ -46,23 +57,25 @@ public static class AudioDspFilterGraphCompiler
             var limit = Math.Pow(10, limiter.CeilingDb / 20);
             filters.Add($"alimiter=limit={Format(limit)}:release={Format(limiter.ReleaseMs)}");
         }
+        if (balance is not null) filters.Add(balance.FilterValue);
 
         var afValue = string.Join(',', filters.Where(filter => filter.Length > 0));
         if (afValue.Length == 0) afValue = "anull";
-        var arguments = new List<string>
-        {
-            "--audio-format=float",
-            "--audio-spdif=no",
-            "--audio-exclusive=no",
-            "--audio-channels=auto",
-            $"--af=lavfi=[{afValue}]",
-        };
         return new AudioDspFilterGraph(
             afValue,
-            arguments,
+            BuildArguments(afValue),
             AudioDspSignalMath.ResolveOutputRoute(preset.OutputMode),
             warnings);
     }
+
+    private static List<string> BuildArguments(string afValue) =>
+    [
+        "--audio-format=float",
+        "--audio-spdif=no",
+        "--audio-exclusive=no",
+        "--audio-channels=auto",
+        $"--af=lavfi=[{afValue}]",
+    ];
 
     private static string BuildPerChannelGraph(
         AudioDspPreset preset,
