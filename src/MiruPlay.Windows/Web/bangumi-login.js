@@ -4,6 +4,12 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char])
 }
 
+function isSameMachineBrowser() {
+  if (typeof window === 'undefined' || !window.location) return false
+  const host = window.location.hostname
+  return host === '127.0.0.1' || host === 'localhost' || host === '[::1]' || host === '::1'
+}
+
 function formatExpiry(ms) {
   return ms > 0 ? new Date(Number(ms)).toLocaleString() : ''
 }
@@ -15,12 +21,14 @@ function oauthStatusLine(oauth) {
 
 export function bangumiLoginPanel(oauth) {
   const configured = Boolean(oauth && oauth.configured)
+  const sameMachine = isSameMachineBrowser()
   const badge = configured ? t('meta.oauthConfiguredBadge') : t('meta.oauthNotConfiguredBadge')
   return '<section class="panel" style="grid-column:1/-1">'
     + '<div class="card-head"><h2>' + t('meta.oauthTitle') + '</h2><span id="oauth-configured-badge" class="badge ' + (configured ? 'ok' : 'warn') + '">' + badge + '</span></div>'
     + '<p class="muted">' + t('meta.oauthCredentialHint') + '</p>'
     + '<p id="oauth-status-line"><strong>' + oauthStatusLine(oauth) + '</strong></p>'
-    + '<div class="actions"><button id="oauth-start" class="primary" type="button" ' + (configured ? '' : 'disabled') + '>' + t('meta.oauthStart') + '</button><button id="oauth-logout" class="danger" type="button">' + t('meta.oauthLogout') + '</button></div>'
+    + (sameMachine ? '' : '<p id="oauth-local-only" class="muted">' + t('meta.oauthLocalOnly') + '</p>')
+    + '<div class="actions"><button id="oauth-start" class="primary" type="button" ' + (configured && sameMachine ? '' : 'disabled') + '>' + t('meta.oauthStart') + '</button><button id="oauth-logout" class="danger" type="button">' + t('meta.oauthLogout') + '</button></div>'
     + '<output id="oauth-message" class="muted" aria-live="polite"></output>'
     + '<details><summary>' + t('meta.oauthCredentialsTitle') + '</summary>'
     + '<form id="oauth-credentials-form" class="form-grid">'
@@ -36,6 +44,7 @@ export function bangumiLoginPanel(oauth) {
 
 export function bindBangumiLoginPanel(options) {
   const { root = document, api, toast, reload, oauth } = options
+  const sameMachine = isSameMachineBrowser()
   const q = selector => root.querySelector(selector)
   let pollTimer = 0
   const stopPolling = () => { if (pollTimer) { clearInterval(pollTimer); pollTimer = 0 } }
@@ -54,6 +63,7 @@ export function bindBangumiLoginPanel(options) {
   }
 
   const startOAuth = async () => {
+    if (!sameMachine) { setMessage(t('meta.oauthLocalOnly'), true); return }
     try {
       const result = await api('/api/metadata/bangumi/oauth/start', { method: 'POST' })
       if (!result.authorizeUrl) { setMessage(result.message || t('meta.oauthFailed'), true); return }
@@ -128,10 +138,10 @@ export function bindBangumiLoginPanel(options) {
     if (image && state && state.captchaImage) image.src = state.captchaImage
     const error = q('#bangumi-login-error')
     if (error) error.textContent = message || ''
+    // Android parity: a wrong captcha keeps the email/password so the user only retypes
+    // the captcha; the terminal-failure path below clears the password explicitly.
     const captcha = q('#bangumi-captcha-text')
     if (captcha) captcha.value = ''
-    const password = q('#bangumi-password')
-    if (password) password.value = ''
   }
 
   const bindLoginBody = () => {
@@ -207,7 +217,7 @@ export function bindBangumiLoginPanel(options) {
   }
 
   const startButton = q('#oauth-start')
-  if (startButton) startButton.onclick = startOAuth
+  if (startButton && sameMachine) startButton.onclick = startOAuth
   const logoutButton = q('#oauth-logout')
   if (logoutButton) logoutButton.onclick = logoutOAuth
   const credentialsForm = q('#oauth-credentials-form')

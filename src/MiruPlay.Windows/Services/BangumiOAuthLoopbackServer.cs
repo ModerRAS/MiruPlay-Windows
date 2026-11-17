@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Threading.Channels;
 
 namespace MiruPlay.Windows.Services;
 
@@ -26,7 +27,12 @@ public sealed class BangumiOAuthLoopbackServer : IBangumiOAuthLoopback
     private readonly HttpListener _listener = new();
     private readonly int _port;
     private readonly string _path;
-    private readonly TaskCompletionSource<string> _callback = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly Channel<string> _callbacks = Channel.CreateUnbounded<string>(new UnboundedChannelOptions
+    {
+        SingleReader = true,
+        SingleWriter = false,
+    });
+    private readonly CancellationTokenSource _stoppedCancellation = new();
     private CancellationTokenSource? _acceptCancellation;
     private Task? _acceptLoop;
     private int _started;
@@ -97,7 +103,7 @@ public sealed class BangumiOAuthLoopbackServer : IBangumiOAuthLoopback
                 return;
             }
             var callbackUrl = $"http://127.0.0.1:{_port}{_path}{request.Url?.Query}";
-            _callback.TrySetResult(callbackUrl);
+            _callbacks.Writer.TryWrite(callbackUrl);
             response.StatusCode = (int)HttpStatusCode.OK;
             await WriteAsync(response, ResultPage, "text/html; charset=utf-8").ConfigureAwait(false);
         }
@@ -124,8 +130,20 @@ public sealed class BangumiOAuthLoopbackServer : IBangumiOAuthLoopback
         await response.OutputStream.WriteAsync(bytes).ConfigureAwait(false);
     }
 
-    public Task<string> WaitForCallbackAsync(CancellationToken cancellationToken) =>
-        _callback.Task.WaitAsync(cancellationToken);
+    /// <summary>Reads the next callback URL. Repeated calls keep working until <see cref="Close"/>;
+    /// a callback with a wrong state is discarded by the coordinator and the wait continues.</summary>
+    public async Task<string> WaitForCallbackAsync(CancellationToken cancellationToken)
+    {
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _stoppedCancellation.Token);
+        try
+        {
+            return await _callbacks.Reader.ReadAsync(linked.Token).ConfigureAwait(false);
+        }
+        catch (ChannelClosedException)
+        {
+            throw new OperationCanceledException(linked.Token);
+        }
+    }
 
     public void Close()
     {
@@ -151,13 +169,21 @@ public sealed class BangumiOAuthLoopbackServer : IBangumiOAuthLoopback
         catch (ObjectDisposedException)
         {
         }
-        _callback.TrySetCanceled();
+        try
+        {
+            _stoppedCancellation.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        _callbacks.Writer.TryComplete();
     }
 
     public void Dispose()
     {
         Close();
         _acceptCancellation?.Dispose();
+        _stoppedCancellation.Dispose();
         GC.SuppressFinalize(this);
     }
 }

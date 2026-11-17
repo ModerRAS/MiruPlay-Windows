@@ -1266,4 +1266,5 @@
   <data name="meta.loginStateChallenge" xml:space="preserve"><value>Waiting for captcha</value></data>
   <data name="meta.loginFailedNotice" xml:space="preserve"><value>Sign-in failed: {0}</value></data>
   <data name="meta.loginSucceeded" xml:space="preserve"><value>Signed in to Bangumi.</value></data>
+  <data name="meta.oauthLocalOnly" xml:space="preserve"><value>OAuth browser sign-in must run on the computer hosting MiruPlay. From a remote browser, use email &amp; password sign-in, or complete OAuth on the client.</value></data>
 </root>

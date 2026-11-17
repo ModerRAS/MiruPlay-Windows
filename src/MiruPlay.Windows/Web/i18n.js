@@ -1262,7 +1262,8 @@ const I18N = {
   "meta.loginStart": "获取验证码",
   "meta.loginStateChallenge": "等待输入验证码",
   "meta.loginFailedNotice": "登录失败：{0}",
-  "meta.loginSucceeded": "已登录 Bangumi。"
+  "meta.loginSucceeded": "已登录 Bangumi。",
+  "meta.oauthLocalOnly": "OAuth 浏览器登录需要在运行 MiruPlay 的这台电脑上操作；远程访问请改用账号密码登录，或在客户端上完成 OAuth 登录。"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -2526,7 +2527,8 @@ const I18N = {
   "meta.loginStart": "取得驗證碼",
   "meta.loginStateChallenge": "等待輸入驗證碼",
   "meta.loginFailedNotice": "登入失敗：{0}",
-  "meta.loginSucceeded": "已登入 Bangumi。"
+  "meta.loginSucceeded": "已登入 Bangumi。",
+  "meta.oauthLocalOnly": "OAuth 瀏覽器登入需要在執行 MiruPlay 的這台電腦上操作；遠端存取請改用帳號密碼登入，或在用戶端上完成 OAuth 登入。"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -3790,7 +3792,8 @@ const I18N = {
   "meta.loginStart": "取得驗證碼",
   "meta.loginStateChallenge": "等待輸入驗證碼",
   "meta.loginFailedNotice": "登入失敗：{0}",
-  "meta.loginSucceeded": "已登入 Bangumi。"
+  "meta.loginSucceeded": "已登入 Bangumi。",
+  "meta.oauthLocalOnly": "OAuth 瀏覽器登入需要在執行 MiruPlay 的這台電腦上操作；遠端存取請改用帳號密碼登入，或在用戶端上完成 OAuth 登入。"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -5054,7 +5057,8 @@ const I18N = {
   "meta.loginStart": "Get captcha",
   "meta.loginStateChallenge": "Waiting for captcha",
   "meta.loginFailedNotice": "Sign-in failed: {0}",
-  "meta.loginSucceeded": "Signed in to Bangumi."
+  "meta.loginSucceeded": "Signed in to Bangumi.",
+  "meta.oauthLocalOnly": "OAuth browser sign-in must run on the computer hosting MiruPlay. From a remote browser, use email & password sign-in, or complete OAuth on the client."
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -6318,7 +6322,8 @@ const I18N = {
   "meta.loginStart": "Get captcha",
   "meta.loginStateChallenge": "Waiting for captcha",
   "meta.loginFailedNotice": "Sign-in failed: {0}",
-  "meta.loginSucceeded": "Signed in to Bangumi."
+  "meta.loginSucceeded": "Signed in to Bangumi.",
+  "meta.oauthLocalOnly": "OAuth browser sign-in must run on the computer hosting MiruPlay. From a remote browser, use email & password sign-in, or complete OAuth on the client."
  }
 };
 let currentLocale = 'zh-CN';

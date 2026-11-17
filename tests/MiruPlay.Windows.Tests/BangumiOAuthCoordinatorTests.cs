@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Channels;
 using MiruPlay.Windows.Services;
 
 namespace MiruPlay.Windows.Tests;
@@ -282,6 +283,71 @@ public sealed class BangumiOAuthCoordinatorTests : IDisposable
             (_, _) => loopbackFactory(),
             () => "state-1");
 
+
+    [Fact]
+    public async Task TimeoutIsEnforcedWithoutAnyWaiterAndAllowsRestart()
+    {
+        var loopbacks = new List<FakeLoopback>();
+        using var coordinator = CreateCoordinator(
+            new BangumiOAuthCredentials("id", "secret", "settings"),
+            () => new RecordingOAuthHandler(TokenJson),
+            () =>
+            {
+                var loopback = new FakeLoopback();
+                loopbacks.Add(loopback);
+                return loopback;
+            },
+            timeout: TimeSpan.FromMilliseconds(150));
+
+        var first = coordinator.StartAuthorize();
+        Assert.NotNull(first);
+        await WaitForStateAsync(coordinator, state => state.Status != BangumiOAuthStatus.Authorizing);
+
+        Assert.Equal(BangumiOAuthStatus.Failed, coordinator.State.Status);
+        Assert.Equal(AppStrings.Get("bgmOauth.timeout"), coordinator.State.Message);
+        var expired = Assert.Single(loopbacks);
+        Assert.True(expired.Closed);
+
+        var second = coordinator.StartAuthorize();
+        Assert.NotNull(second);
+        Assert.Equal(2, loopbacks.Count);
+        Assert.Equal(1, loopbacks[1].StartCount);
+        Assert.Equal(BangumiOAuthStatus.Authorizing, coordinator.State.Status);
+    }
+
+    [Fact]
+    public async Task WrongStateCallbackIsDiscardedAndRealCallbackStillSucceeds()
+    {
+        var loopback = new FakeLoopback();
+        using var coordinator = CreateCoordinator(
+            new BangumiOAuthCredentials("id", "secret", "settings"),
+            () => new RecordingOAuthHandler(TokenJson),
+            () => loopback);
+        coordinator.StartAuthorize();
+        var wait = coordinator.WaitForResultAsync();
+
+        loopback.Deliver($"http://127.0.0.1:{_port}/callback?code=code-1&state=wrong");
+        await Task.Delay(150);
+        Assert.Equal(BangumiOAuthStatus.Authorizing, coordinator.State.Status);
+
+        loopback.Deliver($"http://127.0.0.1:{_port}/callback?code=code-1&state=state-1");
+        var result = await wait;
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(BangumiOAuthStatus.Success, coordinator.State.Status);
+    }
+
+    private static async Task WaitForStateAsync(BangumiOAuthCoordinator coordinator, Func<BangumiOAuthState, bool> predicate)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (predicate(coordinator.State)) return;
+            await Task.Delay(20);
+        }
+        throw new TimeoutException("coordinator state did not change: " + coordinator.State.Status);
+    }
+
     private static int ReservePort()
     {
         using var listener = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 0);
@@ -291,7 +357,8 @@ public sealed class BangumiOAuthCoordinatorTests : IDisposable
 
     private sealed class FakeLoopback : IBangumiOAuthLoopback
     {
-        private readonly TaskCompletionSource<string> _callback = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly Channel<string> _callbacks = Channel.CreateUnbounded<string>();
+        private readonly CancellationTokenSource _closedCancellation = new();
         public int StartCount { get; private set; }
         public bool Closed { get; private set; }
         public Exception? StartError { get; init; }
@@ -301,12 +368,30 @@ public sealed class BangumiOAuthCoordinatorTests : IDisposable
             StartCount++;
             if (StartError is not null) throw StartError;
         }
-        public Task<string> WaitForCallbackAsync(CancellationToken cancellationToken) => _callback.Task.WaitAsync(cancellationToken);
-        public void Deliver(string callbackUrl) => _callback.TrySetResult(callbackUrl);
+        public async Task<string> WaitForCallbackAsync(CancellationToken cancellationToken)
+        {
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _closedCancellation.Token);
+            try
+            {
+                return await _callbacks.Reader.ReadAsync(linked.Token);
+            }
+            catch (ChannelClosedException)
+            {
+                throw new OperationCanceledException(linked.Token);
+            }
+        }
+        public void Deliver(string callbackUrl) => _callbacks.Writer.TryWrite(callbackUrl);
         public void Close()
         {
             Closed = true;
-            _callback.TrySetCanceled();
+            try
+            {
+                _closedCancellation.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            _callbacks.Writer.TryComplete();
         }
         public void Dispose() => Close();
     }

@@ -28,7 +28,7 @@
 | 多版本剧集与特典 | 导入 MLIP 多版本和 extras，支持版本选择策略、详情选择及连续播放 | 对齐 | WPF/WebUI 设置支持自动相近路径与 manual；WPF 手动下一集及自然播放结束显示原生选择器，WebControl 返回下一集版本并由 WebUI 选择后提交不透明 episode ID。WPF 取消不前进、自然结束选定 720p、WebUI 选定 1080p 均以真实临时媒体验证；extras 和版本队列有自动化测试 |
 | 文件名识别与 NFO | 规则与 AniFileBERT ONNX 识别，NFO 参与本地元数据流程 | 部分对齐 | DIRECTORY 继续共用 `OnnxAnimeFilenameParser`；安全有界 `NfoDocumentService` 已接入 Local/SMB/WebDAV 扫描和自有索引，覆盖 series/episode metadata 与增量更新测试。Local 真实 NFO、SMB 映射网络共享，以及本地隔离 WebDAV 协议服务均实际扫描 NFO，并验证 override 在重扫后保留、undo 恢复 NFO；WebDAV 验证使用本地协议 fixture，不代表用户外部 WebDAV 服务器认证已验收。 |
 | 在线元数据搜索与匹配 | Anime 当前用户流程接入 Bangumi；AniList provider 存在但未注入。Drama 接入 TMDB+TVMaze；共享 query plan、聚类、重排和手动/批量流程 | 部分对齐 | 新增 provider-neutral `/api/metadata/search`：Anime 使用 Bangumi，Drama 使用 TMDB+TVMaze；依据模式、标题/原名/别名、路径样本、年份和季号构造最多 10 条查询，按 provider ID 去重，只跨 provider 合并相容候选，保留同源不同作品和季号冲突，按标题/年份/upstream rank/完整度/多源收敛重排并返回证据与 recommendation，成功结果缓存 10 分钟。WebUI/WPF 提供全部来源搜索，仍需用户确认候选后才预览/应用。Local/SMB/WebDAV DIRECTORY 使用自有 SQLite override；WPF/WebUI 支持批量预览、应用与历史撤销，刷新后重载列表；MLIP/RSS 只读。WPF/WebUI 均可导入/搜索 Archive 并回填。仍缺 provider-ref detail lookup、上游本地候选缓存、完整 Drama 季集/艺术图补充；TMDB 真实凭据及候选匹配质量仍需真实数据验收；AniList 未接线不列为当前要求 |
-| Bangumi OAuth 登录 | OAuth2 直连授权（回环回调 + state 校验）、刷新令牌轮换、7 天访问令牌自动续期，WebView 登录页走出站代理 | 对齐（无真实凭据实测） | `BangumiOAuthClient`/`BangumiOAuthLoopbackServer`/`BangumiOAuthCoordinator`/`BangumiOAuthRefreshScheduler` 提供授权 URL、`127.0.0.1:13712/callback` 回环、一次性 state、10 分钟等待超时、code 换 token、24 小时临期自动轮换、DPAPI 保存 access/refresh/expiry、登出清零，以及环境变量 `BANGUMI_CLIENT_ID/BANGUMI_CLIENT_SECRET` 优先、DPAPI 设置兜底、未配置时明确降级；WPF 与 WebControl/WebUI 双入口，手动粘贴 token 不受影响。回环只绑 127.0.0.1 且不经代理，token/用户信息请求复用统一出站代理（loopback 显式 bypass）。自动化：`BangumiOAuthClientTests`、`BangumiOAuthLoopbackTests`、`BangumiOAuthCoordinatorTests`、`BangumiOAuthCredentialStoreTests`、`OutboundHttpProxyTests`、`BangumiLoginApiTests`；本机无真实 OAuth 应用，真实授权/刷新未实测 |
+| Bangumi OAuth 登录 | OAuth2 直连授权（回环回调 + state 校验）、刷新令牌轮换、7 天访问令牌自动续期，WebView 登录页走出站代理 | 对齐（无真实凭据实测） | `BangumiOAuthClient`/`BangumiOAuthLoopbackServer`/`BangumiOAuthCoordinator`/`BangumiOAuthRefreshScheduler` 提供授权 URL、`127.0.0.1:13712/callback` 回环、一次性 state、coordinator 统一 10 分钟超时（超时置 failed 并释放回环监听，WPF/WebControl/网页登录入口一致）、code 换 token、24 小时临期自动轮换、DPAPI 保存 access/refresh/expiry、登出清零，以及环境变量 `BANGUMI_CLIENT_ID/BANGUMI_CLIENT_SECRET` 优先、DPAPI 设置兜底、未配置时明确降级；WPF 与 WebControl API 入口可用，网页端 OAuth 需与 MiruPlay 同机（远程浏览器会回调到用户自己的 `127.0.0.1`，WebUI 会禁用该入口并提示改用账号密码登录），手动粘贴 token 不受影响。回环只绑 127.0.0.1 且不经代理，token/用户信息请求复用统一出站代理（loopback 显式 bypass）。自动化：`BangumiOAuthClientTests`（同一文件含 `BangumiOAuthCredentialStoreTests`、`OutboundHttpProxyTests` 两个测试类）、`BangumiOAuthLoopbackTests`、`BangumiOAuthCoordinatorTests`（含 WPF 无关的超时/重启与错 state 重试回归）、`BangumiLoginApiTests`（含 WebControl 入口超时/重启回归）；本机无真实 OAuth 应用，真实授权/刷新未实测 |
 | 网页控制台账号密码登录 | 网页提交 Bangumi 邮箱/密码/验证码，设备代登录并完成 OAuth 授权；密码不落盘；授权表单无 action 时回提交授权页 URL | 对齐（fake HTTP 契约测试） | `BangumiPasswordLoginClient` 移植登录页 formhash/验证码/表单提交/同站重定向/cookie 会话，并实现 #100 修复（空 action 时 POST 回授权页完整 URL）；`BangumiWebConsoleLogin` 提供 10 分钟会话 TTL、错误后保留会话换验证码、失败/超时丢弃临时会话、密码不回声；`/api/metadata/bangumi/login*` 走现有 WebControl token 鉴权。密码只进入当次 POST body，不写盘/不回声/不落日志；未配置 OAuth 时在提交密码前返回 not_configured。WebUI 提供账号/验证码表单并保留手动 token 与 Archive。自动化：`BangumiPasswordLoginClientTests`、`BangumiWebConsoleLoginTests`、`BangumiLoginApiTests` |
 | Bangumi 收藏与观看状态 | 收藏读写、分集状态同步，并在自然播放完成后标记已看 | 部分对齐 | WebAPI、WebUI 和 WPF 元数据编辑器均支持作品收藏及分集状态读取/写入；WPF 按 episode ID 显示已收藏分集，并允许手动输入未标记 episode ID，状态值符合官方 schema。`BangumiPlaybackSyncService` 在自然完成后标记已看。本机无 Bangumi token，外部账号读写未实测 |
 | Bangumi Archive | 下载/导入离线 archive，并用于本地搜索和匹配 | 对齐 | `BangumiArchiveStore` 提供有界下载、JSONL/ZIP 导入和本地搜索；WPF/WebUI 均有导入、搜索、候选回填入口。WebUI 真实上传 236 字节样例、WPF 真实导入 231 字节样例并搜索回填均通过；multipart 和大小边界有 HTTP 集成测试。测试文件已精确清理；未下载完整上游档案做端到端验证 |
@@ -60,7 +60,7 @@
 
 | Android 更新 | Windows 当前状态 | 证据 / 差距 |
 |---|---|---|
-| #95 OAuth 直连登录（回环回调 + 7 天自动轮换）；#98 OAuth 登录页走应用出站代理 | 对齐（无真实凭据实测） | 授权 URL/state/回环/超时/token/refresh/DPAPI/WPF+WebControl+WebUI 全部落地；回环只绑 127.0.0.1、不经代理，代理对公开主机生效（`OutboundHttpProxy` loopback bypass）。单元与进程内 HTTP 契约测试通过；真实 Bangumi 授权需用户提供 OAuth 应用凭据 |
+| #95 OAuth 直连登录（回环回调 + 7 天自动轮换）；#98 OAuth 登录页走应用出站代理 | 对齐（无真实凭据实测） | 授权 URL/state/回环/超时/token/refresh/DPAPI 与 WPF/WebControl API 全部落地；网页端 OAuth 仅限与客户端同机的浏览器（WebUI 远程访问时禁用入口并提示，远程请用账号密码登录）；回环只绑 127.0.0.1、不经代理，代理对公开主机生效（`OutboundHttpProxy` loopback bypass）。单元与进程内 HTTP 契约测试通过；真实 Bangumi 授权需用户提供 OAuth 应用凭据 |
 | #99 网页控制台账号密码验证码登录；#100 授权表单无 action 回提交授权页 URL | 对齐（fake HTTP 契约测试） | 登录页解析、验证码刷新、POST 登录、cookie 会话、授权表单提交与 #100 回归全部有测试；10 分钟 TTL、密码不落盘/不回声/不落日志、未配置先拒绝均验证。需要真实账号才能完成端到端登录 |
 | #97 Exo 音频平衡（响度 AGC） | 对齐（平台等价实现） | mpv `dynaudnorm` 四等级、与 DSP 链组合顺序、OFF 无滤镜（与 master af 逐字节一致）、设置/API/WPF/WebUI 往返均有测试；无听感/声学实测 |
 | #96 自动扫描跳过离线 archive、archive 流式可取消、URL 噪音系列名 | 对齐 + 平台差异 | archive 搜索改为流式有界 top-k + CancellationToken，下载/导入全链路可取消且取消后无 staging 残留；自动扫描与 archive 解耦并有锁文件回归测试；URL 噪音语义落在父目录回退过滤（扫描输入为相对路径，不解析完整 URL） |
@@ -119,6 +119,15 @@
 - i18n：1262 键 × 5 locale（zh-CN/zh-TW/zh-HK/en-US/en-GB），`node tools/i18n/build.js --check` 通过；见 `artifacts/verification/android-218-i18n-check.log`。`node --check` 通过 `Web/app.js`、`Web/bangumi-login.js`，`git diff --check` 通过。
 - 新增/扩充测试：`AudioBalanceTests`、`BangumiArchiveCancellationTests`、`BangumiArchiveStreamingTests`、`ScanArchiveIsolationTests`、`BangumiOAuthClientTests`、`BangumiOAuthLoopbackTests`、`BangumiOAuthCoordinatorTests`、`BangumiPasswordLoginClientTests`、`BangumiWebConsoleLoginTests`、`BangumiLoginApiTests`，并扩充 `AnimeVideoClassifierTests`、`MetadataTokenStoreTests`；全部使用注入式 `HttpMessageHandler`、随机空闲端口与临时目录，不依赖公网或真实账号。
 - 已知限制：本机无 Bangumi OAuth client_id/secret 与真实账号，OAuth 真实授权、网页真实登录与令牌刷新只能在 fake HTTP/进程内测试中验证；本轮未做 WPF UIA/截图冒烟与 WebUI 浏览器实测；mpv 音频平衡未做听感实测；未对照 Android 真机行为。
+
+本次 PR 验收跟进（2026-11-18，F1-F5）：
+
+- F1：OAuth 10 分钟授权超时从 `WaitForResultAsync` 下沉到 `BangumiOAuthCoordinator` 的后台 flow，WPF、`/api/metadata/bangumi/oauth/start` 与 `/api/metadata/bangumi/login/start` 共用同一超时；到期置 `failed`、释放回环监听并允许立即重新开始。新增“无 UI 等待也超时/可重启”与“WebControl 入口超时/重启”回归。
+- F2：WebUI 在非同机浏览器（host 不是 127.0.0.1/localhost/::1）禁用 OAuth 入口并提示改用账号密码登录；文档与 Android“OAuth 为 TV-only”事实对齐——WebControl API 可用，网页端 OAuth 需与客户端同机。
+- F3：回环回调改为队列语义，错误 state 回调被丢弃后继续等待真实回调直至超时；新增错 state 后真实回调成功、多次回调排队回归。
+- F4：WebUI 验证码错误时保留邮箱/密码，仅清空验证码输入（对齐 Android）；终态失败仍清空密码。
+- F5：修正文档中的测试类引用为真实文件与测试类名。
+- 验证：`dotnet test MiruPlay.Windows.slnx` **456/456 通过，0 跳过，13 秒**；`dotnet build MiruPlay.Windows.slnx -c Release` **0 警告、0 错误**；`node tools/i18n/build.js --check`：**1263 keys × 5 locale**、`app.js` 333 键；`node --check` 通过 `Web/app.js`、`Web/bangumi-login.js`。
 
 后续兼容状态更新至少运行：
 

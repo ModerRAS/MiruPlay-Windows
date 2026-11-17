@@ -67,6 +67,7 @@ public sealed class BangumiOAuthCoordinator : IBangumiOAuthFlow, IDisposable
     private string? _authorizeUrl;
     private IBangumiOAuthLoopback? _loopback;
     private CancellationTokenSource? _flowCancellation;
+    private Task? _flowCompletion;
 
     public BangumiOAuthCoordinator(
         MetadataTokenStore tokens,
@@ -109,6 +110,7 @@ public sealed class BangumiOAuthCoordinator : IBangumiOAuthFlow, IDisposable
     {
         IBangumiOAuthLoopback? loopback = null;
         string url;
+        CancellationToken flowToken;
         lock (_sync)
         {
             if (_state.Status == BangumiOAuthStatus.Authorizing && _authorizeUrl is not null) return _authorizeUrl;
@@ -127,6 +129,7 @@ public sealed class BangumiOAuthCoordinator : IBangumiOAuthFlow, IDisposable
             loopback = _loopbackFactory(_callbackPort, BangumiOAuthConstants.CallbackPath);
             _loopback = loopback;
             _flowCancellation = new CancellationTokenSource();
+            flowToken = _flowCancellation.Token;
         }
         try
         {
@@ -142,47 +145,96 @@ public sealed class BangumiOAuthCoordinator : IBangumiOAuthFlow, IDisposable
             }
             throw;
         }
+        lock (_sync)
+        {
+            // The authorization deadline belongs to the coordinator, not to one UI caller:
+            // WPF, the WebControl start route and the web-console password flow all get the
+            // same ten-minute timeout, and an abandoned flow releases the loopback listener.
+            _flowCompletion = RunFlowAsync(loopback, flowToken);
+        }
         return url;
     }
 
+    /// <summary>Waits for the pending flow to finish (success, failure, timeout or cancel).
+    /// The flow itself already runs in the background; this method only observes it.</summary>
     public async Task<BangumiOAuthResult> WaitForResultAsync(CancellationToken cancellationToken = default)
     {
-        IBangumiOAuthLoopback? loopback;
-        CancellationTokenSource? flowCancellation;
-        lock (_sync)
+        Task? completion;
+        lock (_sync) completion = _flowCompletion;
+        if (completion is not null)
         {
-            loopback = _loopback;
-            flowCancellation = _flowCancellation;
+            try
+            {
+                await completion.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                Cancel();
+            }
         }
-        if (loopback is null || flowCancellation is null)
-            return new BangumiOAuthResult(false, State, State.Message);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, flowCancellation.Token);
+        var current = State;
+        return new BangumiOAuthResult(current.Status == BangumiOAuthStatus.Success, current, current.Message);
+    }
+
+    private async Task RunFlowAsync(IBangumiOAuthLoopback loopback, CancellationToken flowToken)
+    {
         try
         {
-            var callbackUrl = await loopback.WaitForCallbackAsync(linked.Token)
-                .WaitAsync(_authorizationTimeout, linked.Token)
-                .ConfigureAwait(false);
-            await SubmitCallbackUrlAsync(callbackUrl, linked.Token).ConfigureAwait(false);
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(flowToken);
+            deadline.CancelAfter(_authorizationTimeout);
+            while (!deadline.IsCancellationRequested)
+            {
+                string callbackUrl;
+                try
+                {
+                    callbackUrl = await loopback.WaitForCallbackAsync(deadline.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (flowToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (OperationCanceledException)
+                {
+                    FailTimedOut();
+                    return;
+                }
+                bool accepted;
+                try
+                {
+                    accepted = await SubmitCallbackUrlAsync(callbackUrl, deadline.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (flowToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (OperationCanceledException)
+                {
+                    FailTimedOut();
+                    return;
+                }
+                if (accepted) return;
+                // Wrong or already-used state: discard and keep waiting for the real callback.
+            }
         }
-        catch (TimeoutException)
+        catch (Exception error) when (error is HttpRequestException or InvalidDataException or InvalidOperationException or IOException or JsonException or UriFormatException)
         {
             lock (_sync)
             {
                 StopLoopbackLocked();
-                _pendingState = null;
-                _state = new BangumiOAuthState(BangumiOAuthStatus.Failed, _authorizeUrl, AppStrings.Get("bgmOauth.timeout"));
+                _state = new BangumiOAuthState(BangumiOAuthStatus.Failed, _authorizeUrl, AppStrings.Get("bgmOauth.failed"));
             }
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+    }
+
+    private void FailTimedOut()
+    {
+        lock (_sync)
         {
-            // Flow cancelled by the user/logout or stopped after success; state already updated.
+            if (_state.Status is not (BangumiOAuthStatus.Authorizing or BangumiOAuthStatus.Exchanging)) return;
+            StopLoopbackLocked();
+            _pendingState = null;
+            _state = new BangumiOAuthState(BangumiOAuthStatus.Failed, _authorizeUrl, AppStrings.Get("bgmOauth.timeout"));
         }
-        catch (OperationCanceledException)
-        {
-            Cancel();
-        }
-        var current = State;
-        return new BangumiOAuthResult(current.Status == BangumiOAuthStatus.Success, current, current.Message);
     }
 
     /// <summary>Accepts a callback URL (browser redirect or web-console password flow).
@@ -299,6 +351,7 @@ public sealed class BangumiOAuthCoordinator : IBangumiOAuthFlow, IDisposable
 
     private void StopLoopbackLocked()
     {
+        _flowCompletion = null;
         try
         {
             _flowCancellation?.Cancel();

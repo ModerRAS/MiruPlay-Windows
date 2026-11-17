@@ -1266,4 +1266,5 @@
   <data name="meta.loginStateChallenge" xml:space="preserve"><value>等待輸入驗證碼</value></data>
   <data name="meta.loginFailedNotice" xml:space="preserve"><value>登入失敗：{0}</value></data>
   <data name="meta.loginSucceeded" xml:space="preserve"><value>已登入 Bangumi。</value></data>
+  <data name="meta.oauthLocalOnly" xml:space="preserve"><value>OAuth 瀏覽器登入需要在執行 MiruPlay 的這台電腦上操作；遠端存取請改用帳號密碼登入，或在用戶端上完成 OAuth 登入。</value></data>
 </root>

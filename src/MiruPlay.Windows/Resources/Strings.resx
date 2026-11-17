@@ -1266,4 +1266,5 @@
   <data name="meta.loginStateChallenge" xml:space="preserve"><value>等待输入验证码</value></data>
   <data name="meta.loginFailedNotice" xml:space="preserve"><value>登录失败：{0}</value></data>
   <data name="meta.loginSucceeded" xml:space="preserve"><value>已登录 Bangumi。</value></data>
+  <data name="meta.oauthLocalOnly" xml:space="preserve"><value>OAuth 浏览器登录需要在运行 MiruPlay 的这台电脑上操作；远程访问请改用账号密码登录，或在客户端上完成 OAuth 登录。</value></data>
 </root>

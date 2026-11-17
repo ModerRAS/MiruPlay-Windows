@@ -25,6 +25,26 @@ public sealed class BangumiOAuthLoopbackTests
     }
 
     [Fact]
+    public async Task MultipleCallbacksAreQueuedInOrderUntilClosed()
+    {
+        var port = ReservePort();
+        using var server = new BangumiOAuthLoopbackServer(port);
+        server.Start();
+        using var http = new HttpClient();
+        var first = $"http://127.0.0.1:{port}/callback?code=code-1&state=wrong";
+        var second = $"http://127.0.0.1:{port}/callback?code=code-1&state=state-1";
+
+        using var firstResponse = await http.GetAsync(first);
+        using var secondResponse = await http.GetAsync(second);
+
+        Assert.Equal(first, await server.WaitForCallbackAsync(CancellationToken.None));
+        Assert.Equal(second, await server.WaitForCallbackAsync(CancellationToken.None));
+        server.Close();
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => server.WaitForCallbackAsync(cancellation.Token));
+    }
+
+    [Fact]
     public async Task UnknownPathReturnsNotFoundAndDoesNotResolveCallback()
     {
         var port = ReservePort();

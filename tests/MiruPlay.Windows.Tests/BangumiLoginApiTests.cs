@@ -151,7 +151,41 @@ public sealed class BangumiLoginApiTests : IDisposable
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
-    private async Task<Harness> StartHarnessAsync(bool oauthConfigured = true)
+    [Fact]
+    public async Task WebControlStartFlowTimesOutReleasesListenerAndCanRestart()
+    {
+        await using var harness = await StartHarnessAsync(oauthTimeout: TimeSpan.FromMilliseconds(150));
+
+        var started = await ReadData(await harness.Client.PostAsync("/api/metadata/bangumi/oauth/start", null));
+        Assert.Equal("authorizing", started.GetProperty("state").GetString());
+        Assert.NotNull(harness.LastLoopback);
+
+        var state = await WaitForOAuthStateAsync(harness, value => value != "authorizing");
+        Assert.Equal("failed", state);
+        Assert.True(harness.LastLoopback!.Closed);
+        var status = await ReadData(await harness.Client.GetAsync("/api/metadata/bangumi/oauth"));
+        Assert.Contains("超时", status.GetProperty("message").GetString(), StringComparison.Ordinal);
+
+        var restarted = await ReadData(await harness.Client.PostAsync("/api/metadata/bangumi/oauth/start", null));
+        Assert.Equal("authorizing", restarted.GetProperty("state").GetString());
+        Assert.NotNull(restarted.GetProperty("authorizeUrl").GetString());
+    }
+
+    private static async Task<string?> WaitForOAuthStateAsync(Harness harness, Func<string?, bool> predicate)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        string? state = null;
+        while (DateTime.UtcNow < deadline)
+        {
+            var data = await ReadData(await harness.Client.GetAsync("/api/metadata/bangumi/oauth"));
+            state = data.GetProperty("state").GetString();
+            if (predicate(state)) return state;
+            await Task.Delay(25);
+        }
+        throw new TimeoutException("OAuth state did not change: " + state);
+    }
+
+    private async Task<Harness> StartHarnessAsync(bool oauthConfigured = true, TimeSpan? oauthTimeout = null)
     {
         var directory = Path.Combine(_root, Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
@@ -159,12 +193,18 @@ public sealed class BangumiLoginApiTests : IDisposable
         var tokens = new MetadataTokenStore(Path.Combine(directory, "metadata-tokens.bin"));
         var credentials = new BangumiOAuthCredentialStore(Path.Combine(directory, "bangumi-oauth.bin"));
         if (oauthConfigured) credentials.Save("client-id", "client-secret");
+        PendingLoopback? lastLoopback = null;
         var coordinator = new BangumiOAuthCoordinator(
             tokens,
             () => BangumiOAuthCredentialsProvider.Resolve(credentials, _ => null),
             () => new TokenHandler(),
             callbackPort: port,
-            loopbackFactory: (_, _) => new PendingLoopback());
+            authorizationTimeout: oauthTimeout,
+            loopbackFactory: (_, _) =>
+            {
+                lastLoopback = new PendingLoopback();
+                return lastLoopback;
+            });
         var passwordClient = new FakePasswordClient();
         var factoryCalls = 0;
         var webLogin = new BangumiWebConsoleLogin(
@@ -205,7 +245,7 @@ public sealed class BangumiLoginApiTests : IDisposable
         var client = new HttpClient { BaseAddress = new Uri($"http://localhost:{port}") };
         client.DefaultRequestHeaders.Add("X-MiruPlay-Token", webTokens.AccessToken);
         return new Harness(
-            server, client, tokens, credentials, coordinator, webLogin, tasks, port, logPath, () => factoryCalls);
+            server, client, tokens, credentials, coordinator, webLogin, tasks, port, logPath, () => factoryCalls, () => lastLoopback);
     }
 
     private static async Task<JsonElement> ReadData(HttpResponseMessage response)
@@ -225,10 +265,11 @@ public sealed class BangumiLoginApiTests : IDisposable
     {
         private readonly TaskCompletionSource<string> _callback = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public string Prefix => "http://127.0.0.1:0/";
+        public bool Closed { get; private set; }
         public void Start() { }
         public Task<string> WaitForCallbackAsync(CancellationToken cancellationToken) => _callback.Task.WaitAsync(cancellationToken);
-        public void Close() { }
-        public void Dispose() { }
+        public void Close() => Closed = true;
+        public void Dispose() => Close();
     }
 
     private sealed class TokenHandler : HttpMessageHandler
@@ -272,7 +313,8 @@ public sealed class BangumiLoginApiTests : IDisposable
         HeadlessTaskScheduler tasks,
         int port,
         string logPath,
-        Func<int> passwordFactoryCalls) : IAsyncDisposable
+        Func<int> passwordFactoryCalls,
+        Func<PendingLoopback?> lastLoopback) : IAsyncDisposable
     {
         public WebControlServer Server => server;
         public HttpClient Client => client;
@@ -282,6 +324,7 @@ public sealed class BangumiLoginApiTests : IDisposable
         public int Port => port;
         public string LogPath => logPath;
         public Func<int> PasswordFactoryCalls => passwordFactoryCalls;
+        public PendingLoopback? LastLoopback => lastLoopback();
 
         public async ValueTask DisposeAsync()
         {
