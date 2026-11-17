@@ -126,6 +126,9 @@ public static class VideoFilenameInference
     private static readonly Regex TrailingDash = new("\\s*[-–—]\\s*$", RegexOptions.CultureInvariant, RegexTimeout);
     private static readonly Regex Whitespace = new("\\s+", RegexOptions.CultureInvariant, RegexTimeout);
     private static readonly Regex GenericSeparators = new("[._\\-\\[\\]【】()（）]+", RegexOptions.CultureInvariant, RegexTimeout);
+    private static readonly Regex PercentTriplet = new("%[0-9A-Fa-f]{2}", RegexOptions.CultureInvariant, RegexTimeout);
+    private static readonly Regex UrlHostSegment = new("^[A-Za-z0-9]([A-Za-z0-9.\\-]*[A-Za-z0-9])?\\.[A-Za-z]{2,}(:\\d+)?$", RegexOptions.CultureInvariant, RegexTimeout);
+    private static readonly Regex UrlDateSegment = new("^\\d{4}-\\d{1,2}(-\\d{1,2})?$", RegexOptions.CultureInvariant, RegexTimeout);
     private static readonly HashSet<string> GenericParents = new(StringComparer.OrdinalIgnoreCase)
     {
         "115open", "ani", "anime", "anime library", "download", "downloads", "library", "media", "video", "videos", "动漫", "下载", "下載",
@@ -139,7 +142,7 @@ public static class VideoFilenameInference
         if (!match.Success) match = EpisodeNumber.Matches(withoutTags).LastOrDefault() ?? Match.Empty;
         var titlePart = match.Success ? withoutTags[..match.Index] : withoutTags;
         var parent = Cleanup(parentName ?? "");
-        if (GenericParents.Contains(GenericSeparators.Replace(parent, " ").Trim())) parent = "";
+        if (GenericParents.Contains(GenericSeparators.Replace(parent, " ").Trim()) || IsUrlMachinery(parent)) parent = "";
         var title = Cleanup(titlePart);
         if (title.Length == 0) title = parent.Length == 0 ? "Unknown" : parent;
         var seasonMatch = SeasonEpisode.Match(stem);
@@ -156,4 +159,18 @@ public static class VideoFilenameInference
 
     private static string Cleanup(string value) =>
         Whitespace.Replace(TrailingDash.Replace(CleanupSeparators.Replace(value, " "), ""), " ").Trim();
+
+    /// <summary>URL machinery (scheme, host, date or percent-encoded segments) is not a show
+    /// name. Ported from Android VideoDirectoryClassifier's URL-noise fix: real folder names
+    /// still vote as context, but parsing raw URLs must not fabricate a title.</summary>
+    private static bool IsUrlMachinery(string value)
+    {
+        var raw = value.Trim().TrimEnd('/');
+        if (raw.Length == 0) return false;
+        if (raw.Contains("://", StringComparison.Ordinal)) return true;
+        if (raw.Equals("https:", StringComparison.OrdinalIgnoreCase) || raw.Equals("http:", StringComparison.OrdinalIgnoreCase)) return true;
+        if (PercentTriplet.IsMatch(raw)) return true;
+        if (UrlHostSegment.IsMatch(raw)) return true;
+        return UrlDateSegment.IsMatch(raw);
+    }
 }

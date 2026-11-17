@@ -14,7 +14,7 @@ public static class OutboundHttpProxy
     {
         var handler = new HttpClientHandler();
         if (!enabled) return handler;
-        handler.Proxy = new WebProxy(ValidateUri(host, port));
+        handler.Proxy = new WebProxy(ValidateUri(host, port)) { BypassProxyOnLocal = true };
         handler.UseProxy = true;
         return handler;
     }
@@ -23,11 +23,16 @@ public static class OutboundHttpProxy
     {
         public ICredentials? Credentials { get; set; }
 
-        public Uri GetProxy(Uri destination) => getConfig() is { RssProxyEnabled: true } config
+        public Uri GetProxy(Uri destination) => ShouldProxy(destination) && getConfig() is { RssProxyEnabled: true } config
             ? ValidateUri(config.RssProxyHost, config.RssProxyPort)
             : destination;
 
-        public bool IsBypassed(Uri host) => !getConfig().RssProxyEnabled;
+        public bool IsBypassed(Uri host) => !ShouldProxy(host);
+
+        /// <summary>Loopback (OAuth callback, local fixtures) never traverses the outbound
+        /// proxy, matching Android's localhost-bypass semantics.</summary>
+        private bool ShouldProxy(Uri destination) =>
+            getConfig().RssProxyEnabled && !destination.IsLoopback;
     }
 
     public static Uri ValidateUri(string host, int port)

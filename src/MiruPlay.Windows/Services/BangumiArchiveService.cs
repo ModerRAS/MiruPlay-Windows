@@ -192,8 +192,10 @@ public sealed class BangumiArchiveStore : IDisposable
         try
         {
             await _client.DownloadAsync(latest, archive, cancellationToken: cancellationToken).ConfigureAwait(false);
-            ExtractSubject(archive, subject);
-            ValidateSubject(subject);
+            cancellationToken.ThrowIfCancellationRequested();
+            await ExtractSubjectAsync(archive, subject, cancellationToken).ConfigureAwait(false);
+            await ValidateSubjectAsync(subject, cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
             Replace(subject, _subjectFile);
             WriteJsonAtomic(_latestFile, latest);
             return Snapshot();
@@ -219,9 +221,11 @@ public sealed class BangumiArchiveStore : IDisposable
         try
         {
             await CopyBoundedAsync(input, upload, contentLength, maxBytes, cancellationToken).ConfigureAwait(false);
-            if (IsZip(upload)) ExtractSubject(upload, subject);
-            else File.Copy(upload, subject, true);
-            ValidateSubject(subject);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (IsZip(upload)) await ExtractSubjectAsync(upload, subject, cancellationToken).ConfigureAwait(false);
+            else File.Move(upload, subject, true);
+            await ValidateSubjectAsync(subject, cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
             Replace(subject, _subjectFile);
             var now = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture);
             WriteJsonAtomic(_latestFile, new BangumiArchiveLatest(
@@ -235,26 +239,84 @@ public sealed class BangumiArchiveStore : IDisposable
         }
     }
 
-    public IReadOnlyList<BangumiArchiveSearchHit> Search(string query, int limit = 10, float minimumConfidence = 0.62f)
+    /// <summary>
+    /// Streams subject.jsonlines once and keeps only a bounded top-k in rank order.
+    /// The full (~1 GB) archive is never materialised and cancellation is observed per
+    /// line, matching Android BangumiArchive's streaming/cancellable search.
+    /// </summary>
+    public IReadOnlyList<BangumiArchiveSearchHit> Search(
+        string query,
+        int limit = 10,
+        float minimumConfidence = 0.62f,
+        CancellationToken cancellationToken = default)
     {
         var trimmed = query.Trim();
         if (trimmed.Length == 0 || !File.Exists(_subjectFile)) return [];
+        cancellationToken.ThrowIfCancellationRequested();
         if (int.TryParse(trimmed, NumberStyles.None, CultureInfo.InvariantCulture, out var subjectId))
         {
-            var exact = ReadSubjects().FirstOrDefault(subject => subject.Id == subjectId);
+            var exact = FindById(subjectId, cancellationToken);
             return exact is null ? [] : [Hit(exact, exact.NameCn ?? exact.Name, 1)];
         }
+
+        var take = Math.Max(1, limit);
         var requestedSeason = ExtractSeason(trimmed);
-        return ReadSubjects()
-            .Select(subject => (Subject: subject, Match: BestMatch(subject, trimmed)))
-            .Select(value => (value.Subject, value.Match.Title, Confidence: AdjustSeason(value.Match.Score, requestedSeason, ExtractSeason(value.Match.Title) ?? ExtractSeason(value.Subject.Name))))
-            .Where(value => value.Confidence >= minimumConfidence)
-            .OrderByDescending(value => value.Confidence)
-            .ThenBy(value => value.Subject.Rank ?? int.MaxValue)
-            .ThenByDescending(value => value.Subject.Score ?? 0)
-            .Take(Math.Max(1, limit))
-            .Select(value => Hit(value.Subject, value.Title, value.Confidence))
-            .ToList();
+        var hits = new List<BangumiArchiveSearchHit>(Math.Min(take, 64));
+        foreach (var line in File.ReadLines(_subjectFile))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            BangumiArchiveSubject? subject;
+            try
+            {
+                subject = ParseLine(line);
+            }
+            catch (JsonException)
+            {
+                continue;
+            }
+            if (subject is null) continue;
+            var match = BestMatch(subject, trimmed);
+            var confidence = AdjustSeason(match.Score, requestedSeason, ExtractSeason(match.Title) ?? ExtractSeason(subject.Name));
+            if (confidence < minimumConfidence) continue;
+            var candidate = Hit(subject, match.Title, confidence);
+            if (hits.Count == take && CompareHits(candidate, hits[^1]) >= 0) continue;
+            var insertAt = hits.Count;
+            while (insertAt > 0 && CompareHits(candidate, hits[insertAt - 1]) < 0) insertAt--;
+            hits.Insert(insertAt, candidate);
+            if (hits.Count > take) hits.RemoveAt(hits.Count - 1);
+        }
+        return hits;
+    }
+
+    private BangumiArchiveSubject? FindById(int subjectId, CancellationToken cancellationToken)
+    {
+        foreach (var line in File.ReadLines(_subjectFile))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            BangumiArchiveSubject? subject;
+            try
+            {
+                subject = ParseLine(line);
+            }
+            catch (JsonException)
+            {
+                continue;
+            }
+            if (subject?.Id == subjectId) return subject;
+        }
+        return null;
+    }
+
+    /// <summary>Android comparator: confidence desc, rank asc (missing last), score desc, date desc.</summary>
+    private static int CompareHits(BangumiArchiveSearchHit left, BangumiArchiveSearchHit right)
+    {
+        var result = right.Confidence.CompareTo(left.Confidence);
+        if (result != 0) return result;
+        result = (left.Rank ?? int.MaxValue).CompareTo(right.Rank ?? int.MaxValue);
+        if (result != 0) return result;
+        result = (right.Score ?? 0).CompareTo(left.Score ?? 0);
+        if (result != 0) return result;
+        return string.CompareOrdinal(right.AirDate ?? string.Empty, left.AirDate ?? string.Empty);
     }
 
     private static BangumiArchiveSearchHit Hit(BangumiArchiveSubject subject, string matchedTitle, float confidence) => new(
@@ -292,42 +354,35 @@ public sealed class BangumiArchiveStore : IDisposable
         return .2f;
     }
 
-    private List<BangumiArchiveSubject> ReadSubjects()
+    private static BangumiArchiveSubject? ParseLine(string line)
     {
-        var subjects = new List<BangumiArchiveSubject>();
-        foreach (var line in File.ReadLines(_subjectFile))
-        {
-            if (line.Length == 0) continue;
-            try
-            {
-                using var json = JsonDocument.Parse(line);
-                var root = json.RootElement;
-                if (!root.TryGetProperty("id", out var id) || !id.TryGetInt32(out var subjectId) ||
-                    !root.TryGetProperty("type", out var type) || type.GetInt32() != 2 ||
-                    !root.TryGetProperty("name", out var name) || string.IsNullOrWhiteSpace(name.GetString())) continue;
-                subjects.Add(new BangumiArchiveSubject(
-                    subjectId,
-                    name.GetString()!.Trim(),
-                    String(root, "name_cn"),
-                    String(root, "summary"),
-                    Aliases(root),
-                    String(root, "date"),
-                    Integer(root, "eps") ?? Integer(root, "total_episodes") ?? 0,
-                    Float(root, "score"),
-                    Integer(root, "rank")));
-            }
-            catch (JsonException) { }
-        }
-        return subjects;
+        if (string.IsNullOrWhiteSpace(line)) return null;
+        using var json = JsonDocument.Parse(line);
+        var root = json.RootElement;
+        if (!root.TryGetProperty("id", out var id) || !id.TryGetInt32(out var subjectId) ||
+            !root.TryGetProperty("type", out var type) || type.GetInt32() != 2 ||
+            !root.TryGetProperty("name", out var name) || string.IsNullOrWhiteSpace(name.GetString())) return null;
+        return new BangumiArchiveSubject(
+            subjectId,
+            name.GetString()!.Trim(),
+            String(root, "name_cn"),
+            String(root, "summary"),
+            Aliases(root),
+            String(root, "date"),
+            Integer(root, "eps") ?? Integer(root, "total_episodes") ?? 0,
+            Float(root, "score"),
+            Integer(root, "rank"));
     }
 
-    private static void ValidateSubject(string path)
+    private static async Task ValidateSubjectAsync(string path, CancellationToken cancellationToken)
     {
         var info = new FileInfo(path);
         if (!info.Exists || info.Length == 0 || info.Length > MaxSubjectBytes) throw new InvalidDataException(AppStrings.Get("archive.badSubject"));
         var count = 0;
-        foreach (var line in File.ReadLines(path))
+        using var reader = new StreamReader(path);
+        while (await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (string.IsNullOrWhiteSpace(line)) continue;
             using var json = JsonDocument.Parse(line);
             var root = json.RootElement;
@@ -339,15 +394,25 @@ public sealed class BangumiArchiveStore : IDisposable
         if (count == 0) throw new InvalidDataException(AppStrings.Get("archive.noData"));
     }
 
-    private static void ExtractSubject(string archive, string destination)
+    /// <summary>Streams the archive's subject JSONL out of the ZIP. Cancellation is observed
+    /// per chunk; the caller's finally block removes the partially written staging file.</summary>
+    private static async Task ExtractSubjectAsync(string archive, string destination, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         using var zip = ZipFile.OpenRead(archive);
         var entry = zip.Entries.FirstOrDefault(value => !string.IsNullOrEmpty(value.Name) && value.Name.Equals(SubjectFileName, StringComparison.OrdinalIgnoreCase))
             ?? throw new InvalidDataException(AppStrings.Get("archive.noSubjectFile"));
         if (entry.Length > MaxSubjectBytes) throw new InvalidDataException(AppStrings.Get("archive.subjectTooLarge"));
-        using var input = entry.Open();
-        using var output = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None);
-        input.CopyTo(output, 64 * 1024);
+        await using var input = entry.Open();
+        await using var output = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 64 * 1024, useAsync: true);
+        var buffer = new byte[64 * 1024];
+        while (true)
+        {
+            var read = await input.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+            if (read == 0) break;
+            await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+        }
+        await output.FlushAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task CopyBoundedAsync(Stream input, string destination, long contentLength, long maxBytes, CancellationToken cancellationToken)

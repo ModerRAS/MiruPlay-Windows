@@ -28,6 +28,28 @@ public sealed class MetadataTokenStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task OAuthSessionRoundTripsRefreshAndExpiryEncrypted()
+    {
+        var store = new MetadataTokenStore(_path);
+
+        store.SaveBangumiSession("access-token-value", "refresh-token-value", 123_456_789L);
+
+        var loaded = store.Load();
+        Assert.Equal("access-token-value", loaded.Bangumi);
+        Assert.Equal("refresh-token-value", loaded.BangumiRefreshToken);
+        Assert.Equal(123_456_789L, loaded.BangumiExpiresAtMillis);
+        var encrypted = Encoding.UTF8.GetString(await File.ReadAllBytesAsync(_path));
+        Assert.DoesNotContain("refresh-token-value", encrypted, StringComparison.Ordinal);
+        Assert.DoesNotContain("access-token-value", encrypted, StringComparison.Ordinal);
+
+        store.SaveBangumi("manual-token");
+        Assert.Null(store.Load().BangumiRefreshToken);
+        Assert.Equal(0, store.Load().BangumiExpiresAtMillis);
+        store.ClearBangumi();
+        Assert.Null(store.Load().BangumiRefreshToken);
+    }
+
+    [Fact]
     public void EmptyTmdbTokenIsRejected() =>
         Assert.Throws<ArgumentException>(() => new MetadataTokenStore(_path).SaveTmdb(" "));
 

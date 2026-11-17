@@ -1184,4 +1184,87 @@
   <data name="wpf.music.albumOne" xml:space="preserve"><value>共 {0} 張專輯。</value></data>
   <data name="wpf.music.trackOne" xml:space="preserve"><value>共 {0} 首。</value></data>
   <data name="wpf.music.trackCount" xml:space="preserve"><value>共 {0} 首。</value></data>
+  <data name="playback.balance" xml:space="preserve"><value>響度平衡</value></data>
+  <data name="playback.balanceHint" xml:space="preserve"><value>自動壓低過響片段、提升偏輕片段。僅作用於內嵌 mpv 播放；正在播放時會立即套用。</value></data>
+  <data name="playback.balanceOff" xml:space="preserve"><value>關閉</value></data>
+  <data name="playback.balanceLow" xml:space="preserve"><value>低</value></data>
+  <data name="playback.balanceMedium" xml:space="preserve"><value>中</value></data>
+  <data name="playback.balanceHigh" xml:space="preserve"><value>高</value></data>
+  <data name="api.errAudioBalance" xml:space="preserve"><value>音訊平衡等級無效。</value></data>
+  <data name="oauth.heading" xml:space="preserve"><value>Bangumi OAuth 登入</value></data>
+  <data name="oauth.start" xml:space="preserve"><value>瀏覽器登入</value></data>
+  <data name="oauth.logout" xml:space="preserve"><value>登出</value></data>
+  <data name="oauth.statusLoggedOut" xml:space="preserve"><value>未登入</value></data>
+  <data name="oauth.statusLoggedIn" xml:space="preserve"><value>已登入</value></data>
+  <data name="oauth.statusExpires" xml:space="preserve"><value>已登入，權杖有效至 {0}</value></data>
+  <data name="oauth.waiting" xml:space="preserve"><value>已開啟瀏覽器，請在頁面中完成授權…</value></data>
+  <data name="oauth.success" xml:space="preserve"><value>Bangumi OAuth 登入成功。</value></data>
+  <data name="oauth.failed" xml:space="preserve"><value>Bangumi OAuth 登入失敗。</value></data>
+  <data name="oauth.loggedOut" xml:space="preserve"><value>已登出 Bangumi。</value></data>
+  <data name="oauth.notConfigured" xml:space="preserve"><value>未設定 Bangumi OAuth client_id/secret。</value></data>
+  <data name="oauth.configured" xml:space="preserve"><value>已設定（{0}）</value></data>
+  <data name="oauth.sourceEnvironment" xml:space="preserve"><value>環境變數</value></data>
+  <data name="oauth.sourceSettings" xml:space="preserve"><value>本機設定</value></data>
+  <data name="oauth.clientId" xml:space="preserve"><value>OAuth Client ID</value></data>
+  <data name="oauth.clientSecret" xml:space="preserve"><value>OAuth Client Secret</value></data>
+  <data name="oauth.saveCredentials" xml:space="preserve"><value>儲存 OAuth 認證</value></data>
+  <data name="oauth.clearCredentials" xml:space="preserve"><value>清除 OAuth 認證</value></data>
+  <data name="oauth.credentialsSaved" xml:space="preserve"><value>OAuth 認證已儲存。</value></data>
+  <data name="oauth.credentialsCleared" xml:space="preserve"><value>OAuth 認證已清除。</value></data>
+  <data name="bgmOauth.notConfigured" xml:space="preserve"><value>Bangumi OAuth 未設定 client_id/secret。</value></data>
+  <data name="bgmOauth.tokenHttp" xml:space="preserve"><value>Bangumi 換 token 失敗（HTTP {0}）。</value></data>
+  <data name="bgmOauth.tokenMissing" xml:space="preserve"><value>Bangumi 換 token 回應缺少 access_token。</value></data>
+  <data name="bgmOauth.timeout" xml:space="preserve"><value>授權等待逾時（10 分鐘），請重新登入。</value></data>
+  <data name="bgmOauth.missingCode" xml:space="preserve"><value>授權回呼缺少 code。</value></data>
+  <data name="bgmOauth.failed" xml:space="preserve"><value>Bangumi OAuth 登入失敗。</value></data>
+  <data name="bgmOauth.loopbackStarted" xml:space="preserve"><value>OAuth 回呼服務已在執行。</value></data>
+  <data name="bgmOauth.portBusy" xml:space="preserve"><value>OAuth 回呼連接埠 {0} 已被佔用，請關閉佔用程式後重試。</value></data>
+  <data name="bgmOauth.credentialsBroken" xml:space="preserve"><value>Bangumi OAuth 認證損壞，請重新設定。</value></data>
+  <data name="bgmOauth.clientIdInvalid" xml:space="preserve"><value>OAuth Client ID 無效。</value></data>
+  <data name="bgmOauth.clientSecretInvalid" xml:space="preserve"><value>OAuth Client Secret 無效。</value></data>
+  <data name="bgmOauth.responseTooLarge" xml:space="preserve"><value>Bangumi 回應過大。</value></data>
+  <data name="bgmOauth.loginPageFailed" xml:space="preserve"><value>Bangumi 登入頁開啟失敗（HTTP {0}）。</value></data>
+  <data name="bgmOauth.loginFormMissing" xml:space="preserve"><value>Bangumi 登入頁沒有回傳表單。</value></data>
+  <data name="bgmOauth.captchaFailed" xml:space="preserve"><value>無法取得 Bangumi 驗證碼。</value></data>
+  <data name="bgmOauth.captchaTooLarge" xml:space="preserve"><value>Bangumi 驗證碼回應過大。</value></data>
+  <data name="bgmOauth.needChallenge" xml:space="preserve"><value>請先取得驗證碼。</value></data>
+  <data name="bgmOauth.networkFailed" xml:space="preserve"><value>無法連線 Bangumi，請檢查對外代理或網路。</value></data>
+  <data name="bgmOauth.credentialsInvalid" xml:space="preserve"><value>帳號、密碼或驗證碼不正確。</value></data>
+  <data name="bgmOauth.loginNotKept" xml:space="preserve"><value>Bangumi 沒有保持登入狀態，請重試。</value></data>
+  <data name="bgmOauth.authFormMissing" xml:space="preserve"><value>Bangumi 授權頁沒有回傳可提交的表單。</value></data>
+  <data name="bgmOauth.authNoCode" xml:space="preserve"><value>Bangumi 授權沒有回傳授權碼。</value></data>
+  <data name="bgmOauth.fieldsRequired" xml:space="preserve"><value>請填寫電子郵件、密碼和驗證碼。</value></data>
+  <data name="bgmOauth.fieldsTooLong" xml:space="preserve"><value>電子郵件、密碼或驗證碼過長。</value></data>
+  <data name="bgmOauth.loginExpired" xml:space="preserve"><value>驗證碼已過期，請重新取得。</value></data>
+  <data name="bgmOauth.callbackRejected" xml:space="preserve"><value>授權驗證失敗，請重新登入。</value></data>
+  <data name="api.errNoBangumiOAuth" xml:space="preserve"><value>Bangumi 登入不可用。</value></data>
+  <data name="meta.oauthTitle" xml:space="preserve"><value>Bangumi OAuth</value></data>
+  <data name="meta.oauthStart" xml:space="preserve"><value>開啟瀏覽器授權</value></data>
+  <data name="meta.oauthLogout" xml:space="preserve"><value>登出</value></data>
+  <data name="meta.oauthLoggedIn" xml:space="preserve"><value>已登入，權杖有效至 {0}</value></data>
+  <data name="meta.oauthLoggedOut" xml:space="preserve"><value>未登入</value></data>
+  <data name="meta.oauthConfiguredBadge" xml:space="preserve"><value>已設定</value></data>
+  <data name="meta.oauthNotConfiguredBadge" xml:space="preserve"><value>未設定</value></data>
+  <data name="meta.oauthCredentialsTitle" xml:space="preserve"><value>OAuth 應用程式認證</value></data>
+  <data name="meta.oauthClientId" xml:space="preserve"><value>Client ID</value></data>
+  <data name="meta.oauthClientSecret" xml:space="preserve"><value>Client Secret</value></data>
+  <data name="meta.oauthSaveCredentials" xml:space="preserve"><value>儲存認證</value></data>
+  <data name="meta.oauthClearCredentials" xml:space="preserve"><value>清除認證</value></data>
+  <data name="meta.oauthCredentialHint" xml:space="preserve"><value>環境變數 BANGUMI_CLIENT_ID / BANGUMI_CLIENT_SECRET 優先；secret 只儲存不回顯。</value></data>
+  <data name="meta.oauthWaiting" xml:space="preserve"><value>已開啟瀏覽器，等待授權完成…</value></data>
+  <data name="meta.oauthSuccess" xml:space="preserve"><value>OAuth 登入成功。</value></data>
+  <data name="meta.oauthFailed" xml:space="preserve"><value>OAuth 登入失敗。</value></data>
+  <data name="meta.accountLogin" xml:space="preserve"><value>帳號密碼登入</value></data>
+  <data name="meta.accountLoginHint" xml:space="preserve"><value>密碼只用於本次提交，不會儲存在用戶端。</value></data>
+  <data name="meta.email" xml:space="preserve"><value>電子郵件</value></data>
+  <data name="meta.password" xml:space="preserve"><value>密碼</value></data>
+  <data name="meta.captcha" xml:space="preserve"><value>驗證碼</value></data>
+  <data name="meta.captchaRefresh" xml:space="preserve"><value>點擊重新整理驗證碼</value></data>
+  <data name="meta.loginSubmit" xml:space="preserve"><value>登入</value></data>
+  <data name="meta.loginCancel" xml:space="preserve"><value>取消</value></data>
+  <data name="meta.loginStart" xml:space="preserve"><value>取得驗證碼</value></data>
+  <data name="meta.loginStateChallenge" xml:space="preserve"><value>等待輸入驗證碼</value></data>
+  <data name="meta.loginFailedNotice" xml:space="preserve"><value>登入失敗：{0}</value></data>
+  <data name="meta.loginSucceeded" xml:space="preserve"><value>已登入 Bangumi。</value></data>
+  <data name="meta.oauthLocalOnly" xml:space="preserve"><value>OAuth 瀏覽器登入需要在執行 MiruPlay 的這台電腦上操作；遠端存取請改用帳號密碼登入，或在用戶端上完成 OAuth 登入。</value></data>
 </root>
