@@ -1184,4 +1184,11 @@
   <data name="wpf.music.albumOne" xml:space="preserve"><value>{0} album.</value></data>
   <data name="wpf.music.trackOne" xml:space="preserve"><value>{0} track.</value></data>
   <data name="wpf.music.trackCount" xml:space="preserve"><value>{0} tracks.</value></data>
+  <data name="playback.balance" xml:space="preserve"><value>Loudness balance</value></data>
+  <data name="playback.balanceHint" xml:space="preserve"><value>Automatically lowers loud passages and lifts quiet ones. Applies to embedded mpv playback only; changes take effect immediately while playing.</value></data>
+  <data name="playback.balanceOff" xml:space="preserve"><value>Off</value></data>
+  <data name="playback.balanceLow" xml:space="preserve"><value>Low</value></data>
+  <data name="playback.balanceMedium" xml:space="preserve"><value>Medium</value></data>
+  <data name="playback.balanceHigh" xml:space="preserve"><value>High</value></data>
+  <data name="api.errAudioBalance" xml:space="preserve"><value>Invalid audio balance level.</value></data>
 </root>

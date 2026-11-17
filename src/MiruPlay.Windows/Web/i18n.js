@@ -1180,7 +1180,14 @@ const I18N = {
   "wpf.music.scanTimeout": "音乐扫描超时（60 秒），请缩小来源目录或稍后重试。",
   "wpf.music.albumOne": "共 {0} 张专辑。",
   "wpf.music.trackOne": "共 {0} 首。",
-  "wpf.music.trackCount": "共 {0} 首。"
+  "wpf.music.trackCount": "共 {0} 首。",
+  "playback.balance": "响度平衡",
+  "playback.balanceHint": "自动压低过响片段、提升偏轻片段。仅作用于内嵌 mpv 播放；正在播放时会立即应用。",
+  "playback.balanceOff": "关闭",
+  "playback.balanceLow": "低",
+  "playback.balanceMedium": "中",
+  "playback.balanceHigh": "高",
+  "api.errAudioBalance": "音频平衡等级无效。"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -2362,7 +2369,14 @@ const I18N = {
   "wpf.music.scanTimeout": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。",
   "wpf.music.albumOne": "共 {0} 張專輯。",
   "wpf.music.trackOne": "共 {0} 首。",
-  "wpf.music.trackCount": "共 {0} 首。"
+  "wpf.music.trackCount": "共 {0} 首。",
+  "playback.balance": "響度平衡",
+  "playback.balanceHint": "自動壓低過響片段、提升偏輕片段。僅作用於內嵌 mpv 播放；正在播放時會立即套用。",
+  "playback.balanceOff": "關閉",
+  "playback.balanceLow": "低",
+  "playback.balanceMedium": "中",
+  "playback.balanceHigh": "高",
+  "api.errAudioBalance": "音訊平衡等級無效。"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -3544,7 +3558,14 @@ const I18N = {
   "wpf.music.scanTimeout": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。",
   "wpf.music.albumOne": "共 {0} 張專輯。",
   "wpf.music.trackOne": "共 {0} 首。",
-  "wpf.music.trackCount": "共 {0} 首。"
+  "wpf.music.trackCount": "共 {0} 首。",
+  "playback.balance": "響度平衡",
+  "playback.balanceHint": "自動壓低過響片段、提升偏輕片段。僅作用於內嵌 mpv 播放；正在播放時會立即套用。",
+  "playback.balanceOff": "關閉",
+  "playback.balanceLow": "低",
+  "playback.balanceMedium": "中",
+  "playback.balanceHigh": "高",
+  "api.errAudioBalance": "音訊平衡等級無效。"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -4726,7 +4747,14 @@ const I18N = {
   "wpf.music.scanTimeout": "Music scan timed out (60 s); narrow the source directory or retry later.",
   "wpf.music.albumOne": "{0} album.",
   "wpf.music.trackOne": "{0} track.",
-  "wpf.music.trackCount": "{0} tracks."
+  "wpf.music.trackCount": "{0} tracks.",
+  "playback.balance": "Loudness balance",
+  "playback.balanceHint": "Automatically lowers loud passages and lifts quiet ones. Applies to embedded mpv playback only; changes take effect immediately while playing.",
+  "playback.balanceOff": "Off",
+  "playback.balanceLow": "Low",
+  "playback.balanceMedium": "Medium",
+  "playback.balanceHigh": "High",
+  "api.errAudioBalance": "Invalid audio balance level."
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -5908,7 +5936,14 @@ const I18N = {
   "wpf.music.scanTimeout": "Music scan timed out (60 s); narrow the source directory or retry later.",
   "wpf.music.albumOne": "{0} album.",
   "wpf.music.trackOne": "{0} track.",
-  "wpf.music.trackCount": "{0} tracks."
+  "wpf.music.trackCount": "{0} tracks.",
+  "playback.balance": "Loudness balance",
+  "playback.balanceHint": "Automatically lowers loud passages and lifts quiet ones. Applies to embedded mpv playback only; changes take effect immediately while playing.",
+  "playback.balanceOff": "Off",
+  "playback.balanceLow": "Low",
+  "playback.balanceMedium": "Medium",
+  "playback.balanceHigh": "High",
+  "api.errAudioBalance": "Invalid audio balance level."
  }
 };
 let currentLocale = 'zh-CN';

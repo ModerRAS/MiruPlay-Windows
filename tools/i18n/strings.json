@@ -1183,5 +1183,12 @@
   "wpf.music.scanTimeout": { "zh-CN": "音乐扫描超时（60 秒），请缩小来源目录或稍后重试。", "zh-TW": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。", "zh-HK": "音樂掃描逾時（60 秒），請縮小來源目錄或稍後重試。", "en-US": "Music scan timed out (60 s); narrow the source directory or retry later.", "en-GB": "Music scan timed out (60 s); narrow the source directory or retry later." },
   "wpf.music.albumOne": { "zh-CN": "共 {0} 张专辑。", "zh-TW": "共 {0} 張專輯。", "zh-HK": "共 {0} 張專輯。", "en-US": "{0} album.", "en-GB": "{0} album." },
   "wpf.music.trackOne": { "zh-CN": "共 {0} 首。", "zh-TW": "共 {0} 首。", "zh-HK": "共 {0} 首。", "en-US": "{0} track.", "en-GB": "{0} track." },
-  "wpf.music.trackCount": { "zh-CN": "共 {0} 首。", "zh-TW": "共 {0} 首。", "zh-HK": "共 {0} 首。", "en-US": "{0} tracks.", "en-GB": "{0} tracks." }
+  "wpf.music.trackCount": { "zh-CN": "共 {0} 首。", "zh-TW": "共 {0} 首。", "zh-HK": "共 {0} 首。", "en-US": "{0} tracks.", "en-GB": "{0} tracks." },
+  "playback.balance": {"zh-CN":"响度平衡","zh-TW":"響度平衡","zh-HK":"響度平衡","en-US":"Loudness balance","en-GB":"Loudness balance"},
+  "playback.balanceHint": {"zh-CN":"自动压低过响片段、提升偏轻片段。仅作用于内嵌 mpv 播放；正在播放时会立即应用。","zh-TW":"自動壓低過響片段、提升偏輕片段。僅作用於內嵌 mpv 播放；正在播放時會立即套用。","zh-HK":"自動壓低過響片段、提升偏輕片段。僅作用於內嵌 mpv 播放；正在播放時會立即套用。","en-US":"Automatically lowers loud passages and lifts quiet ones. Applies to embedded mpv playback only; changes take effect immediately while playing.","en-GB":"Automatically lowers loud passages and lifts quiet ones. Applies to embedded mpv playback only; changes take effect immediately while playing."},
+  "playback.balanceOff": {"zh-CN":"关闭","zh-TW":"關閉","zh-HK":"關閉","en-US":"Off","en-GB":"Off"},
+  "playback.balanceLow": {"zh-CN":"低","zh-TW":"低","zh-HK":"低","en-US":"Low","en-GB":"Low"},
+  "playback.balanceMedium": {"zh-CN":"中","zh-TW":"中","zh-HK":"中","en-US":"Medium","en-GB":"Medium"},
+  "playback.balanceHigh": {"zh-CN":"高","zh-TW":"高","zh-HK":"高","en-US":"High","en-GB":"High"},
+  "api.errAudioBalance": {"zh-CN":"音频平衡等级无效。","zh-TW":"音訊平衡等級無效。","zh-HK":"音訊平衡等級無效。","en-US":"Invalid audio balance level.","en-GB":"Invalid audio balance level."}
 }

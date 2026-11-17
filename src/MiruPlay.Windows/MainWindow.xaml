@@ -674,6 +674,22 @@
                             <ColumnDefinition Width="240" />
                         </Grid.ColumnDefinitions>
                         <StackPanel>
+                            <TextBlock Text="{services:Loc playback.balance}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc playback.balanceHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="AudioBalanceBox" Grid.Column="1" SelectionChanged="AudioBalance_SelectionChanged" AutomationProperties.Name="{services:Loc playback.balance}">
+                            <ComboBoxItem Tag="off"><TextBlock Text="{services:Loc playback.balanceOff}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="low"><TextBlock Text="{services:Loc playback.balanceLow}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="medium"><TextBlock Text="{services:Loc playback.balanceMedium}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="high"><TextBlock Text="{services:Loc playback.balanceHigh}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                    <Grid Margin="0,0,0,28">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
                             <TextBlock Text="{services:Loc playback.appLang}" FontWeight="SemiBold" />
                             <TextBlock Text="{services:Loc wpf.main.langHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
                         </StackPanel>

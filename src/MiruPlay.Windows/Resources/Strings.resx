@@ -1184,4 +1184,11 @@
   <data name="wpf.music.albumOne" xml:space="preserve"><value>共 {0} 张专辑。</value></data>
   <data name="wpf.music.trackOne" xml:space="preserve"><value>共 {0} 首。</value></data>
   <data name="wpf.music.trackCount" xml:space="preserve"><value>共 {0} 首。</value></data>
+  <data name="playback.balance" xml:space="preserve"><value>响度平衡</value></data>
+  <data name="playback.balanceHint" xml:space="preserve"><value>自动压低过响片段、提升偏轻片段。仅作用于内嵌 mpv 播放；正在播放时会立即应用。</value></data>
+  <data name="playback.balanceOff" xml:space="preserve"><value>关闭</value></data>
+  <data name="playback.balanceLow" xml:space="preserve"><value>低</value></data>
+  <data name="playback.balanceMedium" xml:space="preserve"><value>中</value></data>
+  <data name="playback.balanceHigh" xml:space="preserve"><value>高</value></data>
+  <data name="api.errAudioBalance" xml:space="preserve"><value>音频平衡等级无效。</value></data>
 </root>

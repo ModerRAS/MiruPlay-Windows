@@ -105,6 +105,7 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly Func<AppSettings> _getSettings;
     private readonly Func<Func<AppSettings, AppSettings>, Task<AppSettings>> _updateSettings;
     private readonly Func<AudioDspConfig, Task>? _applyAudioDsp;
+    private readonly Func<AppSettings, Task>? _applyPlaybackSettings;
     private readonly SemaphoreSlim _settingsLock = new(1, 1);
     private readonly MediaSourceActions _mediaSources;
     private readonly MediaSourceRegistry? _metadataSources;
@@ -171,7 +172,8 @@ public sealed class WebControlServer : IAsyncDisposable
         ToppingController? topping = null,
         Func<string, AudioDspPreset?>? findAudioPreset = null,
         MusicLibraryService? musicLibrary = null,
-        Func<MusicPlayRequest, Task<bool>>? playMusic = null)
+        Func<MusicPlayRequest, Task<bool>>? playMusic = null,
+        Func<AppSettings, Task>? applyPlaybackSettings = null)
     {
         _port = port;
         _tokens = tokens;
@@ -187,6 +189,7 @@ public sealed class WebControlServer : IAsyncDisposable
         _getSettings = getSettings;
         _updateSettings = updateSettings;
         _applyAudioDsp = applyAudioDsp;
+        _applyPlaybackSettings = applyPlaybackSettings;
         _mediaSources = mediaSources;
         _metadataSources = metadataSources;
         _refreshSource = refreshSource;
@@ -965,6 +968,8 @@ public sealed class WebControlServer : IAsyncDisposable
                 ?? new PlaybackSettingsRequest();
             if (body.EndAction is not (null or "return_to_detail" or "play_next_episode")) throw new BadHttpRequestException(AppStrings.Get("api.errEndAction"));
             if (body.PreferredSubtitleLanguage is not (null or "auto" or "zh_hans" or "zh_hant" or "zh" or "en" or "ja")) throw new BadHttpRequestException(AppStrings.Get("api.errSubLang"));
+            if (body.AudioBalance is not null && !AudioBalanceLevels.StorageValues.Contains(body.AudioBalance.Trim().ToLowerInvariant()))
+                throw new BadHttpRequestException(AppStrings.Get("api.errAudioBalance"));
             if (body.FormatAwareToneMapping is not null)
             {
                 throw new BadHttpRequestException(AppStrings.Get("api.errToneMap"), StatusCodes.Status501NotImplemented);
@@ -973,7 +978,11 @@ public sealed class WebControlServer : IAsyncDisposable
             {
                 PlaybackEndAction = body.EndAction ?? current.PlaybackEndAction,
                 PreferredSubtitleLanguage = body.PreferredSubtitleLanguage ?? current.PreferredSubtitleLanguage,
+                AudioBalance = body.AudioBalance is null
+                    ? current.AudioBalance
+                    : AppSettingsStore.NormalizeAudioBalance(body.AudioBalance),
             }).ConfigureAwait(false);
+            if (_applyPlaybackSettings is not null) await _applyPlaybackSettings(updated).ConfigureAwait(false);
             return Success(ToPlaybackSettings(updated));
         });
 
@@ -1510,6 +1519,8 @@ public sealed class WebControlServer : IAsyncDisposable
         },
         endActionOptions = new[] { "return_to_detail", "play_next_episode" },
         preferredSubtitleLanguageOptions = new[] { "auto", "zh_hans", "zh_hant", "zh", "en", "ja" },
+        audioBalance = AppSettingsStore.NormalizeAudioBalance(settings.AudioBalance),
+        audioBalanceOptions = AudioBalanceLevels.StorageValues,
     };
 
     private static string NormalizeCloudDrivePath(string path)
@@ -1647,7 +1658,8 @@ public sealed class WebControlServer : IAsyncDisposable
     private sealed record PlaybackSettingsRequest(
         string? EndAction = null,
         string? PreferredSubtitleLanguage = null,
-        JsonElement? FormatAwareToneMapping = null);
+        JsonElement? FormatAwareToneMapping = null,
+        string? AudioBalance = null);
     private sealed record ScanSettingsRequest(
         bool? AutoScanEnabled = null,
         int? AutoScanIntervalHours = null,

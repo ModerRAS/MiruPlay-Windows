@@ -149,6 +149,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             tasks: _tasks,
             resolvePosterPath: ResolvePosterForWebAsync,
             applyAudioDsp: ApplyAudioDspFromWebAsync,
+            applyPlaybackSettings: ApplyPlaybackAudioFromWebAsync,
             metadataSources: _mediaSourceRegistry,
             refreshSource: RefreshSourceAfterMetadataAsync,
             bangumiArchive: _bangumiArchive,
@@ -198,10 +199,24 @@ public partial class MainWindow : Window, IAsyncDisposable
     private Task ApplyAudioDspFromWebAsync(AudioDspConfig config) =>
         Dispatcher.InvokeAsync(() => ApplyAudioDspConfigAsync(config)).Task.Unwrap();
 
-    private async Task ApplyAudioDspConfigAsync(AudioDspConfig config)
+    private Task ApplyPlaybackAudioFromWebAsync(AppSettings settings) =>
+        Dispatcher.InvokeAsync(() => ApplyPlaybackAudioSettingsAsync(settings)).Task.Unwrap();
+
+    private Task ApplyAudioDspConfigAsync(AudioDspConfig config) =>
+        ApplyPlaybackAudioSettingsAsync(_settings with { AudioDsp = config });
+
+    /// <summary>Compiles the shared DSP + loudness-balance graph and applies it to the
+    /// running session (next playback uses it too via LibMpvPlaybackSession.Configure).</summary>
+    private async Task ApplyPlaybackAudioSettingsAsync(AppSettings settings)
     {
+        var audioDsp = (settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
+        var preset = audioDsp.Presets!.First(item => item.Id.Equals(audioDsp.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
+        var layout = AudioDspChannelLayout.ForId(preset.ChannelLayoutId);
         var graph = AudioDspFilterGraphCompiler.Compile(
-            config, AudioDspChannelLayout.Stereo, 48_000);
+            audioDsp,
+            layout,
+            48_000,
+            AudioBalanceLevels.FromStorageValue(settings.AudioBalance));
         if (_activeSession is { IsActive: true } session)
             await session.ApplyAudioDspAsync(graph).ConfigureAwait(true);
     }
@@ -2241,6 +2256,21 @@ public partial class MainWindow : Window, IAsyncDisposable
         _settingsStore.Save(_settings);
     }
 
+    private async void AudioBalance_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || AudioBalanceBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { AudioBalance = AppSettingsStore.NormalizeAudioBalance(value) };
+        _settingsStore.Save(_settings);
+        try
+        {
+            await ApplyPlaybackAudioSettingsAsync(_settings);
+        }
+        catch (Exception error) when (error is ArgumentException or IOException or InvalidOperationException or TimeoutException)
+        {
+            StatusText.Text = AppStrings.Get("wpf.status.dspApplyFailed", error.Message);
+        }
+    }
+
     private void AppLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loadingSettings || AppLanguageBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
@@ -2307,6 +2337,10 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .OfType<ComboBoxItem>()
                 .FirstOrDefault(item => Equals(item.Tag, _settings.PreferredSubtitleLanguage))
                 ?? SubtitlePreference.Items[0];
+            AudioBalanceBox.SelectedItem = AudioBalanceBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeAudioBalance(_settings.AudioBalance)))
+                ?? AudioBalanceBox.Items[0];
         }
         finally
         {

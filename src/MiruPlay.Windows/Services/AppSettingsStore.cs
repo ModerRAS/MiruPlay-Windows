@@ -29,7 +29,8 @@ public sealed record AppSettings(
     string AppUpdateManifestUrl = "",
     string AudioSrcBypass = "software",
     int AudioOutputSampleRate = 48000,
-    string AppLanguage = "system");
+    string AppLanguage = "system",
+    string AudioBalance = "off");
 
 public sealed class AppSettingsStore
 {
@@ -120,14 +121,16 @@ public sealed class AppSettingsStore
             var normalizedSrcBypass = NormalizeAudioSrcBypass(settings.AudioSrcBypass);
             var normalizedSampleRate = NormalizeAudioOutputSampleRate(settings.AudioOutputSampleRate);
             var normalizedLanguage = AppLocale.Normalize(settings.AppLanguage);
+            var normalizedBalance = NormalizeAudioBalance(settings.AudioBalance);
             if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate ||
-                settings.AppLanguage != normalizedLanguage)
+                settings.AppLanguage != normalizedLanguage || settings.AudioBalance != normalizedBalance)
             {
                 settings = settings with
                 {
                     AudioSrcBypass = normalizedSrcBypass,
                     AudioOutputSampleRate = normalizedSampleRate,
                     AppLanguage = normalizedLanguage,
+                    AudioBalance = normalizedBalance,
                 };
                 needsCleanup = true;
             }
@@ -160,6 +163,9 @@ public sealed class AppSettingsStore
     };
 
     public static int NormalizeAudioOutputSampleRate(int value) => value is >= 8_000 and <= 384_000 ? value : 48000;
+
+    public static string NormalizeAudioBalance(string? value) =>
+        AudioBalanceLevels.ToStorageValue(AudioBalanceLevels.FromStorageValue(value));
 
     public void Save(AppSettings settings)
     {
