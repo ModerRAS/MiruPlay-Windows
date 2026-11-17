@@ -61,6 +61,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
         TvTheme.Apply(this);
         InputMethod.SetIsInputMethodEnabled(this, false);
         Cursor = Cursors.None;
+        Mouse.OverrideCursor = Cursors.None;
         _input = new TvInputService(
             TvKeyMap.ParsePreset(_context.Settings.TvRemotePreset),
             _context.Settings.TvExitLongPressMs);
@@ -91,7 +92,12 @@ public sealed partial class TvShellWindow : Window, IDisposable
         SourceInitialized += Shell_SourceInitialized;
         Loaded += Shell_Loaded;
         Closing += Shell_Closing;
-        Activated += (_, _) => RestoreFocus();
+        Activated += (_, _) =>
+        {
+            EnsureCursorHidden();
+            RestoreFocus();
+        };
+        PreviewMouseMove += (_, _) => EnsureCursorHidden();
         SizeChanged += (_, _) => UpdateOsdGeometry();
     }
 
@@ -146,7 +152,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
     {
         if (_libraryLoaded) return;
         FitToPrimaryScreen();
-        Mouse.OverrideCursor = Cursors.None;
+        EnsureCursorHidden();
         ClockText.Visibility = _context.Settings.TvClockVisible ? Visibility.Visible : Visibility.Collapsed;
         UpdateClock();
         _clockTimer.Start();
@@ -273,7 +279,15 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
     internal void FocusShellForPlayback()
     {
+        EnsureCursorHidden();
         FocusRoot();
+    }
+
+    /// <summary>Keep the mouse pointer invisible for the whole TV session (remote-only UI).</summary>
+    internal void EnsureCursorHidden()
+    {
+        Cursor = Cursors.None;
+        Mouse.OverrideCursor = Cursors.None;
     }
 
     internal void ProcessRawKeyDown(Key key)
@@ -320,6 +334,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
         if (!ReferenceEquals(_currentScreen, screen) && _currentScreen is not null)
             _navigator.RememberFocus(_currentScreen.Id, _currentScreen.OnDeactivating());
         _currentScreen = screen;
+        EnsureCursorHidden();
         ScreenHost.Content = screen;
         _navFocused = false;
         ExpandNavigation(false);

@@ -43,6 +43,7 @@ public sealed partial class TvOsdWindow : Window
     {
         InitializeComponent();
         Cursor = System.Windows.Input.Cursors.None;
+        Mouse.OverrideCursor = System.Windows.Input.Cursors.None;
         InputMethod.SetIsInputMethodEnabled(this, false);
         _transport = [Transport0, Transport1, Transport2, Transport3, Transport4];
         _transportText = [TransportText0, TransportText1, TransportText2, TransportText3, TransportText4];
