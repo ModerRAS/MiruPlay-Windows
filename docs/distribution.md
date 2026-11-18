@@ -61,3 +61,41 @@ Pull requests and branch pushes run restore, warning-as-error Release build, tes
 - **v0.1.5** (2026-10-20, `Latest`): portable-only release, built locally from `2c715a6` via `Publish-Release.ps1 -Version 0.1.5 -SkipInstaller` and verified with `Test-ReleaseArtifacts.ps1 -SkipInstaller` (3 hashes, portable launch test). Assets: portable ZIP, symbols ZIP, `SHA256SUMS.txt`, `release-manifest.json`; unsigned. No installer/`windows-update.json` in this release (installer deferred: no Inno Setup on the build machine, no code-signing certificate).
 
 `tools/Test-ReleaseArtifacts.ps1` verifies every checksum, expands and launches the portable package, silently installs and launches the installer, closes the application through its normal WPF lifecycle, and silently uninstalls it. GitHub-hosted Windows runners provide the clean-user validation lane. The release job builds lite always and full only when `runtime/enhance/manifest.json` exists; `Test-ReleaseArtifacts.ps1 -Edition <edition>` asserts lite has no enhancement assets and full contains the VapourSynth/RIFE components plus license files and hashes.
+
+## Release pipeline (CI, two editions)
+
+The release job (`.github/workflows/ci.yml`, tag `v<major>.<minor>.<patch>` or
+`workflow_dispatch`) always builds and validates **both** editions; manual asset
+upload is not part of the process.
+
+1. **Enhancement pack release first.** The RIFE pack is built/published by the
+   `enhancement-pack.yml` workflow as GitHub Release asset `rife-<manifest.version>.7z`
+   under tag `enhance-rife-<manifest.version>`. The pinned SHA-256/size live in
+   `tools/enhance/rife-enhance-manifest.json`.
+2. **Release job consumes it.** `tools/Fetch-ReleaseEnhancement.ps1` downloads the
+   asset with `gh`, verifies size + SHA-256, and installs it to
+   `runtime/enhance/rife` via `tools/Get-EnhancementPack.ps1 -ArchivePath`.
+   If the asset or its hash is missing, the release job fails with an explicit
+   message telling the operator to run the enhancement-pack workflow; it never
+   silently downgrades to a lite-only release.
+3. **Build both editions unconditionally.** `Publish-Release.ps1 -Edition lite` then
+   `-Edition full`; both manifests (`release-manifest-lite/full.json`),
+   `windows-update-lite/full.json` and all archives are produced; the full manifest
+   carries the real `enhancement` hashes from the installed pack.
+4. **Validate both.** `Test-ReleaseArtifacts.ps1 -Edition lite -SkipInstaller=false`
+   and `-Edition full` both run; lite asserts no `runtime/enhance`, full asserts the
+   pack manifest/VSScript/librife/model/licenses and cross-checks hashes.
+5. **Upload via CI only.** The workflow uploads `artifacts/release/*` as CI artifacts
+   and the tag workflow creates/updates the GitHub Release from that exact directory
+   (stale assets removed, no manual upload).
+
+Runner requirement: `windows-latest` (or Ubuntu + `p7zip-full`, not used today).
+The workflow probes `7z.exe` including the standard `C:\Program Files\7-Zip`
+location before downloading the pack.
+
+### Tag conventions
+
+- Application release: `vX.Y.Z` (both `MiruPlay-<ver>-win-x64-lite-*` and
+  `MiruPlay-<ver>-win-x64-full-*` assets).
+- Enhancement pack release: `enhance-rife-<manifest.version>` with asset
+  `rife-<manifest.version>.7z`; publish it before the matching application tag.
