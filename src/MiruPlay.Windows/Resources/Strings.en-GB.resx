@@ -1457,4 +1457,34 @@
   <data name="tv.settings.gamepadStatusXInputFallback" xml:space="preserve"><value>XInput (SDL3 init failed)</value></data>
   <data name="tv.settings.gamepadStatusDisconnected" xml:space="preserve"><value>No gamepad connected</value></data>
   <data name="tv.settings.gamepadWarningSdlInitFailed" xml:space="preserve"><value>SDL3 initialization failed; using XInput: {0}</value></data>
+  <data name="tv.nav.season" xml:space="preserve"><value>Seasons</value></data>
+  <data name="tv.season.title" xml:space="preserve"><value>New Seasons</value></data>
+  <data name="tv.season.summary" xml:space="preserve"><value>{0} titles · grouped by broadcast season</value></data>
+  <data name="tv.season.group" xml:space="preserve"><value>{0} · {1}月季</value></data>
+  <data name="tv.season.unknown" xml:space="preserve"><value>Unknown air date</value></data>
+  <data name="tv.season.empty" xml:space="preserve"><value>No titles yet</value></data>
+  <data name="tv.hint.season" xml:space="preserve"><value>←→ View/Week   ↑↓ Rows   OK Details   Back</value></data>
+  <data name="tv.season.weekday.monday" xml:space="preserve"><value>Monday</value></data>
+  <data name="tv.season.weekday.tuesday" xml:space="preserve"><value>Tuesday</value></data>
+  <data name="tv.season.weekday.wednesday" xml:space="preserve"><value>Wednesday</value></data>
+  <data name="tv.season.weekday.thursday" xml:space="preserve"><value>Thursday</value></data>
+  <data name="tv.season.weekday.friday" xml:space="preserve"><value>Friday</value></data>
+  <data name="tv.season.weekday.saturday" xml:space="preserve"><value>Saturday</value></data>
+  <data name="tv.season.weekday.sunday" xml:space="preserve"><value>Sunday</value></data>
+  <data name="tv.season.weekday.unknown" xml:space="preserve"><value>Unknown weekday</value></data>
+  <data name="tv.nav.schedule" xml:space="preserve"><value>Schedule</value></data>
+  <data name="tv.schedule.title" xml:space="preserve"><value>Anime schedule</value></data>
+  <data name="tv.schedule.lastWeek" xml:space="preserve"><value>Last week</value></data>
+  <data name="tv.schedule.thisWeek" xml:space="preserve"><value>This week</value></data>
+  <data name="tv.schedule.nextWeek" xml:space="preserve"><value>Next week</value></data>
+  <data name="tv.schedule.today" xml:space="preserve"><value>Today</value></data>
+  <data name="tv.schedule.notInLibrary" xml:space="preserve"><value>&quot;{0}&quot; is not in your library</value></data>
+  <data name="tv.schedule.loading" xml:space="preserve"><value>Loading the Bangumi calendar…</value></data>
+  <data name="tv.schedule.stale" xml:space="preserve"><value>Offline: showing the cached calendar</value></data>
+  <data name="tv.schedule.error" xml:space="preserve"><value>Calendar failed to load: {0} (press OK to retry)</value></data>
+  <data name="tv.schedule.emptyDay" xml:space="preserve"><value>No titles today</value></data>
+  <data name="tv.schedule.emptyWeek" xml:space="preserve"><value>No titles this week</value></data>
+  <data name="tv.hint.schedule" xml:space="preserve"><value>←→ Week/Title   ↑↓ Weekday   OK Details   Back</value></data>
+  <data name="tv.season.tab.schedule" xml:space="preserve"><value>Schedule</value></data>
+  <data name="tv.season.tab.season" xml:space="preserve"><value>Seasons</value></data>
 </root>

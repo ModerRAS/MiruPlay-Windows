@@ -1457,4 +1457,34 @@
   <data name="tv.settings.gamepadStatusXInputFallback" xml:space="preserve"><value>XInput（SDL3 初始化失败）</value></data>
   <data name="tv.settings.gamepadStatusDisconnected" xml:space="preserve"><value>未连接手柄</value></data>
   <data name="tv.settings.gamepadWarningSdlInitFailed" xml:space="preserve"><value>SDL3 初始化失败，已回退 XInput：{0}</value></data>
+  <data name="tv.nav.season" xml:space="preserve"><value>新番</value></data>
+  <data name="tv.season.title" xml:space="preserve"><value>新番</value></data>
+  <data name="tv.season.summary" xml:space="preserve"><value>共 {0} 部 · 按播出季分组</value></data>
+  <data name="tv.season.group" xml:space="preserve"><value>{0}年{1}月新番</value></data>
+  <data name="tv.season.unknown" xml:space="preserve"><value>未识别播出日期</value></data>
+  <data name="tv.season.empty" xml:space="preserve"><value>暂无作品</value></data>
+  <data name="tv.hint.season" xml:space="preserve"><value>←→ 切換檢視/週  ↑↓ 換行  OK 詳情  Back 返回</value></data>
+  <data name="tv.season.weekday.monday" xml:space="preserve"><value>星期一</value></data>
+  <data name="tv.season.weekday.tuesday" xml:space="preserve"><value>星期二</value></data>
+  <data name="tv.season.weekday.wednesday" xml:space="preserve"><value>星期三</value></data>
+  <data name="tv.season.weekday.thursday" xml:space="preserve"><value>星期四</value></data>
+  <data name="tv.season.weekday.friday" xml:space="preserve"><value>星期五</value></data>
+  <data name="tv.season.weekday.saturday" xml:space="preserve"><value>星期六</value></data>
+  <data name="tv.season.weekday.sunday" xml:space="preserve"><value>星期日</value></data>
+  <data name="tv.season.weekday.unknown" xml:space="preserve"><value>未知星期</value></data>
+  <data name="tv.nav.schedule" xml:space="preserve"><value>时间表</value></data>
+  <data name="tv.schedule.title" xml:space="preserve"><value>新番时间表</value></data>
+  <data name="tv.schedule.lastWeek" xml:space="preserve"><value>上周</value></data>
+  <data name="tv.schedule.thisWeek" xml:space="preserve"><value>本周</value></data>
+  <data name="tv.schedule.nextWeek" xml:space="preserve"><value>下周</value></data>
+  <data name="tv.schedule.today" xml:space="preserve"><value>今天</value></data>
+  <data name="tv.schedule.notInLibrary" xml:space="preserve"><value>「{0}」未在媒体库中</value></data>
+  <data name="tv.schedule.loading" xml:space="preserve"><value>正在加载 Bangumi 日历…</value></data>
+  <data name="tv.schedule.stale" xml:space="preserve"><value>网络不可用，显示上次缓存的日历</value></data>
+  <data name="tv.schedule.error" xml:space="preserve"><value>日历加载失败：{0}（按 OK 重试）</value></data>
+  <data name="tv.schedule.emptyDay" xml:space="preserve"><value>今天没有新番</value></data>
+  <data name="tv.schedule.emptyWeek" xml:space="preserve"><value>这一周暂无新番</value></data>
+  <data name="tv.hint.schedule" xml:space="preserve"><value>←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回</value></data>
+  <data name="tv.season.tab.schedule" xml:space="preserve"><value>時間表</value></data>
+  <data name="tv.season.tab.season" xml:space="preserve"><value>季番</value></data>
 </root>
