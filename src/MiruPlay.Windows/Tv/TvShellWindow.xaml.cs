@@ -14,6 +14,7 @@ public sealed class TvShellOptions
 {
     public bool DemoMode { get; init; }
     public bool GamepadDemo { get; init; }
+    public AutoUpdateScheduler? AutoUpdate { get; init; }
     public IXInputSource? GamepadSource { get; init; }
     public bool LoadLibrary { get; init; } = true;
     public TvAppContext? Context { get; init; }
@@ -509,6 +510,14 @@ public sealed partial class TvShellWindow : Window, IDisposable
     internal void PollGamepadForTest() => PollGamepad();
 
     internal TvGamepadService Gamepad => _gamepad;
+
+    internal AutoUpdateScheduler? AutoUpdate => _options.AutoUpdate;
+
+    internal void NotifyUpdateAvailable(string? versionName)
+    {
+        if (string.IsNullOrWhiteSpace(versionName)) return;
+        ShowToast(AppStrings.Get("tv.update.available", versionName));
+    }
 
     /// <summary>Live backend/connection status for the TV settings diagnostics row.</summary>
     internal TvGamepadStatus GamepadStatus =>

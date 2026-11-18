@@ -28,6 +28,8 @@ public sealed record AppSettings(
     string PosterWallArrangement = "TITLE",
     string EpisodeVersionSelectionPolicy = "auto_nearest",
     string AppUpdateManifestUrl = "",
+    string AutoUpdateMode = "download",
+    int AutoUpdateIntervalHours = 6,
     string AudioSrcBypass = "software",
     int AudioOutputSampleRate = 48000,
     string AppLanguage = "system",
@@ -136,6 +138,8 @@ public sealed class AppSettingsStore
             var normalizedTvScale = settings.TvUiScalePercent is 100 or 125 or 150 ? settings.TvUiScalePercent : 100;
             var normalizedTvVolumeTarget = settings.TvVolumeKeyTarget is "system" or "application" ? settings.TvVolumeKeyTarget : "system";
             var normalizedTvExitHold = Math.Clamp(settings.TvExitLongPressMs, 1000, 5000);
+            var normalizedAutoUpdateMode = AutoUpdateScheduler.NormalizeMode(settings.AutoUpdateMode);
+            var normalizedAutoUpdateInterval = Math.Clamp(settings.AutoUpdateIntervalHours, 1, 168);
             var normalizedGamepadDeadzone = settings.TvGamepadDeadzonePercent is >= 20 and <= 80
                 ? settings.TvGamepadDeadzonePercent
                 : 50;
@@ -147,6 +151,8 @@ public sealed class AppSettingsStore
                 settings.TvUiScalePercent != normalizedTvScale ||
                 settings.TvVolumeKeyTarget != normalizedTvVolumeTarget ||
                 settings.TvExitLongPressMs != normalizedTvExitHold ||
+                settings.AutoUpdateMode != normalizedAutoUpdateMode ||
+                settings.AutoUpdateIntervalHours != normalizedAutoUpdateInterval ||
                 settings.AudioBalance != normalizedBalance)
             {
                 settings = settings with
@@ -158,6 +164,8 @@ public sealed class AppSettingsStore
                     TvUiScalePercent = normalizedTvScale,
                     TvVolumeKeyTarget = normalizedTvVolumeTarget,
                     TvExitLongPressMs = normalizedTvExitHold,
+                    AutoUpdateMode = normalizedAutoUpdateMode,
+                    AutoUpdateIntervalHours = normalizedAutoUpdateInterval,
                     AudioBalance = normalizedBalance,
                 };
                 needsCleanup = true;

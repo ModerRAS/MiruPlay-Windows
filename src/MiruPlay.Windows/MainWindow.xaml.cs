@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using MiruPlay.Windows.Controls;
 using MiruPlay.Windows.Models;
 using MiruPlay.Windows.Services;
@@ -37,6 +39,9 @@ public partial class MainWindow : Window, IAsyncDisposable
     private readonly OpenObserveLogService _openObserveLogs;
     private readonly OpenObserveLogScheduler _openObserveLogScheduler;
     private readonly WindowsAppUpdater _appUpdater;
+    private AutoUpdateScheduler? _autoUpdateScheduler;
+    private bool _suppressAutoUpdateUi;
+    private bool _autoInstallPromptShown;
     private readonly ToppingController _topping = new();
     private readonly MusicLibraryService _musicLibrary = new();
     private readonly HeadlessTaskScheduler _tasks = new();
@@ -183,6 +188,90 @@ public partial class MainWindow : Window, IAsyncDisposable
         ApplySettingsToView();
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
+    }
+
+    internal WindowsAppUpdater AppUpdater => _appUpdater;
+
+    internal void AttachAutoUpdateScheduler(AutoUpdateScheduler scheduler)
+    {
+        _autoUpdateScheduler = scheduler;
+        _suppressAutoUpdateUi = true;
+        AutoUpdateModeCombo.SelectedItem = AutoUpdateModeCombo.Items.OfType<ComboBoxItem>()
+            .FirstOrDefault(item => Equals(item.Tag, _settings.AutoUpdateMode));
+        _suppressAutoUpdateUi = false;
+        UpdateAutoUpdateUi(scheduler.State);
+    }
+
+    internal void UpdateAutoUpdateUi(AutoUpdateState state)
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(new Action(() => UpdateAutoUpdateUi(state)));
+            return;
+        }
+        var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0";
+        AutoUpdateCurrentVersionText.Text = AppStrings.Get("wpf.update.currentVersion", version);
+        AutoUpdateStatusText.Text = AppStrings.Get(state.Kind switch
+        {
+            AutoUpdateStateKind.Checking => "wpf.update.checking",
+            AutoUpdateStateKind.Downloading => "wpf.update.downloading",
+            AutoUpdateStateKind.Available => "wpf.update.available",
+            AutoUpdateStateKind.Ready => "wpf.update.ready",
+            AutoUpdateStateKind.Failed => "wpf.update.failed",
+            _ => "wpf.update.idle",
+        }, state.VersionName ?? state.Status?.Latest?.VersionName ?? string.Empty, state.Error ?? string.Empty);
+        AutoUpdateLastCheckedText.Text = state.Status is { LastCheckedAt: > 0 } status
+            ? AppStrings.Get("wpf.update.lastChecked", DateTimeOffset.FromUnixTimeMilliseconds(status.LastCheckedAt).LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
+            : AppStrings.Get("wpf.update.neverChecked");
+        AutoUpdateInstallButton.IsEnabled = _appUpdater.Status.StagedInstallerPath is not null;
+    }
+
+    private void AutoUpdateMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_suppressAutoUpdateUi || _loadingSettings || AutoUpdateModeCombo.SelectedItem is not ComboBoxItem item) return;
+        var mode = AutoUpdateScheduler.NormalizeMode(item.Tag as string);
+        if (mode == _settings.AutoUpdateMode) return;
+        _settings = _settings with { AutoUpdateMode = mode };
+        _settingsStore.Save(_settings);
+        _localLogs.Write("INFO", $"Auto update mode changed to {mode}");
+        _autoUpdateScheduler?.Start();
+    }
+
+    private async void CheckAppUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        AutoUpdateCheckButton.IsEnabled = false;
+        try
+        {
+            var state = _autoUpdateScheduler is not null
+                ? await _autoUpdateScheduler.CheckNowAsync()
+                : new AutoUpdateState(AutoUpdateStateKind.Idle);
+            if (_autoUpdateScheduler is null)
+            {
+                var status = await _appUpdater.CheckAsync();
+                if (status.UpdateAvailable && status.StagedInstallerPath is null)
+                {
+                    AutoUpdateStatusText.Text = AppStrings.Get("wpf.update.downloading");
+                    status = await _appUpdater.DownloadAsync();
+                }
+                state = new AutoUpdateState(
+                    status.StagedInstallerPath is not null ? AutoUpdateStateKind.Ready : status.UpdateAvailable ? AutoUpdateStateKind.Available : AutoUpdateStateKind.Idle,
+                    status, VersionName: status.Latest?.VersionName);
+            }
+            UpdateAutoUpdateUi(state);
+        }
+        finally
+        {
+            AutoUpdateCheckButton.IsEnabled = true;
+        }
+    }
+
+    private async void InstallAppUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        if (_appUpdater.Status.StagedInstallerPath is null) return;
+        var confirm = MessageBox.Show(this, AppStrings.Get("wpf.update.installConfirm"), AppStrings.Get("wpf.main.installUpdate"),
+            MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (confirm != MessageBoxResult.Yes) return;
+        await HandleAppUpdateInstallAsync();
     }
 
     private void PresentSeriesDetails(LibrarySeries series)
@@ -1059,6 +1148,23 @@ public partial class MainWindow : Window, IAsyncDisposable
         if (_shutdownComplete) return;
         e.Cancel = true;
         if (_shutdownStarted) return;
+        if (!_autoInstallPromptShown && _settings.AutoUpdateMode == AutoUpdateScheduler.ModeInstall &&
+            _appUpdater.Status.StagedInstallerPath is not null)
+        {
+            _autoInstallPromptShown = true;
+            if (_backgroundMode)
+            {
+                _ = HandleAppUpdateInstallAsync();
+                return;
+            }
+            if (await PromptAutoUpdateInstallAsync())
+            {
+                await HandleAppUpdateInstallAsync();
+                return;
+            }
+            Close();
+            return;
+        }
         _shutdownStarted = true;
         try
         {
@@ -1069,6 +1175,67 @@ public partial class MainWindow : Window, IAsyncDisposable
             _shutdownComplete = true;
             Close();
         }
+    }
+
+    private Task<bool> PromptAutoUpdateInstallAsync()
+    {
+        var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var dialog = new Window
+        {
+            Title = AppStrings.Get("wpf.update.installPromptTitle"),
+            Owner = this,
+            Width = 460,
+            SizeToContent = SizeToContent.Height,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            ResizeMode = ResizeMode.NoResize,
+            WindowStyle = WindowStyle.ToolWindow,
+        };
+        var panel = new StackPanel { Margin = new Thickness(24) };
+        var message = new TextBlock
+        {
+            Text = AppStrings.Get("wpf.update.installPrompt"),
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 0, 0, 10),
+        };
+        var countdown = new TextBlock
+        {
+            Text = AppStrings.Get("wpf.update.installCountdown", 10),
+            Margin = new Thickness(0, 0, 0, 18),
+        };
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+        var install = new Button { Content = AppStrings.Get("wpf.main.installUpdate"), MinWidth = 110 };
+        var cancel = new Button { Content = AppStrings.Get("wpf.update.installCancel"), MinWidth = 90, Margin = new Thickness(10, 0, 0, 0) };
+        install.Click += (_, _) => { completion.TrySetResult(true); dialog.Close(); };
+        cancel.Click += (_, _) => { completion.TrySetResult(false); dialog.Close(); };
+        buttons.Children.Add(install);
+        buttons.Children.Add(cancel);
+        panel.Children.Add(message);
+        panel.Children.Add(countdown);
+        panel.Children.Add(buttons);
+        dialog.Content = panel;
+        var remaining = 10;
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        timer.Tick += (_, _) =>
+        {
+            remaining--;
+            if (remaining <= 0)
+            {
+                completion.TrySetResult(true);
+                dialog.Close();
+                return;
+            }
+            countdown.Text = AppStrings.Get("wpf.update.installCountdown", remaining);
+        };
+        timer.Start();
+        try
+        {
+            dialog.ShowDialog();
+        }
+        finally
+        {
+            timer.Stop();
+        }
+        return completion.Task;
     }
 
     private AudioDspPreset? FindAudioPreset(string id) =>

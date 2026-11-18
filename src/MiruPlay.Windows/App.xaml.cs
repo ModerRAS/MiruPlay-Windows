@@ -14,6 +14,7 @@ public partial class App : Application, IDisposable
     private Mutex? _instanceMutex;
     private MainWindow? _desktopWindow;
     private TvShellWindow? _tvWindow;
+    private AutoUpdateScheduler? _autoUpdateScheduler;
     private bool _tvDemo;
     private bool _shuttingDown;
 
@@ -43,6 +44,12 @@ public partial class App : Application, IDisposable
             var settings = new AppSettingsStore().Load();
             if (settings.TvModeEnabled) forceTv = true;
         }
+        _autoUpdateScheduler = new AutoUpdateScheduler(
+            () => new AppSettingsStore().Load(),
+            _desktopWindow.AppUpdater,
+            HandleAutoUpdateState);
+        _desktopWindow.AttachAutoUpdateScheduler(_autoUpdateScheduler);
+        _autoUpdateScheduler.Start();
         if (forceTv) EnterTvMode(tvLaunch.DemoBadge, tvLaunch.GamepadDemo);
         else _desktopWindow.Show();
     }
@@ -56,6 +63,7 @@ public partial class App : Application, IDisposable
         {
             DemoMode = demo || _tvDemo,
             GamepadDemo = gamepadDemo,
+            AutoUpdate = _autoUpdateScheduler,
             ExitRequested = ReturnToDesktop,
         });
         _tvWindow = shell;
@@ -76,9 +84,18 @@ public partial class App : Application, IDisposable
         _desktopWindow.Activate();
     }
 
+    private void HandleAutoUpdateState(AutoUpdateState state)
+    {
+        _desktopWindow?.UpdateAutoUpdateUi(state);
+        if ((state.Kind is AutoUpdateStateKind.Available or AutoUpdateStateKind.Ready) && state.VersionName is { Length: > 0 } version)
+            _tvWindow?.NotifyUpdateAvailable(version);
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
         _shuttingDown = true;
+        _autoUpdateScheduler?.Dispose();
+        _autoUpdateScheduler = null;
         Dispose();
         base.OnExit(e);
     }

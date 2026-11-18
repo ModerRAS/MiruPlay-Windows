@@ -1487,4 +1487,37 @@
   <data name="tv.hint.schedule" xml:space="preserve"><value>←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回</value></data>
   <data name="tv.season.tab.schedule" xml:space="preserve"><value>時間表</value></data>
   <data name="tv.season.tab.season" xml:space="preserve"><value>季番</value></data>
+  <data name="wpf.main.appUpdate" xml:space="preserve"><value>应用更新</value></data>
+  <data name="wpf.main.autoUpdateMode" xml:space="preserve"><value>自动更新模式</value></data>
+  <data name="wpf.main.autoUpdateHint" xml:space="preserve"><value>自动检查更新；download 模式自动下载后等待确认安装，install 模式在退出时安装。</value></data>
+  <data name="wpf.main.updateModeOff" xml:space="preserve"><value>关闭</value></data>
+  <data name="wpf.main.updateModeCheck" xml:space="preserve"><value>仅检查</value></data>
+  <data name="wpf.main.updateModeDownload" xml:space="preserve"><value>自动下载（推荐）</value></data>
+  <data name="wpf.main.updateModeInstall" xml:space="preserve"><value>退出时安装</value></data>
+  <data name="wpf.main.checkUpdate" xml:space="preserve"><value>检查更新</value></data>
+  <data name="wpf.main.installUpdate" xml:space="preserve"><value>立即安装</value></data>
+  <data name="wpf.update.currentVersion" xml:space="preserve"><value>当前版本：{0}</value></data>
+  <data name="wpf.update.checking" xml:space="preserve"><value>正在检查更新…</value></data>
+  <data name="wpf.update.downloading" xml:space="preserve"><value>正在下载新版本…</value></data>
+  <data name="wpf.update.available" xml:space="preserve"><value>发现新版本 {0}，可下载安装。</value></data>
+  <data name="wpf.update.ready" xml:space="preserve"><value>新版本 {0} 已下载，可以安装。</value></data>
+  <data name="wpf.update.failed" xml:space="preserve"><value>更新失败：{0}</value></data>
+  <data name="wpf.update.idle" xml:space="preserve"><value>已是最新版本。</value></data>
+  <data name="wpf.update.lastChecked" xml:space="preserve"><value>上次检查：{0}</value></data>
+  <data name="wpf.update.neverChecked" xml:space="preserve"><value>尚未检查更新。</value></data>
+  <data name="wpf.update.installConfirm" xml:space="preserve"><value>将关闭 MiruPlay 并运行安装程序，是否继续？</value></data>
+  <data name="tv.settings.update" xml:space="preserve"><value>检查更新</value></data>
+  <data name="tv.update.available" xml:space="preserve"><value>发现新版本 {0}</value></data>
+  <data name="tv.update.unavailable" xml:space="preserve"><value>自动更新不可用（未配置更新清单）</value></data>
+  <data name="tv.update.guideDesktop" xml:space="preserve"><value>新版本已就绪，请回到桌面模式安装</value></data>
+  <data name="tv.update.idle" xml:space="preserve"><value>已是最新版本</value></data>
+  <data name="tv.update.checking" xml:space="preserve"><value>正在检查更新…</value></data>
+  <data name="tv.update.downloading" xml:space="preserve"><value>正在下载新版本…</value></data>
+  <data name="tv.update.ready" xml:space="preserve"><value>新版本已就绪（按 OK 查看引导）</value></data>
+  <data name="tv.update.failed" xml:space="preserve"><value>更新检查失败：{0}</value></data>
+  <data name="tv.update.modeOff" xml:space="preserve"><value>自动更新已关闭</value></data>
+  <data name="wpf.update.installPromptTitle" xml:space="preserve"><value>安装新版本</value></data>
+  <data name="wpf.update.installPrompt" xml:space="preserve"><value>MiruPlay 将在退出后安装已下载的新版本。</value></data>
+  <data name="wpf.update.installCountdown" xml:space="preserve"><value>{0} 秒后自动安装，可取消。</value></data>
+  <data name="wpf.update.installCancel" xml:space="preserve"><value>取消安装</value></data>
 </root>
