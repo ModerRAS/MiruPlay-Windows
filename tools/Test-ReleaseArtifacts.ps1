@@ -4,7 +4,8 @@ param(
     [string]$ReleaseDirectory,
     [ValidateSet('lite', 'full')]
     [string]$Edition = 'lite',
-    [switch]$SkipInstaller
+    [switch]$SkipInstaller,
+    [switch]$RunEnhancementSelfTest
 )
 
 $ErrorActionPreference = 'Stop'
@@ -101,38 +102,62 @@ try {
     }
     if (-not (Test-Path (Join-Path $portableDirectory 'release-manifest.json'))) { throw 'Portable release manifest is missing.' }
     $portableEnhanceRoot = Join-Path $portableDirectory 'runtime\enhance'
-    $enhanceFilesInPortable = @(Get-ChildItem $portableDirectory -Recurse -File | Where-Object {
-        $_.Name -match '^(VSPipe\.exe|vapoursynth|rife-ncnn|rife)' -or $_.FullName -match '\\runtime\\enhance\\'
-    })
     if ($Edition -eq 'lite') {
-        if ($manifest.enhancements -and @($manifest.enhancements).Count -gt 0) { throw 'Lite manifest must not list enhancements.' }
-        if ((Test-Path $portableEnhanceRoot) -or $enhanceFilesInPortable.Count -gt 0) {
-            throw 'Lite portable package must not contain enhancement assets (runtime/enhance, VapourSynth, RIFE).'
-        }
+        if ($null -ne $manifest.enhancement) { throw 'Lite manifest must not declare an enhancement section.' }
+        if (Test-Path $portableEnhanceRoot) { throw 'Lite portable package must not contain runtime/enhance.' }
     } else {
-        $manifestEnhancements = @($manifest.enhancements)
-        if ($manifestEnhancements.Count -eq 0) { throw 'Full manifest must list enhancement files.' }
-        if (-not (Test-Path (Join-Path $portableEnhanceRoot 'manifest.json'))) { throw 'Full portable package is missing runtime\enhance\manifest.json.' }
-        foreach ($enhancement in $manifestEnhancements) {
-            $relative = [string]$enhancement.path
-            if (-not $relative.StartsWith('runtime/enhance/')) { throw "Unexpected enhancement path: $relative" }
-            $fileRelative = $relative.Substring('runtime/enhance/'.Length)
-            $enhancementPath = Join-Path $portableEnhanceRoot ($fileRelative.Replace('/', '\'))
-            if (-not (Test-Path $enhancementPath)) { throw "Full portable package is missing enhancement file: $relative" }
-            if ((Get-FileHash $enhancementPath -Algorithm SHA256).Hash.ToLowerInvariant() -ne [string]$enhancement.sha256) {
+        $enhancement = $manifest.enhancement
+        if ($null -eq $enhancement) { throw 'Full manifest is missing the enhancement section.' }
+        if ([string]$enhancement.id -ne 'rife-vulkan') { throw "Unexpected enhancement id: $($enhancement.id)" }
+        if ([string]$enhancement.edition -ne 'full') { throw 'Enhancement edition must be full.' }
+        if ([string]$enhancement.path -ne 'runtime/enhance/rife') { throw "Unexpected enhancement path: $($enhancement.path)" }
+        if (([string]$enhancement.manifestSha256) -notmatch '^[0-9a-f]{64}$') { throw 'Enhancement manifest sha256 is invalid.' }
+        if (([string]$enhancement.archiveSha256) -notmatch '^[0-9a-f]{64}$') { throw 'Enhancement archive sha256 is invalid.' }
+        if ([long]$enhancement.archiveBytes -le 0 -or [long]$enhancement.unpackedBytes -le 0 -or [int]$enhancement.fileCount -le 0) {
+            throw 'Enhancement archive/unpacked sizes or file count are invalid.'
+        }
+        $rifeRoot = Join-Path $portableDirectory 'runtime\enhance\rife'
+        $rifeManifestPath = Join-Path $rifeRoot 'manifest.json'
+        if (-not (Test-Path $rifeManifestPath)) { throw 'Full portable package is missing runtime\enhance\rife\manifest.json.' }
+        $rifeManifestHash = (Get-FileHash $rifeManifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($rifeManifestHash -ne [string]$enhancement.manifestSha256) { throw 'Enhancement manifest digest does not match release manifest.' }
+        $rifeManifest = Get-Content $rifeManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ([string]$rifeManifest.version -ne [string]$enhancement.version) { throw 'Enhancement version mismatch.' }
+        if (@($rifeManifest.files).Count -ne [int]$enhancement.fileCount) { throw 'Enhancement file count mismatch.' }
+        if (([string]$rifeManifest.sourceArchive.sha256) -ne [string]$enhancement.archiveSha256) { throw 'Enhancement archive digest mismatch.' }
+        foreach ($requiredEnhance in @(
+            'VSScript.dll',
+            'VSPipe.exe',
+            'vs-plugins\librife_windows_x86-64.dll',
+            'vs-plugins\models\rife-v4.6_ensembleFalse\flownet.bin'
+        )) {
+            if (-not (Test-Path (Join-Path $rifeRoot $requiredEnhance))) { throw "Full portable package is missing enhancement asset: $requiredEnhance" }
+        }
+        foreach ($fileEntry in @($rifeManifest.files)) {
+            $relative = [string]$fileEntry.path
+            if ([string]::IsNullOrWhiteSpace($relative) -or $relative.Contains('..') -or [System.IO.Path]::IsPathRooted($relative)) {
+                throw "Unsafe enhancement path: $relative"
+            }
+            $enhancementFile = Join-Path $rifeRoot ($relative.Replace('/', '\'))
+            if (-not (Test-Path $enhancementFile)) { throw "Full portable package is missing enhancement file: $relative" }
+            if ((Get-FileHash $enhancementFile -Algorithm SHA256).Hash.ToLowerInvariant() -ne ([string]$fileEntry.sha256).ToLowerInvariant()) {
                 throw "Enhancement digest mismatch: $relative"
             }
         }
-        $enhanceNames = @($enhanceFilesInPortable | ForEach-Object { $_.Name })
-        if ($enhanceNames.Count -eq 0) { throw 'Full portable package is missing VapourSynth/RIFE enhancement files.' }
-        if (-not (Get-ChildItem $portableEnhanceRoot -Recurse -File | Where-Object { $_.Name -match 'VSPipe|vapoursynth' })) {
-            throw 'Full portable package is missing the VapourSynth component.'
-        }
-        if (-not (Get-ChildItem $portableEnhanceRoot -Recurse -File | Where-Object { $_.Name -match 'rife' })) {
-            throw 'Full portable package is missing the RIFE component.'
-        }
-        if (-not (Get-ChildItem $portableEnhanceRoot -Recurse -File | Where-Object { $_.Name -match 'LICENSE|NOTICE|COPYING|LGPL' })) {
-            throw 'Full portable package is missing enhancement license files.'
+        $rifeLicenses = @(Get-ChildItem (Join-Path $rifeRoot 'licenses') -File -Recurse -ErrorAction SilentlyContinue)
+        if ($rifeLicenses.Count -lt 1) { throw 'Full portable package is missing enhancement license files.' }
+        if ($RunEnhancementSelfTest) {
+            $vspipe = Join-Path $rifeRoot 'VSPipe.exe'
+            $selftest = Join-Path $rifeRoot 'selftest\selftest_480p.vpy'
+            if ((Test-Path $vspipe) -and (Test-Path $selftest)) {
+                $selfTestOutput = & $vspipe -p -c y4m $selftest NUL 2>&1 | Out-String
+                if ($LASTEXITCODE -ne 0) { throw "Enhancement self-test failed: $selfTestOutput" }
+                if ($selfTestOutput -notmatch '\((\d+(?:\.\d+)?) fps\)') { throw 'Enhancement self-test did not report fps.' }
+                $selfTestFps = [double]$Matches[1]
+                if ($selfTestFps -lt 20) { throw "Enhancement self-test fps too low: $selfTestFps" }
+            } else {
+                Write-Warning 'Enhancement self-test skipped: VSPipe or selftest_480p.vpy is missing.'
+            }
         }
     }
 

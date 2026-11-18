@@ -14,7 +14,9 @@ param(
     [string]$TimestampUrl = 'http://timestamp.digicert.com',
     [switch]$SkipInstaller,
     [switch]$SkipLibMpvDownload,
-    [switch]$SkipSdl3Download
+    [switch]$SkipSdl3Download,
+    [switch]$SkipEnhancementDownload,
+    [switch]$SkipAnime4KDownload
 )
 
 $ErrorActionPreference = 'Stop'
@@ -28,8 +30,21 @@ $libMpvDirectory = Join-Path $root 'runtime\libmpv'
 $libMpvPath = Join-Path $libMpvDirectory 'libmpv-2.dll'
 $sdl3Directory = Join-Path $root 'runtime\sdl3'
 $sdl3Path = Join-Path $sdl3Directory 'SDL3.dll'
-$enhanceDirectory = Join-Path $root 'runtime\enhance'
-$enhanceManifestPath = Join-Path $enhanceDirectory 'manifest.json'
+$rifeEnhanceDirectory = Join-Path $root 'runtime\enhance\rife'
+$rifeEnhanceManifestPath = Join-Path $rifeEnhanceDirectory 'manifest.json'
+$anime4kDirectory = Join-Path $root 'runtime\shaders\anime4k'
+$anime4kArchiveHash = '139cd282086457c5adc79caf7b75b8b825091d71c9b54958c18745fea62d7ed7'
+$anime4kFiles = @(
+    'Anime4K_Clamp_Highlights.glsl',
+    'Anime4K_Restore_CNN_M.glsl',
+    'Anime4K_Restore_CNN_S.glsl',
+    'Anime4K_Restore_CNN_Soft_M.glsl',
+    'Anime4K_Upscale_CNN_x2_M.glsl',
+    'Anime4K_Upscale_CNN_x2_S.glsl',
+    'Anime4K_Upscale_Denoise_CNN_x2_M.glsl',
+    'Anime4K_AutoDownscalePre_x2.glsl',
+    'Anime4K_AutoDownscalePre_x4.glsl'
+)
 $project = Join-Path $root 'src\MiruPlay.Windows\MiruPlay.Windows.csproj'
 $installerScript = Join-Path $root 'installer\MiruPlay.iss'
 
@@ -163,38 +178,51 @@ if ($actualSdl3Hash -ne $expectedSdl3Hash) {
     throw "SDL3 runtime digest mismatch: $actualSdl3Hash"
 }
 
-$enhancements = @()
-$enhanceVersion = $null
-if ($Edition -eq 'full') {
-    if (-not (Test-Path $enhanceManifestPath)) {
-        throw "Full edition requires an enhancement pack manifest at $enhanceManifestPath. Run tools/Get-EnhancementPack.ps1 or remove -Edition full."
+$missingAnime4K = @($anime4kFiles | Where-Object { -not (Test-Path (Join-Path $anime4kDirectory $_)) })
+if ($missingAnime4K.Count -gt 0) {
+    if ($SkipAnime4KDownload) { throw "Anime4K shader assets are missing: $($missingAnime4K -join ', ')" }
+    Invoke-Checked { & (Join-Path $PSScriptRoot 'Get-Anime4KShaders.ps1') -Destination $anime4kDirectory } 'Anime4K shader download failed'
+}
+foreach ($file in $anime4kFiles) {
+    if (-not (Test-Path (Join-Path $anime4kDirectory $file))) {
+        throw "Anime4K shader is missing after download: $file"
     }
-    $enhanceManifest = Get-Content $enhanceManifestPath -Raw | ConvertFrom-Json
-    if ([string]::IsNullOrWhiteSpace([string]$enhanceManifest.version)) {
-        throw 'Enhancement pack manifest must declare a version.'
+}
+
+$includeRife = $Edition -eq 'full'
+$enhancement = $null
+if ($includeRife) {
+    $getEnhance = Join-Path $PSScriptRoot 'Get-EnhancementPack.ps1'
+    if (-not (Test-Path $rifeEnhanceManifestPath)) {
+        if ($SkipEnhancementDownload) { throw "RIFE enhancement pack is missing for full edition: $rifeEnhanceManifestPath" }
+        & $getEnhance | Where-Object { $_ -match '^enhance' } | ForEach-Object { Write-Output $_ }
+    } else {
+        & $getEnhance -VerifyOnly | Where-Object { $_ -match '^enhance' } | ForEach-Object { Write-Output $_ }
     }
-    $enhanceVersion = [string]$enhanceManifest.version
-    $enhanceFiles = @($enhanceManifest.files)
-    if ($enhanceFiles.Count -eq 0) { throw 'Enhancement pack manifest must list files.' }
-    foreach ($entry in $enhanceFiles) {
-        $relative = ([string]$entry.path).Trim().Replace('\', '/')
-        if ([string]::IsNullOrWhiteSpace($relative) -or $relative.StartsWith('/') -or $relative.Contains('..') -or
-            [System.IO.Path]::IsPathRooted($relative)) {
-            throw "Enhancement pack file path is unsafe: $relative"
-        }
-        $fullPath = Join-Path $enhanceDirectory ($relative.Replace('/', '\'))
-        if (-not (Test-Path $fullPath)) { throw "Enhancement pack file is missing: $relative" }
-        $expectedHash = ([string]$entry.sha256).Trim().ToLowerInvariant()
-        if ($expectedHash -notmatch '^[0-9a-f]{64}$') { throw "Enhancement pack hash is invalid for $relative" }
-        $actualHash = (Get-FileHash $fullPath -Algorithm SHA256).Hash.ToLowerInvariant()
-        if ($actualHash -ne $expectedHash) { throw "Enhancement pack digest mismatch for $relative" }
-        $enhancements += [ordered]@{
-            path = "runtime/enhance/$relative"
-            sha256 = $actualHash
-            size = [long](Get-Item $fullPath).Length
-        }
+    if (-not (Test-Path $rifeEnhanceManifestPath)) { throw "RIFE enhancement pack manifest is missing: $rifeEnhanceManifestPath" }
+    $rifeManifest = Get-Content $rifeEnhanceManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    foreach ($field in @('schemaVersion', 'id', 'version', 'minAppVersion', 'sourceArchive', 'files')) {
+        if ($null -eq $rifeManifest.$field) { throw "RIFE enhancement manifest is missing $field." }
     }
-    Write-Output "Enhancement pack: $enhanceVersion ($($enhancements.Count) files)"
+    if ($rifeManifest.schemaVersion -ne 1 -or [string]$rifeManifest.id -ne 'rife-vulkan') { throw 'Unsupported RIFE enhancement manifest.' }
+    $rifeArchive = $rifeManifest.sourceArchive
+    foreach ($field in @('sha256', 'size', 'unpackedSize', 'fileCount')) {
+        if ($null -eq $rifeArchive.$field) { throw "RIFE enhancement sourceArchive is missing $field." }
+    }
+    if (([string]$rifeArchive.sha256) -notmatch '^[0-9a-fA-F]{64}$') { throw 'RIFE archive sha256 is invalid.' }
+    $rifeManifestHash = (Get-FileHash $rifeEnhanceManifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $enhancement = [ordered]@{
+        id = 'rife-vulkan'
+        version = [string]$rifeManifest.version
+        edition = 'full'
+        path = 'runtime/enhance/rife'
+        manifestSha256 = $rifeManifestHash
+        archiveSha256 = ([string]$rifeArchive.sha256).ToLowerInvariant()
+        archiveBytes = [long]$rifeArchive.size
+        unpackedBytes = [long]$rifeArchive.unpackedSize
+        fileCount = @($rifeManifest.files).Count
+    }
+    Write-Output "RIFE enhancement pack: $($enhancement.version) ($($enhancement.fileCount) files)"
 } else {
     Write-Output 'Edition lite: no enhancement pack will be bundled.'
 }
@@ -210,7 +238,8 @@ if (Test-Path $releaseDirectory) {
 }
 
 Invoke-Checked {
-    dotnet publish $project -c Release -r $RuntimeIdentifier --self-contained true -p:Version=$Version -p:Edition=$Edition -p:PublishTrimmed=false -o $publishDirectory
+    $includeRifeValue = $includeRife.ToString().ToLowerInvariant()
+    dotnet publish $project -c Release -r $RuntimeIdentifier --self-contained true -p:Version=$Version -p:Edition=$Edition -p:IncludeRifeEnhancement=$includeRifeValue -p:PublishTrimmed=false -o $publishDirectory
 } 'dotnet publish failed'
 
 $publishedSdl3Path = Join-Path $publishDirectory 'runtime\sdl3\SDL3.dll'
@@ -226,26 +255,16 @@ foreach ($file in @('LICENSE', 'README.md', 'THIRD-PARTY-NOTICES.md')) {
     Copy-Item (Join-Path $root $file) $publishDirectory
 }
 [IO.File]::WriteAllText((Join-Path $publishDirectory 'edition.txt'), $Edition, [Text.UTF8Encoding]::new($false))
-if ($Edition -eq 'full') {
-    $publishedEnhance = Join-Path $publishDirectory 'runtime\enhance'
-    if (Test-Path $publishedEnhance) { Remove-Item $publishedEnhance -Recurse -Force }
-    New-Item -ItemType Directory -Force -Path $publishedEnhance | Out-Null
-    Copy-Item (Join-Path $enhanceDirectory '*') $publishedEnhance -Recurse -Force
-    foreach ($enhancement in $enhancements) {
-        $relative = $enhancement.path.Substring('runtime/enhance/'.Length)
-        $published = Join-Path $publishDirectory ("runtime\enhance\" + $relative.Replace('/', '\'))
-        if (-not (Test-Path $published)) { throw "Enhancement file missing from publish output: $relative" }
-        if ((Get-FileHash $published -Algorithm SHA256).Hash.ToLowerInvariant() -ne $enhancement.sha256) {
-            throw "Published enhancement digest mismatch: $relative"
-        }
+if ($includeRife) {
+    $publishedRifeManifest = Join-Path $publishDirectory 'runtime\enhance\rife\manifest.json'
+    if (-not (Test-Path $publishedRifeManifest)) { throw 'csproj did not copy runtime/enhance/rife into the publish output.' }
+    if ((Get-FileHash $publishedRifeManifest -Algorithm SHA256).Hash.ToLowerInvariant() -ne $enhancement.manifestSha256) {
+        throw 'Published RIFE enhancement manifest digest mismatch.'
     }
 } elseif (Test-Path (Join-Path $publishDirectory 'runtime\enhance')) {
     throw 'Edition lite publish output must not contain runtime/enhance.'
 }
-Copy-ThirdPartyLicenses `
-    (Join-Path $root 'src\MiruPlay.Windows\obj\project.assets.json') `
-    (Join-Path $publishDirectory 'licenses')
-
+Copy-ThirdPartyLicenses (Join-Path $root 'src\MiruPlay.Windows\obj\project.assets.json') (Join-Path $publishDirectory 'licenses')
 $signed = -not [string]::IsNullOrWhiteSpace($CertificatePath)
 $signTool = $null
 if ($signed) {
@@ -286,8 +305,7 @@ $manifest = [ordered]@{
     sourceRevision = $sourceRevision
     signing = if ($signed) { 'authenticode' } else { 'unsigned' }
     edition = $Edition
-    enhancements = @($enhancements)
-    enhancementPackVersion = $enhanceVersion
+    enhancement = if ($includeRife) { $enhancement } else { $null }
     libmpv = [ordered]@{
         version = '20261111-git-bcde6b93cc'
         library = 'runtime/libmpv/libmpv-2.dll'
@@ -299,6 +317,20 @@ $manifest = [ordered]@{
         library = 'runtime/sdl3/SDL3.dll'
         librarySha256 = $actualSdl3Hash
         distribution = 'libsdl-org/SDL'
+    }
+    shaders = [ordered]@{
+        anime4k = [ordered]@{
+            version = '4.0.1'
+            asset = 'Anime4K_v4.0.zip'
+            archiveSha256 = $anime4kArchiveHash
+            directory = 'runtime/shaders/anime4k'
+            files = @($anime4kFiles | ForEach-Object {
+                [ordered]@{
+                    name = $_
+                    sha256 = (Get-FileHash (Join-Path $anime4kDirectory $_) -Algorithm SHA256).Hash.ToLowerInvariant()
+                }
+            })
+        }
     }
 }
 $manifestPath = Join-Path $releaseDirectory "release-manifest-$Edition.json"

@@ -1594,4 +1594,5 @@
   <data name="tv.settings.interpolation.off" xml:space="preserve"><value>Off</value></data>
   <data name="tv.settings.interpolation.mpv" xml:space="preserve"><value>Built-in</value></data>
   <data name="api.errFrameInterpolationMode" xml:space="preserve"><value>Invalid frame interpolation mode.</value></data>
+  <data name="upd.wrongEdition" xml:space="preserve"><value>Update manifest edition ({0}) does not match this app ({1}).</value></data>
 </root>

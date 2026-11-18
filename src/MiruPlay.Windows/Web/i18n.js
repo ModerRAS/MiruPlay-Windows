@@ -1590,7 +1590,8 @@ const I18N = {
   "playback.interpolationMpv": "mpv 内置平滑",
   "tv.settings.interpolation.off": "关闭",
   "tv.settings.interpolation.mpv": "内置",
-  "api.errFrameInterpolationMode": "插帧方式取值无效。"
+  "api.errFrameInterpolationMode": "插帧方式取值无效。",
+  "upd.wrongEdition": "更新清单的版本类型（{0}）与当前应用（{1}）不匹配。"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -3182,7 +3183,8 @@ const I18N = {
   "playback.interpolationMpv": "mpv 內建平滑",
   "tv.settings.interpolation.off": "關閉",
   "tv.settings.interpolation.mpv": "內建",
-  "api.errFrameInterpolationMode": "插幀方式取值無效。"
+  "api.errFrameInterpolationMode": "插幀方式取值無效。",
+  "upd.wrongEdition": "更新清單的版本類型（{0}）與當前應用（{1}）不匹配。"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -4774,7 +4776,8 @@ const I18N = {
   "playback.interpolationMpv": "mpv 內建平滑",
   "tv.settings.interpolation.off": "關閉",
   "tv.settings.interpolation.mpv": "內建",
-  "api.errFrameInterpolationMode": "插幀方式取值無效。"
+  "api.errFrameInterpolationMode": "插幀方式取值無效。",
+  "upd.wrongEdition": "更新清單的版本類型（{0}）與當前應用（{1}）不匹配。"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -6366,7 +6369,8 @@ const I18N = {
   "playback.interpolationMpv": "mpv built-in smoothing",
   "tv.settings.interpolation.off": "Off",
   "tv.settings.interpolation.mpv": "Built-in",
-  "api.errFrameInterpolationMode": "Invalid frame interpolation mode."
+  "api.errFrameInterpolationMode": "Invalid frame interpolation mode.",
+  "upd.wrongEdition": "Update manifest edition ({0}) does not match this app ({1})."
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -7958,7 +7962,8 @@ const I18N = {
   "playback.interpolationMpv": "mpv built-in smoothing",
   "tv.settings.interpolation.off": "Off",
   "tv.settings.interpolation.mpv": "Built-in",
-  "api.errFrameInterpolationMode": "Invalid frame interpolation mode."
+  "api.errFrameInterpolationMode": "Invalid frame interpolation mode.",
+  "upd.wrongEdition": "Update manifest edition ({0}) does not match this app ({1})."
  }
 };
 let currentLocale = 'zh-CN';

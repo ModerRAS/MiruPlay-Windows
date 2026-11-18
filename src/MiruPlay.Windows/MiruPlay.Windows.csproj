@@ -14,6 +14,7 @@
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <PublishTrimmed>false</PublishTrimmed>
     <Edition Condition="'$(Edition)' == ''">lite</Edition>
+    <IncludeRifeEnhancement Condition="'$(IncludeRifeEnhancement)' == ''">false</IncludeRifeEnhancement>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +29,13 @@
   <ItemGroup Condition="Exists('..\..\runtime\libmpv\libmpv-2.dll')">
     <Content Include="..\..\runtime\libmpv\libmpv-2.dll"
              Link="runtime\libmpv\libmpv-2.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IncludeRifeEnhancement)' == 'true'">
+    <Content Include="..\..\runtime\enhance\rife\**\*"
+             Link="runtime\enhance\rife\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

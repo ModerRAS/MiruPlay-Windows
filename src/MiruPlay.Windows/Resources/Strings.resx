@@ -1594,4 +1594,5 @@
   <data name="tv.settings.interpolation.off" xml:space="preserve"><value>关闭</value></data>
   <data name="tv.settings.interpolation.mpv" xml:space="preserve"><value>内置</value></data>
   <data name="api.errFrameInterpolationMode" xml:space="preserve"><value>插帧方式取值无效。</value></data>
+  <data name="upd.wrongEdition" xml:space="preserve"><value>更新清单的版本类型（{0}）与当前应用（{1}）不匹配。</value></data>
 </root>

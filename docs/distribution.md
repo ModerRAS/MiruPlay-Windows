@@ -3,14 +3,14 @@
 MiruPlay publishes Windows x64 artifacts in two editions from one self-contained `.NET 10` publish directory:
 
 - **lite** (default): application + pinned in-process libmpv + SDL3 + base Anime4K Fast assets.
-- **full**: lite + optional enhancement pack from `runtime/enhance/` (portable VapourSynth + MVTools, RIFE ncnn + models, optional large shaders). The pack is not in git; `tools/Get-EnhancementPack.ps1` pins its version, archive SHA-256 and file manifest. `Publish-Release.ps1 -Edition full` fails if the pack is missing; CI skips full until the pack is delivered.
+- **full**: lite + RIFE/VapourSynth enhancement pack at `runtime/enhance/rife/` (portable VapourSynth R73 + MVTools + RIFE ncnn + models; ~42.3 MiB unpacked / ~21.3 MiB 7z). The pack is not in git; `tools/enhance/rife-enhance-manifest.json` + `tools/Get-EnhancementPack.ps1` pin its version, GitHub Release archive URL/SHA-256/size and per-file hashes. `Publish-Release.ps1 -Edition full` runs the pack verifier and fails if missing/tampered; CI skips full until the pack is delivered.
 
 Artifacts are edition-scoped:
 
 - `MiruPlay-<version>-win-x64-<edition>-portable.zip`: portable application with the .NET runtime, pinned in-process libmpv runtime, and the optional pinned SDL3 runtime for the TV-mode gamepad backend.
 - `MiruPlay-<version>-win-x64-<edition>-setup.exe`: per-user Inno Setup installer. lite uses `%LOCALAPPDATA%\Programs\MiruPlay`; full uses `%LOCALAPPDATA%\Programs\MiruPlay Full` and a distinct AppId, so both editions can coexist. `edition.txt` is written into the install directory.
 - `MiruPlay-<version>-win-x64-<edition>-symbols.zip`: first-party portable PDB files.
-- `release-manifest-<edition>.json`: build/runtime metadata, `edition`, `enhancements[]`, signing state, mpv provenance, and SDL3 provenance.
+- `release-manifest-<edition>.json`: build/runtime metadata, `edition`, Anime4K shader provenance, signing state, mpv provenance, SDL3 provenance, and (full only) an `enhancement` object: `{id:"rife-vulkan", version, edition:"full", path:"runtime/enhance/rife", manifestSha256, archiveSha256, archiveBytes, unpackedBytes, fileCount}`. lite has no `enhancement` field.
 - `windows-update-<edition>.json`: edition-scoped update manifest; lite installs only lite updates and full only full updates.
 - `windows-update.json`: updater-compatible GitHub Release metadata and SHA-256/size for the `*-setup.exe` asset (generated when `-SkipInstaller` is not used).
 - `SHA256SUMS.txt`: SHA-256 for every release artifact and manifest.
