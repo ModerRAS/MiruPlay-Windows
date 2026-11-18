@@ -88,10 +88,10 @@ $aggregate = [ordered]@{
     version = $Version
     files = @($fileEntries | ForEach-Object { [ordered]@{ path = $_.path; sha256 = $_.sha256 } })
 }
-[IO.File]::WriteAllText(
+[System.IO.File]::WriteAllText(
     (Join-Path $stage 'manifest.json'),
     (ConvertTo-AggregateJson -Version $Version -Files $fileEntries),
-    [Text.UTF8Encoding]::new($false))
+    [System.Text.UTF8Encoding]::new($false))
 
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 $archivePath = Join-Path $OutputDirectory "rife-$Version.7z"
@@ -102,7 +102,7 @@ $listPath = Join-Path $OutputDirectory "rife-$Version.files.txt"
 $sorted = @(Get-ChildItem -LiteralPath $stage -Recurse -File |
     ForEach-Object { $_.FullName.Substring($stage.Length + 1).Replace('\', '/') } |
     Sort-Object -Culture 'zh-CN')
-[IO.File]::WriteAllLines($listPath, $sorted, [Text.UTF8Encoding]::new($false))
+[System.IO.File]::WriteAllLines($listPath, $sorted, [System.Text.UTF8Encoding]::new($false))
 Push-Location $stage
 try {
     & $SevenZipPath a -t7z -mx=9 -mtm=off -mtc=off -mta=off $archivePath ('@' + $listPath) | Out-Null
@@ -145,10 +145,10 @@ $manifest = [ordered]@{
     )
     files = $fileEntries
 }
-[IO.File]::WriteAllText(
+[System.IO.File]::WriteAllText(
     $ManifestPath,
     ($manifest | ConvertTo-Json -Depth 8),
-    [Text.UTF8Encoding]::new($false))
+    [System.Text.UTF8Encoding]::new($false))
 
 Write-Output "packVersion=$Version"
 Write-Output "packSha256=$zipHash"
