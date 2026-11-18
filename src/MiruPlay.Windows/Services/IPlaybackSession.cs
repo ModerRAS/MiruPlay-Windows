@@ -20,6 +20,7 @@ public interface IPlaybackSession : IAsyncDisposable
     MpvNativeDiagnostics? GetNativeDiagnostics();
     AudioDspFilterGraph? AppliedAudioDsp { get; }
     AudioDspChannelLayout? AppliedAudioDspChannelLayout { get; }
+    MpvQualityEnhancementStatus? QualityEnhancement { get; }
     bool IsActive { get; }
     bool IsPlaying { get; }
     event EventHandler? SubtitleTracksChanged;

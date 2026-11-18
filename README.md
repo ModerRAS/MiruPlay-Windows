@@ -8,6 +8,7 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 校验协议版本、必需表、capability 和不安全路径
 - 按 Anime/Drama 模式隔离媒体源，并提供海报墙、搜索、作品详情和剧集列表
 - 使用内置 libmpv 或 Windows 默认播放器播放本地视频
+- 可选画质增强：缩放质量预设（低/中/高）、Anime4K SDR 动画着色器（A/A+A/B/C）与 mpv 内置帧混合插帧（非 MEMC）；HDR 片源自动跳过 Anime4K
 - 显示模式支持自动（默认，不改变现有画质）、HDR 直通、映射到 SDR；Windows 需开启系统 HDR，HDR 直通参数需实机验证
 - 音频码流直通（关闭/自动/强制 + TrueHD/E-AC3/AC-3/DTS/DTS-HD）可把 Atmos 原样送入 HDMI/AVR；需要独占 WASAPI，失败自动回退 PCM，并与 PEQ/DSP/响度平衡互斥
 - 内置 libmpv 已支持 Dolby Vision Profile 7 FEL 播放器侧解码与合成（Windows 输出 HDR10，不输出 DV 信号）；设置页展示运行时 FEL 支持与 libmpv/libplacebo 版本
@@ -27,7 +28,7 @@ dotnet test MiruPlay.Windows.slnx
 dotnet run --project src/MiruPlay.Windows
 ```
 
-播放优先使用发布包内的 `runtime/libmpv/libmpv-2.dll`。如果内置运行时不可用，本地文件才会交给 Windows 默认视频应用；WebDAV 播放会明确提示内置播放器不可用。开发机可运行 `tools/Get-LibMpvRuntime.ps1` 获取固定版本的 libmpv；电视模式手柄的 SDL3 后端运行 `tools/Get-Sdl3Runtime.ps1` 获取固定版本的 SDL3（缺失时自动回退 XInput，发布脚本会强制校验/补齐）。`tools/Test-WebDavPlayback.mjs` 可对运行中的客户端执行临时 WebDAV MLIP 导入、鉴权播放、停止、删除和本地库恢复 smoke；`tools/Test-SmbPlayback.mjs` 使用现有 Windows 网络映射执行等价的真实 SMB smoke。
+播放优先使用发布包内的 `runtime/libmpv/libmpv-2.dll`。如果内置运行时不可用，本地文件才会交给 Windows 默认视频应用；WebDAV 播放会明确提示内置播放器不可用。开发机可运行 `tools/Get-LibMpvRuntime.ps1` 获取固定版本的 libmpv（画质增强还需 `tools/Get-Anime4KShaders.ps1` 获取固定版本 Anime4K 着色器）；电视模式手柄的 SDL3 后端运行 `tools/Get-Sdl3Runtime.ps1` 获取固定版本的 SDL3（缺失时自动回退 XInput，发布脚本会强制校验/补齐）。`tools/Test-WebDavPlayback.mjs` 可对运行中的客户端执行临时 WebDAV MLIP 导入、鉴权播放、停止、删除和本地库恢复 smoke；`tools/Test-SmbPlayback.mjs` 使用现有 Windows 网络映射执行等价的真实 SMB smoke。
 
 WebControl 默认监听 `9978`。在浏览器打开设置页显示的地址，输入访问令牌即可使用内嵌 WebUI；也可首次使用 `?token=<访问令牌>`，页面会立即移除 URL 参数并将令牌保存在浏览器本地。令牌通过当前 Windows 用户的 DPAPI 加密保存在 `%LOCALAPPDATA%\MiruPlay\web-control-token.bin`。
 

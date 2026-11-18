@@ -82,6 +82,9 @@ try {
         'release-manifest.json',
         'runtime\libmpv\libmpv-2.dll',
         'runtime\sdl3\SDL3.dll',
+        'runtime\shaders\anime4k\Anime4K_Clamp_Highlights.glsl',
+        'runtime\shaders\anime4k\Anime4K_Upscale_CNN_x2_M.glsl',
+        'licenses\Anime4K-MIT.txt',
         'licenses\NuGet-Packages.json',
         'licenses\Apache-2.0.txt',
         'licenses\mpv-Copyright.txt'
@@ -96,6 +99,22 @@ try {
     $portableSdl3 = Join-Path $portableDirectory 'runtime\sdl3\SDL3.dll'
     $portableSdl3Hash = (Get-FileHash $portableSdl3 -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($portableSdl3Hash -ne $manifest.sdl3.librarySha256) { throw 'Portable SDL3 runtime digest does not match release-manifest.json.' }
+
+    if (-not $manifest.shaders -or -not $manifest.shaders.anime4k) { throw 'release-manifest.json is missing the Anime4K shader metadata section.' }
+    $anime4k = $manifest.shaders.anime4k
+    if ($anime4k.version -ne '4.0.1') { throw "Unexpected Anime4K version in manifest: $($anime4k.version)" }
+    if ($anime4k.archiveSha256 -ne '139cd282086457c5adc79caf7b75b8b825091d71c9b54958c18745fea62d7ed7') { throw 'Anime4K archive digest in manifest is unexpected.' }
+    if ($anime4k.directory -ne 'runtime/shaders/anime4k') { throw "Unexpected Anime4K manifest path: $($anime4k.directory)" }
+    $anime4kFiles = @($anime4k.files)
+    if ($anime4kFiles.Count -ne 9) { throw "Anime4K manifest lists $($anime4kFiles.Count) shader files, expected 9." }
+    foreach ($shader in $anime4kFiles) {
+        if ($shader.name -notmatch '^Anime4K_[A-Za-z0-9_]+_x?[0-9]?\.glsl$' -and $shader.name -notmatch '^Anime4K_[A-Za-z0-9_]+\.glsl$') { throw "Unexpected Anime4K shader file name: $($shader.name)" }
+        if ($shader.sha256.Length -ne 64 -or $shader.sha256 -match '[^0-9a-f]') { throw "Anime4K shader digest is not a lowercase SHA-256: $($shader.name)" }
+        $shaderPath = Join-Path $portableDirectory (Join-Path 'runtime\shaders\anime4k' $shader.name)
+        if (-not (Test-Path $shaderPath)) { throw "Portable package is missing Anime4K shader $($shader.name)" }
+        $shaderHash = (Get-FileHash $shaderPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($shaderHash -ne $shader.sha256) { throw "Anime4K shader digest does not match the manifest: $($shader.name)" }
+    }
 
     $portableMpvFiles = @(Get-ChildItem $portableDirectory -Filter 'mpv.exe' -File -Recurse)
     if ((Test-Path (Join-Path $portableDirectory 'runtime\mpv')) -or $portableMpvFiles.Count -gt 0) {
@@ -117,6 +136,7 @@ try {
         if (-not (Test-Path $installedExecutable)) { throw 'Silent installation did not install MiruPlay.exe.' }
         if (-not (Test-Path (Join-Path $installDirectory 'runtime\libmpv\libmpv-2.dll'))) { throw 'Silent installation did not install the libmpv runtime.' }
         if (-not (Test-Path (Join-Path $installDirectory 'runtime\sdl3\SDL3.dll'))) { throw 'Silent installation did not install the SDL3 runtime.' }
+        if (-not (Test-Path (Join-Path $installDirectory 'runtime\shaders\anime4k\Anime4K_Clamp_Highlights.glsl'))) { throw 'Silent installation did not install the Anime4K shaders.' }
         $installedMpvFiles = @(Get-ChildItem $installDirectory -Filter 'mpv.exe' -File -Recurse)
         if ((Test-Path (Join-Path $installDirectory 'runtime\mpv')) -or $installedMpvFiles.Count -gt 0) {
             throw 'Installed package contains the removed external mpv runtime.'

@@ -846,6 +846,55 @@
                     </Grid>
 
                     <Separator Background="{StaticResource SubtleBorder}" />
+                    <TextBlock Text="{services:Loc quality.heading}" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <TextBlock Text="{services:Loc quality.note}" Style="{StaticResource SecondaryText}" Margin="0,6,0,14" TextWrapping="Wrap" />
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="{services:Loc playback.upscale}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc playback.upscaleHint}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="QualityUpscaleBox" Grid.Column="1" SelectionChanged="QualityUpscale_SelectionChanged" AutomationProperties.Name="{services:Loc playback.upscale}">
+                            <ComboBoxItem Tag="off"><TextBlock Text="{services:Loc playback.upscaleOff}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="low"><TextBlock Text="{services:Loc playback.upscaleLow}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="medium"><TextBlock Text="{services:Loc playback.upscaleMedium}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="high"><TextBlock Text="{services:Loc playback.upscaleHigh}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="{services:Loc playback.anime4k}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc playback.anime4kHint}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="QualityAnime4KBox" Grid.Column="1" SelectionChanged="QualityAnime4K_SelectionChanged" AutomationProperties.Name="{services:Loc playback.anime4k}">
+                            <ComboBoxItem Tag="off"><TextBlock Text="{services:Loc playback.anime4kOff}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="a"><TextBlock Text="{services:Loc playback.anime4kA}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="a_plus_a"><TextBlock Text="{services:Loc playback.anime4kAPlusA}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="b"><TextBlock Text="{services:Loc playback.anime4kB}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="c"><TextBlock Text="{services:Loc playback.anime4kC}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="{services:Loc playback.interpolation}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc quality.interpolationNote}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <CheckBox x:Name="QualityInterpolationCheckBox" Grid.Column="1" Content="{services:Loc wpf.main.enable}" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" Click="QualityInterpolation_Click" AutomationProperties.Name="{services:Loc playback.interpolation}" />
+                    </Grid>
+                    <TextBlock x:Name="QualityShaderHintText" Style="{StaticResource SecondaryText}" Margin="0,0,0,28" TextWrapping="Wrap" Visibility="Collapsed" />
+
+                    <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="{services:Loc wpf.main.about}" Style="{StaticResource SectionTitle}" Margin="0,28,0,12" />
                     <TextBlock Text="MiruPlay Windows" FontWeight="SemiBold" />
                     <TextBlock Text="{services:Loc wpf.main.aboutText}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />

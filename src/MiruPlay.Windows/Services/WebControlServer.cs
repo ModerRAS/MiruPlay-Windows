@@ -78,7 +78,8 @@ public sealed record PlaybackRuntimeStatus(
     bool IsMuted = false,
     bool CanPlayPrevious = false,
     bool CanPlayNext = false,
-    IReadOnlyList<PlaybackVersionChoice>? NextEpisodeVersions = null);
+    IReadOnlyList<PlaybackVersionChoice>? NextEpisodeVersions = null,
+    MpvQualityEnhancementStatus? Quality = null);
 
 public sealed class WebControlServer : IAsyncDisposable
 {
@@ -1088,6 +1089,12 @@ public sealed class WebControlServer : IAsyncDisposable
                     !device.StartsWith("wasapi/", StringComparison.OrdinalIgnoreCase))
                     throw new BadHttpRequestException(AppStrings.Get("api.errAudioPassthroughDevice"));
             }
+            if (body.UpscalePreset is not null &&
+                !MpvQualityPresetSettings.UpscaleValues.Contains(body.UpscalePreset.Trim().ToLowerInvariant()))
+                throw new BadHttpRequestException(AppStrings.Get("api.errQualityPreset"));
+            if (body.Anime4KPreset is not null &&
+                !MpvQualityPresetSettings.Anime4KValues.Contains(body.Anime4KPreset.Trim().ToLowerInvariant()))
+                throw new BadHttpRequestException(AppStrings.Get("api.errQualityPreset"));
             if (body.FormatAwareToneMapping is not null)
             {
                 throw new BadHttpRequestException(AppStrings.Get("api.errToneMap"), StatusCodes.Status501NotImplemented);
@@ -1111,6 +1118,13 @@ public sealed class WebControlServer : IAsyncDisposable
                 AudioPassthroughDevice = body.AudioPassthroughDevice is null
                     ? current.AudioPassthroughDevice
                     : AppSettingsStore.NormalizeAudioPassthroughDevice(body.AudioPassthroughDevice),
+                MpvUpscalePreset = body.UpscalePreset is null
+                    ? current.MpvUpscalePreset
+                    : AppSettingsStore.NormalizeMpvUpscalePreset(body.UpscalePreset),
+                MpvAnime4KPreset = body.Anime4KPreset is null
+                    ? current.MpvAnime4KPreset
+                    : AppSettingsStore.NormalizeMpvAnime4KPreset(body.Anime4KPreset),
+                MpvInterpolationEnabled = body.InterpolationEnabled ?? current.MpvInterpolationEnabled,
             }).ConfigureAwait(false);
             if (_applyPlaybackSettings is not null) await _applyPlaybackSettings(updated).ConfigureAwait(false);
             return Success(ToPlaybackSettings(updated, _getRuntimeCapabilities?.Invoke()));
@@ -1691,6 +1705,11 @@ public sealed class WebControlServer : IAsyncDisposable
         audioDevices = (capabilities?.AudioDevices ?? [])
             .Where(device => device.Name.StartsWith("wasapi/", StringComparison.OrdinalIgnoreCase))
             .ToArray(),
+        upscalePreset = AppSettingsStore.NormalizeMpvUpscalePreset(settings.MpvUpscalePreset),
+        upscalePresetOptions = MpvQualityPresetSettings.UpscaleValues,
+        anime4kPreset = AppSettingsStore.NormalizeMpvAnime4KPreset(settings.MpvAnime4KPreset),
+        anime4kPresetOptions = MpvQualityPresetSettings.Anime4KValues,
+        interpolationEnabled = settings.MpvInterpolationEnabled,
     };
 
     private static string NormalizeCloudDrivePath(string path)
@@ -1835,7 +1854,10 @@ public sealed class WebControlServer : IAsyncDisposable
         string? HdrMode = null,
         string? AudioPassthroughMode = null,
         string? AudioPassthroughCodecs = null,
-        string? AudioPassthroughDevice = null);
+        string? AudioPassthroughDevice = null,
+        string? UpscalePreset = null,
+        string? Anime4KPreset = null,
+        bool? InterpolationEnabled = null);
     private sealed record ScanSettingsRequest(
         bool? AutoScanEnabled = null,
         int? AutoScanIntervalHours = null,

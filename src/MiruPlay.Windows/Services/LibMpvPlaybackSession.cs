@@ -38,6 +38,13 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         "libplacebo-version",
         "mpv-version",
         "ffmpeg-version",
+        "glsl-shaders",
+        "scale",
+        "cscale",
+        "dscale",
+        "interpolation",
+        "video-sync",
+        "tscale",
     ];
     private readonly ILibMpvClient _client;
     private readonly LibraryEpisode _episode;
@@ -68,6 +75,10 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     private string? _audioOutputChannels;
     private bool _audioPassthroughActive;
     private int _enhancementLayerDegraded;
+    private MpvQualityEnhancementOptions? _qualityOptions;
+    private MpvDisplayPipeline _qualityDisplayPipeline;
+    private MpvQualityEnhancementStatus? _qualityStatus;
+    private int _qualityApplied;
     private AudioDspFilterGraph? _appliedAudioDsp;
     private AudioDspChannelLayout? _appliedAudioDspChannelLayout;
     private Task? _monitorTask;
@@ -123,6 +134,9 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             await session.WaitForFileLoadedAsync().ConfigureAwait(false);
             session.LoadExternalSubtitles(episode.SubtitlePaths, settings.PreferredSubtitleLanguage);
             session.LoadExternalAudio(episode.ExternalAudioPaths);
+            // Optional Anime4K shaders depend on the detected video color space; try once
+            // after file-loaded and let the monitor retry until video-params is available.
+            session.TryApplyQualityEnhancement();
             session._transportLease = transportLease;
             session.StartMonitoring();
             return session;
@@ -199,6 +213,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     public MpvPlaybackInfo PlaybackInfo => BuildPlaybackInfo();
     public AudioDspFilterGraph? AppliedAudioDsp => _appliedAudioDsp;
     public AudioDspChannelLayout? AppliedAudioDspChannelLayout => _appliedAudioDspChannelLayout;
+    public MpvQualityEnhancementStatus? QualityEnhancement => Volatile.Read(ref _qualityStatus);
     public bool IsActive => !Completion.IsCompleted && Volatile.Read(ref _ending) == 0;
     public bool IsPlaying => IsActive && !IsPaused;
     public MpvNativeDiagnostics GetNativeDiagnostics()
@@ -491,6 +506,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 if (sampleInterval.Elapsed >= TimeSpan.FromMilliseconds(500))
                 {
                     SampleRuntimeState();
+                    TryApplyQualityEnhancement();
                     sampleInterval.Restart();
                 }
                 if (progressInterval.Elapsed >= TimeSpan.FromSeconds(15))
@@ -512,6 +528,23 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
 
     private void CaptureNativeLog(LibMpvLogMessage message)
     {
+        // User shaders are optional. If libmpv reports a shader compilation problem
+        // after we applied the Anime4K chain, clear the shaders and degrade gracefully
+        // instead of leaving the session in a half-applied state.
+        if (Volatile.Read(ref _qualityApplied) != 0 &&
+            _qualityStatus is { ShaderState: MpvQualityShaderStates.Applied } appliedStatus &&
+            IsShaderCompilationFailure(message.Text))
+        {
+            _ = _client.SetPropertyString("glsl-shaders", string.Empty);
+            Volatile.Write(ref _qualityStatus, appliedStatus with
+            {
+                ShaderState = MpvQualityShaderStates.Failed,
+                DegradedReasonKey = MpvQualityDegradedReasons.ShaderFailed,
+                AppliedShaderFiles = [],
+            });
+            RecordQualityLog(1, $"Anime4K shader compilation failed; user shaders cleared: {message.Text}");
+        }
+
         // libmpv warns (not fails) when the Dolby Vision enhancement layer cannot be
         // decoded or composed and it falls back to base-layer-only rendering.
         if (!string.IsNullOrEmpty(message.Text) &&
@@ -559,6 +592,11 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         else
         {
             foreach (var argument in MpvWindowsVideoOptionMapper.BuildArguments(videoOptions)) SetOptionArgument(argument);
+            _qualityOptions = videoOptions?.Quality;
+            _qualityDisplayPipeline = videoOptions?.DisplayPipeline ?? MpvDisplayPipeline.Auto;
+            foreach (var argument in MpvQualityEnhancementPlanner.BuildInitialArguments(_qualityOptions))
+                TrySetOptionArgument(argument);
+            ConfigureQualityShaderCache();
             SetOption("osc", "no");
             SetOption("input-default-bindings", "no");
             SetOption("input-vo-keyboard", "no");
@@ -685,8 +723,128 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     private void SetOption(string name, string value) =>
         EnsureNativeSuccess(_client.SetOptionString(name, value), AppStrings.Get("mpv.optionFailed", name));
 
+    /// <summary>Quality enhancement is optional: a missing/unsupported option must
+    /// degrade the feature instead of failing the whole playback session.</summary>
+    private void TrySetOptionArgument(string argument)
+    {
+        if (!argument.StartsWith("--", StringComparison.Ordinal)) return;
+        var option = argument[2..];
+        var separator = option.IndexOf('=');
+        var name = separator < 0 ? option : option[..separator];
+        var value = separator < 0 ? "yes" : option[(separator + 1)..];
+        if (_client.SetOptionString(name, value) < 0)
+            RecordQualityLog(2, $"Optional quality option '--{name}' is not supported by this libmpv build; skipped.");
+    }
+
+    private void ConfigureQualityShaderCache()
+    {
+        if (_qualityOptions is not { IsEnabled: true }) return;
+        try
+        {
+            var directory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "MiruPlay",
+                "cache",
+                "shader");
+            Directory.CreateDirectory(directory);
+            TrySetOptionArgument("--gpu-shader-cache=yes");
+            TrySetOptionArgument($"--gpu-shader-cache-dir={directory.Replace('\\', '/')}");
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            RecordQualityLog(2, $"Could not prepare the libmpv shader cache directory: {error.Message}");
+        }
+    }
+
+    /// <summary>Applies the requested Anime4K chain once the video color space is
+    /// known. HDR content and HDR passthrough deliberately skip the SDR-tuned shaders
+    /// while keeping the built-in scaler/interpolation options.</summary>
+    private void TryApplyQualityEnhancement()
+    {
+        var options = _qualityOptions;
+        if (options is null || !options.IsEnabled) return;
+        if (Volatile.Read(ref _qualityApplied) != 0) return;
+
+        var transfer = _client.GetPropertyString("video-params/gamma");
+        var primaries = _client.GetPropertyString("video-params/primaries");
+        var width = TryReadInt("video-params/w");
+        var height = TryReadInt("video-params/h");
+        var signalPeak = TryReadDouble("video-params/sig-peak");
+        var contentKnown = !string.IsNullOrWhiteSpace(transfer) ||
+            !string.IsNullOrWhiteSpace(primaries) ||
+            width is not null ||
+            signalPeak is not null;
+        var video = contentKnown
+            ? new MpvVideoTrackInfo(null, null, primaries, transfer, width, height)
+            : null;
+        var plan = MpvQualityEnhancementPlanner.PlanShaders(
+            options,
+            _qualityDisplayPipeline,
+            video,
+            signalPeak,
+            options.ShaderDirectory);
+
+        switch (plan.Decision)
+        {
+            case MpvQualityShaderDecision.NotReady:
+                return;
+            case MpvQualityShaderDecision.NotRequested:
+                SetQualityStatus(options, plan);
+                return;
+            case MpvQualityShaderDecision.Apply:
+                var shaderList = MpvAnime4KShaderCatalog.BuildShaderListValue(plan.ShaderPaths);
+                if (_client.SetPropertyString("glsl-shaders", shaderList) < 0)
+                {
+                    RecordQualityLog(2, "libmpv rejected the Anime4K shader list; falling back to built-in scaling.");
+                    SetQualityStatus(options, plan, MpvQualityShaderStates.Failed, MpvQualityDegradedReasons.ShaderFailed);
+                    return;
+                }
+                RecordQualityLog(
+                    3,
+                    $"Anime4K preset '{MpvQualityPresetSettings.ToStorageValue(options.Anime4K)}' applied with {plan.ShaderPaths.Count} shader file(s).");
+                SetQualityStatus(options, plan);
+                return;
+            default:
+                var missing = plan.MissingFiles is { Count: > 0 } files ? string.Join(", ", files) : string.Empty;
+                RecordQualityLog(
+                    2,
+                    $"Anime4K skipped ({plan.DegradedReasonKey}); missing: {(missing.Length == 0 ? "none" : missing)}.");
+                SetQualityStatus(options, plan);
+                return;
+        }
+    }
+
+    private void SetQualityStatus(
+        MpvQualityEnhancementOptions options,
+        MpvQualityShaderPlan plan,
+        string? shaderStateOverride = null,
+        string? degradedReasonOverride = null)
+    {
+        Volatile.Write(
+            ref _qualityStatus,
+            MpvQualityEnhancementPlanner.BuildStatus(options, plan, shaderStateOverride, degradedReasonOverride));
+        Interlocked.Exchange(ref _qualityApplied, 1);
+    }
+
+    private void RecordQualityLog(int level, string text)
+    {
+        var log = new MpvNativeLogMessage(Environment.TickCount64, "miruplay/quality", level, text);
+        lock (_nativeLogSync)
+        {
+            if (_nativeLogs.Count == NativeLogLimit) _nativeLogs.Dequeue();
+            _nativeLogs.Enqueue(log);
+        }
+    }
+
     private static bool IsRemotePath(string path) =>
         Uri.TryCreate(path, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https";
+
+    private static bool IsShaderCompilationFailure(string? text)
+    {
+        if (string.IsNullOrEmpty(text) || text.IndexOf("shader", StringComparison.OrdinalIgnoreCase) < 0) return false;
+        return text.Contains("fail", StringComparison.OrdinalIgnoreCase) ||
+            text.Contains("error", StringComparison.OrdinalIgnoreCase);
+    }
 
     private void SampleRuntimeState()
     {
