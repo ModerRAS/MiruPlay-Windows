@@ -287,12 +287,15 @@
                                     </Border>
                                 </Grid>
                             </Border>
-                            <TextBlock Text="{TemplateBinding TitleText}" FontSize="19" FontWeight="SemiBold"
+                            <TextBlock x:Name="Title" Text="{TemplateBinding TitleText}" FontSize="19"
+                                       FontWeight="SemiBold" Foreground="{StaticResource TvTextBrush}"
                                        Margin="1,10,1,0" TextTrimming="CharacterEllipsis"
-                                       MaxHeight="46" TextWrapping="Wrap" />
+                                       MaxHeight="46" TextWrapping="Wrap"
+                                       HorizontalAlignment="Stretch" TextAlignment="Center" />
                             <TextBlock Text="{TemplateBinding SubtitleText}" FontSize="14" Margin="1,4,1,0"
                                        Foreground="{StaticResource TvTextMutedBrush}"
-                                       TextTrimming="CharacterEllipsis" />
+                                       TextTrimming="CharacterEllipsis"
+                                       HorizontalAlignment="Stretch" TextAlignment="Center" />
                         </StackPanel>
                         <Border x:Name="Ring" Margin="-6" CornerRadius="13" BorderThickness="3"
                                 BorderBrush="{StaticResource TvAccentBrush}" Opacity="0" />
@@ -344,11 +347,15 @@
                                 BorderBrush="{StaticResource TvBorderBrush}" BorderThickness="1">
                             <StackPanel VerticalAlignment="Center" Margin="24,0">
                                 <TextBlock Text="{TemplateBinding AccentText}" FontSize="15"
-                                           Foreground="{StaticResource TvAccentBrush}" />
+                                           Foreground="{StaticResource TvAccentBrush}"
+                                           HorizontalAlignment="Stretch" TextAlignment="Center" />
                                 <TextBlock Text="{TemplateBinding TitleText}" FontSize="25" FontWeight="SemiBold"
-                                           Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
+                                           Foreground="{StaticResource TvTextBrush}"
+                                           Margin="0,4,0,0" TextTrimming="CharacterEllipsis"
+                                           HorizontalAlignment="Stretch" TextAlignment="Center" />
                                 <TextBlock Text="{TemplateBinding SubtitleText}" FontSize="15" Margin="0,6,0,0"
-                                           Foreground="{StaticResource TvTextMutedBrush}" TextTrimming="CharacterEllipsis" />
+                                           Foreground="{StaticResource TvTextMutedBrush}" TextTrimming="CharacterEllipsis"
+                                           HorizontalAlignment="Stretch" TextAlignment="Center" />
                             </StackPanel>
                         </Border>
                         <Border x:Name="Ring" Margin="-6" CornerRadius="14" BorderThickness="3"
@@ -402,6 +409,7 @@
                                            Foreground="{StaticResource TvTextBrush}" MinWidth="46" />
                                 <StackPanel Grid.Column="1" Margin="6,0,0,0">
                                     <TextBlock Text="{TemplateBinding TitleText}" FontSize="17" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TvTextBrush}"
                                                TextTrimming="CharacterEllipsis" />
                                     <TextBlock Text="{TemplateBinding SubtitleText}" FontSize="14" Margin="0,4,0,0"
                                                Foreground="{StaticResource TvTextMutedBrush}" />
