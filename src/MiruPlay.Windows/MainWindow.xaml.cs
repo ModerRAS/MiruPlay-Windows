@@ -2642,10 +2642,10 @@ public partial class MainWindow : Window, IAsyncDisposable
         StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
     }
 
-    private void QualityInterpolation_Click(object sender, RoutedEventArgs e)
+    private void QualityInterpolation_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_loadingSettings) return;
-        _settings = _settings with { MpvInterpolationEnabled = QualityInterpolationCheckBox.IsChecked == true };
+        if (_loadingSettings || QualityInterpolationBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { FrameInterpolationMode = AppSettingsStore.NormalizeFrameInterpolationMode(value) };
         _settingsStore.Save(_settings);
         StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
     }
@@ -2782,7 +2782,10 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .OfType<ComboBoxItem>()
                 .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeMpvAnime4KPreset(_settings.MpvAnime4KPreset)))
                 ?? QualityAnime4KBox.Items[0];
-            QualityInterpolationCheckBox.IsChecked = _settings.MpvInterpolationEnabled;
+            QualityInterpolationBox.SelectedItem = QualityInterpolationBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeFrameInterpolationMode(_settings.FrameInterpolationMode)))
+                ?? QualityInterpolationBox.Items[0];
             UpdateQualityShaderHint();
             UpdatePlaybackCapabilityText();
         }

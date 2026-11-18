@@ -19,6 +19,53 @@ public enum MpvAnime4KPreset
     C,
 }
 
+/// <summary>Frame interpolation mode. v1 ships Off and the built-in mpv frame mixing
+/// (MpvBuiltIn); the RIFE value is reserved for the later optional enhancement pack and
+/// must not be produced or accepted by v1 settings/API normalization until that lands.</summary>
+public enum MpvFrameInterpolationMode
+{
+    Off,
+    MpvBuiltIn,
+    Rife,
+}
+
+public static class MpvFrameInterpolationModes
+{
+    public const string Off = "off";
+    public const string MpvBuiltIn = "mpv";
+
+    /// <summary>Reserved for the RIFE enhancement pack. Keep the value here so DTOs and
+    /// persisted settings have a stable extension point; v1 does not implement it.</summary>
+    public const string Rife = "rife";
+
+    /// <summary>Values accepted by v1 settings/API/UI. When the RIFE pack lands, append
+    /// <see cref="Rife"/> here and add its UI option branch.</summary>
+    public static IReadOnlyList<string> SupportedValues { get; } = [Off, MpvBuiltIn];
+
+    /// <summary>Reserved/planned values, exposed for documentation and future API schema
+    /// checks but rejected by v1 validation.</summary>
+    public static IReadOnlyList<string> ReservedValues { get; } = [Rife];
+
+    public static string Normalize(string? value) => value?.Trim().ToLowerInvariant() switch
+    {
+        MpvBuiltIn or "mpv_builtin" or "builtin" or "smooth" => MpvBuiltIn,
+        // "rife" is reserved: an older build must safely fall back to off instead of
+        // pretending to run a mode it does not implement.
+        _ => Off,
+    };
+
+    public static MpvFrameInterpolationMode Parse(string? value) => Normalize(value) == MpvBuiltIn
+        ? MpvFrameInterpolationMode.MpvBuiltIn
+        : MpvFrameInterpolationMode.Off;
+
+    public static string ToStorageValue(MpvFrameInterpolationMode mode) => mode switch
+    {
+        MpvFrameInterpolationMode.MpvBuiltIn => MpvBuiltIn,
+        MpvFrameInterpolationMode.Rife => Rife,
+        _ => Off,
+    };
+}
+
 /// <summary>Storage-value contract for the optional GPU quality presets shared by
 /// settings, WebControl, WPF and TV mode.</summary>
 public static class MpvQualityPresetSettings
@@ -97,13 +144,13 @@ public static class MpvQualityPresetSettings
 public sealed record MpvQualityEnhancementOptions(
     MpvUpscaleQualityPreset Upscale = MpvUpscaleQualityPreset.Off,
     MpvAnime4KPreset Anime4K = MpvAnime4KPreset.Off,
-    bool Interpolation = false,
+    MpvFrameInterpolationMode Interpolation = MpvFrameInterpolationMode.Off,
     string? ShaderDirectory = null)
 {
     public bool IsEnabled =>
         Upscale != MpvUpscaleQualityPreset.Off ||
         Anime4K != MpvAnime4KPreset.Off ||
-        Interpolation;
+        Interpolation != MpvFrameInterpolationMode.Off;
 }
 
 public static class MpvQualityEnhancementPaths
@@ -160,7 +207,7 @@ public sealed record MpvQualityShaderPlan(
 public sealed record MpvQualityEnhancementStatus(
     string UpscalePreset,
     string Anime4KPreset,
-    bool Interpolation,
+    string FrameInterpolationMode,
     string ShaderState,
     string? DegradedReasonKey,
     IReadOnlyList<string> AppliedShaderFiles);
@@ -350,7 +397,16 @@ public static class MpvQualityEnhancementPlanner
                 break;
         }
 
-        if (options.Interpolation) arguments.AddRange(InterpolationArguments);
+        switch (options.Interpolation)
+        {
+            case MpvFrameInterpolationMode.MpvBuiltIn:
+                arguments.AddRange(InterpolationArguments);
+                break;
+            case MpvFrameInterpolationMode.Rife:
+                // Reserved extension point: the RIFE enhancement pack will append its own
+                // arguments/pipeline here. v1 emits nothing so an old build stays safe.
+                break;
+        }
         return arguments;
     }
 
@@ -412,7 +468,7 @@ public static class MpvQualityEnhancementPlanner
         new(
             MpvQualityPresetSettings.ToStorageValue(options.Upscale),
             MpvQualityPresetSettings.ToStorageValue(options.Anime4K),
-            options.Interpolation,
+            MpvFrameInterpolationModes.ToStorageValue(options.Interpolation),
             shaderStateOverride ?? MpvQualityShaderStates.FromDecision(plan.Decision),
             degradedReasonOverride ?? plan.DegradedReasonKey,
             plan.Decision == MpvQualityShaderDecision.Apply

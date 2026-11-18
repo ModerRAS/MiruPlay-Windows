@@ -54,7 +54,7 @@ public sealed class MpvQualityEnhancementTests : IDisposable
     public void InterpolationUsesDisplayResampleFrameMixingAndExtraHwdecFrames()
     {
         var arguments = MpvQualityEnhancementPlanner.BuildInitialArguments(
-            new MpvQualityEnhancementOptions(Interpolation: true));
+            new MpvQualityEnhancementOptions(Interpolation: MpvFrameInterpolationMode.MpvBuiltIn));
 
         Assert.Equal(
         [
@@ -64,6 +64,14 @@ public sealed class MpvQualityEnhancementTests : IDisposable
             "--hwdec-extra-frames=8",
         ], arguments);
         Assert.DoesNotContain(arguments, argument => argument.Contains("tscale=linear", StringComparison.Ordinal));
+
+        // Reserved RIFE mode is a future extension point and must not silently run the
+        // mpv built-in frame mixing pipeline in v1.
+        Assert.Empty(MpvQualityEnhancementPlanner.BuildInitialArguments(
+            new MpvQualityEnhancementOptions(Interpolation: MpvFrameInterpolationMode.Rife)));
+        Assert.Equal(["off", "mpv"], MpvFrameInterpolationModes.SupportedValues);
+        Assert.DoesNotContain("rife", MpvFrameInterpolationModes.SupportedValues);
+        Assert.Contains("rife", MpvFrameInterpolationModes.ReservedValues);
     }
 
     [Fact]
@@ -233,7 +241,7 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         var options = new MpvQualityEnhancementOptions(
             MpvUpscaleQualityPreset.High,
             MpvAnime4KPreset.A,
-            Interpolation: true,
+            Interpolation: MpvFrameInterpolationMode.MpvBuiltIn,
             ShaderDirectory: shaderDirectory);
         var plan = MpvQualityEnhancementPlanner.PlanShaders(
             options, MpvDisplayPipeline.Auto, SdrVideo(), null, shaderDirectory);
@@ -241,7 +249,7 @@ public sealed class MpvQualityEnhancementTests : IDisposable
 
         Assert.Equal("high", status.UpscalePreset);
         Assert.Equal("a", status.Anime4KPreset);
-        Assert.True(status.Interpolation);
+        Assert.Equal("mpv", status.FrameInterpolationMode);
         Assert.Equal(MpvQualityShaderStates.Applied, status.ShaderState);
         Assert.Equal(6, status.AppliedShaderFiles.Count);
         Assert.Null(status.DegradedReasonKey);
@@ -261,21 +269,30 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         var defaults = store.Load();
         Assert.Equal("off", defaults.MpvUpscalePreset);
         Assert.Equal("off", defaults.MpvAnime4KPreset);
-        Assert.False(defaults.MpvInterpolationEnabled);
+        Assert.Equal("off", defaults.FrameInterpolationMode);
 
         File.WriteAllText(path,
-            "{\"MpvUpscalePreset\":\"ULTRA\",\"MpvAnime4KPreset\":\"A+A\",\"MpvInterpolationEnabled\":true}");
+            "{\"MpvUpscalePreset\":\"ULTRA\",\"MpvAnime4KPreset\":\"A+A\",\"FrameInterpolationMode\":\"MPV\"}");
         var normalized = store.Load();
         Assert.Equal("off", normalized.MpvUpscalePreset);
         Assert.Equal("a_plus_a", normalized.MpvAnime4KPreset);
-        Assert.True(normalized.MpvInterpolationEnabled);
+        Assert.Equal("mpv", normalized.FrameInterpolationMode);
+
+        // The RIFE value is reserved for the future enhancement pack; an older build
+        // must fall back to off instead of pretending to run RIFE.
+        File.WriteAllText(path, "{\"FrameInterpolationMode\":\"rife\"}");
+        Assert.Equal("off", store.Load().FrameInterpolationMode);
+
+        // Legacy boolean field from the first v1 iteration migrates to the mpv mode.
+        File.WriteAllText(path, "{\"MpvInterpolationEnabled\":true}");
+        Assert.Equal("mpv", store.Load().FrameInterpolationMode);
 
         File.WriteAllText(path, "{\"AudioBalance\":\"high\"}");
         var legacy = store.Load();
         Assert.Equal("high", legacy.AudioBalance);
         Assert.Equal("off", legacy.MpvUpscalePreset);
         Assert.Equal("off", legacy.MpvAnime4KPreset);
-        Assert.False(legacy.MpvInterpolationEnabled);
+        Assert.Equal("off", legacy.FrameInterpolationMode);
     }
 
     [Fact]
@@ -286,12 +303,12 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         store.Save(new AppSettings(
             MpvUpscalePreset: "medium",
             MpvAnime4KPreset: "b",
-            MpvInterpolationEnabled: true));
+            FrameInterpolationMode: "mpv"));
 
         var loaded = store.Load();
         Assert.Equal("medium", loaded.MpvUpscalePreset);
         Assert.Equal("b", loaded.MpvAnime4KPreset);
-        Assert.True(loaded.MpvInterpolationEnabled);
+        Assert.Equal("mpv", loaded.FrameInterpolationMode);
     }
 
     [Fact]
@@ -300,13 +317,17 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         var settings = new AppSettings(
             MpvUpscalePreset: "high",
             MpvAnime4KPreset: "c",
-            MpvInterpolationEnabled: true);
+            FrameInterpolationMode: "mpv");
         var options = MpvWindowsVideoOptionMapper.FromSettings(settings, CreateShaderDirectory()).Quality;
 
         Assert.NotNull(options);
         Assert.Equal(MpvUpscaleQualityPreset.High, options!.Upscale);
         Assert.Equal(MpvAnime4KPreset.C, options.Anime4K);
-        Assert.True(options.Interpolation);
+        Assert.Equal(MpvFrameInterpolationMode.MpvBuiltIn, options.Interpolation);
+
+        var reserved = MpvWindowsVideoOptionMapper.FromSettings(
+            settings with { FrameInterpolationMode = "rife" }, CreateShaderDirectory()).Quality;
+        Assert.Equal(MpvFrameInterpolationMode.Off, reserved!.Interpolation);
     }
 
     [Fact]
@@ -347,7 +368,10 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         var initial = await ReadData(await client.GetAsync("/api/settings/playback"));
         Assert.Equal("off", initial.GetProperty("upscalePreset").GetString());
         Assert.Equal("off", initial.GetProperty("anime4kPreset").GetString());
-        Assert.False(initial.GetProperty("interpolationEnabled").GetBoolean());
+        Assert.Equal("off", initial.GetProperty("frameInterpolationMode").GetString());
+        Assert.Equal(
+            ["off", "mpv"],
+            initial.GetProperty("frameInterpolationModeOptions").EnumerateArray().Select(item => item.GetString()!).ToArray());
         Assert.Equal(
             ["off", "low", "medium", "high"],
             initial.GetProperty("upscalePresetOptions").EnumerateArray().Select(item => item.GetString()!).ToArray());
@@ -359,22 +383,27 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         {
             upscalePreset = "high",
             anime4kPreset = "a_plus_a",
-            interpolationEnabled = true,
+            frameInterpolationMode = "mpv",
         });
         updateResponse.EnsureSuccessStatusCode();
         var updated = await ReadData(updateResponse);
         Assert.Equal("high", updated.GetProperty("upscalePreset").GetString());
         Assert.Equal("a_plus_a", updated.GetProperty("anime4kPreset").GetString());
-        Assert.True(updated.GetProperty("interpolationEnabled").GetBoolean());
+        Assert.Equal("mpv", updated.GetProperty("frameInterpolationMode").GetString());
         Assert.Equal("high", settings.MpvUpscalePreset);
         Assert.Equal("a_plus_a", settings.MpvAnime4KPreset);
-        Assert.True(settings.MpvInterpolationEnabled);
-        Assert.True(applied?.MpvInterpolationEnabled);
+        Assert.Equal("mpv", settings.FrameInterpolationMode);
+        Assert.Equal("mpv", applied?.FrameInterpolationMode);
 
         var invalidUpscale = await client.PutAsJsonAsync("/api/settings/playback", new { upscalePreset = "ultra" });
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidUpscale.StatusCode);
         var invalidAnime4K = await client.PutAsJsonAsync("/api/settings/playback", new { anime4kPreset = "z" });
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidAnime4K.StatusCode);
+        var invalidInterpolation = await client.PutAsJsonAsync("/api/settings/playback", new { frameInterpolationMode = "bogus" });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidInterpolation.StatusCode);
+        // Reserved RIFE value is not accepted by v1 (the future pack will extend the allowed set).
+        var reservedInterpolation = await client.PutAsJsonAsync("/api/settings/playback", new { frameInterpolationMode = "rife" });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, reservedInterpolation.StatusCode);
     }
 
     private static MpvVideoTrackInfo SdrVideo() => new("h264", "yuv420p", "bt.709", "bt.1886", 1920, 1080);

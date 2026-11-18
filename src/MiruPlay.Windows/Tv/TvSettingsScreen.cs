@@ -186,11 +186,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddRow("audioPassthrough", "tv.settings.audioPassthrough", () => ValueAudioPassthrough(), step => ChangeAudioPassthrough(step));
         AddRow("upscaleQuality", "tv.settings.upscaleQuality", () => ValueUpscale(), step => ChangeUpscale(step));
         AddRow("anime4kPreset", "tv.settings.anime4kPreset", () => ValueAnime4K(), step => ChangeAnime4K(step));
-        AddRow("interpolation", "tv.settings.interpolation", () => Bool(_context.Settings.MpvInterpolationEnabled), _ =>
-        {
-            Toggle(settings => settings with { MpvInterpolationEnabled = !settings.MpvInterpolationEnabled });
-            _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
-        });
+        AddRow("interpolation", "tv.settings.interpolation", () => ValueFrameInterpolation(), step => ChangeFrameInterpolation(step));
         AddGroup("tv.settings.group.tv");
         AddRow("startMode", "tv.settings.startTvMode", () => Bool(_context.Settings.TvModeEnabled), _ => Toggle(settings => settings with { TvModeEnabled = !settings.TvModeEnabled }));
         AddRow("preset", "tv.settings.remotePreset", () => ValuePreset(), step => ChangePreset());
@@ -433,6 +429,25 @@ public sealed class TvSettingsScreen : TvScreenBase
         MpvQualityPresetSettings.Anime4KC => AppStrings.Get("tv.settings.anime4k.c"),
         _ => AppStrings.Get("tv.settings.anime4k.off"),
     };
+
+    private void ChangeFrameInterpolation(int step)
+    {
+        // Extension point: the RIFE pack will append MpvFrameInterpolationModes.Rife here.
+        var values = MpvFrameInterpolationModes.SupportedValues.ToArray();
+        var index = Array.IndexOf(values, AppSettingsStore.NormalizeFrameInterpolationMode(_context.Settings.FrameInterpolationMode));
+        if (index < 0) index = 0;
+        index = (index + step + values.Length) % values.Length;
+        _context.SaveSettings(_context.Settings with { FrameInterpolationMode = values[index] });
+        RefreshValues();
+        _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+    }
+
+    private string ValueFrameInterpolation() =>
+        AppSettingsStore.NormalizeFrameInterpolationMode(_context.Settings.FrameInterpolationMode) switch
+        {
+            MpvFrameInterpolationModes.MpvBuiltIn => AppStrings.Get("tv.settings.interpolation.mpv"),
+            _ => AppStrings.Get("tv.settings.interpolation.off"),
+        };
 
     private void ChangePreset()
     {

@@ -225,7 +225,7 @@ public static class MpvWindowsVideoOptionMapper
         var quality = new MpvQualityEnhancementOptions(
             MpvQualityPresetSettings.ParseUpscale(settings.MpvUpscalePreset),
             MpvQualityPresetSettings.ParseAnime4K(settings.MpvAnime4KPreset),
-            settings.MpvInterpolationEnabled,
+            MpvFrameInterpolationModes.Parse(settings.FrameInterpolationMode),
             shaderDirectory ?? MpvQualityEnhancementPaths.ResolveShaderDirectory());
         return new MpvWindowsVideoOptions(
             MpvPlaybackModeSettings.ToDisplayPipeline(settings.HdrMode),

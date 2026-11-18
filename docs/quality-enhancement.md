@@ -9,7 +9,7 @@
 |---|---|---|
 | 缩放质量预设 | off / 低 / 中 / 高 -> mpv scale/cscale/dscale/correct-downscaling/linear-downscaling/sigmoid-upscaling | off（参数与今天完全相同） |
 | Anime4K 预设 | off / A / A+A / B / C -> 官方 v4.0.1 Fast 链（9 个 GLSL 文件，MIT） | off |
-| 内置插帧 | video-sync=display-resample + interpolation=yes + tscale=oversample + 插帧时 hwdec-extra-frames=8 | off |
+| 插帧方式 | `off` / `mpv`（内置帧混合：video-sync=display-resample + interpolation=yes + tscale=oversample + hwdec-extra-frames=8）；`rife` 为后续增强包预留，v1 不接受 | off |
 
 ## 2. 行为与互斥
 
@@ -20,7 +20,8 @@
   Anime4K（缩放/插帧仍生效），原因写入播放状态与诊断。
 - 着色器在 file-loaded 后按内容应用，不在 mpv_initialize 前加载。
 - 资产缺失、选项被运行时拒绝、shader 编译失败都不中断播放：清空 user shader 并回退到内置缩放。
-- 内置插帧是 mpv 的时间轴重采样/帧混合（smoothmotion 类），不是 MEMC、不是 RIFE 真插帧；
+- 插帧方式为可扩展字符串存储值：v1 支持 `off`、`mpv`；`rife` 已预留为后续增强包的取值，v1 设置/API 会将其安全回退为 off。
+- `mpv` 模式是 mpv 的时间轴重采样/帧混合（smoothmotion 类），不是 MEMC、不是 RIFE 真插帧；
   主要收益是降低 24p 在 60Hz 上的 judder，代价是轻微运动模糊。它需要 display-* 同步与 vsync；
   VFR 内容、VRR/G-Sync 显示器可能使其自动失效（mpv 自动回退，不报错）。
 - 高刷/VRR 建议：使用插帧时优先固定刷新率；否则可能看到重复帧或插帧不生效。
@@ -50,7 +51,8 @@
 
 - 已自动化验证（690 个测试全绿）：选项映射（off 输出与旧版逐字节一致、低/中/高精确参数、插帧参数）、
   Anime4K 预设文件顺序、HDR/直通/资产缺失降级规则、设置归一化与旧 JSON 兼容、
-  WebControl GET/PUT 与非法值 400、i18n 五语言（1585 键 x 5）、发布产物校验。
+  WebControl GET/PUT 与非法值 400、插帧方式 off/mpv 与预留 rife 的安全回退、
+  i18n 五语言（1590 键 x 5）、发布产物校验。
 - 只读 libmpv 探针（固定版 v0.42.0-38-gbcde6b93c，gpu-next + D3D11 + wid）：Anime4K Fast A 链全部
   pass 编译并逐帧执行；ravu compute shader pass 可执行；插帧 display-sync-active=yes；
   缺失 shader 不影响播放；WS_CHILD 子窗口下 display-sync-active=yes 已实测。

@@ -1569,10 +1569,10 @@
   <data name="playback.anime4kAPlusA" xml:space="preserve"><value>A+A (stronger)</value></data>
   <data name="playback.anime4kB" xml:space="preserve"><value>B (720p)</value></data>
   <data name="playback.anime4kC" xml:space="preserve"><value>C (480p)</value></data>
-  <data name="playback.interpolation" xml:space="preserve"><value>Built-in interpolation (not MEMC)</value></data>
+  <data name="playback.interpolation" xml:space="preserve"><value>Frame interpolation</value></data>
   <data name="quality.heading" xml:space="preserve"><value>Picture enhancement</value></data>
   <data name="quality.note" xml:space="preserve"><value>Only affects the built-in libmpv; Anime4K is skipped for HDR sources; changes apply on the next playback.</value></data>
-  <data name="quality.interpolationNote" xml:space="preserve"><value>mpv built-in temporal resampling (frame blending) reduces 24p judder on 60Hz displays; it is not MEMC/RIFE interpolation and may add slight motion blur.</value></data>
+  <data name="quality.interpolationNote" xml:space="preserve"><value>mpv built-in frame blending (smoothmotion-like) reduces 24p judder on 60Hz displays; it is not MEMC/RIFE interpolation and may add slight motion blur.</value></data>
   <data name="quality.reason.hdr" xml:space="preserve"><value>HDR source detected: Anime4K shaders were skipped (they expect SDR content).</value></data>
   <data name="quality.reason.assetsMissing" xml:space="preserve"><value>Anime4K shader assets are missing; falling back to the built-in scaler.</value></data>
   <data name="quality.reason.shaderFailed" xml:space="preserve"><value>Anime4K shader loading failed; falling back to the built-in scaler.</value></data>
@@ -1589,4 +1589,9 @@
   <data name="tv.settings.anime4k.b" xml:space="preserve"><value>B (720p)</value></data>
   <data name="tv.settings.anime4k.c" xml:space="preserve"><value>C (480p)</value></data>
   <data name="api.errQualityPreset" xml:space="preserve"><value>Invalid quality preset.</value></data>
+  <data name="playback.interpolationOff" xml:space="preserve"><value>Off</value></data>
+  <data name="playback.interpolationMpv" xml:space="preserve"><value>mpv built-in smoothing</value></data>
+  <data name="tv.settings.interpolation.off" xml:space="preserve"><value>Off</value></data>
+  <data name="tv.settings.interpolation.mpv" xml:space="preserve"><value>Built-in</value></data>
+  <data name="api.errFrameInterpolationMode" xml:space="preserve"><value>Invalid frame interpolation mode.</value></data>
 </root>

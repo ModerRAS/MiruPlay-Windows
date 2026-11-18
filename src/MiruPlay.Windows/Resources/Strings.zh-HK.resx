@@ -1569,16 +1569,16 @@
   <data name="playback.anime4kAPlusA" xml:space="preserve"><value>A+A（更強）</value></data>
   <data name="playback.anime4kB" xml:space="preserve"><value>B（720p）</value></data>
   <data name="playback.anime4kC" xml:space="preserve"><value>C（480p）</value></data>
-  <data name="playback.interpolation" xml:space="preserve"><value>內建補幀（非 MEMC）</value></data>
+  <data name="playback.interpolation" xml:space="preserve"><value>插幀方式</value></data>
   <data name="quality.heading" xml:space="preserve"><value>畫質增強</value></data>
   <data name="quality.note" xml:space="preserve"><value>僅作用於內建 libmpv；HDR 片源會自動跳過 Anime4K；設定於下一次播放生效。</value></data>
-  <data name="quality.interpolationNote" xml:space="preserve"><value>mpv 內建時間重取樣（影格混合），用於減少 24p 在 60Hz 上的抖動；不是 MEMC/RIFE 真補幀，可能產生輕微動態模糊。</value></data>
+  <data name="quality.interpolationNote" xml:space="preserve"><value>選擇 mpv 內建影格混合（smoothmotion 類）可減少 24p 在 60Hz 上的抖動；它不是 MEMC/RIFE 真插幀，可能產生輕微動態模糊。</value></data>
   <data name="quality.reason.hdr" xml:space="preserve"><value>目前是 HDR 片源，已跳過 Anime4K 著色器（避免在 PQ/HLG 空間誤處理）。</value></data>
   <data name="quality.reason.assetsMissing" xml:space="preserve"><value>未安裝 Anime4K 著色器資產，已退回內建縮放。</value></data>
   <data name="quality.reason.shaderFailed" xml:space="preserve"><value>Anime4K 著色器載入失敗，已退回內建縮放。</value></data>
   <data name="tv.settings.upscaleQuality" xml:space="preserve"><value>縮放品質</value></data>
   <data name="tv.settings.anime4kPreset" xml:space="preserve"><value>Anime4K</value></data>
-  <data name="tv.settings.interpolation" xml:space="preserve"><value>內建補幀</value></data>
+  <data name="tv.settings.interpolation" xml:space="preserve"><value>插幀</value></data>
   <data name="tv.settings.upscale.off" xml:space="preserve"><value>關閉</value></data>
   <data name="tv.settings.upscale.low" xml:space="preserve"><value>低</value></data>
   <data name="tv.settings.upscale.medium" xml:space="preserve"><value>中</value></data>
@@ -1589,4 +1589,9 @@
   <data name="tv.settings.anime4k.b" xml:space="preserve"><value>B (720p)</value></data>
   <data name="tv.settings.anime4k.c" xml:space="preserve"><value>C (480p)</value></data>
   <data name="api.errQualityPreset" xml:space="preserve"><value>畫質預設取值無效。</value></data>
+  <data name="playback.interpolationOff" xml:space="preserve"><value>關閉</value></data>
+  <data name="playback.interpolationMpv" xml:space="preserve"><value>mpv 內建平滑</value></data>
+  <data name="tv.settings.interpolation.off" xml:space="preserve"><value>關閉</value></data>
+  <data name="tv.settings.interpolation.mpv" xml:space="preserve"><value>內建</value></data>
+  <data name="api.errFrameInterpolationMode" xml:space="preserve"><value>插幀方式取值無效。</value></data>
 </root>

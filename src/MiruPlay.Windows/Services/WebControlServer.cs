@@ -1095,6 +1095,11 @@ public sealed class WebControlServer : IAsyncDisposable
             if (body.Anime4KPreset is not null &&
                 !MpvQualityPresetSettings.Anime4KValues.Contains(body.Anime4KPreset.Trim().ToLowerInvariant()))
                 throw new BadHttpRequestException(AppStrings.Get("api.errQualityPreset"));
+            // Extension point: when the RIFE enhancement pack lands, append
+            // MpvFrameInterpolationModes.Rife to SupportedValues and this check accepts it.
+            if (body.FrameInterpolationMode is not null &&
+                !MpvFrameInterpolationModes.SupportedValues.Contains(body.FrameInterpolationMode.Trim().ToLowerInvariant()))
+                throw new BadHttpRequestException(AppStrings.Get("api.errFrameInterpolationMode"));
             if (body.FormatAwareToneMapping is not null)
             {
                 throw new BadHttpRequestException(AppStrings.Get("api.errToneMap"), StatusCodes.Status501NotImplemented);
@@ -1124,7 +1129,9 @@ public sealed class WebControlServer : IAsyncDisposable
                 MpvAnime4KPreset = body.Anime4KPreset is null
                     ? current.MpvAnime4KPreset
                     : AppSettingsStore.NormalizeMpvAnime4KPreset(body.Anime4KPreset),
-                MpvInterpolationEnabled = body.InterpolationEnabled ?? current.MpvInterpolationEnabled,
+                FrameInterpolationMode = body.FrameInterpolationMode is null
+                    ? current.FrameInterpolationMode
+                    : AppSettingsStore.NormalizeFrameInterpolationMode(body.FrameInterpolationMode),
             }).ConfigureAwait(false);
             if (_applyPlaybackSettings is not null) await _applyPlaybackSettings(updated).ConfigureAwait(false);
             return Success(ToPlaybackSettings(updated, _getRuntimeCapabilities?.Invoke()));
@@ -1709,7 +1716,8 @@ public sealed class WebControlServer : IAsyncDisposable
         upscalePresetOptions = MpvQualityPresetSettings.UpscaleValues,
         anime4kPreset = AppSettingsStore.NormalizeMpvAnime4KPreset(settings.MpvAnime4KPreset),
         anime4kPresetOptions = MpvQualityPresetSettings.Anime4KValues,
-        interpolationEnabled = settings.MpvInterpolationEnabled,
+        frameInterpolationMode = AppSettingsStore.NormalizeFrameInterpolationMode(settings.FrameInterpolationMode),
+        frameInterpolationModeOptions = MpvFrameInterpolationModes.SupportedValues,
     };
 
     private static string NormalizeCloudDrivePath(string path)
@@ -1857,7 +1865,7 @@ public sealed class WebControlServer : IAsyncDisposable
         string? AudioPassthroughDevice = null,
         string? UpscalePreset = null,
         string? Anime4KPreset = null,
-        bool? InterpolationEnabled = null);
+        string? FrameInterpolationMode = null);
     private sealed record ScanSettingsRequest(
         bool? AutoScanEnabled = null,
         int? AutoScanIntervalHours = null,

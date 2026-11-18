@@ -229,7 +229,7 @@ public sealed class LibMpvPlaybackSessionTests : IDisposable
             transportLease: null,
             videoOptions: new MpvWindowsVideoOptions(Quality: new MpvQualityEnhancementOptions(
                 MpvUpscaleQualityPreset.Medium,
-                Interpolation: true)));
+                Interpolation: MpvFrameInterpolationMode.MpvBuiltIn)));
 
         Assert.Equal("lanczos", client.Options["scale"]);
         Assert.Equal("spline36", client.Options["cscale"]);

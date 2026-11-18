@@ -8,7 +8,7 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 校验协议版本、必需表、capability 和不安全路径
 - 按 Anime/Drama 模式隔离媒体源，并提供海报墙、搜索、作品详情和剧集列表
 - 使用内置 libmpv 或 Windows 默认播放器播放本地视频
-- 可选画质增强：缩放质量预设（低/中/高）、Anime4K SDR 动画着色器（A/A+A/B/C）与 mpv 内置帧混合插帧（非 MEMC）；HDR 片源自动跳过 Anime4K
+- 可选画质增强：缩放质量预设（低/中/高）、Anime4K SDR 动画着色器（A/A+A/B/C）与插帧方式（off/mpv 内置帧混合，非 MEMC；预留 RIFE 扩展）；HDR 片源自动跳过 Anime4K
 - 显示模式支持自动（默认，不改变现有画质）、HDR 直通、映射到 SDR；Windows 需开启系统 HDR，HDR 直通参数需实机验证
 - 音频码流直通（关闭/自动/强制 + TrueHD/E-AC3/AC-3/DTS/DTS-HD）可把 Atmos 原样送入 HDMI/AVR；需要独占 WASAPI，失败自动回退 PCM，并与 PEQ/DSP/响度平衡互斥
 - 内置 libmpv 已支持 Dolby Vision Profile 7 FEL 播放器侧解码与合成（Windows 输出 HDR10，不输出 DV 信号）；设置页展示运行时 FEL 支持与 libmpv/libplacebo 版本

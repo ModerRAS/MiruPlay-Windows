@@ -890,7 +890,10 @@
                             <TextBlock Text="{services:Loc playback.interpolation}" FontWeight="SemiBold" />
                             <TextBlock Text="{services:Loc quality.interpolationNote}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
                         </StackPanel>
-                        <CheckBox x:Name="QualityInterpolationCheckBox" Grid.Column="1" Content="{services:Loc wpf.main.enable}" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" Click="QualityInterpolation_Click" AutomationProperties.Name="{services:Loc playback.interpolation}" />
+                        <ComboBox x:Name="QualityInterpolationBox" Grid.Column="1" SelectionChanged="QualityInterpolation_SelectionChanged" AutomationProperties.Name="{services:Loc playback.interpolation}">
+                            <ComboBoxItem Tag="off"><TextBlock Text="{services:Loc playback.interpolationOff}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="mpv"><TextBlock Text="{services:Loc playback.interpolationMpv}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
                     </Grid>
                     <TextBlock x:Name="QualityShaderHintText" Style="{StaticResource SecondaryText}" Margin="0,0,0,28" TextWrapping="Wrap" Visibility="Collapsed" />
 
