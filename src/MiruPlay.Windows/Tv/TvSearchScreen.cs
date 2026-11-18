@@ -26,6 +26,7 @@ public sealed class TvSearchScreen : TvScreenBase
     private readonly ScrollViewer _resultsScroller;
     private readonly TextBlock _emptyText;
     private readonly StackPanel _keyboardHost = new();
+    private readonly List<FrameworkElement> _keyButtons = [];
     private readonly Border _recentHost;
     private TvZone? _recentZone;
     private TvZone? _keyZone;
@@ -88,10 +89,12 @@ public sealed class TvSearchScreen : TvScreenBase
                 var button = CreateKeyButton(key);
                 button.Click += (_, _) => Append(key);
                 rowPanel.Children.Add(button);
+                _keyButtons.Add(button);
             }
             keyboardRows.Children.Add(rowPanel);
         }
-        var actionRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 0) };
+        _actionPanel.Margin = new Thickness(0, 4, 0, 0);
+        var actionRow = _actionPanel;
         var space = CreateWideKey(AppStrings.Get("tv.search.space"), "space");
         space.Click += (_, _) => Append(" ");
         var backspace = CreateWideKey("⌫", "backspace");
@@ -191,10 +194,7 @@ public sealed class TvSearchScreen : TvScreenBase
     {
         var recentItems = _recentPanel.Children.Cast<FrameworkElement>().ToList();
         _recentZone = new TvZone("recent", TvZoneKind.Horizontal, recentItems);
-        var keyItems = _keyboardHost.Children
-            .OfType<StackPanel>()
-            .SelectMany(panel => panel.Children.OfType<FrameworkElement>())
-            .ToList();
+        var keyItems = _keyButtons.ToList();
         _keyZone = new TvZone("keys", TvZoneKind.Grid, keyItems, 10, onEdge: (index, direction) => HandleKeyEdge(index, direction));
         var actionItems = _actionPanel.Children.Cast<FrameworkElement>().ToList();
         _actionZone = new TvZone("actions", TvZoneKind.Horizontal, actionItems);

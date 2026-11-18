@@ -40,6 +40,10 @@
 5. **OSD 状态机**：任意键呼出，3 秒无操作自动隐藏（暂停/抽屉打开/焦点在 OSD 内时不隐藏）；Back 逐级：关抽屉 → 隐藏 OSD → 退出播放；Menu 打开抽屉（字幕/音轨/倍速/信息）；方向键进入焦点模式后左右选按钮、上下换行；播放结束按设置自动下一集或返回详情。
 6. **从「从头播放」语义**：`LibMpvPlaybackSession.StartAsync(..., forceStartPosition: true)` 显式写 `start=0`，避免 `startPositionMs=0` 被当成「未指定」而续播断点；「继续播放」显式传进度。桌面播放页默认参数不变，零回归。
 
+## 焦点
+
+进入屏幕后不按额外键即显示焦点环：屏幕挂树时立即设置逻辑焦点，`TvScreenBase.ApplyFocus` 在 `Focus()` 失败时按 Loaded/Input 优先级重试，Shell 在屏幕布局完成后再补一次 `RefocusActive()`；子屏 Back 返回走同一套 `RestoreFocus` 路径。
+
 ## 手柄输入
 
 电视模式支持 XInput（Xbox 系）与 SDL3（DualSense/DualShock/Switch Pro/8BitDo 等 HID 手柄）两种后端，SDL3 优先、XInput 兜底；映射/设置/支持矩阵见 [tv-gamepad.md](tv-gamepad.md)。`--tv-pad-demo` 可在无实体手柄时演示。

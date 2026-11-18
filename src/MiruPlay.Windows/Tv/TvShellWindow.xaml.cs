@@ -375,6 +375,14 @@ public sealed partial class TvShellWindow : Window, IDisposable
             var memory = _navigator.RecallFocus(screen.Id);
             screen.OnActivated(memory);
             if (focusContent) screen.FocusFromNav();
+            // Screens are attached to the visual tree just above; defer a second
+            // focus pass until layout has run so the focus ring appears without
+            // requiring an extra remote key.
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+            {
+                if (!ReferenceEquals(_currentScreen, screen)) return;
+                screen.RefocusActive();
+            }));
         }
         UpdateHint();
     }

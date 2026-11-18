@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 using MiruPlay.Windows.Services;
 
 namespace MiruPlay.Windows.Tv;
@@ -89,6 +90,7 @@ public sealed class TvZone
 public abstract class TvScreenBase : UserControl
 {
     private readonly List<TvZone> _zones = [];
+    private int _focusRequest;
 
     public TvShellWindow? Shell { get; internal set; }
 
@@ -184,10 +186,42 @@ public abstract class TvScreenBase : UserControl
         var next = Math.Clamp(index, 0, zone.Items.Count - 1);
         ActiveZone = zone;
         ActiveIndex = next;
-        var item = zone.Items[next];
+        var request = ++_focusRequest;
+        ApplyFocus(zone, next, request, attempt: 0);
+    }
+
+    /// <summary>
+    /// Re-applies keyboard focus for the current logical focus target. Screens
+    /// are focused immediately when they are pushed, before WPF has completed
+    /// layout, so <see cref="UIElement.Focus()"/> can return false and no focus
+    /// ring is drawn until the next key press. The shell calls this again after
+    /// the new screen finished loading.
+    /// </summary>
+    public void RefocusActive()
+    {
+        if (ActiveZone is { } zone && zone.Items.Count > 0) FocusZone(zone, ActiveIndex);
+        else FocusInitial();
+    }
+
+    private void ApplyFocus(TvZone zone, int index, int request, int attempt)
+    {
+        if (request != _focusRequest || !ReferenceEquals(ActiveZone, zone) || ActiveIndex != index) return;
+        if (index < 0 || index >= zone.Items.Count) return;
+        var item = zone.Items[index];
         item.BringIntoView();
-        item.Focus();
-        zone.OnFocusChanged?.Invoke(next);
+        if (item.Focus())
+        {
+            zone.OnFocusChanged?.Invoke(index);
+            return;
+        }
+        if (attempt >= 2)
+        {
+            // Give up after layout/input retries; the next remote key will focus it.
+            zone.OnFocusChanged?.Invoke(index);
+            return;
+        }
+        var priority = attempt == 0 ? DispatcherPriority.Loaded : DispatcherPriority.Input;
+        Dispatcher.BeginInvoke(priority, new Action(() => ApplyFocus(zone, index, request, attempt + 1)));
     }
 
     protected bool Move(TvInputAction direction)
