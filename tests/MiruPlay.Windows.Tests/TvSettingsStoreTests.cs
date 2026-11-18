@@ -33,6 +33,9 @@ public sealed class TvSettingsStoreTests : IDisposable
         Assert.Equal("general", settings.TvRemotePreset);
         Assert.Equal("system", settings.TvVolumeKeyTarget);
         Assert.Equal(2000, settings.TvExitLongPressMs);
+        Assert.True(settings.TvGamepadEnabled);
+        Assert.Equal(50, settings.TvGamepadDeadzonePercent);
+        Assert.Equal("xbox", settings.TvGamepadFaceLayout);
     }
 
     [Fact]
@@ -51,6 +54,8 @@ public sealed class TvSettingsStoreTests : IDisposable
         Assert.Equal(1000, settings.TvExitLongPressMs);
         Assert.Equal("system", settings.TvVolumeKeyTarget);
         Assert.True(settings.TvModeEnabled);
+        Assert.Equal(50, settings.TvGamepadDeadzonePercent);
+        Assert.Equal("xbox", settings.TvGamepadFaceLayout);
     }
 
     [Fact]
@@ -64,6 +69,9 @@ public sealed class TvSettingsStoreTests : IDisposable
             TvRemotePreset: "mce",
             TvUiScalePercent: 125,
             TvExitLongPressMs: 3000,
+            TvGamepadEnabled: false,
+            TvGamepadDeadzonePercent: 70,
+            TvGamepadFaceLayout: "nintendo",
             TvClockVisible: false,
             TvSoundFeedback: false,
             TvVolumeKeyTarget: "application"));
@@ -74,6 +82,9 @@ public sealed class TvSettingsStoreTests : IDisposable
         Assert.Equal("mce", settings.TvRemotePreset);
         Assert.Equal(125, settings.TvUiScalePercent);
         Assert.Equal(3000, settings.TvExitLongPressMs);
+        Assert.False(settings.TvGamepadEnabled);
+        Assert.Equal(70, settings.TvGamepadDeadzonePercent);
+        Assert.Equal("nintendo", settings.TvGamepadFaceLayout);
         Assert.False(settings.TvClockVisible);
         Assert.False(settings.TvSoundFeedback);
         Assert.Equal("application", settings.TvVolumeKeyTarget);

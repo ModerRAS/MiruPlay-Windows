@@ -38,6 +38,9 @@ public sealed record AppSettings(
     string TvRemotePreset = "general",
     string TvVolumeKeyTarget = "system",
     int TvExitLongPressMs = 2000,
+    bool TvGamepadEnabled = true,
+    int TvGamepadDeadzonePercent = 50,
+    string TvGamepadFaceLayout = "xbox",
     string AudioBalance = "off");
 
 public sealed class AppSettingsStore
@@ -133,6 +136,10 @@ public sealed class AppSettingsStore
             var normalizedTvScale = settings.TvUiScalePercent is 100 or 125 or 150 ? settings.TvUiScalePercent : 100;
             var normalizedTvVolumeTarget = settings.TvVolumeKeyTarget is "system" or "application" ? settings.TvVolumeKeyTarget : "system";
             var normalizedTvExitHold = Math.Clamp(settings.TvExitLongPressMs, 1000, 5000);
+            var normalizedGamepadDeadzone = settings.TvGamepadDeadzonePercent is >= 20 and <= 80
+                ? settings.TvGamepadDeadzonePercent
+                : 50;
+            var normalizedGamepadLayout = TvGamepadFaceLayouts.Normalize(settings.TvGamepadFaceLayout);
             var normalizedBalance = NormalizeAudioBalance(settings.AudioBalance);
             if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate ||
                 settings.AppLanguage != normalizedLanguage ||

@@ -11,7 +11,8 @@ param(
     [string]$CertificatePassword,
     [string]$TimestampUrl = 'http://timestamp.digicert.com',
     [switch]$SkipInstaller,
-    [switch]$SkipLibMpvDownload
+    [switch]$SkipLibMpvDownload,
+    [switch]$SkipSdl3Download
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,6 +24,8 @@ $publishDirectory = Join-Path $artifacts "publish\$RuntimeIdentifier\MiruPlay"
 $symbolsDirectory = Join-Path $artifacts "symbols\$RuntimeIdentifier"
 $libMpvDirectory = Join-Path $root 'runtime\libmpv'
 $libMpvPath = Join-Path $libMpvDirectory 'libmpv-2.dll'
+$sdl3Directory = Join-Path $root 'runtime\sdl3'
+$sdl3Path = Join-Path $sdl3Directory 'SDL3.dll'
 $project = Join-Path $root 'src\MiruPlay.Windows\MiruPlay.Windows.csproj'
 $installerScript = Join-Path $root 'installer\MiruPlay.iss'
 
@@ -146,12 +149,31 @@ if ($actualLibMpvHash -ne $expectedLibMpvHash) {
     throw "libmpv runtime digest mismatch: $actualLibMpvHash"
 }
 
+if (-not (Test-Path $sdl3Path)) {
+    if ($SkipSdl3Download) { throw "SDL3 runtime is missing: $sdl3Path" }
+    Invoke-Checked { & (Join-Path $PSScriptRoot 'Get-Sdl3Runtime.ps1') -Destination $sdl3Directory } 'SDL3 runtime download failed'
+}
+$expectedSdl3Hash = '66844f10251cc1c10619ed5d8e4e3224f564900ee6d69ba87d63de782addae40'
+$actualSdl3Hash = (Get-FileHash -Algorithm SHA256 $sdl3Path).Hash.ToLowerInvariant()
+if ($actualSdl3Hash -ne $expectedSdl3Hash) {
+    throw "SDL3 runtime digest mismatch: $actualSdl3Hash"
+}
+
 Remove-Item $publishDirectory, $symbolsDirectory, $releaseDirectory -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $publishDirectory, $symbolsDirectory, $releaseDirectory | Out-Null
 
 Invoke-Checked {
     dotnet publish $project -c Release -r $RuntimeIdentifier --self-contained true -p:Version=$Version -p:PublishTrimmed=false -o $publishDirectory
 } 'dotnet publish failed'
+
+$publishedSdl3Path = Join-Path $publishDirectory 'runtime\sdl3\SDL3.dll'
+if (-not (Test-Path $publishedSdl3Path)) {
+    throw "SDL3 runtime was not copied into the publish output: $publishedSdl3Path"
+}
+$publishedSdl3Hash = (Get-FileHash -Algorithm SHA256 $publishedSdl3Path).Hash.ToLowerInvariant()
+if ($publishedSdl3Hash -ne $actualSdl3Hash) {
+    throw "Published SDL3 runtime digest mismatch: $publishedSdl3Hash"
+}
 
 foreach ($file in @('LICENSE', 'README.md', 'THIRD-PARTY-NOTICES.md')) {
     Copy-Item (Join-Path $root $file) $publishDirectory
@@ -204,6 +226,12 @@ $manifest = [ordered]@{
         library = 'runtime/libmpv/libmpv-2.dll'
         librarySha256 = $actualLibMpvHash
         distribution = 'shinchiro/mpv-winbuild-cmake'
+    }
+    sdl3 = [ordered]@{
+        version = '3.4.20'
+        library = 'runtime/sdl3/SDL3.dll'
+        librarySha256 = $actualSdl3Hash
+        distribution = 'libsdl-org/SDL'
     }
 }
 $manifestPath = Join-Path $releaseDirectory 'release-manifest.json'

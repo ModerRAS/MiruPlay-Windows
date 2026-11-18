@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using MiruPlay.Windows.Services;
 using MiruPlay.Windows.Models;
 
@@ -14,6 +15,9 @@ public sealed class TvSettingsScreen : TvScreenBase
     private readonly TvShellWindow _shell;
     private readonly StackPanel _list = new() { Margin = new Thickness(0, 0, 0, 40) };
     private readonly List<SettingRow> _rows = [];
+    private readonly DispatcherTimer _statusTimer;
+    private SettingRow? _gamepadStatusRow;
+    private TextBlock? _gamepadWarningText;
     private TvZone? _zone;
 
     public TvSettingsScreen(TvAppContext context, TvShellWindow shell)
@@ -39,12 +43,74 @@ public sealed class TvSettingsScreen : TvScreenBase
         content.Children.Add(_list);
         scroll.Content = content;
         Content = scroll;
+        _statusTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(1) };
+        _statusTimer.Tick += (_, _) => UpdateGamepadStatus();
         Build();
     }
 
     public override TvScreenId Id => TvScreenId.Settings;
 
     public override string HintText => AppStrings.Get("tv.hint.settings");
+
+    public override bool HandleAction(TvInputAction action)
+    {
+        if (action is TvInputAction.Left or TvInputAction.Right && ActiveZone is { } zone && zone.Id == "settings")
+        {
+            var focusables = _rows.Where(row => row.Focusable).ToList();
+            if (ActiveIndex >= 0 && ActiveIndex < focusables.Count)
+            {
+                var row = focusables[ActiveIndex];
+                row.Adjust(action == TvInputAction.Right ? 1 : -1);
+                row.ValueText.Text = row.Value();
+                return true;
+            }
+        }
+        return base.HandleAction(action);
+    }
+
+    public override void OnActivated(string? focusKey)
+    {
+        base.OnActivated(focusKey);
+        UpdateGamepadStatus();
+        _statusTimer.Start();
+    }
+
+    public override string? OnDeactivating()
+    {
+        _statusTimer.Stop();
+        return base.OnDeactivating();
+    }
+
+    private static string GamepadStatusTextFor(TvGamepadStatus status) => status.Demo
+        ? AppStrings.Get("tv.settings.gamepadStatusDemo")
+        : status.Connected
+            ? status.ActiveBackend == "SDL3"
+                ? AppStrings.Get("tv.settings.gamepadStatusActiveSdl", status.DeviceName ?? "SDL3")
+                : AppStrings.Get("tv.settings.gamepadStatusActiveXInput")
+            : status.Sdl3InitFailed
+                ? AppStrings.Get("tv.settings.gamepadStatusXInputFallback")
+                : AppStrings.Get("tv.settings.gamepadStatusDisconnected");
+
+    private string GamepadStatusText() => GamepadStatusTextFor(_shell.GamepadStatus);
+
+    private void UpdateGamepadStatus()
+    {
+        if (_gamepadStatusRow is null) return;
+        var status = _shell.GamepadStatus;
+        _gamepadStatusRow.ValueText.Text = GamepadStatusTextFor(status);
+        if (_gamepadWarningText is null) return;
+        if (status.Sdl3InitFailed)
+        {
+            _gamepadWarningText.Text = AppStrings.Get(
+                "tv.settings.gamepadWarningSdlInitFailed",
+                status.Sdl3Error ?? AppStrings.Get("tv.settings.gamepadBackendValue"));
+            _gamepadWarningText.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _gamepadWarningText.Visibility = Visibility.Collapsed;
+        }
+    }
 
     public override bool FocusInitial()
     {
@@ -75,6 +141,20 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddRow("startMode", "tv.settings.startTvMode", () => Bool(_context.Settings.TvModeEnabled), _ => Toggle(settings => settings with { TvModeEnabled = !settings.TvModeEnabled }));
         AddRow("preset", "tv.settings.remotePreset", () => ValuePreset(), step => ChangePreset());
         AddRow("exitHold", "tv.settings.exitHold", () => AppStrings.Get("tv.settings.exitHoldValue", _context.Settings.TvExitLongPressMs), step => ChangeExitHold(step));
+        AddRow("gamepad", "tv.settings.gamepad", () => Bool(_context.Settings.TvGamepadEnabled), _ => Toggle(settings => settings with { TvGamepadEnabled = !settings.TvGamepadEnabled }));
+        AddRow("gamepadDeadzone", "tv.settings.gamepadDeadzone", () => AppStrings.Get("tv.settings.gamepadDeadzoneValue", _context.Settings.TvGamepadDeadzonePercent), step => ChangeGamepadDeadzone(step));
+        AddRow("gamepadLayout", "tv.settings.gamepadLayout", () => ValueGamepadLayout(), _ => ChangeGamepadLayout());
+        _gamepadStatusRow = AddInfoRow("gamepadBackend", "tv.settings.gamepadBackend", GamepadStatusText());
+        _gamepadWarningText = new TextBlock
+        {
+            FontSize = 15,
+            Foreground = (Brush)FindResource("TvDangerBrush"),
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(2, 2, 2, 10),
+            Visibility = Visibility.Collapsed,
+        };
+        _list.Children.Add(_gamepadWarningText);
+        AddHintRow("tv.settings.gamepadHint");
         AddRow("clock", "tv.settings.clock", () => Bool(_context.Settings.TvClockVisible), _ => Toggle(settings => settings with { TvClockVisible = !settings.TvClockVisible }));
         AddRow("sound", "tv.settings.sound", () => Bool(_context.Settings.TvSoundFeedback), _ => Toggle(settings => settings with { TvSoundFeedback = !settings.TvSoundFeedback }));
         AddGroup("tv.settings.group.source");
@@ -92,6 +172,18 @@ public sealed class TvSettingsScreen : TvScreenBase
         _zone = new TvZone("settings", TvZoneKind.Vertical, items, onFocusChanged: index => items[index].BringIntoView());
         RegisterZone(_zone);
         if (ActiveZone is null) FocusInitial();
+    }
+
+    private void AddHintRow(string textKey)
+    {
+        _list.Children.Add(new TextBlock
+        {
+            Text = AppStrings.Get(textKey),
+            FontSize = 15,
+            Foreground = (Brush)FindResource("TvTextMutedBrush"),
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(2, 2, 2, 10),
+        });
     }
 
     private void AddGroup(string titleKey)
@@ -136,7 +228,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         _rows.Add(settingRow);
     }
 
-    private void AddInfoRow(string id, string labelKey, string value)
+    private SettingRow AddInfoRow(string id, string labelKey, string value)
     {
         var valueText = new TextBlock
         {
@@ -162,7 +254,9 @@ public sealed class TvSettingsScreen : TvScreenBase
         };
         row.Click += (_, _) => _shell.ShowToast(AppStrings.Get("tv.settings.phoneHint"));
         _list.Children.Add(row);
-        _rows.Add(new SettingRow(id, row, valueText, () => valueText.Text, _ => { }, Focusable: true));
+        var settingRow = new SettingRow(id, row, valueText, () => valueText.Text, _ => { }, Focusable: true);
+        _rows.Add(settingRow);
+        return settingRow;
     }
 
     private static Grid BuildRowContent(string labelKey, TextBlock valueText)
@@ -217,6 +311,31 @@ public sealed class TvSettingsScreen : TvScreenBase
         _context.SaveSettings(_context.Settings with { TvRemotePreset = next });
         RefreshValues();
         _shell.ShowToast(AppStrings.Get("tv.settings.restartHint"));
+    }
+
+    private void ChangeGamepadLayout()
+    {
+        var current = TvGamepadFaceLayouts.Normalize(_context.Settings.TvGamepadFaceLayout);
+        var next = current == "xbox" ? "nintendo" : "xbox";
+        _context.SaveSettings(_context.Settings with { TvGamepadFaceLayout = next });
+        _shell.OnTvSettingsChanged();
+        RefreshValues();
+    }
+
+    private string ValueGamepadLayout() =>
+        AppStrings.Get(TvGamepadFaceLayouts.Normalize(_context.Settings.TvGamepadFaceLayout) == "nintendo"
+            ? "tv.settings.gamepadLayoutNintendo"
+            : "tv.settings.gamepadLayoutXbox");
+
+    private void ChangeGamepadDeadzone(int step)
+    {
+        var values = new[] { 20, 30, 40, 50, 60, 70, 80 };
+        var index = Array.IndexOf(values, _context.Settings.TvGamepadDeadzonePercent);
+        if (index < 0) index = 3;
+        index = Math.Clamp(index + step, 0, values.Length - 1);
+        _context.SaveSettings(_context.Settings with { TvGamepadDeadzonePercent = values[index] });
+        _shell.OnTvSettingsChanged();
+        RefreshValues();
     }
 
     private void ChangeExitHold(int step)

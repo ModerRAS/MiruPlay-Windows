@@ -81,12 +81,22 @@ try {
         'THIRD-PARTY-NOTICES.md',
         'release-manifest.json',
         'runtime\libmpv\libmpv-2.dll',
+        'runtime\sdl3\SDL3.dll',
         'licenses\NuGet-Packages.json',
         'licenses\Apache-2.0.txt',
         'licenses\mpv-Copyright.txt'
     )) {
         if (-not (Test-Path (Join-Path $portableDirectory $required))) { throw "Portable package is missing $required" }
     }
+    if (-not $manifest.sdl3) { throw 'release-manifest.json is missing the SDL3 runtime metadata section.' }
+    if ($manifest.sdl3.version -ne '3.4.20') { throw "Unexpected SDL3 version in manifest: $($manifest.sdl3.version)" }
+    if ($manifest.sdl3.library -ne 'runtime/sdl3/SDL3.dll') { throw "Unexpected SDL3 manifest path: $($manifest.sdl3.library)" }
+    if ($manifest.sdl3.distribution -ne 'libsdl-org/SDL') { throw "Unexpected SDL3 distribution: $($manifest.sdl3.distribution)" }
+    if ($manifest.sdl3.librarySha256.Length -ne 64 -or $manifest.sdl3.librarySha256 -match '[^0-9a-f]') { throw 'SDL3 manifest digest is not a lowercase SHA-256.' }
+    $portableSdl3 = Join-Path $portableDirectory 'runtime\sdl3\SDL3.dll'
+    $portableSdl3Hash = (Get-FileHash $portableSdl3 -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($portableSdl3Hash -ne $manifest.sdl3.librarySha256) { throw 'Portable SDL3 runtime digest does not match release-manifest.json.' }
+
     $portableMpvFiles = @(Get-ChildItem $portableDirectory -Filter 'mpv.exe' -File -Recurse)
     if ((Test-Path (Join-Path $portableDirectory 'runtime\mpv')) -or $portableMpvFiles.Count -gt 0) {
         throw 'Portable package contains the removed external mpv runtime.'
@@ -106,6 +116,7 @@ try {
         $installedExecutable = Join-Path $installDirectory 'MiruPlay.exe'
         if (-not (Test-Path $installedExecutable)) { throw 'Silent installation did not install MiruPlay.exe.' }
         if (-not (Test-Path (Join-Path $installDirectory 'runtime\libmpv\libmpv-2.dll'))) { throw 'Silent installation did not install the libmpv runtime.' }
+        if (-not (Test-Path (Join-Path $installDirectory 'runtime\sdl3\SDL3.dll'))) { throw 'Silent installation did not install the SDL3 runtime.' }
         $installedMpvFiles = @(Get-ChildItem $installDirectory -Filter 'mpv.exe' -File -Recurse)
         if ((Test-Path (Join-Path $installDirectory 'runtime\mpv')) -or $installedMpvFiles.Count -gt 0) {
             throw 'Installed package contains the removed external mpv runtime.'
