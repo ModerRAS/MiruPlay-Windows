@@ -4,6 +4,7 @@ public enum TvScreenId
 {
     Home,
     Library,
+    Season,
     Search,
     Settings,
     Detail,

@@ -1456,5 +1456,20 @@
   "tv.settings.gamepadStatusActiveXInput": {"zh-CN":"XInput（当前）","zh-TW":"XInput（当前）","zh-HK":"XInput（当前）","en-US":"XInput (active)","en-GB":"XInput (active)"},
   "tv.settings.gamepadStatusXInputFallback": {"zh-CN":"XInput（SDL3 初始化失败）","zh-TW":"XInput（SDL3 初始化失败）","zh-HK":"XInput（SDL3 初始化失败）","en-US":"XInput (SDL3 init failed)","en-GB":"XInput (SDL3 init failed)"},
   "tv.settings.gamepadStatusDisconnected": {"zh-CN":"未连接手柄","zh-TW":"未连接手柄","zh-HK":"未连接手柄","en-US":"No gamepad connected","en-GB":"No gamepad connected"},
-  "tv.settings.gamepadWarningSdlInitFailed": {"zh-CN":"SDL3 初始化失败，已回退 XInput：{0}","zh-TW":"SDL3 初始化失败，已回退 XInput：{0}","zh-HK":"SDL3 初始化失败，已回退 XInput：{0}","en-US":"SDL3 initialization failed; using XInput: {0}","en-GB":"SDL3 initialization failed; using XInput: {0}"}
+  "tv.settings.gamepadWarningSdlInitFailed": {"zh-CN":"SDL3 初始化失败，已回退 XInput：{0}","zh-TW":"SDL3 初始化失败，已回退 XInput：{0}","zh-HK":"SDL3 初始化失败，已回退 XInput：{0}","en-US":"SDL3 initialization failed; using XInput: {0}","en-GB":"SDL3 initialization failed; using XInput: {0}"},
+  "tv.nav.season": {"zh-CN":"新番","zh-TW":"新番","zh-HK":"新番","en-US":"Seasons","en-GB":"Seasons"},
+  "tv.season.title": {"zh-CN":"新番","zh-TW":"新番","zh-HK":"新番","en-US":"New Seasons","en-GB":"New Seasons"},
+  "tv.season.summary": {"zh-CN":"共 {0} 部 · 按播出季分组","zh-TW":"共 {0} 部 · 按播出季分组","zh-HK":"共 {0} 部 · 按播出季分组","en-US":"{0} titles · grouped by broadcast season","en-GB":"{0} titles · grouped by broadcast season"},
+  "tv.season.group": {"zh-CN":"{0}年{1}月新番","zh-TW":"{0}年{1}月新番","zh-HK":"{0}年{1}月新番","en-US":"{0} · {1}月季","en-GB":"{0} · {1}月季"},
+  "tv.season.unknown": {"zh-CN":"未识别播出日期","zh-TW":"未识别播出日期","zh-HK":"未识别播出日期","en-US":"Unknown air date","en-GB":"Unknown air date"},
+  "tv.season.empty": {"zh-CN":"暂无作品","zh-TW":"暂无作品","zh-HK":"暂无作品","en-US":"No titles yet","en-GB":"No titles yet"},
+  "tv.hint.season": {"zh-CN":"←→ 选择  ↑↓ 换行  OK 详情  Back 返回","zh-TW":"←→ 选择  ↑↓ 换行  OK 详情  Back 返回","zh-HK":"←→ 选择  ↑↓ 换行  OK 详情  Back 返回","en-US":"←→ Select   ↑↓ Rows   OK Details   Back","en-GB":"←→ Select   ↑↓ Rows   OK Details   Back"},
+  "tv.season.weekday.monday": {"zh-CN":"星期一","zh-TW":"星期一","zh-HK":"星期一","en-US":"Monday","en-GB":"Monday"},
+  "tv.season.weekday.tuesday": {"zh-CN":"星期二","zh-TW":"星期二","zh-HK":"星期二","en-US":"Tuesday","en-GB":"Tuesday"},
+  "tv.season.weekday.wednesday": {"zh-CN":"星期三","zh-TW":"星期三","zh-HK":"星期三","en-US":"Wednesday","en-GB":"Wednesday"},
+  "tv.season.weekday.thursday": {"zh-CN":"星期四","zh-TW":"星期四","zh-HK":"星期四","en-US":"Thursday","en-GB":"Thursday"},
+  "tv.season.weekday.friday": {"zh-CN":"星期五","zh-TW":"星期五","zh-HK":"星期五","en-US":"Friday","en-GB":"Friday"},
+  "tv.season.weekday.saturday": {"zh-CN":"星期六","zh-TW":"星期六","zh-HK":"星期六","en-US":"Saturday","en-GB":"Saturday"},
+  "tv.season.weekday.sunday": {"zh-CN":"星期日","zh-TW":"星期日","zh-HK":"星期日","en-US":"Sunday","en-GB":"Sunday"},
+  "tv.season.weekday.unknown": {"zh-CN":"未知星期","zh-TW":"未知星期","zh-HK":"未知星期","en-US":"Unknown weekday","en-GB":"Unknown weekday"}
 }

@@ -1457,4 +1457,19 @@
   <data name="tv.settings.gamepadStatusXInputFallback" xml:space="preserve"><value>XInput（SDL3 初始化失败）</value></data>
   <data name="tv.settings.gamepadStatusDisconnected" xml:space="preserve"><value>未连接手柄</value></data>
   <data name="tv.settings.gamepadWarningSdlInitFailed" xml:space="preserve"><value>SDL3 初始化失败，已回退 XInput：{0}</value></data>
+  <data name="tv.nav.season" xml:space="preserve"><value>新番</value></data>
+  <data name="tv.season.title" xml:space="preserve"><value>新番</value></data>
+  <data name="tv.season.summary" xml:space="preserve"><value>共 {0} 部 · 按播出季分组</value></data>
+  <data name="tv.season.group" xml:space="preserve"><value>{0}年{1}月新番</value></data>
+  <data name="tv.season.unknown" xml:space="preserve"><value>未识别播出日期</value></data>
+  <data name="tv.season.empty" xml:space="preserve"><value>暂无作品</value></data>
+  <data name="tv.hint.season" xml:space="preserve"><value>←→ 选择  ↑↓ 换行  OK 详情  Back 返回</value></data>
+  <data name="tv.season.weekday.monday" xml:space="preserve"><value>星期一</value></data>
+  <data name="tv.season.weekday.tuesday" xml:space="preserve"><value>星期二</value></data>
+  <data name="tv.season.weekday.wednesday" xml:space="preserve"><value>星期三</value></data>
+  <data name="tv.season.weekday.thursday" xml:space="preserve"><value>星期四</value></data>
+  <data name="tv.season.weekday.friday" xml:space="preserve"><value>星期五</value></data>
+  <data name="tv.season.weekday.saturday" xml:space="preserve"><value>星期六</value></data>
+  <data name="tv.season.weekday.sunday" xml:space="preserve"><value>星期日</value></data>
+  <data name="tv.season.weekday.unknown" xml:space="preserve"><value>未知星期</value></data>
 </root>
