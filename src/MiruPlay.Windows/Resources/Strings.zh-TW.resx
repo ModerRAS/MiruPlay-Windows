@@ -1472,4 +1472,17 @@
   <data name="tv.season.weekday.saturday" xml:space="preserve"><value>星期六</value></data>
   <data name="tv.season.weekday.sunday" xml:space="preserve"><value>星期日</value></data>
   <data name="tv.season.weekday.unknown" xml:space="preserve"><value>未知星期</value></data>
+  <data name="tv.nav.schedule" xml:space="preserve"><value>时间表</value></data>
+  <data name="tv.schedule.title" xml:space="preserve"><value>新番时间表</value></data>
+  <data name="tv.schedule.lastWeek" xml:space="preserve"><value>上周</value></data>
+  <data name="tv.schedule.thisWeek" xml:space="preserve"><value>本周</value></data>
+  <data name="tv.schedule.nextWeek" xml:space="preserve"><value>下周</value></data>
+  <data name="tv.schedule.today" xml:space="preserve"><value>今天</value></data>
+  <data name="tv.schedule.notInLibrary" xml:space="preserve"><value>「{0}」未在媒体库中</value></data>
+  <data name="tv.schedule.loading" xml:space="preserve"><value>正在加载 Bangumi 日历…</value></data>
+  <data name="tv.schedule.stale" xml:space="preserve"><value>网络不可用，显示上次缓存的日历</value></data>
+  <data name="tv.schedule.error" xml:space="preserve"><value>日历加载失败：{0}（按 OK 重试）</value></data>
+  <data name="tv.schedule.emptyDay" xml:space="preserve"><value>今天没有新番</value></data>
+  <data name="tv.schedule.emptyWeek" xml:space="preserve"><value>这一周暂无新番</value></data>
+  <data name="tv.hint.schedule" xml:space="preserve"><value>←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回</value></data>
 </root>

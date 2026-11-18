@@ -1471,5 +1471,18 @@
   "tv.season.weekday.friday": {"zh-CN":"星期五","zh-TW":"星期五","zh-HK":"星期五","en-US":"Friday","en-GB":"Friday"},
   "tv.season.weekday.saturday": {"zh-CN":"星期六","zh-TW":"星期六","zh-HK":"星期六","en-US":"Saturday","en-GB":"Saturday"},
   "tv.season.weekday.sunday": {"zh-CN":"星期日","zh-TW":"星期日","zh-HK":"星期日","en-US":"Sunday","en-GB":"Sunday"},
-  "tv.season.weekday.unknown": {"zh-CN":"未知星期","zh-TW":"未知星期","zh-HK":"未知星期","en-US":"Unknown weekday","en-GB":"Unknown weekday"}
+  "tv.season.weekday.unknown": {"zh-CN":"未知星期","zh-TW":"未知星期","zh-HK":"未知星期","en-US":"Unknown weekday","en-GB":"Unknown weekday"},
+  "tv.nav.schedule": {"zh-CN":"时间表","zh-TW":"时间表","zh-HK":"时间表","en-US":"Schedule","en-GB":"Schedule"},
+  "tv.schedule.title": {"zh-CN":"新番时间表","zh-TW":"新番时间表","zh-HK":"新番时间表","en-US":"Anime schedule","en-GB":"Anime schedule"},
+  "tv.schedule.lastWeek": {"zh-CN":"上周","zh-TW":"上周","zh-HK":"上周","en-US":"Last week","en-GB":"Last week"},
+  "tv.schedule.thisWeek": {"zh-CN":"本周","zh-TW":"本周","zh-HK":"本周","en-US":"This week","en-GB":"This week"},
+  "tv.schedule.nextWeek": {"zh-CN":"下周","zh-TW":"下周","zh-HK":"下周","en-US":"Next week","en-GB":"Next week"},
+  "tv.schedule.today": {"zh-CN":"今天","zh-TW":"今天","zh-HK":"今天","en-US":"Today","en-GB":"Today"},
+  "tv.schedule.notInLibrary": {"zh-CN":"「{0}」未在媒体库中","zh-TW":"「{0}」未在媒体库中","zh-HK":"「{0}」未在媒体库中","en-US":"\"{0}\" is not in your library","en-GB":"\"{0}\" is not in your library"},
+  "tv.schedule.loading": {"zh-CN":"正在加载 Bangumi 日历…","zh-TW":"正在加载 Bangumi 日历…","zh-HK":"正在加载 Bangumi 日历…","en-US":"Loading the Bangumi calendar…","en-GB":"Loading the Bangumi calendar…"},
+  "tv.schedule.stale": {"zh-CN":"网络不可用，显示上次缓存的日历","zh-TW":"网络不可用，显示上次缓存的日历","zh-HK":"网络不可用，显示上次缓存的日历","en-US":"Offline: showing the cached calendar","en-GB":"Offline: showing the cached calendar"},
+  "tv.schedule.error": {"zh-CN":"日历加载失败：{0}（按 OK 重试）","zh-TW":"日历加载失败：{0}（按 OK 重试）","zh-HK":"日历加载失败：{0}（按 OK 重试）","en-US":"Calendar failed to load: {0} (press OK to retry)","en-GB":"Calendar failed to load: {0} (press OK to retry)"},
+  "tv.schedule.emptyDay": {"zh-CN":"今天没有新番","zh-TW":"今天没有新番","zh-HK":"今天没有新番","en-US":"No titles today","en-GB":"No titles today"},
+  "tv.schedule.emptyWeek": {"zh-CN":"这一周暂无新番","zh-TW":"这一周暂无新番","zh-HK":"这一周暂无新番","en-US":"No titles this week","en-GB":"No titles this week"},
+  "tv.hint.schedule": {"zh-CN":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","zh-TW":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","zh-HK":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","en-US":"←→ Week/Title   ↑↓ Weekday   OK Details   Back","en-GB":"←→ Week/Title   ↑↓ Weekday   OK Details   Back"}
 }

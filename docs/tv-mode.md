@@ -52,6 +52,10 @@
 
 侧边栏「新番」按本地库 `AirDate` 做两级分组：季（Android 语义 1/4/7/9 月桶，年降序→季月降序）→ 更新星期（周一…周日，未知最后）。`TvReleaseSeason` 只服务 TV 层，不改桌面 `LibraryOrganization`；同日按标题升序，无法解析日期的作品归「未识别播出日期」。海报解码在后台线程完成，避免 S: 图库阻塞 UI。
 
+## 时间表
+
+侧边栏「时间表」= Bangumi 公开日历（`https://api.bgm.tv/calendar`）的上周/本周/下周视图：按周一起算，每天一行海报；未来开播日期晚于当周周末的作品过滤；今天行高亮；点击按 Bangumi id 匹配本地库，命中进详情，否则 toast「未在媒体库中」。内存 + `%LOCALAPPDATA%/MiruPlay/cache/bangumi-calendar.json` 缓存 1 小时，离线用过期缓存并提示，按 OK 重试；网络走现有 `OutboundHttpProxy` 代理配置。
+
 ## 手柄输入
 
 电视模式支持 XInput（Xbox 系）与 SDL3（DualSense/DualShock/Switch Pro/8BitDo 等 HID 手柄）两种后端，SDL3 优先、XInput 兜底；映射/设置/支持矩阵见 [tv-gamepad.md](tv-gamepad.md)。`--tv-pad-demo` 可在无实体手柄时演示。

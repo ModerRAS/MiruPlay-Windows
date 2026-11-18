@@ -1468,7 +1468,20 @@ const I18N = {
   "tv.season.weekday.friday": "星期五",
   "tv.season.weekday.saturday": "星期六",
   "tv.season.weekday.sunday": "星期日",
-  "tv.season.weekday.unknown": "未知星期"
+  "tv.season.weekday.unknown": "未知星期",
+  "tv.nav.schedule": "时间表",
+  "tv.schedule.title": "新番时间表",
+  "tv.schedule.lastWeek": "上周",
+  "tv.schedule.thisWeek": "本周",
+  "tv.schedule.nextWeek": "下周",
+  "tv.schedule.today": "今天",
+  "tv.schedule.notInLibrary": "「{0}」未在媒体库中",
+  "tv.schedule.loading": "正在加载 Bangumi 日历…",
+  "tv.schedule.stale": "网络不可用，显示上次缓存的日历",
+  "tv.schedule.error": "日历加载失败：{0}（按 OK 重试）",
+  "tv.schedule.emptyDay": "今天没有新番",
+  "tv.schedule.emptyWeek": "这一周暂无新番",
+  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -2938,7 +2951,20 @@ const I18N = {
   "tv.season.weekday.friday": "星期五",
   "tv.season.weekday.saturday": "星期六",
   "tv.season.weekday.sunday": "星期日",
-  "tv.season.weekday.unknown": "未知星期"
+  "tv.season.weekday.unknown": "未知星期",
+  "tv.nav.schedule": "时间表",
+  "tv.schedule.title": "新番时间表",
+  "tv.schedule.lastWeek": "上周",
+  "tv.schedule.thisWeek": "本周",
+  "tv.schedule.nextWeek": "下周",
+  "tv.schedule.today": "今天",
+  "tv.schedule.notInLibrary": "「{0}」未在媒体库中",
+  "tv.schedule.loading": "正在加载 Bangumi 日历…",
+  "tv.schedule.stale": "网络不可用，显示上次缓存的日历",
+  "tv.schedule.error": "日历加载失败：{0}（按 OK 重试）",
+  "tv.schedule.emptyDay": "今天没有新番",
+  "tv.schedule.emptyWeek": "这一周暂无新番",
+  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -4408,7 +4434,20 @@ const I18N = {
   "tv.season.weekday.friday": "星期五",
   "tv.season.weekday.saturday": "星期六",
   "tv.season.weekday.sunday": "星期日",
-  "tv.season.weekday.unknown": "未知星期"
+  "tv.season.weekday.unknown": "未知星期",
+  "tv.nav.schedule": "时间表",
+  "tv.schedule.title": "新番时间表",
+  "tv.schedule.lastWeek": "上周",
+  "tv.schedule.thisWeek": "本周",
+  "tv.schedule.nextWeek": "下周",
+  "tv.schedule.today": "今天",
+  "tv.schedule.notInLibrary": "「{0}」未在媒体库中",
+  "tv.schedule.loading": "正在加载 Bangumi 日历…",
+  "tv.schedule.stale": "网络不可用，显示上次缓存的日历",
+  "tv.schedule.error": "日历加载失败：{0}（按 OK 重试）",
+  "tv.schedule.emptyDay": "今天没有新番",
+  "tv.schedule.emptyWeek": "这一周暂无新番",
+  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -5878,7 +5917,20 @@ const I18N = {
   "tv.season.weekday.friday": "Friday",
   "tv.season.weekday.saturday": "Saturday",
   "tv.season.weekday.sunday": "Sunday",
-  "tv.season.weekday.unknown": "Unknown weekday"
+  "tv.season.weekday.unknown": "Unknown weekday",
+  "tv.nav.schedule": "Schedule",
+  "tv.schedule.title": "Anime schedule",
+  "tv.schedule.lastWeek": "Last week",
+  "tv.schedule.thisWeek": "This week",
+  "tv.schedule.nextWeek": "Next week",
+  "tv.schedule.today": "Today",
+  "tv.schedule.notInLibrary": "\"{0}\" is not in your library",
+  "tv.schedule.loading": "Loading the Bangumi calendar…",
+  "tv.schedule.stale": "Offline: showing the cached calendar",
+  "tv.schedule.error": "Calendar failed to load: {0} (press OK to retry)",
+  "tv.schedule.emptyDay": "No titles today",
+  "tv.schedule.emptyWeek": "No titles this week",
+  "tv.hint.schedule": "←→ Week/Title   ↑↓ Weekday   OK Details   Back"
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -7348,7 +7400,20 @@ const I18N = {
   "tv.season.weekday.friday": "Friday",
   "tv.season.weekday.saturday": "Saturday",
   "tv.season.weekday.sunday": "Sunday",
-  "tv.season.weekday.unknown": "Unknown weekday"
+  "tv.season.weekday.unknown": "Unknown weekday",
+  "tv.nav.schedule": "Schedule",
+  "tv.schedule.title": "Anime schedule",
+  "tv.schedule.lastWeek": "Last week",
+  "tv.schedule.thisWeek": "This week",
+  "tv.schedule.nextWeek": "Next week",
+  "tv.schedule.today": "Today",
+  "tv.schedule.notInLibrary": "\"{0}\" is not in your library",
+  "tv.schedule.loading": "Loading the Bangumi calendar…",
+  "tv.schedule.stale": "Offline: showing the cached calendar",
+  "tv.schedule.error": "Calendar failed to load: {0} (press OK to retry)",
+  "tv.schedule.emptyDay": "No titles today",
+  "tv.schedule.emptyWeek": "No titles this week",
+  "tv.hint.schedule": "←→ Week/Title   ↑↓ Weekday   OK Details   Back"
  }
 };
 let currentLocale = 'zh-CN';
