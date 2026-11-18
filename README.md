@@ -24,7 +24,7 @@ dotnet test MiruPlay.Windows.slnx
 dotnet run --project src/MiruPlay.Windows
 ```
 
-播放优先使用发布包内的 `runtime/libmpv/libmpv-2.dll`。如果内置运行时不可用，本地文件才会交给 Windows 默认视频应用；WebDAV 播放会明确提示内置播放器不可用。开发机可运行 `tools/Get-LibMpvRuntime.ps1` 获取固定版本的 libmpv。`tools/Test-WebDavPlayback.mjs` 可对运行中的客户端执行临时 WebDAV MLIP 导入、鉴权播放、停止、删除和本地库恢复 smoke；`tools/Test-SmbPlayback.mjs` 使用现有 Windows 网络映射执行等价的真实 SMB smoke。
+播放优先使用发布包内的 `runtime/libmpv/libmpv-2.dll`。如果内置运行时不可用，本地文件才会交给 Windows 默认视频应用；WebDAV 播放会明确提示内置播放器不可用。开发机可运行 `tools/Get-LibMpvRuntime.ps1` 获取固定版本的 libmpv；电视模式手柄的 SDL3 后端运行 `tools/Get-Sdl3Runtime.ps1` 获取固定版本的 SDL3（缺失时自动回退 XInput，发布脚本会强制校验/补齐）。`tools/Test-WebDavPlayback.mjs` 可对运行中的客户端执行临时 WebDAV MLIP 导入、鉴权播放、停止、删除和本地库恢复 smoke；`tools/Test-SmbPlayback.mjs` 使用现有 Windows 网络映射执行等价的真实 SMB smoke。
 
 WebControl 默认监听 `9978`。在浏览器打开设置页显示的地址，输入访问令牌即可使用内嵌 WebUI；也可首次使用 `?token=<访问令牌>`，页面会立即移除 URL 参数并将令牌保存在浏览器本地。令牌通过当前 Windows 用户的 DPAPI 加密保存在 `%LOCALAPPDATA%\MiruPlay\web-control-token.bin`。
 

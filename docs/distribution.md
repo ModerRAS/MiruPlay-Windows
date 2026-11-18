@@ -2,10 +2,10 @@
 
 MiruPlay publishes Windows x64 artifacts from one self-contained `.NET 10` publish directory:
 
-- `MiruPlay-<version>-win-x64-portable.zip`: portable application with the .NET runtime and pinned in-process libmpv runtime.
+- `MiruPlay-<version>-win-x64-portable.zip`: portable application with the .NET runtime, pinned in-process libmpv runtime, and the optional pinned SDL3 runtime for the TV-mode gamepad backend.
 - `MiruPlay-<version>-win-x64-setup.exe`: per-user Inno Setup installer. The default directory is `%LOCALAPPDATA%\Programs\MiruPlay`; elevation is not required.
 - `MiruPlay-<version>-win-x64-symbols.zip`: first-party portable PDB files.
-- `release-manifest.json`: build/runtime metadata, signing state, and mpv provenance.
+- `release-manifest.json`: build/runtime metadata, signing state, mpv provenance, and SDL3 provenance.
 - `windows-update.json`: updater-compatible GitHub Release metadata and SHA-256/size for the `*-setup.exe` asset (generated when `-SkipInstaller` is not used).
 - `SHA256SUMS.txt`: SHA-256 for every release artifact and manifest.
 
@@ -15,7 +15,7 @@ The installer removes application files but intentionally preserves user configu
 
 ## Build locally
 
-Requirements: Windows 10/11, .NET 10 SDK, 7-Zip, and Inno Setup 6.
+Requirements: Windows 10/11, .NET 10 SDK, 7-Zip, and Inno Setup 6. The SDL3 runtime is downloaded on demand by `tools/Get-Sdl3Runtime.ps1` (or already present under `runtime/sdl3`).
 
 ```powershell
 winget install --id JRSoftware.InnoSetup --exact --scope user
@@ -25,7 +25,15 @@ winget install --id JRSoftware.InnoSetup --exact --scope user
 
 `Publish-Release.ps1` emits `windows-update.json` beside the downloadable assets. Its `downloadUrl` points to the tag asset for `-GitHubRepository` (default `ModerRAS/MiruPlay-Windows`); host that JSON at a stable URL and configure the same URL in WebControl. `-SkipInstaller` creates a portable-only build and therefore does not emit an update manifest.
 
-`Publish-Release.ps1` downloads the pinned libmpv archive only when the local runtime is missing and verifies its hard-coded SHA-256 value before extraction. Use `-SkipLibMpvDownload` to require a pre-existing runtime, or `-SkipInstaller` for a portable-only developer build.
+`Publish-Release.ps1` downloads the pinned libmpv archive only when the local runtime is missing and verifies its hard-coded SHA-256 value before extraction. The same pattern applies to SDL3:
+
+- Pinned runtime: **SDL 3.4.20** (2026-11-03) from `libsdl-org/SDL`, asset `SDL3-3.4.20-win32-x64.zip`.
+- Archive SHA-256: `368bed8b24e44ad9ea372990814f2343fcfb9e468abb7f8f4a3bc146c7304752`
+- Packaged file: `runtime/sdl3/SDL3.dll` (SHA-256 `66844f10251cc1c10619ed5d8e4e3224f564900ee6d69ba87d63de782addae40`)
+- When the DLL is missing, `Publish-Release.ps1` runs `tools/Get-Sdl3Runtime.ps1` and re-verifies the digest before publishing. Use `-SkipSdl3Download` to require a pre-existing runtime; a missing file then fails the build instead of silently shipping without SDL3.
+- `test-ReleaseArtifacts.ps1` requires `runtime\sdl3\SDL3.dll` in the portable ZIP, after silent installation, and verifies the portable digest against the `sdl3` section of `release-manifest.json`.
+
+Use `-SkipLibMpvDownload` to require a pre-existing libmpv runtime, or `-SkipInstaller` for a portable-only developer build.
 
 ## Signing policy
 
