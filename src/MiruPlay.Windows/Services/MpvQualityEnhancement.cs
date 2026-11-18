@@ -19,9 +19,9 @@ public enum MpvAnime4KPreset
     C,
 }
 
-/// <summary>Frame interpolation mode. v1 ships Off and the built-in mpv frame mixing
-/// (MpvBuiltIn); the RIFE value is reserved for the later optional enhancement pack and
-/// must not be produced or accepted by v1 settings/API normalization until that lands.</summary>
+/// <summary>Frame interpolation mode: Off, built-in mpv frame mixing (MpvBuiltIn) and the
+/// optional RIFE enhancement pack (Rife). RIFE is only effective when the enhancement pack is
+/// installed and has passed its self-test; otherwise playback degrades with a reason.</summary>
 public enum MpvFrameInterpolationMode
 {
     Off,
@@ -34,29 +34,29 @@ public static class MpvFrameInterpolationModes
     public const string Off = "off";
     public const string MpvBuiltIn = "mpv";
 
-    /// <summary>Reserved for the RIFE enhancement pack. Keep the value here so DTOs and
-    /// persisted settings have a stable extension point; v1 does not implement it.</summary>
+    /// <summary>RIFE true frame interpolation via the optional enhancement pack.</summary>
     public const string Rife = "rife";
 
-    /// <summary>Values accepted by v1 settings/API/UI. When the RIFE pack lands, append
-    /// <see cref="Rife"/> here and add its UI option branch.</summary>
-    public static IReadOnlyList<string> SupportedValues { get; } = [Off, MpvBuiltIn];
+    /// <summary>Values accepted by settings/API/UI. RIFE is always selectable; playback
+    /// degrades to plain mpv with an explicit reason when the pack is not ready.</summary>
+    public static IReadOnlyList<string> SupportedValues { get; } = [Off, MpvBuiltIn, Rife];
 
-    /// <summary>Reserved/planned values, exposed for documentation and future API schema
-    /// checks but rejected by v1 validation.</summary>
-    public static IReadOnlyList<string> ReservedValues { get; } = [Rife];
+    /// <summary>No values are reserved any more; kept for API schema compatibility.</summary>
+    public static IReadOnlyList<string> ReservedValues { get; } = [];
 
     public static string Normalize(string? value) => value?.Trim().ToLowerInvariant() switch
     {
         MpvBuiltIn or "mpv_builtin" or "builtin" or "smooth" => MpvBuiltIn,
-        // "rife" is reserved: an older build must safely fall back to off instead of
-        // pretending to run a mode it does not implement.
+        Rife or "rife_ncnn" or "ncnn" => Rife,
         _ => Off,
     };
 
-    public static MpvFrameInterpolationMode Parse(string? value) => Normalize(value) == MpvBuiltIn
-        ? MpvFrameInterpolationMode.MpvBuiltIn
-        : MpvFrameInterpolationMode.Off;
+    public static MpvFrameInterpolationMode Parse(string? value) => Normalize(value) switch
+    {
+        MpvBuiltIn => MpvFrameInterpolationMode.MpvBuiltIn,
+        Rife => MpvFrameInterpolationMode.Rife,
+        _ => MpvFrameInterpolationMode.Off,
+    };
 
     public static string ToStorageValue(MpvFrameInterpolationMode mode) => mode switch
     {
@@ -210,7 +210,11 @@ public sealed record MpvQualityEnhancementStatus(
     string FrameInterpolationMode,
     string ShaderState,
     string? DegradedReasonKey,
-    IReadOnlyList<string> AppliedShaderFiles);
+    IReadOnlyList<string> AppliedShaderFiles,
+    string? RifeState = null,
+    string? RifeDegradedReasonKey = null,
+    int? RifeFactor = null,
+    string? RifeProcessingHeight = null);
 
 /// <summary>Anime4K v4.0.1 official mpv shader files (MIT). The first version ships
 /// the official "Fast/Low-end" chains only; the high-quality VL tier is a later step.</summary>
@@ -403,8 +407,8 @@ public static class MpvQualityEnhancementPlanner
                 arguments.AddRange(InterpolationArguments);
                 break;
             case MpvFrameInterpolationMode.Rife:
-                // Reserved extension point: the RIFE enhancement pack will append its own
-                // arguments/pipeline here. v1 emits nothing so an old build stays safe.
+                // RIFE runs through the vapoursynth filter, which is added as a runtime
+                // command once the enhancement pack plan is available (see LibMpvPlaybackSession).
                 break;
         }
         return arguments;
@@ -464,7 +468,11 @@ public static class MpvQualityEnhancementPlanner
         MpvQualityEnhancementOptions options,
         MpvQualityShaderPlan plan,
         string? shaderStateOverride = null,
-        string? degradedReasonOverride = null) =>
+        string? degradedReasonOverride = null,
+        string? rifeState = null,
+        string? rifeDegradedReasonKey = null,
+        int? rifeFactor = null,
+        string? rifeProcessingHeight = null) =>
         new(
             MpvQualityPresetSettings.ToStorageValue(options.Upscale),
             MpvQualityPresetSettings.ToStorageValue(options.Anime4K),
@@ -473,5 +481,9 @@ public static class MpvQualityEnhancementPlanner
             degradedReasonOverride ?? plan.DegradedReasonKey,
             plan.Decision == MpvQualityShaderDecision.Apply
                 ? plan.ShaderPaths.Select(Path.GetFileName).Where(name => name is not null).Select(name => name!).ToArray()
-                : []);
+                : [],
+            RifeState: rifeState,
+            RifeDegradedReasonKey: rifeDegradedReasonKey,
+            RifeFactor: rifeFactor,
+            RifeProcessingHeight: rifeProcessingHeight);
 }

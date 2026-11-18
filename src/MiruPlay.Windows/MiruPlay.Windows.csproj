@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <AssemblyMetadata Include="Edition" Value="$(Edition)" />
+    <EmbeddedResource Include="..\..\tools\enhance\rife-enhance-manifest.json"
+                      LogicalName="MiruPlay.Windows.rife-enhance-manifest.json" />
     <InternalsVisibleTo Include="MiruPlay.Windows.Tests" />
     <Resource Include="Assets\MiruPlay.ico" />
     <Content Include="Assets\anime_parser\**\*"

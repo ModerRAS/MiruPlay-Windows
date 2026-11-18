@@ -4,6 +4,7 @@ using MiruPlay.Windows.Services;
 
 namespace MiruPlay.Windows.Tests;
 
+[Collection("MpvIntegration")]
 public sealed class MpvPlaybackIntegrationTests : IDisposable
 {
     private readonly string _directory = Path.Combine(Path.GetTempPath(), $"miruplay-mpv-ipc-{Guid.NewGuid():N}");

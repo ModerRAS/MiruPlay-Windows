@@ -9,7 +9,7 @@
 |---|---|---|
 | 缩放质量预设 | off / 低 / 中 / 高 -> mpv scale/cscale/dscale/correct-downscaling/linear-downscaling/sigmoid-upscaling | off（参数与今天完全相同） |
 | Anime4K 预设 | off / A / A+A / B / C -> 官方 v4.0.1 Fast 链（9 个 GLSL 文件，MIT） | off |
-| 插帧方式 | `off` / `mpv`（内置帧混合：video-sync=display-resample + interpolation=yes + tscale=oversample + hwdec-extra-frames=8）；`rife` 为后续增强包预留，v1 不接受 | off |
+| 插帧方式 | `off` / `mpv`（内置帧混合：video-sync=display-resample + interpolation=yes + tscale=oversample + hwdec-extra-frames=8）；`rife`（可选 RIFE 增强包真帧插帧，SDR 限定、需下载/随 full 版提供） | off |
 
 ## 2. 行为与互斥
 
@@ -20,7 +20,7 @@
   Anime4K（缩放/插帧仍生效），原因写入播放状态与诊断。
 - 着色器在 file-loaded 后按内容应用，不在 mpv_initialize 前加载。
 - 资产缺失、选项被运行时拒绝、shader 编译失败都不中断播放：清空 user shader 并回退到内置缩放。
-- 插帧方式为可扩展字符串存储值：v1 支持 `off`、`mpv`；`rife` 已预留为后续增强包的取值，v1 设置/API 会将其安全回退为 off。
+- 插帧方式为可扩展字符串存储值：支持 `off`、`mpv`、`rife`。`rife` 依赖可选增强包（见 [rife-enhancement.md](rife-enhancement.md)）；未安装/自检失败/HDR 直通或 HDR 内容时自动回退普通播放并给出原因，不会中断播放。
 - `mpv` 模式是 mpv 的时间轴重采样/帧混合（smoothmotion 类），不是 MEMC、不是 RIFE 真插帧；
   主要收益是降低 24p 在 60Hz 上的 judder，代价是轻微运动模糊。它需要 display-* 同步与 vsync；
   VFR 内容、VRR/G-Sync 显示器可能使其自动失效（mpv 自动回退，不报错）。
@@ -51,7 +51,7 @@
 
 - 已自动化验证（690 个测试全绿）：选项映射（off 输出与旧版逐字节一致、低/中/高精确参数、插帧参数）、
   Anime4K 预设文件顺序、HDR/直通/资产缺失降级规则、设置归一化与旧 JSON 兼容、
-  WebControl GET/PUT 与非法值 400、插帧方式 off/mpv 与预留 rife 的安全回退、
+  WebControl GET/PUT 与非法值 400、插帧方式 off/mpv/rife 与 RIFE 不可用时的安全回退、
   i18n 五语言（1590 键 x 5）、发布产物校验。
 - 只读 libmpv 探针（固定版 v0.42.0-38-gbcde6b93c，gpu-next + D3D11 + wid）：Anime4K Fast A 链全部
   pass 编译并逐帧执行；ravu compute shader pass 可执行；插帧 display-sync-active=yes；
@@ -68,9 +68,17 @@
 - 未实测：4K/高刷性能、真实 HDR 显示链路上的画质观感、真人内容上的 Anime4K（官方也不建议）。
   需要用户提供片源与 GPU/显示器信息后做 P1 验收。
 
-## 6. 已知限制
+## 6. RIFE 增强包（可选）
+
+- `frameInterpolationMode=rife` 时由可选增强包提供 RIFE 真帧插帧；设置子项 `RifeEnhancement{factor,model,gpuThread,processingHeight}`，默认 2×/4.6/2/auto。
+- 增强包来源：full 版内置 `<install>/runtime/enhance/rife`，或设置页从 GitHub Release 下载到 `%LOCALAPPDATA%/MiruPlay/enhance/rife`；包含便携 VapourSynth + RIFE ncnn 插件/模型 + 许可证。
+- 安装前 SHA-256/大小/逐文件校验，原子替换、失败回滚、磁盘余量检查；安装后运行 VSPipe 480p 自检（阈值保守），按自检结果推荐处理高度（780M 建议 480p）。
+- 运行期失败（VapourSynth 初始化失败、脚本异常、持续掉帧/失步、检测到 HDR 内容）会自动 `vf remove @rife` 回退普通播放，原因写入播放状态与诊断。
+- 细节、性能数据、API 与许可证见 [rife-enhancement.md](rife-enhancement.md)。
+
+## 7. 已知限制
 
 - 仅 SDR 动画使用 Anime4K；不做 HDR 着色器链。
-- 插帧不是运动补偿，不产生真实中间帧；无法替代 SVP/RIFE。
-- 不提供自定义 shader 导入、不下载运行时模型；VapourSynth/RIFE 不随包分发。
+- `mpv` 插帧不是运动补偿，不产生真实中间帧；需要真帧插帧时用可选的 `rife` 增强包。
+- 不提供自定义 shader 导入。VapourSynth/RIFE 仅通过 full 版内置或用户显式下载的增强包提供，不默认随 lite 包分发。
 - 默认全部关闭，避免任何画质/性能回归。

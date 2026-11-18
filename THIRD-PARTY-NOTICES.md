@@ -18,6 +18,22 @@ The matching development archive also supplies the in-process library:
 
 The pinned build includes FFmpeg and other libraries. Their exact configuration and corresponding source revisions are published by the Windows build project above. MiruPlay loads the matching `libmpv-2.dll` in-process. The package's `licenses` directory includes the matching mpv copyright statement and GPL/LGPL texts plus FFmpeg's license summary and GPL/LGPL texts.
 
+## RIFE frame interpolation enhancement pack (optional, full edition / user install)
+
+The optional RIFE enhancement pack is not part of the lite edition; the full edition bundles it or the
+Windows client downloads it from the project's GitHub Release asset.
+
+- Pack version: `2026.11`; archive `rife-2026.11.7z`
+- Archive SHA-256: `4e0c1afdd3d869aca1bb5ec17139045ee648b7c8e8b5d180d22eb6740093e6d6` (31,239,766 B)
+- Layout: `runtime/enhance/rife/{manifest.json,vs-plugins/,licenses/,selftest/}` (installed copy under `%LOCALAPPDATA%\MiruPlay\enhance\rife`)
+- Components and licenses:
+  - VapourSynth R73 (Python binding and VSScript/VSPipe binaries) - LGPL-2.1. Upstream: https://github.com/vapoursynth/vapoursynth. The DLLs are separate dynamically linked files; license text in `licenses/VapourSynth-LGPL-2.1.txt`.
+  - Python 3.14.3 runtime - PSF-2.0. Upstream: https://www.python.org. License text in `licenses/Python-PSF-2.0.txt`.
+  - RIFE ncnn Vulkan VapourSynth plugin (`librife_windows_x86-64.dll`, r9_mod_v33) - MIT (Copyright 2021-2022 HolyWu). Upstream: https://github.com/styler00dollar/VapourSynth-RIFE-ncnn-Vulkan. License text in `licenses/RIFE-ncnn-Vulkan-MIT.txt`.
+  - ncnn (statically linked into the plugin) - BSD-3-Clause (Tencent). Upstream: https://github.com/Tencent/ncnn. License text in `licenses/ncnn-BSD-3-Clause.txt`.
+  - RIFE model weights (rife-v4.6 / rife-v4.25-lite, converted by styler00dollar) - MIT (Megvii RIFE). Upstream: https://github.com/hzwer/ECCV2022-RIFE. License text in `licenses/RIFE-MIT.txt`.
+- The pack's own `manifest.json` pins every file with SHA-256; the Windows client verifies the archive hash and each file before installing and rejects unexpected or missing files.
+
 ## SDL3 (gamepad backend)
 
 - Project: SDL (Simple DirectMedia Layer)

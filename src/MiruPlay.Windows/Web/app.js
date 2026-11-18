@@ -625,18 +625,71 @@ async function loadPlaybackSettings() {
     <label>${t('playback.upscale')}<select id="quality-upscale">${(settings.upscalePresetOptions || ['off','low','medium','high']).map(value => { const key = 'playback.upscale' + value.charAt(0).toUpperCase() + value.slice(1); return `<option value="${value}" ${settings.upscalePreset === value ? 'selected' : ''}>${t(key)}</option>` }).join('')}</select></label>
     <label>${t('playback.anime4k')}<select id="quality-anime4k">${(settings.anime4kPresetOptions || ['off','a','a_plus_a','b','c']).map(value => { const key = value === 'off' ? 'playback.anime4kOff' : value === 'a' ? 'playback.anime4kA' : value === 'a_plus_a' ? 'playback.anime4kAPlusA' : value === 'b' ? 'playback.anime4kB' : 'playback.anime4kC'; return `<option value="${value}" ${settings.anime4kPreset === value ? 'selected' : ''}>${t(key)}</option>` }).join('')}</select></label>
     <p class="muted">${t('quality.note')}</p>
-    <label>${t('playback.interpolation')}<select id="frame-interpolation-mode">${(settings.frameInterpolationModeOptions || ['off','mpv']).map(value => { const key = value === 'mpv' ? 'playback.interpolationMpv' : 'playback.interpolationOff'; return `<option value="${value}" ${settings.frameInterpolationMode === value ? 'selected' : ''}>${t(key)}</option>` }).join('')}</select></label>
+    <label>${t('playback.interpolation')}<select id="frame-interpolation-mode">${(settings.frameInterpolationModeOptions || ['off','mpv','rife']).map(value => { const key = value === 'mpv' ? 'playback.interpolationMpv' : value === 'rife' ? 'playback.interpolationRife' : 'playback.interpolationOff'; return `<option value="${value}" ${settings.frameInterpolationMode === value ? 'selected' : ''}>${t(key)}</option>` }).join('')}</select></label>
     <p class="muted">${t('quality.interpolationNote')}</p>
+    <label>${t('quality.rifeFactor')}<select id="rife-factor"><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option></select></label>
+    <label>${t('quality.rifeModel')}<select id="rife-model"><option value="4.6">4.6</option><option value="4.25-lite">4.25-lite</option></select></label>
+    <label>${t('quality.rifeProcessingHeight')}<select id="rife-height"><option value="auto">${t('quality.rifeHeightAuto')}</option><option value="1080">1080p</option><option value="720">720p</option><option value="576">576p</option><option value="540">540p</option><option value="480">480p</option><option value="360">360p</option></select></label>
+    <label>${t('quality.rifeGpuThread')}<select id="rife-thread"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
+    <p class="muted">${t('quality.rifeNote')}</p>
+    <p class="muted" id="rife-status"></p>
+    <div class="actions">
+      <button type="button" id="rife-install">${t('quality.rifeInstall')}</button>
+      <button type="button" id="rife-selftest">${t('quality.rifeSelftest')}</button>
+      <button type="button" id="rife-uninstall">${t('quality.rifeUninstall')}</button>
+    </div>
     <label>${t('playback.appLang')}<select id="app-language">${[['system',t('locale.system')],['zh-CN',t('locale.zhCN')],['zh-TW',t('locale.zhTW')],['zh-HK',t('locale.zhHK')],['en-US',t('locale.enUS')],['en-GB',t('locale.enGB')]].map(([value,label]) => `<option value="${value}" ${locale.language === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
     <div class="actions"><button class="primary" type="submit">${t('sources.save')}</button></div></form></section>`
   $('#playback-settings-form').onsubmit = async event => {
     event.preventDefault()
     try {
-      await api('/api/settings/playback', { method: 'PUT', body: JSON.stringify({ endAction: $('#playback-end').value, preferredSubtitleLanguage: $('#playback-subtitle').value, audioBalance: $('#playback-balance').value, hdrMode: $('#hdr-mode').value, audioPassthroughMode: $('#audio-passthrough-mode').value, audioPassthroughCodecs: [...document.querySelectorAll('.passthrough-codec:checked')].map(item => item.value).join(','), audioPassthroughDevice: $('#passthrough-device').value, upscalePreset: $('#quality-upscale').value, anime4kPreset: $('#quality-anime4k').value, frameInterpolationMode: $('#frame-interpolation-mode').value }) })
+      await api('/api/settings/playback', { method: 'PUT', body: JSON.stringify({ endAction: $('#playback-end').value, preferredSubtitleLanguage: $('#playback-subtitle').value, audioBalance: $('#playback-balance').value, hdrMode: $('#hdr-mode').value, audioPassthroughMode: $('#audio-passthrough-mode').value, audioPassthroughCodecs: [...document.querySelectorAll('.passthrough-codec:checked')].map(item => item.value).join(','), audioPassthroughDevice: $('#passthrough-device').value, upscalePreset: $('#quality-upscale').value, anime4kPreset: $('#quality-anime4k').value, frameInterpolationMode: $('#frame-interpolation-mode').value, rifeEnhancement: { factor: Number($('#rife-factor').value), model: $('#rife-model').value, gpuThread: Number($('#rife-thread').value), processingHeight: $('#rife-height').value } }) })
       await api('/api/settings/locale', { method: 'PUT', body: JSON.stringify({ language: $('#app-language').value }) })
       await api('/api/settings/scan', { method: 'PUT', body: JSON.stringify({ currentAppMode: $('#app-mode').value, autoScanEnabled: $('#auto-scan-enabled').checked, autoScanIntervalHours: Number($('#auto-scan-interval').value), mergeSameAnimeEnabled: $('#merge-same-anime').checked, posterWallArrangement: $('#poster-arrangement').value, episodeVersionSelectionPolicy: $('#version-selection-policy').value }) })
       toast(t('playback.saved'))
     } catch (error) { toast(error.message, true) }
+  }
+  bindRifeButtons(settings)
+}
+
+function rifeStatusText(status) {
+  if (!status || !status.installed) return t('quality.rifeStatusNotInstalled')
+  const source = status.source === 'bundled' ? t('quality.rifeSourceBundled') : t('quality.rifeSourceInstalled')
+  let text = t('quality.rifeStatusInstalled', source, status.version || '?')
+  if (status.selfTest && status.selfTest.ok) {
+    text += ' · ' + t('quality.rifeStatusSelftest', Number(status.selfTest.outputFps480p || 0).toFixed(1), status.selfTest.gpu || '?', status.selfTest.recommendedHeight || '480')
+  } else if (status.selfTest) {
+    text += ' · ' + t('quality.rifeStatusSelftestFailed', t(status.selfTest.errorKey || 'rife.reason.selftestFailed'))
+  }
+  return text
+}
+
+function bindRifeButtons(settings) {
+  const install = $('#rife-install')
+  const selftest = $('#rife-selftest')
+  const uninstall = $('#rife-uninstall')
+  if (!install || !selftest || !uninstall) return
+  const status = settings.rifeEnhancementStatus || {}
+  const rife = settings.rifeEnhancement || {}
+  const factor = $('#rife-factor'); if (factor) factor.value = String(rife.factor || 2)
+  const model = $('#rife-model'); if (model) model.value = rife.model || '4.6'
+  const height = $('#rife-height'); if (height) height.value = rife.processingHeight || 'auto'
+  const thread = $('#rife-thread'); if (thread) thread.value = String(rife.gpuThread || 2)
+  const statusLine = $('#rife-status'); if (statusLine) statusLine.textContent = rifeStatusText(status)
+  install.disabled = !!status.installed
+  selftest.disabled = !status.installed
+  uninstall.disabled = !status.installed
+  install.onclick = async () => {
+    install.disabled = true
+    try { await api('/api/enhance/rife/install', { method: 'POST' }); toast(t('quality.rifeReadyToast')); await loadPlaybackSettings() } catch (error) { toast(error.message, true); install.disabled = false }
+  }
+  selftest.onclick = async () => {
+    selftest.disabled = true
+    try { const result = await api('/api/enhance/rife/selftest', { method: 'POST' }); toast(result.ok ? t('quality.rifeReadyToast') : t('quality.rifeStatusSelftestFailed', t(result.errorKey || 'rife.reason.selftestFailed')), !result.ok); await loadPlaybackSettings() } catch (error) { toast(error.message, true); selftest.disabled = false }
+  }
+  uninstall.onclick = async () => {
+    uninstall.disabled = true
+    try { await api('/api/enhance/rife/uninstall', { method: 'POST' }); toast(t('quality.rifeUninstalledToast')); await loadPlaybackSettings() } catch (error) { toast(error.message, true); uninstall.disabled = false }
   }
 }
 const dspTypeNames = ['peaking', 'low_shelf', 'high_shelf', 'low_pass', 'high_pass', 'notch', 'band_pass']

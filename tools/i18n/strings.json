@@ -11136,5 +11136,362 @@
     "zh-HK": "更新清單的版本類型（{0}）與當前應用（{1}）不匹配。",
     "en-US": "Update manifest edition ({0}) does not match this app ({1}).",
     "en-GB": "Update manifest edition ({0}) does not match this app ({1})."
+  },
+  "playback.interpolationRife": {
+    "zh-CN": "RIFE 真插帧（增强包）",
+    "zh-TW": "RIFE 真插幀（增強包）",
+    "zh-HK": "RIFE 真插幀（增強包）",
+    "en-US": "RIFE frame interpolation (enhancement pack)",
+    "en-GB": "RIFE frame interpolation (enhancement pack)"
+  },
+  "quality.rifeHeading": {
+    "zh-CN": "RIFE 真插帧（实验性增强包）",
+    "zh-TW": "RIFE 真插幀（實驗性增強包）",
+    "zh-HK": "RIFE 真插幀（實驗性增強包）",
+    "en-US": "RIFE frame interpolation (experimental pack)",
+    "en-GB": "RIFE frame interpolation (experimental pack)"
+  },
+  "quality.rifeNote": {
+    "zh-CN": "需要下载约 35 MB 的增强包；仅在进程内 libmpv、SDR 内容下生效。安装后由 VSPipe 自检选择处理高度，运行失败会自动回退普通播放。",
+    "zh-TW": "需要下載約 35 MB 的增強包；僅在行程內 libmpv、SDR 內容下生效。安裝後由 VSPipe 自檢選擇處理高度，執行失敗會自動回退一般播放。",
+    "zh-HK": "需要下載約 35 MB 的增強包；僅在行程內 libmpv、SDR 內容下生效。安裝後由 VSPipe 自檢選擇處理高度，執行失敗會自動回退一般播放。",
+    "en-US": "Downloads a ~35 MB enhancement pack. Only works with in-process libmpv on SDR content; VSPipe self-test picks the processing height and failures fall back to normal playback.",
+    "en-GB": "Downloads a ~35 MB enhancement pack. Only works with in-process libmpv on SDR content; VSPipe self-test picks the processing height and failures fall back to normal playback."
+  },
+  "quality.rifeStatusUnknown": {
+    "zh-CN": "正在读取 RIFE 增强包状态…",
+    "zh-TW": "正在讀取 RIFE 增強包狀態…",
+    "zh-HK": "正在讀取 RIFE 增強包狀態…",
+    "en-US": "Reading RIFE enhancement pack status…",
+    "en-GB": "Reading RIFE enhancement pack status…"
+  },
+  "quality.rifeStatusNotInstalled": {
+    "zh-CN": "RIFE 增强包未安装。",
+    "zh-TW": "RIFE 增強包未安裝。",
+    "zh-HK": "RIFE 增強包未安裝。",
+    "en-US": "The RIFE enhancement pack is not installed.",
+    "en-GB": "The RIFE enhancement pack is not installed."
+  },
+  "quality.rifeStatusInstalled": {
+    "zh-CN": "RIFE 增强包（{0}）· 版本 {1}",
+    "zh-TW": "RIFE 增強包（{0}）· 版本 {1}",
+    "zh-HK": "RIFE 增強包（{0}）· 版本 {1}",
+    "en-US": "RIFE enhancement pack ({0}) · version {1}",
+    "en-GB": "RIFE enhancement pack ({0}) · version {1}"
+  },
+  "quality.rifeSourceInstalled": {
+    "zh-CN": "已安装",
+    "zh-TW": "已安裝",
+    "zh-HK": "已安裝",
+    "en-US": "installed",
+    "en-GB": "installed"
+  },
+  "quality.rifeSourceBundled": {
+    "zh-CN": "随安装包提供",
+    "zh-TW": "隨安裝包提供",
+    "zh-HK": "隨安裝包提供",
+    "en-US": "bundled",
+    "en-GB": "bundled"
+  },
+  "quality.rifeStatusSelftest": {
+    "zh-CN": "自检 {0} fps（{1}，推荐 {2}p）",
+    "zh-TW": "自檢 {0} fps（{1}，推薦 {2}p）",
+    "zh-HK": "自檢 {0} fps（{1}，推薦 {2}p）",
+    "en-US": "self-test {0} fps ({1}, recommends {2}p)",
+    "en-GB": "self-test {0} fps ({1}, recommends {2}p)"
+  },
+  "quality.rifeStatusSelftestFailed": {
+    "zh-CN": "自检未通过：{0}",
+    "zh-TW": "自檢未通過：{0}",
+    "zh-HK": "自檢未通過：{0}",
+    "en-US": "self-test failed: {0}",
+    "en-GB": "self-test failed: {0}"
+  },
+  "quality.rifeInstall": {
+    "zh-CN": "下载并安装",
+    "zh-TW": "下載並安裝",
+    "zh-HK": "下載並安裝",
+    "en-US": "Download and install",
+    "en-GB": "Download and install"
+  },
+  "quality.rifeUninstall": {
+    "zh-CN": "卸载",
+    "zh-TW": "卸載",
+    "zh-HK": "卸載",
+    "en-US": "Uninstall",
+    "en-GB": "Uninstall"
+  },
+  "quality.rifeSelftest": {
+    "zh-CN": "重新自检",
+    "zh-TW": "重新自檢",
+    "zh-HK": "重新自檢",
+    "en-US": "Run self-test",
+    "en-GB": "Run self-test"
+  },
+  "quality.rifeFactor": {
+    "zh-CN": "RIFE 帧率倍数",
+    "zh-TW": "RIFE 影格率倍數",
+    "zh-HK": "RIFE 影格率倍數",
+    "en-US": "RIFE frame-rate factor",
+    "en-GB": "RIFE frame-rate factor"
+  },
+  "quality.rifeModel": {
+    "zh-CN": "RIFE 模型",
+    "zh-TW": "RIFE 模型",
+    "zh-HK": "RIFE 模型",
+    "en-US": "RIFE model",
+    "en-GB": "RIFE model"
+  },
+  "quality.rifeProcessingHeight": {
+    "zh-CN": "RIFE 处理高度",
+    "zh-TW": "RIFE 處理高度",
+    "zh-HK": "RIFE 處理高度",
+    "en-US": "RIFE processing height",
+    "en-GB": "RIFE processing height"
+  },
+  "quality.rifeHeightAuto": {
+    "zh-CN": "自动（按自检推荐）",
+    "zh-TW": "自動（依自檢推薦）",
+    "zh-HK": "自動（依自檢推薦）",
+    "en-US": "Auto (self-test)",
+    "en-GB": "Auto (self-test)"
+  },
+  "quality.rifeGpuThread": {
+    "zh-CN": "RIFE GPU 线程",
+    "zh-TW": "RIFE GPU 執行緒",
+    "zh-HK": "RIFE GPU 執行緒",
+    "en-US": "RIFE GPU threads",
+    "en-GB": "RIFE GPU threads"
+  },
+  "quality.rifeHint": {
+    "zh-CN": "RIFE 当前不会生效：{0}",
+    "zh-TW": "RIFE 目前不會生效：{0}",
+    "zh-HK": "RIFE 目前不會生效：{0}",
+    "en-US": "RIFE will not take effect: {0}",
+    "en-GB": "RIFE will not take effect: {0}"
+  },
+  "quality.rifeInstalling": {
+    "zh-CN": "正在下载并安装 RIFE 增强包…",
+    "zh-TW": "正在下載並安裝 RIFE 增強包…",
+    "zh-HK": "正在下載並安裝 RIFE 增強包…",
+    "en-US": "Downloading and installing the RIFE enhancement pack…",
+    "en-GB": "Downloading and installing the RIFE enhancement pack…"
+  },
+  "quality.rifeSelftesting": {
+    "zh-CN": "正在运行 RIFE 自检…",
+    "zh-TW": "正在執行 RIFE 自檢…",
+    "zh-HK": "正在執行 RIFE 自檢…",
+    "en-US": "Running the RIFE self-test…",
+    "en-GB": "Running the RIFE self-test…"
+  },
+  "quality.rifeUninstalling": {
+    "zh-CN": "正在卸载 RIFE 增强包…",
+    "zh-TW": "正在卸載 RIFE 增強包…",
+    "zh-HK": "正在卸載 RIFE 增強包…",
+    "en-US": "Uninstalling the RIFE enhancement pack…",
+    "en-GB": "Uninstalling the RIFE enhancement pack…"
+  },
+  "quality.rifeOperationFailed": {
+    "zh-CN": "RIFE 操作失败：{0}",
+    "zh-TW": "RIFE 操作失敗：{0}",
+    "zh-HK": "RIFE 操作失敗：{0}",
+    "en-US": "RIFE operation failed: {0}",
+    "en-GB": "RIFE operation failed: {0}"
+  },
+  "quality.rifeReadyToast": {
+    "zh-CN": "RIFE 自检通过，将在下次播放生效。",
+    "zh-TW": "RIFE 自檢通過，將在下次播放生效。",
+    "zh-HK": "RIFE 自檢通過，將在下次播放生效。",
+    "en-US": "RIFE self-test passed; it will apply on the next playback.",
+    "en-GB": "RIFE self-test passed; it will apply on the next playback."
+  },
+  "quality.rifeUninstalledToast": {
+    "zh-CN": "RIFE 增强包已卸载。",
+    "zh-TW": "RIFE 增強包已卸載。",
+    "zh-HK": "RIFE 增強包已卸載。",
+    "en-US": "The RIFE enhancement pack was uninstalled.",
+    "en-GB": "The RIFE enhancement pack was uninstalled."
+  },
+  "rife.reason.notInstalled": {
+    "zh-CN": "增强包未安装",
+    "zh-TW": "增強包未安裝",
+    "zh-HK": "增強包未安裝",
+    "en-US": "enhancement pack is not installed",
+    "en-GB": "enhancement pack is not installed"
+  },
+  "rife.reason.invalidPack": {
+    "zh-CN": "增强包文件缺失或损坏",
+    "zh-TW": "增強包檔案缺失或損壞",
+    "zh-HK": "增強包檔案缺失或損壞",
+    "en-US": "enhancement pack files are missing or corrupt",
+    "en-GB": "enhancement pack files are missing or corrupt"
+  },
+  "rife.reason.selftestRequired": {
+    "zh-CN": "尚未运行自检",
+    "zh-TW": "尚未執行自檢",
+    "zh-HK": "尚未執行自檢",
+    "en-US": "self-test has not run yet",
+    "en-GB": "self-test has not run yet"
+  },
+  "rife.reason.selftestFailed": {
+    "zh-CN": "自检失败",
+    "zh-TW": "自檢失敗",
+    "zh-HK": "自檢失敗",
+    "en-US": "self-test failed",
+    "en-GB": "self-test failed"
+  },
+  "rife.reason.selftestSlow": {
+    "zh-CN": "当前显卡无法实时插帧（自检过慢）",
+    "zh-TW": "目前顯示卡無法即時插幀（自檢過慢）",
+    "zh-HK": "目前顯示卡無法即時插幀（自檢過慢）",
+    "en-US": "this GPU cannot interpolate in real time (self-test too slow)",
+    "en-GB": "this GPU cannot interpolate in real time (self-test too slow)"
+  },
+  "rife.reason.selftestTimeout": {
+    "zh-CN": "自检超时",
+    "zh-TW": "自檢逾時",
+    "zh-HK": "自檢逾時",
+    "en-US": "self-test timed out",
+    "en-GB": "self-test timed out"
+  },
+  "rife.reason.selftestExit": {
+    "zh-CN": "自检进程失败",
+    "zh-TW": "自檢程序失敗",
+    "zh-HK": "自檢程序失敗",
+    "en-US": "self-test process failed",
+    "en-GB": "self-test process failed"
+  },
+  "rife.reason.vulkanUnavailable": {
+    "zh-CN": "Vulkan 不可用或驱动异常",
+    "zh-TW": "Vulkan 無法使用或驅動異常",
+    "zh-HK": "Vulkan 無法使用或驅動異常",
+    "en-US": "Vulkan is unavailable or the driver failed",
+    "en-GB": "Vulkan is unavailable or the driver failed"
+  },
+  "rife.reason.hdrPassthrough": {
+    "zh-CN": "HDR 直通模式下不启用 RIFE",
+    "zh-TW": "HDR 直通模式下不啟用 RIFE",
+    "zh-HK": "HDR 直通模式下不啟用 RIFE",
+    "en-US": "RIFE is disabled in HDR passthrough mode",
+    "en-GB": "RIFE is disabled in HDR passthrough mode"
+  },
+  "rife.reason.hdrContent": {
+    "zh-CN": "HDR 内容不启用 RIFE",
+    "zh-TW": "HDR 內容不啟用 RIFE",
+    "zh-HK": "HDR 內容不啟用 RIFE",
+    "en-US": "RIFE is disabled for HDR content",
+    "en-GB": "RIFE is disabled for HDR content"
+  },
+  "rife.reason.initFailed": {
+    "zh-CN": "RIFE 初始化失败，已回退普通播放",
+    "zh-TW": "RIFE 初始化失敗，已回退一般播放",
+    "zh-HK": "RIFE 初始化失敗，已回退一般播放",
+    "en-US": "RIFE failed to initialise; fell back to normal playback",
+    "en-GB": "RIFE failed to initialise; fell back to normal playback"
+  },
+  "rife.reason.performance": {
+    "zh-CN": "当前分辨率无法实时插帧，已回退普通播放",
+    "zh-TW": "目前解析度無法即時插幀，已回退一般播放",
+    "zh-HK": "目前解析度無法即時插幀，已回退一般播放",
+    "en-US": "real-time interpolation is not sustainable at this resolution; fell back to normal playback",
+    "en-GB": "real-time interpolation is not sustainable at this resolution; fell back to normal playback"
+  },
+  "rife.reason.pathUnsupported": {
+    "zh-CN": "用户目录包含非 ASCII 路径且无法建立兼容缓存",
+    "zh-TW": "使用者目錄包含非 ASCII 路徑且無法建立相容快取",
+    "zh-HK": "使用者目錄包含非 ASCII 路徑且無法建立相容快取",
+    "en-US": "the user profile path is not ASCII and no compatible cache could be created",
+    "en-GB": "the user profile path is not ASCII and no compatible cache could be created"
+  },
+  "rife.reason.mirrorFailed": {
+    "zh-CN": "无法建立 RIFE 兼容缓存路径",
+    "zh-TW": "無法建立 RIFE 相容快取路徑",
+    "zh-HK": "無法建立 RIFE 相容快取路徑",
+    "en-US": "could not create the RIFE-compatible cache path",
+    "en-GB": "could not create the RIFE-compatible cache path"
+  },
+  "rife.reason.archiveUnsupported": {
+    "zh-CN": "增强包格式不受支持",
+    "zh-TW": "增強包格式不受支援",
+    "zh-HK": "增強包格式不受支援",
+    "en-US": "unsupported enhancement pack format",
+    "en-GB": "unsupported enhancement pack format"
+  },
+  "rife.reason.downloadFailed": {
+    "zh-CN": "增强包下载或校验失败",
+    "zh-TW": "增強包下載或校驗失敗",
+    "zh-HK": "增強包下載或校驗失敗",
+    "en-US": "enhancement pack download or verification failed",
+    "en-GB": "enhancement pack download or verification failed"
+  },
+  "rife.reason.insufficientDisk": {
+    "zh-CN": "磁盘空间不足",
+    "zh-TW": "磁碟空間不足",
+    "zh-HK": "磁碟空間不足",
+    "en-US": "not enough disk space",
+    "en-GB": "not enough disk space"
+  },
+  "api.errRifeSettings": {
+    "zh-CN": "RIFE 设置值无效。",
+    "zh-TW": "RIFE 設定值無效。",
+    "zh-HK": "RIFE 設定值無效。",
+    "en-US": "Invalid RIFE settings.",
+    "en-GB": "Invalid RIFE settings."
+  },
+  "api.errRifeUnavailable": {
+    "zh-CN": "RIFE 增强包服务不可用。",
+    "zh-TW": "RIFE 增強包服務無法使用。",
+    "zh-HK": "RIFE 增強包服務無法使用。",
+    "en-US": "The RIFE enhancement service is unavailable.",
+    "en-GB": "The RIFE enhancement service is unavailable."
+  },
+  "tv.settings.rifeFactor": {
+    "zh-CN": "RIFE 帧率倍数",
+    "zh-TW": "RIFE 影格率倍數",
+    "zh-HK": "RIFE 影格率倍數",
+    "en-US": "RIFE frame-rate factor",
+    "en-GB": "RIFE frame-rate factor"
+  },
+  "tv.settings.rifeModel": {
+    "zh-CN": "RIFE 模型",
+    "zh-TW": "RIFE 模型",
+    "zh-HK": "RIFE 模型",
+    "en-US": "RIFE model",
+    "en-GB": "RIFE model"
+  },
+  "tv.settings.rifeHeight": {
+    "zh-CN": "RIFE 处理高度",
+    "zh-TW": "RIFE 處理高度",
+    "zh-HK": "RIFE 處理高度",
+    "en-US": "RIFE processing height",
+    "en-GB": "RIFE processing height"
+  },
+  "tv.settings.rifeGpuThread": {
+    "zh-CN": "RIFE GPU 线程",
+    "zh-TW": "RIFE GPU 執行緒",
+    "zh-HK": "RIFE GPU 執行緒",
+    "en-US": "RIFE GPU threads",
+    "en-GB": "RIFE GPU threads"
+  },
+  "tv.settings.rifeUnavailable": {
+    "zh-CN": "RIFE 增强包未安装或自检未通过",
+    "zh-TW": "RIFE 增強包未安裝或自檢未通過",
+    "zh-HK": "RIFE 增強包未安裝或自檢未通過",
+    "en-US": "The RIFE enhancement pack is not installed or has not passed its self-test",
+    "en-GB": "The RIFE enhancement pack is not installed or has not passed its self-test"
+  },
+  "playback.rifeBadge": {
+    "zh-CN": "RIFE {0}",
+    "zh-TW": "RIFE {0}",
+    "zh-HK": "RIFE {0}",
+    "en-US": "RIFE {0}",
+    "en-GB": "RIFE {0}"
+  },
+  "web.rifeStatus": {
+    "zh-CN": "RIFE 增强包",
+    "zh-TW": "RIFE 增強包",
+    "zh-HK": "RIFE 增強包",
+    "en-US": "RIFE enhancement pack",
+    "en-GB": "RIFE enhancement pack"
   }
 }

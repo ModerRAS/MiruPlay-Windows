@@ -187,6 +187,10 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddRow("upscaleQuality", "tv.settings.upscaleQuality", () => ValueUpscale(), step => ChangeUpscale(step));
         AddRow("anime4kPreset", "tv.settings.anime4kPreset", () => ValueAnime4K(), step => ChangeAnime4K(step));
         AddRow("interpolation", "tv.settings.interpolation", () => ValueFrameInterpolation(), step => ChangeFrameInterpolation(step));
+        AddRow("rifeFactor", "tv.settings.rifeFactor", () => ValueRifeFactor(), step => ChangeRifeFactor(step));
+        AddRow("rifeModel", "tv.settings.rifeModel", () => ValueRifeModel(), step => ChangeRifeModel(step));
+        AddRow("rifeHeight", "tv.settings.rifeHeight", () => ValueRifeHeight(), step => ChangeRifeHeight(step));
+        AddRow("rifeGpuThread", "tv.settings.rifeGpuThread", () => ValueRifeGpuThread(), step => ChangeRifeGpuThread(step));
         AddGroup("tv.settings.group.tv");
         AddRow("startMode", "tv.settings.startTvMode", () => Bool(_context.Settings.TvModeEnabled), _ => Toggle(settings => settings with { TvModeEnabled = !settings.TvModeEnabled }));
         AddRow("preset", "tv.settings.remotePreset", () => ValuePreset(), step => ChangePreset());
@@ -432,22 +436,90 @@ public sealed class TvSettingsScreen : TvScreenBase
 
     private void ChangeFrameInterpolation(int step)
     {
-        // Extension point: the RIFE pack will append MpvFrameInterpolationModes.Rife here.
+        // SupportedValues now includes Rife; playback falls back with a reason when the pack is not ready.
         var values = MpvFrameInterpolationModes.SupportedValues.ToArray();
         var index = Array.IndexOf(values, AppSettingsStore.NormalizeFrameInterpolationMode(_context.Settings.FrameInterpolationMode));
         if (index < 0) index = 0;
         index = (index + step + values.Length) % values.Length;
         _context.SaveSettings(_context.Settings with { FrameInterpolationMode = values[index] });
         RefreshValues();
-        _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+        var status = _context.RifeEnhancement.GetStatus();
+        _shell.ShowToast(values[index] == MpvFrameInterpolationModes.Rife && !status.Ready
+            ? AppStrings.Get("tv.settings.rifeUnavailable")
+            : AppStrings.Get("tv.settings.nextPlaybackHint"));
     }
 
     private string ValueFrameInterpolation() =>
         AppSettingsStore.NormalizeFrameInterpolationMode(_context.Settings.FrameInterpolationMode) switch
         {
+            MpvFrameInterpolationModes.Rife => AppStrings.Get("playback.interpolationRife"),
             MpvFrameInterpolationModes.MpvBuiltIn => AppStrings.Get("tv.settings.interpolation.mpv"),
             _ => AppStrings.Get("tv.settings.interpolation.off"),
         };
+
+    private void ChangeRifeFactor(int step)
+    {
+        var values = RifeEnhancementSettings.FactorValues;
+        var current = RifeEnhancementSettings.Normalize(_context.Settings.RifeEnhancement);
+        var index = values.ToList().IndexOf(current.Factor);
+        if (index < 0) index = 0;
+        index = (index + step + values.Count) % values.Count;
+        _context.SaveSettings(_context.Settings with { RifeEnhancement = current with { Factor = values[index] } });
+        RefreshValues();
+        _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+    }
+
+    private string ValueRifeFactor() =>
+        RifeEnhancementSettings.Normalize(_context.Settings.RifeEnhancement).Factor + "x";
+
+    private void ChangeRifeModel(int step)
+    {
+        var values = RifeEnhancementSettings.ModelValues;
+        var current = RifeEnhancementSettings.Normalize(_context.Settings.RifeEnhancement);
+        var index = values.ToList().IndexOf(current.Model);
+        if (index < 0) index = 0;
+        index = (index + step + values.Count) % values.Count;
+        _context.SaveSettings(_context.Settings with { RifeEnhancement = current with { Model = values[index] } });
+        RefreshValues();
+        _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+    }
+
+    private string ValueRifeModel() => RifeEnhancementSettings.Normalize(_context.Settings.RifeEnhancement).Model;
+
+    private void ChangeRifeHeight(int step)
+    {
+        var values = RifeEnhancementSettings.ProcessingHeightValues;
+        var current = RifeEnhancementSettings.Normalize(_context.Settings.RifeEnhancement);
+        var index = values.ToList().IndexOf(current.ProcessingHeight);
+        if (index < 0) index = 0;
+        index = (index + step + values.Count) % values.Count;
+        _context.SaveSettings(_context.Settings with { RifeEnhancement = current with { ProcessingHeight = values[index] } });
+        RefreshValues();
+        _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+    }
+
+    private string ValueRifeHeight()
+    {
+        var height = RifeEnhancementSettings.Normalize(_context.Settings.RifeEnhancement).ProcessingHeight;
+        return height == RifeEnhancementSettings.AutoProcessingHeight
+            ? AppStrings.Get("quality.rifeHeightAuto")
+            : height + "p";
+    }
+
+    private void ChangeRifeGpuThread(int step)
+    {
+        var values = RifeEnhancementSettings.GpuThreadValues;
+        var current = RifeEnhancementSettings.Normalize(_context.Settings.RifeEnhancement);
+        var index = values.ToList().IndexOf(current.GpuThread);
+        if (index < 0) index = 0;
+        index = (index + step + values.Count) % values.Count;
+        _context.SaveSettings(_context.Settings with { RifeEnhancement = current with { GpuThread = values[index] } });
+        RefreshValues();
+        _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+    }
+
+    private string ValueRifeGpuThread() =>
+        RifeEnhancementSettings.Normalize(_context.Settings.RifeEnhancement).GpuThread.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     private void ChangePreset()
     {

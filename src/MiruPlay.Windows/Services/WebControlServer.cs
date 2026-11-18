@@ -136,6 +136,7 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly Func<Task<bool>>? _installUpdate;
     private readonly Func<LibrarySeries, CancellationToken, Task<string?>> _resolvePosterPath;
     private readonly Func<MpvRuntimeCapabilities?>? _getRuntimeCapabilities;
+    private readonly RifeEnhancementService? _rifeEnhancement;
     private readonly bool _listenOnAnyIp;
     private readonly long _startedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     private WebApplication? _app;
@@ -184,7 +185,8 @@ public sealed class WebControlServer : IAsyncDisposable
         BangumiOAuthCredentialStore? bangumiOAuthCredentials = null,
         BangumiWebConsoleLogin? bangumiWebLogin = null,
         Func<CancellationToken, Task<string?>>? getBangumiToken = null,
-        Func<MpvRuntimeCapabilities?>? getRuntimeCapabilities = null)
+        Func<MpvRuntimeCapabilities?>? getRuntimeCapabilities = null,
+        RifeEnhancementService? rifeEnhancement = null)
     {
         _port = port;
         _tokens = tokens;
@@ -192,6 +194,7 @@ public sealed class WebControlServer : IAsyncDisposable
         _getPlaybackStatus = getPlaybackStatus;
         _getPlaybackDiagnostics = getPlaybackDiagnostics ?? (() => null);
         _getRuntimeCapabilities = getRuntimeCapabilities;
+        _rifeEnhancement = rifeEnhancement;
         _topping = topping;
         _findAudioPreset = findAudioPreset;
         _musicLibrary = musicLibrary;
@@ -1100,6 +1103,18 @@ public sealed class WebControlServer : IAsyncDisposable
             if (body.FrameInterpolationMode is not null &&
                 !MpvFrameInterpolationModes.SupportedValues.Contains(body.FrameInterpolationMode.Trim().ToLowerInvariant()))
                 throw new BadHttpRequestException(AppStrings.Get("api.errFrameInterpolationMode"));
+            if (body.RifeEnhancement is { } rife)
+            {
+                if (!RifeEnhancementSettings.FactorValues.Contains(rife.Factor) ||
+                    rife.Model is null ||
+                    !RifeEnhancementSettings.ModelValues.Contains(rife.Model.Trim(), StringComparer.OrdinalIgnoreCase) ||
+                    !RifeEnhancementSettings.GpuThreadValues.Contains(rife.GpuThread) ||
+                    rife.ProcessingHeight is null ||
+                    !RifeEnhancementSettings.ProcessingHeightValues.Contains(rife.ProcessingHeight.Trim(), StringComparer.OrdinalIgnoreCase))
+                {
+                    throw new BadHttpRequestException(AppStrings.Get("api.errRifeSettings"));
+                }
+            }
             if (body.FormatAwareToneMapping is not null)
             {
                 throw new BadHttpRequestException(AppStrings.Get("api.errToneMap"), StatusCodes.Status501NotImplemented);
@@ -1132,9 +1147,35 @@ public sealed class WebControlServer : IAsyncDisposable
                 FrameInterpolationMode = body.FrameInterpolationMode is null
                     ? current.FrameInterpolationMode
                     : AppSettingsStore.NormalizeFrameInterpolationMode(body.FrameInterpolationMode),
+                RifeEnhancement = body.RifeEnhancement is null
+                    ? current.RifeEnhancement
+                    : RifeEnhancementSettings.Normalize(body.RifeEnhancement),
             }).ConfigureAwait(false);
             if (_applyPlaybackSettings is not null) await _applyPlaybackSettings(updated).ConfigureAwait(false);
             return Success(ToPlaybackSettings(updated, _getRuntimeCapabilities?.Invoke()));
+        });
+
+        app.MapGet("/api/enhance/rife/status", () => Success(RequireRifeEnhancement().GetStatus()));
+        app.MapPost("/api/enhance/rife/install", async (HttpRequest request) =>
+        {
+            var status = await RequireRifeEnhancement()
+                .InstallAsync(null, request.HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+            return Success(status);
+        });
+        app.MapPost("/api/enhance/rife/selftest", async (HttpRequest request) =>
+        {
+            var result = await RequireRifeEnhancement()
+                .RunSelfTestAsync(request.HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+            return Success(result);
+        });
+        app.MapPost("/api/enhance/rife/uninstall", async (HttpRequest request) =>
+        {
+            var status = await RequireRifeEnhancement()
+                .UninstallAsync(request.HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+            return Success(status);
         });
 
         app.MapGet("/api/settings/locale", () => Success(new
@@ -1688,7 +1729,7 @@ public sealed class WebControlServer : IAsyncDisposable
         autoScanIntervalOptionsHours = MediaSourceAutoScanScheduler.IntervalOptionsHours,
     };
 
-    private static object ToPlaybackSettings(AppSettings settings, MpvRuntimeCapabilities? capabilities = null) => new
+    private object ToPlaybackSettings(AppSettings settings, MpvRuntimeCapabilities? capabilities = null) => new
     {
         endAction = settings.PlaybackEndAction,
         preferredSubtitleLanguage = settings.PreferredSubtitleLanguage,
@@ -1718,7 +1759,19 @@ public sealed class WebControlServer : IAsyncDisposable
         anime4kPresetOptions = MpvQualityPresetSettings.Anime4KValues,
         frameInterpolationMode = AppSettingsStore.NormalizeFrameInterpolationMode(settings.FrameInterpolationMode),
         frameInterpolationModeOptions = MpvFrameInterpolationModes.SupportedValues,
+        rifeEnhancement = RifeEnhancementSettings.Normalize(settings.RifeEnhancement),
+        rifeEnhancementStatus = _rifeEnhancement?.GetStatus() ?? new RifeEnhancementStatus(
+            false, false, null, null, null, null, RifeEnhancementReasons.NotInstalled, null, []),
+        rifeFactorOptions = RifeEnhancementSettings.FactorValues,
+        rifeModelOptions = RifeEnhancementSettings.ModelValues,
+        rifeGpuThreadOptions = RifeEnhancementSettings.GpuThreadValues,
+        rifeProcessingHeightOptions = RifeEnhancementSettings.ProcessingHeightValues,
     };
+
+    private RifeEnhancementService RequireRifeEnhancement() =>
+        _rifeEnhancement ?? throw new BadHttpRequestException(
+            AppStrings.Get("api.errRifeUnavailable"),
+            StatusCodes.Status503ServiceUnavailable);
 
     private static string NormalizeCloudDrivePath(string path)
     {
@@ -1865,7 +1918,8 @@ public sealed class WebControlServer : IAsyncDisposable
         string? AudioPassthroughDevice = null,
         string? UpscalePreset = null,
         string? Anime4KPreset = null,
-        string? FrameInterpolationMode = null);
+        string? FrameInterpolationMode = null,
+        RifeEnhancementSettings? RifeEnhancement = null);
     private sealed record ScanSettingsRequest(
         bool? AutoScanEnabled = null,
         int? AutoScanIntervalHours = null,

@@ -893,9 +893,82 @@
                         <ComboBox x:Name="QualityInterpolationBox" Grid.Column="1" SelectionChanged="QualityInterpolation_SelectionChanged" AutomationProperties.Name="{services:Loc playback.interpolation}">
                             <ComboBoxItem Tag="off"><TextBlock Text="{services:Loc playback.interpolationOff}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                             <ComboBoxItem Tag="mpv"><TextBlock Text="{services:Loc playback.interpolationMpv}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="rife"><TextBlock Text="{services:Loc playback.interpolationRife}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
                         </ComboBox>
                     </Grid>
                     <TextBlock x:Name="QualityShaderHintText" Style="{StaticResource SecondaryText}" Margin="0,0,0,28" TextWrapping="Wrap" Visibility="Collapsed" />
+                    <Border Background="{StaticResource SubtleBorder}" CornerRadius="8" Padding="16" Margin="0,12,0,28">
+                        <StackPanel>
+                            <TextBlock Text="{services:Loc quality.rifeHeading}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc quality.rifeNote}" Style="{StaticResource SecondaryText}" Margin="0,4,0,10" TextWrapping="Wrap" />
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="RifeStatusText" Text="{services:Loc quality.rifeStatusUnknown}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button x:Name="RifeInstallButton" Content="{services:Loc quality.rifeInstall}" Padding="12,4" Margin="0,0,8,0" Click="RifeInstall_Click" />
+                                    <Button x:Name="RifeSelftestButton" Content="{services:Loc quality.rifeSelftest}" Padding="12,4" Margin="0,0,8,0" Click="RifeSelftest_Click" />
+                                    <Button x:Name="RifeUninstallButton" Content="{services:Loc quality.rifeUninstall}" Padding="12,4" Click="RifeUninstall_Click" />
+                                </StackPanel>
+                            </Grid>
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="240" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{services:Loc quality.rifeFactor}" VerticalAlignment="Center" />
+                                <ComboBox x:Name="RifeFactorBox" Grid.Column="1" SelectionChanged="RifeFactor_SelectionChanged" AutomationProperties.Name="{services:Loc quality.rifeFactor}">
+                                    <ComboBoxItem Tag="2"><TextBlock Text="2x" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="3"><TextBlock Text="3x" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="4"><TextBlock Text="4x" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                </ComboBox>
+                            </Grid>
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="240" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{services:Loc quality.rifeModel}" VerticalAlignment="Center" />
+                                <ComboBox x:Name="RifeModelBox" Grid.Column="1" SelectionChanged="RifeModel_SelectionChanged" AutomationProperties.Name="{services:Loc quality.rifeModel}">
+                                    <ComboBoxItem Tag="4.6"><TextBlock Text="4.6" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="4.25-lite"><TextBlock Text="4.25-lite" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                </ComboBox>
+                            </Grid>
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="240" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{services:Loc quality.rifeProcessingHeight}" VerticalAlignment="Center" />
+                                <ComboBox x:Name="RifeHeightBox" Grid.Column="1" SelectionChanged="RifeHeight_SelectionChanged" AutomationProperties.Name="{services:Loc quality.rifeProcessingHeight}">
+                                    <ComboBoxItem Tag="auto"><TextBlock Text="{services:Loc quality.rifeHeightAuto}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="1080"><TextBlock Text="1080p" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="720"><TextBlock Text="720p" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="576"><TextBlock Text="576p" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="540"><TextBlock Text="540p" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="480"><TextBlock Text="480p" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="360"><TextBlock Text="360p" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                </ComboBox>
+                            </Grid>
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="240" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{services:Loc quality.rifeGpuThread}" VerticalAlignment="Center" />
+                                <ComboBox x:Name="RifeGpuThreadBox" Grid.Column="1" SelectionChanged="RifeGpuThread_SelectionChanged" AutomationProperties.Name="{services:Loc quality.rifeGpuThread}">
+                                    <ComboBoxItem Tag="1"><TextBlock Text="1" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="2"><TextBlock Text="2" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="3"><TextBlock Text="3" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                    <ComboBoxItem Tag="4"><TextBlock Text="4" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                                </ComboBox>
+                            </Grid>
+                            <TextBlock x:Name="RifeHintText" Style="{StaticResource SecondaryText}" Margin="0,8,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
+                        </StackPanel>
+                    </Border>
+
 
                     <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="{services:Loc wpf.main.about}" Style="{StaticResource SectionTitle}" Margin="0,28,0,12" />

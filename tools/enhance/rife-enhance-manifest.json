@@ -1,689 +1,411 @@
 {
-  "schemaVersion": 1,
-  "id": "rife-vulkan",
-  "displayName": "RIFE 真插帧（实验性）",
-  "version": "2026.11-r73-rife-r9modv33",
-  "channel": "stable",
-  "minAppVersion": "0.2.0",
-  "arch": "x64",
-  "backend": "rife-ncnn-vulkan",
-  "generatedAtUtc": "2026-11-18T09:50:00Z",
-  "sourceArchive": {
-    "url": "https://github.com/ModerRAS/MiruPlay-Windows/releases/download/enhance-rife-2026.11-r73-rife-r9modv33/rife-2026.11-r73-rife-r9modv33.7z",
-    "sha256": "582e88cc5579e1121dfd62d7005e700fec8628f4ea53119241cf84a7f2727294",
-    "size": 21342045,
-    "format": "7z",
-    "unpackedSize": 44418959,
-    "fileCount": 105,
-    "note": "Placeholder GitHub Release asset URL (repo ModerRAS/MiruPlay-Windows, tag enhance-rife-<version>). Replace url/sha256/size from the final release archive via Get-EnhancementPack.ps1 -GenerateManifest."
-  },
-  "runtime": {
-    "python": "3.14.3",
-    "vapoursynth": "R73",
-    "apiVersion": "R4.1",
-    "vsscript": "VSScript.dll",
-    "vsscriptSha256": "8722117f6cfc9bfafab445da4a10d70f9b7bc227b9312a0edc4df15128c9a6ad",
-    "layout": "portable.vs + vs-plugins + vs-coreplugins + Lib/site-packages"
-  },
-  "plugins": [
-    {
-      "name": "rife",
-      "file": "vs-plugins/librife_windows_x86-64.dll",
-      "sha256": "06830be202057b33ed7d8fd24e59e8918ed36a4fb156a6010a45c0881b0a7671",
-      "size": 5243904,
-      "source": "https://github.com/styler00dollar/VapourSynth-RIFE-ncnn-Vulkan/releases/tag/r9_mod_v33",
-      "license": "MIT"
-    }
-  ],
-  "models": [
-    {
-      "id": "4.6",
-      "index": 23,
-      "path": "vs-plugins/models/rife-v4.6_ensembleFalse",
-      "size": 10656595,
-      "default": true
-    },
-    {
-      "id": "4.25-lite",
-      "index": 70,
-      "path": "vs-plugins/models/rife-v4.25-lite_ensembleFalse",
-      "size": 11312082,
-      "default": false
-    }
-  ],
-  "scripts": [
-    {
-      "id": "rife-2x",
-      "file": "scripts/rife2x.vpy",
-      "sha256": "1cc57c51fa215ce47a03784688a8b999191ec8d0d4bd9ab2caf85f573e847845",
-      "size": 1376
-    },
-    {
-      "id": "rife-3x",
-      "file": "scripts/rife3x.vpy",
-      "sha256": "1cc57c51fa215ce47a03784688a8b999191ec8d0d4bd9ab2caf85f573e847845",
-      "size": 1376
-    },
-    {
-      "id": "rife-4x",
-      "file": "scripts/rife4x.vpy",
-      "sha256": "1cc57c51fa215ce47a03784688a8b999191ec8d0d4bd9ab2caf85f573e847845",
-      "size": 1376
-    }
-  ],
-  "selftest": {
-    "runner": "VSPipe.exe",
-    "command": "VSPipe.exe -p -c y4m <selftest.vpy> NUL",
-    "resultsPrefix": "Output ",
-    "scripts": [
-      {
-        "file": "selftest/selftest_360p.vpy",
-        "sha256": "439c17eb5a508ddb7dd188b7deac7e2afafa988b5fe5cac7cd1f8a823815e805",
-        "size": 569
-      },
-      {
-        "file": "selftest/selftest_480p.vpy",
-        "sha256": "2d621dd8b7cdd6d8d6c82fc833080696e11066a497a1692ab218a7204eba797c",
-        "size": 569
-      },
-      {
-        "file": "selftest/selftest_540p.vpy",
-        "sha256": "dec7820722c4b795cb2ee93ae26dd9b15b58ef6a1ac39c7f50c2ab4d5a4b4b65",
-        "size": 569
-      },
-      {
-        "file": "selftest/selftest_1080p.vpy",
-        "sha256": "a70e8211f9c709227e4b91ba4bb1de5692c83b1a7db8f1595178499a18bc0dba",
-        "size": 571
-      },
-      {
-        "file": "selftest/selftest_576p.vpy",
-        "sha256": "439b0a3a6aba47de282e63a52753ee1734fde4937e7ba58d4ca43ad1cd5d5394",
-        "size": 570
-      },
-      {
-        "file": "selftest/selftest_720p.vpy",
-        "sha256": "b1faa61868ec3b97a04637a6c9a0cf233e774a72a42f3cf45c0416d919afe5fa",
-        "size": 570
-      }
-    ]
-  },
-  "capabilities": {
-    "factors": [
-      2,
-      3,
-      4
-    ],
-    "modelIds": [
-      "4.6",
-      "4.25-lite"
-    ],
-    "maxProcessingHeightDefault": "auto",
-    "processingHeightOptions": [
-      1080,
-      720,
-      576,
-      540,
-      480,
-      360
-    ],
-    "hdr": false,
-    "hwdecCompatible": true,
-    "requiresVulkan": true,
-    "gpuBackend": "ncnn-vulkan"
-  },
-  "licenses": [
-    {
-      "component": "VapourSynth",
-      "license": "LGPL-2.1",
-      "file": "licenses/vapoursynth-LGPL-2.1.txt"
-    },
-    {
-      "component": "Python",
-      "license": "PSF-2.0",
-      "file": "licenses/python-LICENSE.txt"
-    },
-    {
-      "component": "librife (HolyWu/styler00dollar)",
-      "license": "MIT",
-      "file": "licenses/librife-MIT.txt"
-    },
-    {
-      "component": "ncnn",
-      "license": "BSD-3-Clause",
-      "file": "licenses/ncnn-BSD-3-Clause.txt"
-    },
-    {
-      "component": "RIFE models",
-      "license": "MIT",
-      "file": "licenses/rife-MIT.txt"
-    }
-  ],
-  "files": [
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/mod_etc.cpython-314.pyc",
-      "sha256": "8e812252dc78d1ba72ede76d81be1d728d36bed4c4086a331bfb774eb209b2df",
-      "size": 23034
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/mod_fmt.cpython-314.pyc",
-      "sha256": "4fd817b00ac83b3a65419106feeba909c2ad6c75c965922435846cd131723fdd",
-      "size": 11147
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/mod_helper.cpython-314.pyc",
-      "sha256": "721bd9443dc454c365ef7555ad7661341ae03c5cbf9789300889e816795821e7",
-      "size": 30896
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_misc/dcf2.py",
-      "sha256": "ee30ce7c19adf4cb7977cc324e1deabffcf29f6eee7c579ecc11610c7a65810a",
-      "size": 3773
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_misc/__init__.py",
-      "sha256": "d59aca94c0b8c83832c337ed38f0b739ab66ee486a58ea29158df38682e23b61",
-      "size": 194
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/mod_dbdn.cpython-314.pyc",
-      "sha256": "116bc5a01a5c7520a334abdc8101e4243f2f0d059608466c659b067b93785a8b",
-      "size": 29152
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/mod_memc.cpython-314.pyc",
-      "sha256": "338f900e8c9dadbc3de04f306a1024916fc81c3b63cc26949fcdc21c73f06f21",
-      "size": 42284
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/__init__.cpython-314.pyc",
-      "sha256": "8fd3028ff71fce64c21a7f5d932c64952c79943a25efeefed61747236b588899",
-      "size": 900
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth-73.dist-info/direct_url.json",
-      "sha256": "9ef8739e53dbd4aca1887a53c1c66f94a4e9fdf2d1ed478a91c2ca75b07d0e63",
-      "size": 280
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth-73.dist-info/INSTALLER",
-      "sha256": "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
-      "size": 4
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/mod_mix.cpython-314.pyc",
-      "sha256": "e47ebb8f6b8caada1f5eb3b4fde024eab45f0c1a09e4780a05ec3dd16755b9ed",
-      "size": 21331
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/mod_scale.cpython-314.pyc",
-      "sha256": "4d4644f12680a3153cf93e28c149efcab1f1609e18c3fb394c547f8ee8073d73",
-      "size": 14702
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__pycache__/_internal.cpython-314.pyc",
-      "sha256": "b2996ee882bbab184f835cca690da60cf31d9b401737f6317ee2e5cd6cb0fc05",
-      "size": 12914
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_internal.py",
-      "sha256": "1d8aa3c81065191bf47a511bb5cbd1664f03a2ccd51e1c1fc9cd66518899f536",
-      "size": 6860
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__init__.py",
-      "sha256": "df3179c2165f78ca9dbc1d2ffecfc3df528969b5ff7f833f7526c119139dd77d",
-      "size": 534
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/__main__.py",
-      "sha256": "a8ecd125a20b6aad8d69dc03061417e4ea3f6107e3aaf3bbe3ca939c0f06101b",
-      "size": 466
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/mod_memc.py",
-      "sha256": "4266995ad20c9f931ae84ffb288d873cde662e05d2839e45d37db1429bdc2226",
-      "size": 31418
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/mod_mix.py",
-      "sha256": "6b705a3ff33e8bd0d5040e7cfbeca4dfa1fec62e0c13326a10347c43999b295d",
-      "size": 13570
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/mod_scale.py",
-      "sha256": "7083fe9f9c67b6c646bf65c3af52655bc4a1e828419310ea9d263895661dfb79",
-      "size": 9407
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_external/dfttest2.py",
-      "sha256": "dc235a7b4c6a5e57ea1f0573e3743fb2d995a6709f859720d7456fe254a79cd4",
-      "size": 28172
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_external/vsmlrt.py",
-      "sha256": "63888593f968fd4735a1b059b71b38f275e20d53d7200ac436dccba029363669",
-      "size": 112019
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_external/__init__.py",
-      "sha256": "2fb9fc32ae956e8dcb38f9b6b7866a538f3bd08cc407fb49fff93ad203cf575b",
-      "size": 666
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_misc/colorfly.py",
-      "sha256": "5b6f8e5b26e081bc807167cd88721ea972becdfdb8badf6f4512b6a73c236a52",
-      "size": 27515
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_external/mvsfunc.py",
-      "sha256": "b2890555dce69c298f7d0ffe555724876fb5c073e58f154f39a505c15cf64bb9",
-      "size": 151612
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_external/nnedi3_resample.py",
-      "sha256": "8114b141535c28d5f430e97c78bc287d5d11103771871f358eb534a35cdfdf96",
-      "size": 23466
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/_external/qtgmc.py",
-      "sha256": "3757a894410a46fcf15f0f150248eca706a72774b24381d2fb7e3326f1619c47",
-      "size": 59098
-    },
-    {
-      "path": "selftest/selftest_360p.vpy",
-      "sha256": "439c17eb5a508ddb7dd188b7deac7e2afafa988b5fe5cac7cd1f8a823815e805",
-      "size": 569
-    },
-    {
-      "path": "selftest/selftest_480p.vpy",
-      "sha256": "2d621dd8b7cdd6d8d6c82fc833080696e11066a497a1692ab218a7204eba797c",
-      "size": 569
-    },
-    {
-      "path": "selftest/selftest_540p.vpy",
-      "sha256": "dec7820722c4b795cb2ee93ae26dd9b15b58ef6a1ac39c7f50c2ab4d5a4b4b65",
-      "size": 569
-    },
-    {
-      "path": "scripts/rife3x.vpy",
-      "sha256": "1cc57c51fa215ce47a03784688a8b999191ec8d0d4bd9ab2caf85f573e847845",
-      "size": 1376
-    },
-    {
-      "path": "scripts/rife4x.vpy",
-      "sha256": "1cc57c51fa215ce47a03784688a8b999191ec8d0d4bd9ab2caf85f573e847845",
-      "size": 1376
-    },
-    {
-      "path": "selftest/selftest_1080p.vpy",
-      "sha256": "a70e8211f9c709227e4b91ba4bb1de5692c83b1a7db8f1595178499a18bc0dba",
-      "size": 571
-    },
-    {
-      "path": "selftest/selftest_576p.vpy",
-      "sha256": "439b0a3a6aba47de282e63a52753ee1734fde4937e7ba58d4ca43ad1cd5d5394",
-      "size": 570
-    },
-    {
-      "path": "vs-plugins/models/rife-v4.6_ensembleFalse/flownet.bin",
-      "sha256": "03393cf14fe6d0af015d24d93bae1e5925f2828cb3b6555300a132643c617aa5",
-      "size": 10629680
-    },
-    {
-      "path": "vs-plugins/models/rife-v4.6_ensembleFalse/flownet.param",
-      "sha256": "ae9b08af43fba97e27aa2c40c04c35b1a75f637b2d2b01a941fa94361ab25cbd",
-      "size": 26915
-    },
-    {
-      "path": "vs-scripts/.keep",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
-    },
-    {
-      "path": "selftest/selftest_720p.vpy",
-      "sha256": "b1faa61868ec3b97a04637a6c9a0cf233e774a72a42f3cf45c0416d919afe5fa",
-      "size": 570
-    },
-    {
-      "path": "vs-coreplugins/AvsCompat.dll",
-      "sha256": "fcb328a5038aebe40a44260f40220fa31e3a0b2d61f49d793ed92b96cf7c4f5b",
-      "size": 152576
-    },
-    {
-      "path": "vs-plugins/librife_windows_x86-64.dll",
-      "sha256": "06830be202057b33ed7d8fd24e59e8918ed36a4fb156a6010a45c0881b0a7671",
-      "size": 5243904
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth-73.dist-info/top_level.txt",
-      "sha256": "660a89a972f54f9f6463ba4c6f881d071f04530689039ef7701e0ab73ac2e6bb",
-      "size": 28
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth-73.dist-info/WHEEL",
-      "sha256": "7ac32499a99338d72a63adf2c91e045b8e12276c66e153da3c5c29c27bf03ab3",
-      "size": 100
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth-73.dist-info/licenses/COPYING.LESSER",
-      "sha256": "92a759ec0febde4750821736bbde642a3b835c0604fc81bee62f9e428f86981f",
-      "size": 27028
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth-73.dist-info/METADATA",
-      "sha256": "dddd61440c57de607f821b8345e7038b6e4886fbfc5f56ddda9fc145a7405173",
-      "size": 2048
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth-73.dist-info/RECORD",
-      "sha256": "b7be7f350a6f0c3e99a012323b35d540f20579a47a9236f20a9698dd40eca931",
-      "size": 1331
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth-73.dist-info/REQUESTED",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
-    },
-    {
-      "path": "Lib/site-packages/vsscript/vsscript_internal.h",
-      "sha256": "9acb70db9fccf262cdecbe78449fe02f701f9520101806979c3309e2d2cd72e8",
-      "size": 1092
-    },
-    {
-      "path": "licenses/rife-MIT.txt",
-      "sha256": "0ed056092dc6a2f90f992623a688c9a05c450edc34e727457d92a98a80c8f0b1",
-      "size": 1071
-    },
-    {
-      "path": "licenses/vapoursynth-LGPL-2.1.txt",
-      "sha256": "92a759ec0febde4750821736bbde642a3b835c0604fc81bee62f9e428f86981f",
-      "size": 27028
-    },
-    {
-      "path": "scripts/rife2x.vpy",
-      "sha256": "1cc57c51fa215ce47a03784688a8b999191ec8d0d4bd9ab2caf85f573e847845",
-      "size": 1376
-    },
-    {
-      "path": "licenses/librife-MIT.txt",
-      "sha256": "24b76be71c3a12b089e28828ca27a9aa11855340f5ad39422334089986f310fc",
-      "size": 1073
-    },
-    {
-      "path": "licenses/ncnn-BSD-3-Clause.txt",
-      "sha256": "c81f07ffc8698c59a8dffdd12f6a444648b9c3b6bae16c7e1d7f2fd16a295acb",
-      "size": 6432
-    },
-    {
-      "path": "licenses/python-LICENSE.txt",
-      "sha256": "935cf13e19f8c31b497d20b05d73623431a226b230c3599bc30fa3348979bc68",
-      "size": 35407
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/mod_helper.py",
-      "sha256": "bdfc8c1c7505aa5633c9b37c7cf70aff458730c202b75cbb543b3ead4947cb00",
-      "size": 19036
-    },
-    {
-      "path": "python314._pth",
-      "sha256": "6f2f9713492df599e2b775ad17c9f010e3fe77cd63afe5d105ad2e2716754c19",
-      "size": 91
-    },
-    {
-      "path": "select.pyd",
-      "sha256": "05734bd352ce60c944d474aa62468cc5eebf400097f1d9d0c453d37aed26fcca",
-      "size": 33624
-    },
-    {
-      "path": "sqlite3.dll",
-      "sha256": "bf85c9ae8a9eda75ce45dee2d325aabc4426557c5223b38cb4271f860cc808c2",
-      "size": 1584984
-    },
-    {
-      "path": "python3.dll",
-      "sha256": "be1017ca4ca8ff837efbb343d5c8f739bd67bd1c43fb41068a539b19357c0213",
-      "size": 74072
-    },
-    {
-      "path": "python314.dll",
-      "sha256": "1ac15e2224581fc678bbd17728b9aa538d47b891b72c76499ef07e54cd74f151",
-      "size": 6753112
-    },
-    {
-      "path": "python314.zip",
-      "sha256": "dcb07c93dbb4259be58b3755de8e26631a9217d578268579a3eda6a223eccf76",
-      "size": 4112470
-    },
-    {
-      "path": "unicodedata.pyd",
-      "sha256": "4445b894f836e89a8b9fdcc88b5e59fbc76aca805baaf40aeb69e869978d4e6d",
-      "size": 758104
-    },
-    {
-      "path": "vcruntime140_threads.dll",
-      "sha256": "a6222020b500a9a86b36e040c2dbd0e459716db1bf2810a11cd7512ea9b8d89b",
-      "size": 37456
-    },
-    {
-      "path": "VSPipe.exe",
-      "sha256": "67c612e7805066a1ed1e97bf151a22c5d3642b940c9d62fabb4707cbc2a7281e",
-      "size": 239616
-    },
-    {
-      "path": "VSScript.dll",
-      "sha256": "8722117f6cfc9bfafab445da4a10d70f9b7bc227b9312a0edc4df15128c9a6ad",
-      "size": 45056
-    },
-    {
-      "path": "vccorlib140.dll",
-      "sha256": "6b8d8a76c3e6664293407553650e60b94df9aaafc7c92057ea83032bd228e44f",
-      "size": 350880
-    },
-    {
-      "path": "vcruntime140.dll",
-      "sha256": "052ad6a20d375957e82aa6a3c441ea548d89be0981516ca7eb306e063d5027f4",
-      "size": 120400
-    },
-    {
-      "path": "vcruntime140_1.dll",
-      "sha256": "6a99bc0128e0c7d6cbbf615fcc26909565e17d4ca3451b97f8987f9c6acbc6c8",
-      "size": 49776
-    },
-    {
-      "path": "libssl-3.dll",
-      "sha256": "1e4bc0638682bfcbb36f4465d6a2e9944d917a60f05ecc8ddf9e96847e05e13f",
-      "size": 794992
-    },
-    {
-      "path": "msvcp140.dll",
-      "sha256": "def46aa6a8f72f27bafac0c43334419486a4d1dcdb6c479a8ef7034b3e1fa4cb",
-      "size": 553552
-    },
-    {
-      "path": "msvcp140_1.dll",
-      "sha256": "2dd670f874562fbdca5b022df1943d70a57ba91fde559280e3a1daebe4db2380",
-      "size": 35488
-    },
-    {
-      "path": "concrt140.dll",
-      "sha256": "b2faf3b85b23c840b654e57d5497a0ad31acd02fb01856cad4725a1715d5f78e",
-      "size": 321696
-    },
-    {
-      "path": "libcrypto-3.dll",
-      "sha256": "e03dd02fdcfb791981c9962827cfcf495f2a47a514c1526efb57f847a9df514a",
-      "size": 5229424
-    },
-    {
-      "path": "libffi-8.dll",
-      "sha256": "eff52743773eb550fcc6ce3efc37c85724502233b6b002a35496d828bd7b280a",
-      "size": 39696
-    },
-    {
-      "path": "msvcp140_2.dll",
-      "sha256": "1d60da3ac2b06482912ca852fa7047436e6e474b4cfffa3bf77f4598cfbf454c",
-      "size": 278608
-    },
-    {
-      "path": "pyexpat.pyd",
-      "sha256": "b6d5142424d161039c25bea00e6acd8f7b1a5331d3994d9f3c28bd083ede159f",
-      "size": 218968
-    },
-    {
-      "path": "python.cat",
-      "sha256": "ce06bbe86a96e0793ac4a6de361c2a10f7c773380e48f7fb5e1e952a7dc29f1f",
-      "size": 594323
-    },
-    {
-      "path": "python.exe",
-      "sha256": "cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b",
-      "size": 106328
-    },
-    {
-      "path": "msvcp140_atomic_wait.dll",
-      "sha256": "e7963645e0d1db08e300614d4c5fa7194bd8173e9ab7a5558859e6b232ed3241",
-      "size": 48800
-    },
-    {
-      "path": "msvcp140_codecvt_ids.dll",
-      "sha256": "ae8d922b00cdd93e3ebecc37beb46c800f383ebdeb9f9e5b84e04a72428b6fb3",
-      "size": 31392
-    },
-    {
-      "path": "portable.vs",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 0
-    },
-    {
-      "path": "_ssl.pyd",
-      "sha256": "43e60bbdff2fe41701f39fa25ea6a8251a2b7623ff18f980a209a451eb5e648f",
-      "size": 184664
-    },
-    {
-      "path": "_uuid.pyd",
-      "sha256": "fc7406772b43caa3b6f41c690753792188b1c14c36a723d49e9276b7457696ce",
-      "size": 28504
-    },
-    {
-      "path": "_wmi.pyd",
-      "sha256": "5a7f3444f1c2f85fb5573bc330c1aea2c583912bb6f948ff81f8fd89a30e67be",
-      "size": 40280
-    },
-    {
-      "path": "_remote_debugging.pyd",
-      "sha256": "26cf68ed8e3f952c2cc4e7a70b0c9148d24df0fe5a2759e5ba9bcca685bd92bc",
-      "size": 75608
-    },
-    {
-      "path": "_socket.pyd",
-      "sha256": "ff3e97cd11bdc68798e5b3dcd5295d1efba179b7344142d50d066bbf1c2d79cd",
-      "size": 87384
-    },
-    {
-      "path": "_sqlite3.pyd",
-      "sha256": "c6d7bcea0084bcfa3c487bd7040350ee7c77f4108ce74b964f760133b2a7a6b2",
-      "size": 132440
-    },
-    {
-      "path": "_zoneinfo.pyd",
-      "sha256": "a214ce4504b9a204196e2d2d9c5c1b3d317bb35f4ea3a1f469a334240564c81f",
-      "size": 51544
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/mod_dbdn.py",
-      "sha256": "e055136049cfe33d8602f35d96c53bde4581d9ef675f863d1ad17f1520974831",
-      "size": 19624
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/mod_etc.py",
-      "sha256": "13dbd40462ba8206665c2c82627340eef9fc0039285fd670ac6fe940c9dcf138",
-      "size": 13820
-    },
-    {
-      "path": "Lib/site-packages/k7sfunc/mod_fmt.py",
-      "sha256": "b48900b865a5331c5b3cd65644902b37fd1b59b54982ccebed722a56c5a08705",
-      "size": 7338
-    },
-    {
-      "path": "_zstd.pyd",
-      "sha256": "536a3b521a3c42d2827ece0ccfbe40b83a2fd96a0f5496cd60b943b10e1266d4",
-      "size": 503640
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth.dll",
-      "sha256": "24ee8126a7d95e88530504cf80d0254d84ad199d187f0c60ff1537e7e3baa87f",
-      "size": 2085888
-    },
-    {
-      "path": "Lib/site-packages/vapoursynth.pyd",
-      "sha256": "73fc94542c5e0b2128b60b74cefe404910cdfaf709282b2cc50d4fa7d67ecd45",
-      "size": 649728
-    },
-    {
-      "path": "_asyncio.pyd",
-      "sha256": "48fdd95938c43b8b3e1f6312de651a53d459e8e2c754fbbdf48e99f5caa1f55b",
-      "size": 78168
-    },
-    {
-      "path": "_bz2.pyd",
-      "sha256": "a4be36fffeefa8b24c1234d548da8f05558aba53c2ea7d1d2614776eaad8fbf4",
-      "size": 87384
-    },
-    {
-      "path": "_ctypes.pyd",
-      "sha256": "f8a9f7831e81b2bfba12456e589f8198114f24986bd527ac231a844565afcddb",
-      "size": 142680
-    },
-    {
-      "path": "VSScriptPython38.dll",
-      "sha256": "3596609ff45b7be0bd38ce1e6e1860fac2700b0919589857a806204f6919f832",
-      "size": 45056
-    },
-    {
-      "path": "VSVFW.dll",
-      "sha256": "7bd76e37fbcc72cc4ea16001d4000fdb24dcf6c682b2c6569e8407f18a16bfac",
-      "size": 108032
-    },
-    {
-      "path": "winsound.pyd",
-      "sha256": "ebcbf8aec8331573f4e4e00c3b90148d2b0083b89af261193389a4fd6ddb6dda",
-      "size": 33112
-    },
-    {
-      "path": "_decimal.pyd",
-      "sha256": "04738ee6b96bcc6351446b011b523d831aa88ec3f11d4b64c33414c965b56b80",
-      "size": 290648
-    },
-    {
-      "path": "_multiprocessing.pyd",
-      "sha256": "84a2e86428dde756e6f3e56369daf558180a30f1f7d4781cce295304e19b6fb8",
-      "size": 38744
-    },
-    {
-      "path": "_overlapped.pyd",
-      "sha256": "80a2f8feda9255ef611af0a28fd4df311e3cd59c3dc4eaba9a2e97bd42ddbf54",
-      "size": 58200
-    },
-    {
-      "path": "_queue.pyd",
-      "sha256": "cb529f77bc4665dfa3b66fae3d00ab84de1e9618d0cb94900efbf28527623c0f",
-      "size": 36696
-    },
-    {
-      "path": "_elementtree.pyd",
-      "sha256": "fbb615c3373825d4ffd61fef4698aa5b2bce474bc2c3f75dea4b9a06fff23800",
-      "size": 138584
-    },
-    {
-      "path": "_hashlib.pyd",
-      "sha256": "d4524b261f09806a828c62fc97e8517328b23d65ab87d20706a4bafd86bbf345",
-      "size": 69464
-    },
-    {
-      "path": "_lzma.pyd",
-      "sha256": "f7ad11fbbb7aeaf7b6566a532a3243e3ae5f92bac480dbe5c2ef300fe2c1dabe",
-      "size": 161112
-    }
-  ]
+    "schemaVersion":  1,
+    "id":  "rife-vulkan",
+    "version":  "2026.11",
+    "minAppVersion":  "0.2.0",
+    "sourceArchive":  {
+                          "url":  "https://github.com/ModerRAS/MiruPlay-Windows/releases/download/enhance-rife-2026.11/rife-2026.11.7z",
+                          "sha256":  "4e0c1afdd3d869aca1bb5ec17139045ee648b7c8e8b5d180d22eb6740093e6d6",
+                          "size":  31239766,
+                          "format":  "7z",
+                          "unpackedSize":  54261641,
+                          "fileCount":  69
+                      },
+    "components":  {
+                       "vapoursynth":  "R73",
+                       "python":  "3.14.3",
+                       "rife":  "rife-ncnn-vulkan r9_mod_v33",
+                       "models":  [
+                                      "4.6",
+                                      "4.25-lite"
+                                  ]
+                   },
+    "models":  [
+                   {
+                       "id":  "4.6",
+                       "index":  23,
+                       "default":  true,
+                       "path":  "vs-plugins/models/rife-v4.6_ensembleFalse"
+                   },
+                   {
+                       "id":  "4.25-lite",
+                       "index":  70,
+                       "default":  false,
+                       "path":  "vs-plugins/models/rife-v4.25-lite_ensembleFalse"
+                   }
+               ],
+    "licenses":  [
+                     {
+                         "component":  "VapourSynth",
+                         "license":  "LGPL-2.1",
+                         "file":  "licenses/VapourSynth-LGPL-2.1.txt"
+                     },
+                     {
+                         "component":  "Python",
+                         "license":  "PSF-2.0",
+                         "file":  "licenses/Python-PSF-2.0.txt"
+                     },
+                     {
+                         "component":  "RIFE ncnn plugin (HolyWu/styler00dollar)",
+                         "license":  "MIT",
+                         "file":  "licenses/RIFE-ncnn-Vulkan-MIT.txt"
+                     },
+                     {
+                         "component":  "ncnn",
+                         "license":  "BSD-3-Clause",
+                         "file":  "licenses/ncnn-BSD-3-Clause.txt"
+                     },
+                     {
+                         "component":  "RIFE models",
+                         "license":  "MIT",
+                         "file":  "licenses/RIFE-MIT.txt"
+                     }
+                 ],
+    "files":  [
+                  {
+                      "path":  "_asyncio.pyd",
+                      "sha256":  "48fdd95938c43b8b3e1f6312de651a53d459e8e2c754fbbdf48e99f5caa1f55b",
+                      "size":  78168
+                  },
+                  {
+                      "path":  "_bz2.pyd",
+                      "sha256":  "a4be36fffeefa8b24c1234d548da8f05558aba53c2ea7d1d2614776eaad8fbf4",
+                      "size":  87384
+                  },
+                  {
+                      "path":  "_ctypes.pyd",
+                      "sha256":  "f8a9f7831e81b2bfba12456e589f8198114f24986bd527ac231a844565afcddb",
+                      "size":  142680
+                  },
+                  {
+                      "path":  "_decimal.pyd",
+                      "sha256":  "04738ee6b96bcc6351446b011b523d831aa88ec3f11d4b64c33414c965b56b80",
+                      "size":  290648
+                  },
+                  {
+                      "path":  "_elementtree.pyd",
+                      "sha256":  "fbb615c3373825d4ffd61fef4698aa5b2bce474bc2c3f75dea4b9a06fff23800",
+                      "size":  138584
+                  },
+                  {
+                      "path":  "_hashlib.pyd",
+                      "sha256":  "d4524b261f09806a828c62fc97e8517328b23d65ab87d20706a4bafd86bbf345",
+                      "size":  69464
+                  },
+                  {
+                      "path":  "_lzma.pyd",
+                      "sha256":  "f7ad11fbbb7aeaf7b6566a532a3243e3ae5f92bac480dbe5c2ef300fe2c1dabe",
+                      "size":  161112
+                  },
+                  {
+                      "path":  "_multiprocessing.pyd",
+                      "sha256":  "84a2e86428dde756e6f3e56369daf558180a30f1f7d4781cce295304e19b6fb8",
+                      "size":  38744
+                  },
+                  {
+                      "path":  "_overlapped.pyd",
+                      "sha256":  "80a2f8feda9255ef611af0a28fd4df311e3cd59c3dc4eaba9a2e97bd42ddbf54",
+                      "size":  58200
+                  },
+                  {
+                      "path":  "_queue.pyd",
+                      "sha256":  "cb529f77bc4665dfa3b66fae3d00ab84de1e9618d0cb94900efbf28527623c0f",
+                      "size":  36696
+                  },
+                  {
+                      "path":  "_remote_debugging.pyd",
+                      "sha256":  "26cf68ed8e3f952c2cc4e7a70b0c9148d24df0fe5a2759e5ba9bcca685bd92bc",
+                      "size":  75608
+                  },
+                  {
+                      "path":  "_socket.pyd",
+                      "sha256":  "ff3e97cd11bdc68798e5b3dcd5295d1efba179b7344142d50d066bbf1c2d79cd",
+                      "size":  87384
+                  },
+                  {
+                      "path":  "_sqlite3.pyd",
+                      "sha256":  "c6d7bcea0084bcfa3c487bd7040350ee7c77f4108ce74b964f760133b2a7a6b2",
+                      "size":  132440
+                  },
+                  {
+                      "path":  "_ssl.pyd",
+                      "sha256":  "43e60bbdff2fe41701f39fa25ea6a8251a2b7623ff18f980a209a451eb5e648f",
+                      "size":  184664
+                  },
+                  {
+                      "path":  "_uuid.pyd",
+                      "sha256":  "fc7406772b43caa3b6f41c690753792188b1c14c36a723d49e9276b7457696ce",
+                      "size":  28504
+                  },
+                  {
+                      "path":  "_wmi.pyd",
+                      "sha256":  "5a7f3444f1c2f85fb5573bc330c1aea2c583912bb6f948ff81f8fd89a30e67be",
+                      "size":  40280
+                  },
+                  {
+                      "path":  "_zoneinfo.pyd",
+                      "sha256":  "a214ce4504b9a204196e2d2d9c5c1b3d317bb35f4ea3a1f469a334240564c81f",
+                      "size":  51544
+                  },
+                  {
+                      "path":  "_zstd.pyd",
+                      "sha256":  "536a3b521a3c42d2827ece0ccfbe40b83a2fd96a0f5496cd60b943b10e1266d4",
+                      "size":  503640
+                  },
+                  {
+                      "path":  "concrt140.dll",
+                      "sha256":  "b2faf3b85b23c840b654e57d5497a0ad31acd02fb01856cad4725a1715d5f78e",
+                      "size":  321696
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth.dll",
+                      "sha256":  "24ee8126a7d95e88530504cf80d0254d84ad199d187f0c60ff1537e7e3baa87f",
+                      "size":  2085888
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth.pyd",
+                      "sha256":  "73fc94542c5e0b2128b60b74cefe404910cdfaf709282b2cc50d4fa7d67ecd45",
+                      "size":  649728
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth-73.dist-info/direct_url.json",
+                      "sha256":  "9ef8739e53dbd4aca1887a53c1c66f94a4e9fdf2d1ed478a91c2ca75b07d0e63",
+                      "size":  280
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth-73.dist-info/INSTALLER",
+                      "sha256":  "ceebae7b8927a3227e5303cf5e0f1f7b34bb542ad7250ac03fbcde36ec2f1508",
+                      "size":  4
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth-73.dist-info/licenses/COPYING.LESSER",
+                      "sha256":  "92a759ec0febde4750821736bbde642a3b835c0604fc81bee62f9e428f86981f",
+                      "size":  27028
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth-73.dist-info/METADATA",
+                      "sha256":  "dddd61440c57de607f821b8345e7038b6e4886fbfc5f56ddda9fc145a7405173",
+                      "size":  2048
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth-73.dist-info/RECORD",
+                      "sha256":  "b7be7f350a6f0c3e99a012323b35d540f20579a47a9236f20a9698dd40eca931",
+                      "size":  1331
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth-73.dist-info/REQUESTED",
+                      "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "size":  0
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth-73.dist-info/top_level.txt",
+                      "sha256":  "660a89a972f54f9f6463ba4c6f881d071f04530689039ef7701e0ab73ac2e6bb",
+                      "size":  28
+                  },
+                  {
+                      "path":  "Lib/site-packages/vapoursynth-73.dist-info/WHEEL",
+                      "sha256":  "7ac32499a99338d72a63adf2c91e045b8e12276c66e153da3c5c29c27bf03ab3",
+                      "size":  100
+                  },
+                  {
+                      "path":  "Lib/site-packages/vsscript/vsscript_internal.h",
+                      "sha256":  "9acb70db9fccf262cdecbe78449fe02f701f9520101806979c3309e2d2cd72e8",
+                      "size":  1092
+                  },
+                  {
+                      "path":  "libcrypto-3.dll",
+                      "sha256":  "e03dd02fdcfb791981c9962827cfcf495f2a47a514c1526efb57f847a9df514a",
+                      "size":  5229424
+                  },
+                  {
+                      "path":  "libffi-8.dll",
+                      "sha256":  "eff52743773eb550fcc6ce3efc37c85724502233b6b002a35496d828bd7b280a",
+                      "size":  39696
+                  },
+                  {
+                      "path":  "libssl-3.dll",
+                      "sha256":  "1e4bc0638682bfcbb36f4465d6a2e9944d917a60f05ecc8ddf9e96847e05e13f",
+                      "size":  794992
+                  },
+                  {
+                      "path":  "licenses/ncnn-BSD-3-Clause.txt",
+                      "sha256":  "c81f07ffc8698c59a8dffdd12f6a444648b9c3b6bae16c7e1d7f2fd16a295acb",
+                      "size":  6432
+                  },
+                  {
+                      "path":  "licenses/Python-PSF-2.0.txt",
+                      "sha256":  "935cf13e19f8c31b497d20b05d73623431a226b230c3599bc30fa3348979bc68",
+                      "size":  35407
+                  },
+                  {
+                      "path":  "licenses/RIFE-MIT.txt",
+                      "sha256":  "0ed056092dc6a2f90f992623a688c9a05c450edc34e727457d92a98a80c8f0b1",
+                      "size":  1071
+                  },
+                  {
+                      "path":  "licenses/RIFE-ncnn-Vulkan-MIT.txt",
+                      "sha256":  "24b76be71c3a12b089e28828ca27a9aa11855340f5ad39422334089986f310fc",
+                      "size":  1073
+                  },
+                  {
+                      "path":  "licenses/VapourSynth-LGPL-2.1.txt",
+                      "sha256":  "92a759ec0febde4750821736bbde642a3b835c0604fc81bee62f9e428f86981f",
+                      "size":  27028
+                  },
+                  {
+                      "path":  "msvcp140.dll",
+                      "sha256":  "def46aa6a8f72f27bafac0c43334419486a4d1dcdb6c479a8ef7034b3e1fa4cb",
+                      "size":  553552
+                  },
+                  {
+                      "path":  "msvcp140_1.dll",
+                      "sha256":  "2dd670f874562fbdca5b022df1943d70a57ba91fde559280e3a1daebe4db2380",
+                      "size":  35488
+                  },
+                  {
+                      "path":  "msvcp140_2.dll",
+                      "sha256":  "1d60da3ac2b06482912ca852fa7047436e6e474b4cfffa3bf77f4598cfbf454c",
+                      "size":  278608
+                  },
+                  {
+                      "path":  "msvcp140_atomic_wait.dll",
+                      "sha256":  "e7963645e0d1db08e300614d4c5fa7194bd8173e9ab7a5558859e6b232ed3241",
+                      "size":  48800
+                  },
+                  {
+                      "path":  "msvcp140_codecvt_ids.dll",
+                      "sha256":  "ae8d922b00cdd93e3ebecc37beb46c800f383ebdeb9f9e5b84e04a72428b6fb3",
+                      "size":  31392
+                  },
+                  {
+                      "path":  "portable.vs",
+                      "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "size":  0
+                  },
+                  {
+                      "path":  "pyexpat.pyd",
+                      "sha256":  "b6d5142424d161039c25bea00e6acd8f7b1a5331d3994d9f3c28bd083ede159f",
+                      "size":  218968
+                  },
+                  {
+                      "path":  "python.exe",
+                      "sha256":  "cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b",
+                      "size":  106328
+                  },
+                  {
+                      "path":  "python3.dll",
+                      "sha256":  "be1017ca4ca8ff837efbb343d5c8f739bd67bd1c43fb41068a539b19357c0213",
+                      "size":  74072
+                  },
+                  {
+                      "path":  "python314._pth",
+                      "sha256":  "6f2f9713492df599e2b775ad17c9f010e3fe77cd63afe5d105ad2e2716754c19",
+                      "size":  91
+                  },
+                  {
+                      "path":  "python314.dll",
+                      "sha256":  "1ac15e2224581fc678bbd17728b9aa538d47b891b72c76499ef07e54cd74f151",
+                      "size":  6753112
+                  },
+                  {
+                      "path":  "python314.zip",
+                      "sha256":  "dcb07c93dbb4259be58b3755de8e26631a9217d578268579a3eda6a223eccf76",
+                      "size":  4112470
+                  },
+                  {
+                      "path":  "select.pyd",
+                      "sha256":  "05734bd352ce60c944d474aa62468cc5eebf400097f1d9d0c453d37aed26fcca",
+                      "size":  33624
+                  },
+                  {
+                      "path":  "selftest/selftest_480p.vpy",
+                      "sha256":  "741ddcc4fec2865b7be28b306e5ad26d2e92a11ee55d9fcfed29a6c53bdaff1c",
+                      "size":  499
+                  },
+                  {
+                      "path":  "sqlite3.dll",
+                      "sha256":  "bf85c9ae8a9eda75ce45dee2d325aabc4426557c5223b38cb4271f860cc808c2",
+                      "size":  1584984
+                  },
+                  {
+                      "path":  "unicodedata.pyd",
+                      "sha256":  "4445b894f836e89a8b9fdcc88b5e59fbc76aca805baaf40aeb69e869978d4e6d",
+                      "size":  758104
+                  },
+                  {
+                      "path":  "vccorlib140.dll",
+                      "sha256":  "6b8d8a76c3e6664293407553650e60b94df9aaafc7c92057ea83032bd228e44f",
+                      "size":  350880
+                  },
+                  {
+                      "path":  "vcruntime140.dll",
+                      "sha256":  "052ad6a20d375957e82aa6a3c441ea548d89be0981516ca7eb306e063d5027f4",
+                      "size":  120400
+                  },
+                  {
+                      "path":  "vcruntime140_1.dll",
+                      "sha256":  "6a99bc0128e0c7d6cbbf615fcc26909565e17d4ca3451b97f8987f9c6acbc6c8",
+                      "size":  49776
+                  },
+                  {
+                      "path":  "vcruntime140_threads.dll",
+                      "sha256":  "a6222020b500a9a86b36e040c2dbd0e459716db1bf2810a11cd7512ea9b8d89b",
+                      "size":  37456
+                  },
+                  {
+                      "path":  "vs-coreplugins/AvsCompat.dll",
+                      "sha256":  "fcb328a5038aebe40a44260f40220fa31e3a0b2d61f49d793ed92b96cf7c4f5b",
+                      "size":  152576
+                  },
+                  {
+                      "path":  "VSPipe.exe",
+                      "sha256":  "67c612e7805066a1ed1e97bf151a22c5d3642b940c9d62fabb4707cbc2a7281e",
+                      "size":  239616
+                  },
+                  {
+                      "path":  "vs-plugins/.keep",
+                      "sha256":  "f1945cd6c19e56b3c1c78943ef5ec18116907a4ca1efc40a57d48ab1db7adfc5",
+                      "size":  3
+                  },
+                  {
+                      "path":  "vs-plugins/librife_windows_x86-64.dll",
+                      "sha256":  "06830be202057b33ed7d8fd24e59e8918ed36a4fb156a6010a45c0881b0a7671",
+                      "size":  5243904
+                  },
+                  {
+                      "path":  "vs-plugins/models/rife-v4.25-lite_ensembleFalse/flownet.bin",
+                      "sha256":  "350a15e464bea5ad378e06c0fb43996e90a0d35653d5a6ef6bc980d832538fb7",
+                      "size":  11276252
+                  },
+                  {
+                      "path":  "vs-plugins/models/rife-v4.25-lite_ensembleFalse/flownet.param",
+                      "sha256":  "f750ec6723f05a800c8fb07ac0bf3537e741b6ff7fe61b3894e407bd10373a63",
+                      "size":  35830
+                  },
+                  {
+                      "path":  "vs-plugins/models/rife-v4.6_ensembleFalse/flownet.bin",
+                      "sha256":  "03393cf14fe6d0af015d24d93bae1e5925f2828cb3b6555300a132643c617aa5",
+                      "size":  10629680
+                  },
+                  {
+                      "path":  "vs-plugins/models/rife-v4.6_ensembleFalse/flownet.param",
+                      "sha256":  "ae9b08af43fba97e27aa2c40c04c35b1a75f637b2d2b01a941fa94361ab25cbd",
+                      "size":  26915
+                  },
+                  {
+                      "path":  "VSScript.dll",
+                      "sha256":  "8722117f6cfc9bfafab445da4a10d70f9b7bc227b9312a0edc4df15128c9a6ad",
+                      "size":  45056
+                  },
+                  {
+                      "path":  "vs-scripts/.keep",
+                      "sha256":  "f1945cd6c19e56b3c1c78943ef5ec18116907a4ca1efc40a57d48ab1db7adfc5",
+                      "size":  3
+                  },
+                  {
+                      "path":  "winsound.pyd",
+                      "sha256":  "ebcbf8aec8331573f4e4e00c3b90148d2b0083b89af261193389a4fd6ddb6dda",
+                      "size":  33112
+                  }
+              ]
 }

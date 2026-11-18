@@ -43,6 +43,8 @@ public sealed class TvAppContext : IAsyncDisposable
 
     public PlaybackProgressStore ProgressStore => _progressStore;
 
+    public RifeEnhancementService RifeEnhancement { get; } = new();
+
     public MediaSourceRegistry MediaSources => _mediaSources;
 
     public MediaSourceDefinition? ActiveSource { get; private set; }
@@ -153,6 +155,7 @@ public sealed class TvAppContext : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        RifeEnhancement.Dispose();
         _mediaSources.Dispose();
         await Task.CompletedTask.ConfigureAwait(false);
     }

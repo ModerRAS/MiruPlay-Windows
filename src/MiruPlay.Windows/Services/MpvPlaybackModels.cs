@@ -40,7 +40,8 @@ public sealed record MpvWindowsVideoOptions(
     int TargetSdrNits = 100,
     int TargetHdrPeakNits = 1_000,
     bool ComputeHdrPeak = true,
-    MpvQualityEnhancementOptions? Quality = null)
+    MpvQualityEnhancementOptions? Quality = null,
+    RifePlaybackRequest? Rife = null)
 {
     public int SafeTargetSdrNits => Math.Clamp(TargetSdrNits, 80, 240);
     public int SafeTargetHdrPeakNits => Math.Clamp(TargetHdrPeakNits, 203, 10_000);
@@ -219,7 +220,10 @@ public sealed record MpvPlaybackLaunchResult(
 
 public static class MpvWindowsVideoOptionMapper
 {
-    public static MpvWindowsVideoOptions FromSettings(AppSettings settings, string? shaderDirectory = null)
+    public static MpvWindowsVideoOptions FromSettings(
+        AppSettings settings,
+        string? shaderDirectory = null,
+        RifePlaybackRequest? rife = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
         var quality = new MpvQualityEnhancementOptions(
@@ -229,7 +233,8 @@ public static class MpvWindowsVideoOptionMapper
             shaderDirectory ?? MpvQualityEnhancementPaths.ResolveShaderDirectory());
         return new MpvWindowsVideoOptions(
             MpvPlaybackModeSettings.ToDisplayPipeline(settings.HdrMode),
-            Quality: quality);
+            Quality: quality,
+            Rife: rife);
     }
 
     public static IReadOnlyList<string> BuildArguments(MpvWindowsVideoOptions? options)

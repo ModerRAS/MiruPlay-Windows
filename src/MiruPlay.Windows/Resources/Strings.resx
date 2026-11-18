@@ -1595,4 +1595,55 @@
   <data name="tv.settings.interpolation.mpv" xml:space="preserve"><value>内置</value></data>
   <data name="api.errFrameInterpolationMode" xml:space="preserve"><value>插帧方式取值无效。</value></data>
   <data name="upd.wrongEdition" xml:space="preserve"><value>更新清单的版本类型（{0}）与当前应用（{1}）不匹配。</value></data>
+  <data name="playback.interpolationRife" xml:space="preserve"><value>RIFE 真插帧（增强包）</value></data>
+  <data name="quality.rifeHeading" xml:space="preserve"><value>RIFE 真插帧（实验性增强包）</value></data>
+  <data name="quality.rifeNote" xml:space="preserve"><value>需要下载约 35 MB 的增强包；仅在进程内 libmpv、SDR 内容下生效。安装后由 VSPipe 自检选择处理高度，运行失败会自动回退普通播放。</value></data>
+  <data name="quality.rifeStatusUnknown" xml:space="preserve"><value>正在读取 RIFE 增强包状态…</value></data>
+  <data name="quality.rifeStatusNotInstalled" xml:space="preserve"><value>RIFE 增强包未安装。</value></data>
+  <data name="quality.rifeStatusInstalled" xml:space="preserve"><value>RIFE 增强包（{0}）· 版本 {1}</value></data>
+  <data name="quality.rifeSourceInstalled" xml:space="preserve"><value>已安装</value></data>
+  <data name="quality.rifeSourceBundled" xml:space="preserve"><value>随安装包提供</value></data>
+  <data name="quality.rifeStatusSelftest" xml:space="preserve"><value>自检 {0} fps（{1}，推荐 {2}p）</value></data>
+  <data name="quality.rifeStatusSelftestFailed" xml:space="preserve"><value>自检未通过：{0}</value></data>
+  <data name="quality.rifeInstall" xml:space="preserve"><value>下载并安装</value></data>
+  <data name="quality.rifeUninstall" xml:space="preserve"><value>卸载</value></data>
+  <data name="quality.rifeSelftest" xml:space="preserve"><value>重新自检</value></data>
+  <data name="quality.rifeFactor" xml:space="preserve"><value>RIFE 帧率倍数</value></data>
+  <data name="quality.rifeModel" xml:space="preserve"><value>RIFE 模型</value></data>
+  <data name="quality.rifeProcessingHeight" xml:space="preserve"><value>RIFE 处理高度</value></data>
+  <data name="quality.rifeHeightAuto" xml:space="preserve"><value>自动（按自检推荐）</value></data>
+  <data name="quality.rifeGpuThread" xml:space="preserve"><value>RIFE GPU 线程</value></data>
+  <data name="quality.rifeHint" xml:space="preserve"><value>RIFE 当前不会生效：{0}</value></data>
+  <data name="quality.rifeInstalling" xml:space="preserve"><value>正在下载并安装 RIFE 增强包…</value></data>
+  <data name="quality.rifeSelftesting" xml:space="preserve"><value>正在运行 RIFE 自检…</value></data>
+  <data name="quality.rifeUninstalling" xml:space="preserve"><value>正在卸载 RIFE 增强包…</value></data>
+  <data name="quality.rifeOperationFailed" xml:space="preserve"><value>RIFE 操作失败：{0}</value></data>
+  <data name="quality.rifeReadyToast" xml:space="preserve"><value>RIFE 自检通过，将在下次播放生效。</value></data>
+  <data name="quality.rifeUninstalledToast" xml:space="preserve"><value>RIFE 增强包已卸载。</value></data>
+  <data name="rife.reason.notInstalled" xml:space="preserve"><value>增强包未安装</value></data>
+  <data name="rife.reason.invalidPack" xml:space="preserve"><value>增强包文件缺失或损坏</value></data>
+  <data name="rife.reason.selftestRequired" xml:space="preserve"><value>尚未运行自检</value></data>
+  <data name="rife.reason.selftestFailed" xml:space="preserve"><value>自检失败</value></data>
+  <data name="rife.reason.selftestSlow" xml:space="preserve"><value>当前显卡无法实时插帧（自检过慢）</value></data>
+  <data name="rife.reason.selftestTimeout" xml:space="preserve"><value>自检超时</value></data>
+  <data name="rife.reason.selftestExit" xml:space="preserve"><value>自检进程失败</value></data>
+  <data name="rife.reason.vulkanUnavailable" xml:space="preserve"><value>Vulkan 不可用或驱动异常</value></data>
+  <data name="rife.reason.hdrPassthrough" xml:space="preserve"><value>HDR 直通模式下不启用 RIFE</value></data>
+  <data name="rife.reason.hdrContent" xml:space="preserve"><value>HDR 内容不启用 RIFE</value></data>
+  <data name="rife.reason.initFailed" xml:space="preserve"><value>RIFE 初始化失败，已回退普通播放</value></data>
+  <data name="rife.reason.performance" xml:space="preserve"><value>当前分辨率无法实时插帧，已回退普通播放</value></data>
+  <data name="rife.reason.pathUnsupported" xml:space="preserve"><value>用户目录包含非 ASCII 路径且无法建立兼容缓存</value></data>
+  <data name="rife.reason.mirrorFailed" xml:space="preserve"><value>无法建立 RIFE 兼容缓存路径</value></data>
+  <data name="rife.reason.archiveUnsupported" xml:space="preserve"><value>增强包格式不受支持</value></data>
+  <data name="rife.reason.downloadFailed" xml:space="preserve"><value>增强包下载或校验失败</value></data>
+  <data name="rife.reason.insufficientDisk" xml:space="preserve"><value>磁盘空间不足</value></data>
+  <data name="api.errRifeSettings" xml:space="preserve"><value>RIFE 设置值无效。</value></data>
+  <data name="api.errRifeUnavailable" xml:space="preserve"><value>RIFE 增强包服务不可用。</value></data>
+  <data name="tv.settings.rifeFactor" xml:space="preserve"><value>RIFE 帧率倍数</value></data>
+  <data name="tv.settings.rifeModel" xml:space="preserve"><value>RIFE 模型</value></data>
+  <data name="tv.settings.rifeHeight" xml:space="preserve"><value>RIFE 处理高度</value></data>
+  <data name="tv.settings.rifeGpuThread" xml:space="preserve"><value>RIFE GPU 线程</value></data>
+  <data name="tv.settings.rifeUnavailable" xml:space="preserve"><value>RIFE 增强包未安装或自检未通过</value></data>
+  <data name="playback.rifeBadge" xml:space="preserve"><value>RIFE {0}</value></data>
+  <data name="web.rifeStatus" xml:space="preserve"><value>RIFE 增强包</value></data>
 </root>
