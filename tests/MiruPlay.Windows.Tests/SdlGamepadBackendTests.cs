@@ -4,6 +4,7 @@ namespace MiruPlay.Windows.Tests;
 
 public sealed class SdlGamepadBackendTests
 {
+    private static readonly string[] ExpectedBackends = ["SDL3", "XInput", "none", "demo"];
     [Fact]
     public void SdlSourceSmokeDoesNotThrowWithoutControllerOrDll()
     {
@@ -37,5 +38,24 @@ public sealed class SdlGamepadBackendTests
     {
         Assert.Equal(TvGamepadFaceLayout.Nintendo, TvGamepadFaceLayouts.Parse("nintendo"));
         Assert.Equal(TvGamepadFaceLayout.Xbox, TvGamepadFaceLayouts.Parse("xbox"));
+    }
+
+    [Fact]
+    public void AutoSourceStatusReportsBackendStateWithoutThrowing()
+    {
+        using var source = new AutoGamepadSource();
+        var status = source.GetStatus();
+        Assert.False(status.Demo);
+        Assert.False(status.Connected);
+        Assert.Contains(status.ActiveBackend, ExpectedBackends);
+    }
+
+    [Fact]
+    public void Sdl3InitFailureIsExposedAsDiagnosticWarning()
+    {
+        TvGamepadDiagnostics.ReportSdl3InitFailure("unit-test init failure");
+        Assert.Equal("unit-test init failure", TvGamepadDiagnostics.Sdl3InitError);
+        Assert.Contains("unit-test init failure", TvGamepadDiagnostics.LastWarning);
+        Assert.Contains("XInput", TvGamepadDiagnostics.LastWarning);
     }
 }

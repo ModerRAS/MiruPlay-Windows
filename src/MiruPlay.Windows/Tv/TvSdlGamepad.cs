@@ -40,6 +40,7 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
     private IntPtr _gamepad;
     private long _nextScanAt;
     private bool _disposed;
+    private string? _deviceName;
 
     public SdlGamepadSource(Func<long>? clock = null)
     {
@@ -48,6 +49,8 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
     }
 
     public TvGamepadFaceLayout FaceLayout { get; set; } = TvGamepadFaceLayout.Xbox;
+
+    public string? DeviceName => _deviceName;
 
     public static bool IsAvailable => EnsureApi() is not null;
 
@@ -63,6 +66,7 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
         {
             api.CloseGamepad(_gamepad);
             _gamepad = IntPtr.Zero;
+            _deviceName = null;
             _nextScanAt = now;
         }
         if (_gamepad == IntPtr.Zero && now >= _nextScanAt)
@@ -86,6 +90,7 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
             var pad = api.OpenGamepad(id);
             if (pad == IntPtr.Zero) continue;
             _gamepad = pad;
+            _deviceName = api.GetGamepadName(pad);
             return;
         }
     }
@@ -157,9 +162,14 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
             if (_apiInitialized) return _api;
             _apiInitialized = true;
             var api = SdlApi.Load();
-            if (api is null) return null;
+            if (api is null)
+            {
+                TvGamepadDiagnostics.ReportSdl3DllMissing();
+                return null;
+            }
             if (!api.Init(SdlInitGamepad))
             {
+                TvGamepadDiagnostics.ReportSdl3InitFailure(api.GetErrorText());
                 api.Quit();
                 return null;
             }
@@ -181,6 +191,8 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
         private readonly UpdateGamepadsDelegate _updateGamepads;
         private readonly GetButtonDelegate _getButton;
         private readonly GetAxisDelegate _getAxis;
+        private readonly GetNameDelegate _getGamepadName;
+        private readonly GetErrorDelegate _getError;
 
         private SdlApi(
             IntPtr library,
@@ -193,7 +205,9 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
             GamepadConnectedDelegate gamepadConnected,
             UpdateGamepadsDelegate updateGamepads,
             GetButtonDelegate getButton,
-            GetAxisDelegate getAxis)
+            GetAxisDelegate getAxis,
+            GetNameDelegate getGamepadName,
+            GetErrorDelegate getError)
         {
             _library = library;
             _init = init;
@@ -206,6 +220,8 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
             _updateGamepads = updateGamepads;
             _getButton = getButton;
             _getAxis = getAxis;
+            _getGamepadName = getGamepadName;
+            _getError = getError;
         }
 
         public static SdlApi? Load()
@@ -226,7 +242,9 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
                         Export<GamepadConnectedDelegate>(library, "SDL_GamepadConnected", true)!,
                         Export<UpdateGamepadsDelegate>(library, "SDL_UpdateGamepads", true)!,
                         Export<GetButtonDelegate>(library, "SDL_GetGamepadButton", true)!,
-                        Export<GetAxisDelegate>(library, "SDL_GetGamepadAxis", true)!);
+                        Export<GetAxisDelegate>(library, "SDL_GetGamepadAxis", true)!,
+                        Export<GetNameDelegate>(library, "SDL_GetGamepadName", true)!,
+                        Export<GetErrorDelegate>(library, "SDL_GetError", false)!);
                 }
                 catch (Exception error) when (error is EntryPointNotFoundException or ArgumentException)
                 {
@@ -278,6 +296,19 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
         public bool GetButton(IntPtr pad, int button) => _getButton(pad, button);
         public short GetAxis(IntPtr pad, int axis) => _getAxis(pad, axis);
 
+        public string? GetGamepadName(IntPtr pad)
+        {
+            var pointer = _getGamepadName(pad);
+            return pointer == IntPtr.Zero ? null : Marshal.PtrToStringUTF8(pointer);
+        }
+
+        public string? GetErrorText()
+        {
+            if (_getError is null) return null;
+            var pointer = _getError();
+            return pointer == IntPtr.Zero ? null : Marshal.PtrToStringUTF8(pointer);
+        }
+
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         [return: MarshalAs(UnmanagedType.U1)]
         private delegate bool InitDelegate(uint flags);
@@ -307,6 +338,12 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         private delegate short GetAxisDelegate(IntPtr gamepad, int axis);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate IntPtr GetNameDelegate(IntPtr gamepad);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        private delegate IntPtr GetErrorDelegate();
     }
 }
 
@@ -332,21 +369,43 @@ public sealed class AutoGamepadSource : IXInputSource, IDisposable
 
     public string ActiveBackend { get; private set; } = "none";
 
+    private bool _lastConnected;
+    private string? _lastDeviceName;
+
     public bool TryGetState(int userIndex, out TvGamepadState state)
     {
         if (_sdl.TryGetState(userIndex, out state) && state.Connected)
         {
             ActiveBackend = "SDL3";
+            _lastConnected = true;
+            _lastDeviceName = _sdl.DeviceName;
             return true;
         }
         if (_xinput.TryGetState(userIndex, out state) && state.Connected)
         {
             ActiveBackend = "XInput";
+            _lastConnected = true;
+            _lastDeviceName = null;
             return true;
         }
         ActiveBackend = Sdl3Available ? "SDL3" : "XInput";
+        _lastConnected = false;
+        _lastDeviceName = null;
         state = new TvGamepadState(false, TvGamepadButtons.None);
         return false;
+    }
+
+    public TvGamepadStatus GetStatus()
+    {
+        var sdlAvailable = Sdl3Available;
+        return new TvGamepadStatus(
+            Demo: false,
+            Sdl3DllMissing: TvGamepadDiagnostics.Sdl3DllMissing,
+            Sdl3InitFailed: !sdlAvailable && !TvGamepadDiagnostics.Sdl3DllMissing,
+            Sdl3Error: TvGamepadDiagnostics.Sdl3InitError,
+            Connected: _lastConnected,
+            ActiveBackend: ActiveBackend,
+            DeviceName: _lastDeviceName);
     }
 
     public void Dispose() => _sdl.Dispose();

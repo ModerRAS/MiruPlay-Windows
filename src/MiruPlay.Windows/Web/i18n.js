@@ -1447,7 +1447,13 @@ const I18N = {
   "tv.settings.gamepadLayoutXbox": "Xbox / PS 布局",
   "tv.settings.gamepadLayoutNintendo": "Nintendo 布局（A/B 交换）",
   "tv.settings.gamepadBackend": "输入后端",
-  "tv.settings.gamepadBackendValue": "SDL3 → XInput"
+  "tv.settings.gamepadBackendValue": "SDL3 → XInput",
+  "tv.settings.gamepadStatusDemo": "演示虚拟手柄",
+  "tv.settings.gamepadStatusActiveSdl": "{0}（SDL3 当前）",
+  "tv.settings.gamepadStatusActiveXInput": "XInput（当前）",
+  "tv.settings.gamepadStatusXInputFallback": "XInput（SDL3 初始化失败）",
+  "tv.settings.gamepadStatusDisconnected": "未连接手柄",
+  "tv.settings.gamepadWarningSdlInitFailed": "SDL3 初始化失败，已回退 XInput：{0}"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -2896,7 +2902,13 @@ const I18N = {
   "tv.settings.gamepadLayoutXbox": "Xbox / PS 布局",
   "tv.settings.gamepadLayoutNintendo": "Nintendo 布局（A/B 交换）",
   "tv.settings.gamepadBackend": "输入后端",
-  "tv.settings.gamepadBackendValue": "SDL3 → XInput"
+  "tv.settings.gamepadBackendValue": "SDL3 → XInput",
+  "tv.settings.gamepadStatusDemo": "演示虚拟手柄",
+  "tv.settings.gamepadStatusActiveSdl": "{0}（SDL3 当前）",
+  "tv.settings.gamepadStatusActiveXInput": "XInput（当前）",
+  "tv.settings.gamepadStatusXInputFallback": "XInput（SDL3 初始化失败）",
+  "tv.settings.gamepadStatusDisconnected": "未连接手柄",
+  "tv.settings.gamepadWarningSdlInitFailed": "SDL3 初始化失败，已回退 XInput：{0}"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -4345,7 +4357,13 @@ const I18N = {
   "tv.settings.gamepadLayoutXbox": "Xbox / PS 布局",
   "tv.settings.gamepadLayoutNintendo": "Nintendo 布局（A/B 交换）",
   "tv.settings.gamepadBackend": "输入后端",
-  "tv.settings.gamepadBackendValue": "SDL3 → XInput"
+  "tv.settings.gamepadBackendValue": "SDL3 → XInput",
+  "tv.settings.gamepadStatusDemo": "演示虚拟手柄",
+  "tv.settings.gamepadStatusActiveSdl": "{0}（SDL3 当前）",
+  "tv.settings.gamepadStatusActiveXInput": "XInput（当前）",
+  "tv.settings.gamepadStatusXInputFallback": "XInput（SDL3 初始化失败）",
+  "tv.settings.gamepadStatusDisconnected": "未连接手柄",
+  "tv.settings.gamepadWarningSdlInitFailed": "SDL3 初始化失败，已回退 XInput：{0}"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -5794,7 +5812,13 @@ const I18N = {
   "tv.settings.gamepadLayoutXbox": "Xbox / PS layout",
   "tv.settings.gamepadLayoutNintendo": "Nintendo layout (A/B swapped)",
   "tv.settings.gamepadBackend": "Input backend",
-  "tv.settings.gamepadBackendValue": "SDL3 → XInput"
+  "tv.settings.gamepadBackendValue": "SDL3 → XInput",
+  "tv.settings.gamepadStatusDemo": "Demo virtual gamepad",
+  "tv.settings.gamepadStatusActiveSdl": "{0} (SDL3 active)",
+  "tv.settings.gamepadStatusActiveXInput": "XInput (active)",
+  "tv.settings.gamepadStatusXInputFallback": "XInput (SDL3 init failed)",
+  "tv.settings.gamepadStatusDisconnected": "No gamepad connected",
+  "tv.settings.gamepadWarningSdlInitFailed": "SDL3 initialization failed; using XInput: {0}"
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -7243,7 +7267,13 @@ const I18N = {
   "tv.settings.gamepadLayoutXbox": "Xbox / PS layout",
   "tv.settings.gamepadLayoutNintendo": "Nintendo layout (A/B swapped)",
   "tv.settings.gamepadBackend": "Input backend",
-  "tv.settings.gamepadBackendValue": "SDL3 → XInput"
+  "tv.settings.gamepadBackendValue": "SDL3 → XInput",
+  "tv.settings.gamepadStatusDemo": "Demo virtual gamepad",
+  "tv.settings.gamepadStatusActiveSdl": "{0} (SDL3 active)",
+  "tv.settings.gamepadStatusActiveXInput": "XInput (active)",
+  "tv.settings.gamepadStatusXInputFallback": "XInput (SDL3 init failed)",
+  "tv.settings.gamepadStatusDisconnected": "No gamepad connected",
+  "tv.settings.gamepadWarningSdlInitFailed": "SDL3 initialization failed; using XInput: {0}"
  }
 };
 let currentLocale = 'zh-CN';

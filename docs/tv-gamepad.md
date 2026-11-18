@@ -60,6 +60,12 @@ Nintendo 脸键布局：SDL 按物理位置映射（下方=SOUTH），Switch Pro
 - 无实体手柄时可用 `--tv-pad-demo` 演示/验收。
 - SDL3 后端没有实体手柄的现场验证；插入手柄后每 1s 内自动枚举/打开（热插拔），无需重启。
 
+## 交付报告与证据
+
+- 交付报告：`artifacts/miruplay-tv-gamepad/report.md`（在 Claw 工作区）
+- 演示证据：`artifacts/miruplay-tv-mode/demo/pad-01..07*.png` + `tv-gamepad-demo.mp4`
+- 总体验收：`artifacts/miruplay-tv-mode/report.md`
+
 ## 验证与证据
 
 - 单测：`TvGamepadServiceTests`（映射、死区边界、连发、B 长按、触发器、右摇杆、断连/热插拔、禁用）、`TvActionCoalescerTests`、`SdlGamepadBackendTests`（SDL3 缺失/无设备不崩、非法索引、脸键布局归一化）、`TvLaunchArgumentsTests`（--tv-pad-demo）。

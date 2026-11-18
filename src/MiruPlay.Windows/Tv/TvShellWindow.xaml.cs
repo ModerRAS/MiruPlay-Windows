@@ -500,6 +500,14 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
     internal TvGamepadService Gamepad => _gamepad;
 
+    /// <summary>Live backend/connection status for the TV settings diagnostics row.</summary>
+    internal TvGamepadStatus GamepadStatus =>
+        _options.GamepadDemo
+            ? new TvGamepadStatus(true, false, false, null, true, "demo", "TV pad demo")
+            : _gamepadSource is AutoGamepadSource auto
+                ? auto.GetStatus()
+                : new TvGamepadStatus(false, false, false, null, false, "none", null);
+
     private void BeginBackHold(TvInputOrigin origin)
     {
         if (_exitHoldOrigin is not null) return;

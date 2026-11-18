@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using MiruPlay.Windows.Services;
 using MiruPlay.Windows.Models;
 
@@ -14,6 +15,9 @@ public sealed class TvSettingsScreen : TvScreenBase
     private readonly TvShellWindow _shell;
     private readonly StackPanel _list = new() { Margin = new Thickness(0, 0, 0, 40) };
     private readonly List<SettingRow> _rows = [];
+    private readonly DispatcherTimer _statusTimer;
+    private SettingRow? _gamepadStatusRow;
+    private TextBlock? _gamepadWarningText;
     private TvZone? _zone;
 
     public TvSettingsScreen(TvAppContext context, TvShellWindow shell)
@@ -39,6 +43,8 @@ public sealed class TvSettingsScreen : TvScreenBase
         content.Children.Add(_list);
         scroll.Content = content;
         Content = scroll;
+        _statusTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(1) };
+        _statusTimer.Tick += (_, _) => UpdateGamepadStatus();
         Build();
     }
 
@@ -60,6 +66,50 @@ public sealed class TvSettingsScreen : TvScreenBase
             }
         }
         return base.HandleAction(action);
+    }
+
+    public override void OnActivated(string? focusKey)
+    {
+        base.OnActivated(focusKey);
+        UpdateGamepadStatus();
+        _statusTimer.Start();
+    }
+
+    public override string? OnDeactivating()
+    {
+        _statusTimer.Stop();
+        return base.OnDeactivating();
+    }
+
+    private static string GamepadStatusTextFor(TvGamepadStatus status) => status.Demo
+        ? AppStrings.Get("tv.settings.gamepadStatusDemo")
+        : status.Connected
+            ? status.ActiveBackend == "SDL3"
+                ? AppStrings.Get("tv.settings.gamepadStatusActiveSdl", status.DeviceName ?? "SDL3")
+                : AppStrings.Get("tv.settings.gamepadStatusActiveXInput")
+            : status.Sdl3InitFailed
+                ? AppStrings.Get("tv.settings.gamepadStatusXInputFallback")
+                : AppStrings.Get("tv.settings.gamepadStatusDisconnected");
+
+    private string GamepadStatusText() => GamepadStatusTextFor(_shell.GamepadStatus);
+
+    private void UpdateGamepadStatus()
+    {
+        if (_gamepadStatusRow is null) return;
+        var status = _shell.GamepadStatus;
+        _gamepadStatusRow.ValueText.Text = GamepadStatusTextFor(status);
+        if (_gamepadWarningText is null) return;
+        if (status.Sdl3InitFailed)
+        {
+            _gamepadWarningText.Text = AppStrings.Get(
+                "tv.settings.gamepadWarningSdlInitFailed",
+                status.Sdl3Error ?? AppStrings.Get("tv.settings.gamepadBackendValue"));
+            _gamepadWarningText.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _gamepadWarningText.Visibility = Visibility.Collapsed;
+        }
     }
 
     public override bool FocusInitial()
@@ -94,7 +144,16 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddRow("gamepad", "tv.settings.gamepad", () => Bool(_context.Settings.TvGamepadEnabled), _ => Toggle(settings => settings with { TvGamepadEnabled = !settings.TvGamepadEnabled }));
         AddRow("gamepadDeadzone", "tv.settings.gamepadDeadzone", () => AppStrings.Get("tv.settings.gamepadDeadzoneValue", _context.Settings.TvGamepadDeadzonePercent), step => ChangeGamepadDeadzone(step));
         AddRow("gamepadLayout", "tv.settings.gamepadLayout", () => ValueGamepadLayout(), _ => ChangeGamepadLayout());
-        AddInfoRow("gamepadBackend", "tv.settings.gamepadBackend", AppStrings.Get("tv.settings.gamepadBackendValue"));
+        _gamepadStatusRow = AddInfoRow("gamepadBackend", "tv.settings.gamepadBackend", GamepadStatusText());
+        _gamepadWarningText = new TextBlock
+        {
+            FontSize = 15,
+            Foreground = (Brush)FindResource("TvDangerBrush"),
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(2, 2, 2, 10),
+            Visibility = Visibility.Collapsed,
+        };
+        _list.Children.Add(_gamepadWarningText);
         AddHintRow("tv.settings.gamepadHint");
         AddRow("clock", "tv.settings.clock", () => Bool(_context.Settings.TvClockVisible), _ => Toggle(settings => settings with { TvClockVisible = !settings.TvClockVisible }));
         AddRow("sound", "tv.settings.sound", () => Bool(_context.Settings.TvSoundFeedback), _ => Toggle(settings => settings with { TvSoundFeedback = !settings.TvSoundFeedback }));
@@ -169,7 +228,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         _rows.Add(settingRow);
     }
 
-    private void AddInfoRow(string id, string labelKey, string value)
+    private SettingRow AddInfoRow(string id, string labelKey, string value)
     {
         var valueText = new TextBlock
         {
@@ -195,7 +254,9 @@ public sealed class TvSettingsScreen : TvScreenBase
         };
         row.Click += (_, _) => _shell.ShowToast(AppStrings.Get("tv.settings.phoneHint"));
         _list.Children.Add(row);
-        _rows.Add(new SettingRow(id, row, valueText, () => valueText.Text, _ => { }, Focusable: true));
+        var settingRow = new SettingRow(id, row, valueText, () => valueText.Text, _ => { }, Focusable: true);
+        _rows.Add(settingRow);
+        return settingRow;
     }
 
     private static Grid BuildRowContent(string labelKey, TextBlock valueText)

@@ -1451,4 +1451,10 @@
   <data name="tv.settings.gamepadLayoutNintendo" xml:space="preserve"><value>Nintendo layout (A/B swapped)</value></data>
   <data name="tv.settings.gamepadBackend" xml:space="preserve"><value>Input backend</value></data>
   <data name="tv.settings.gamepadBackendValue" xml:space="preserve"><value>SDL3 → XInput</value></data>
+  <data name="tv.settings.gamepadStatusDemo" xml:space="preserve"><value>Demo virtual gamepad</value></data>
+  <data name="tv.settings.gamepadStatusActiveSdl" xml:space="preserve"><value>{0} (SDL3 active)</value></data>
+  <data name="tv.settings.gamepadStatusActiveXInput" xml:space="preserve"><value>XInput (active)</value></data>
+  <data name="tv.settings.gamepadStatusXInputFallback" xml:space="preserve"><value>XInput (SDL3 init failed)</value></data>
+  <data name="tv.settings.gamepadStatusDisconnected" xml:space="preserve"><value>No gamepad connected</value></data>
+  <data name="tv.settings.gamepadWarningSdlInitFailed" xml:space="preserve"><value>SDL3 initialization failed; using XInput: {0}</value></data>
 </root>

@@ -1450,5 +1450,11 @@
   "tv.settings.gamepadLayoutXbox": {"zh-CN":"Xbox / PS 布局","zh-TW":"Xbox / PS 布局","zh-HK":"Xbox / PS 布局","en-US":"Xbox / PS layout","en-GB":"Xbox / PS layout"},
   "tv.settings.gamepadLayoutNintendo": {"zh-CN":"Nintendo 布局（A/B 交换）","zh-TW":"Nintendo 布局（A/B 交换）","zh-HK":"Nintendo 布局（A/B 交换）","en-US":"Nintendo layout (A/B swapped)","en-GB":"Nintendo layout (A/B swapped)"},
   "tv.settings.gamepadBackend": {"zh-CN":"输入后端","zh-TW":"输入后端","zh-HK":"输入后端","en-US":"Input backend","en-GB":"Input backend"},
-  "tv.settings.gamepadBackendValue": {"zh-CN":"SDL3 → XInput","zh-TW":"SDL3 → XInput","zh-HK":"SDL3 → XInput","en-US":"SDL3 → XInput","en-GB":"SDL3 → XInput"}
+  "tv.settings.gamepadBackendValue": {"zh-CN":"SDL3 → XInput","zh-TW":"SDL3 → XInput","zh-HK":"SDL3 → XInput","en-US":"SDL3 → XInput","en-GB":"SDL3 → XInput"},
+  "tv.settings.gamepadStatusDemo": {"zh-CN":"演示虚拟手柄","zh-TW":"演示虚拟手柄","zh-HK":"演示虚拟手柄","en-US":"Demo virtual gamepad","en-GB":"Demo virtual gamepad"},
+  "tv.settings.gamepadStatusActiveSdl": {"zh-CN":"{0}（SDL3 当前）","zh-TW":"{0}（SDL3 当前）","zh-HK":"{0}（SDL3 当前）","en-US":"{0} (SDL3 active)","en-GB":"{0} (SDL3 active)"},
+  "tv.settings.gamepadStatusActiveXInput": {"zh-CN":"XInput（当前）","zh-TW":"XInput（当前）","zh-HK":"XInput（当前）","en-US":"XInput (active)","en-GB":"XInput (active)"},
+  "tv.settings.gamepadStatusXInputFallback": {"zh-CN":"XInput（SDL3 初始化失败）","zh-TW":"XInput（SDL3 初始化失败）","zh-HK":"XInput（SDL3 初始化失败）","en-US":"XInput (SDL3 init failed)","en-GB":"XInput (SDL3 init failed)"},
+  "tv.settings.gamepadStatusDisconnected": {"zh-CN":"未连接手柄","zh-TW":"未连接手柄","zh-HK":"未连接手柄","en-US":"No gamepad connected","en-GB":"No gamepad connected"},
+  "tv.settings.gamepadWarningSdlInitFailed": {"zh-CN":"SDL3 初始化失败，已回退 XInput：{0}","zh-TW":"SDL3 初始化失败，已回退 XInput：{0}","zh-HK":"SDL3 初始化失败，已回退 XInput：{0}","en-US":"SDL3 initialization failed; using XInput: {0}","en-GB":"SDL3 initialization failed; using XInput: {0}"}
 }

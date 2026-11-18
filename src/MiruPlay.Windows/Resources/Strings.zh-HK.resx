@@ -1451,4 +1451,10 @@
   <data name="tv.settings.gamepadLayoutNintendo" xml:space="preserve"><value>Nintendo 布局（A/B 交换）</value></data>
   <data name="tv.settings.gamepadBackend" xml:space="preserve"><value>输入后端</value></data>
   <data name="tv.settings.gamepadBackendValue" xml:space="preserve"><value>SDL3 → XInput</value></data>
+  <data name="tv.settings.gamepadStatusDemo" xml:space="preserve"><value>演示虚拟手柄</value></data>
+  <data name="tv.settings.gamepadStatusActiveSdl" xml:space="preserve"><value>{0}（SDL3 当前）</value></data>
+  <data name="tv.settings.gamepadStatusActiveXInput" xml:space="preserve"><value>XInput（当前）</value></data>
+  <data name="tv.settings.gamepadStatusXInputFallback" xml:space="preserve"><value>XInput（SDL3 初始化失败）</value></data>
+  <data name="tv.settings.gamepadStatusDisconnected" xml:space="preserve"><value>未连接手柄</value></data>
+  <data name="tv.settings.gamepadWarningSdlInitFailed" xml:space="preserve"><value>SDL3 初始化失败，已回退 XInput：{0}</value></data>
 </root>
