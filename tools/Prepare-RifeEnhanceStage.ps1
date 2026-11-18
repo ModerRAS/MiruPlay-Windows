@@ -14,6 +14,17 @@ function Resolve-AbsolutePath {
     return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Path))
 }
 $basePath = (Get-Location).Path
+function Copy-TextFileAsLf([string]$Source, [string]$Destination) {
+    # Normalize CRLF to LF at the byte level, preserving any UTF-8 BOM and the final newline.
+    $bytes = [IO.File]::ReadAllBytes($Source)
+    $output = [System.Collections.Generic.List[byte]]::new($bytes.Length)
+    for ($i = 0; $i -lt $bytes.Length; $i++) {
+        if ($bytes[$i] -eq 13 -and ($i + 1) -lt $bytes.Length -and $bytes[$i + 1] -eq 10) { continue }
+        $output.Add($bytes[$i])
+    }
+    [IO.File]::WriteAllBytes($Destination, $output.ToArray())
+}
+
 $repo = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) { [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')) } else { [System.IO.Path]::GetFullPath($RepositoryRoot) }
 if ([string]::IsNullOrWhiteSpace($Destination)) { $Destination = Join-Path $repo 'artifacts\enhance-stage' }
 $SevenZipPath = Resolve-AbsolutePath $SevenZipPath $basePath
@@ -75,23 +86,24 @@ try {
     $licenses = Join-Path $destination 'licenses'
     New-Item -ItemType Directory -Force -Path $licenses | Out-Null
     foreach ($license in 'VapourSynth-LGPL-2.1.txt', 'Python-PSF-2.0.txt', 'RIFE-ncnn-Vulkan-MIT.txt', 'ncnn-BSD-3-Clause.txt', 'RIFE-MIT.txt') {
-        Copy-Item -LiteralPath (Join-Path $repo (Join-Path 'licenses' $license)) -Destination $licenses -Force
+        Copy-TextFileAsLf (Join-Path $repo (Join-Path 'licenses' $license)) (Join-Path $licenses $license)
     }
 
     # 4) Synthetic VSPipe self-test script.
     $selftest = Join-Path $destination 'selftest'
     New-Item -ItemType Directory -Force -Path $selftest | Out-Null
-    $script = @'
-import vapoursynth as vs
-from vapoursynth import core
-clip = core.std.BlankClip(width=854, height=480, fpsnum=24, fpsden=1, length=24, format=vs.YUV420P8, color=[32,96,160])
-clip = core.text.FrameNum(clip)
-src_fmt = clip.format.id
-clip = core.resize.Bilinear(clip=clip, format=vs.RGBS, matrix_in_s="709")
-clip = core.rife.RIFE(clip=clip, model=23, factor_num=2, factor_den=1, gpu_id=0, gpu_thread=2, sc=False)
-clip = core.resize.Bilinear(clip=clip, format=src_fmt, matrix_s="709")
-clip.set_output(0)
-'@
+    $scriptLines = @(
+        'import vapoursynth as vs',
+        'from vapoursynth import core',
+        'clip = core.std.BlankClip(width=854, height=480, fpsnum=24, fpsden=1, length=24, format=vs.YUV420P8, color=[32,96,160])',
+        'clip = core.text.FrameNum(clip)',
+        'src_fmt = clip.format.id',
+        'clip = core.resize.Bilinear(clip=clip, format=vs.RGBS, matrix_in_s="709")',
+        'clip = core.rife.RIFE(clip=clip, model=23, factor_num=2, factor_den=1, gpu_id=0, gpu_thread=2, sc=False)',
+        'clip = core.resize.Bilinear(clip=clip, format=src_fmt, matrix_s="709")',
+        'clip.set_output(0)'
+    )
+    $script = ($scriptLines -join "`n")
     [IO.File]::WriteAllText((Join-Path $selftest 'selftest_480p.vpy'), $script, [Text.UTF8Encoding]::new($false))
 
     $count = (Get-ChildItem $destination -Recurse -File | Measure-Object).Count
