@@ -40,6 +40,10 @@
 5. **OSD 状态机**：任意键呼出，3 秒无操作自动隐藏（暂停/抽屉打开/焦点在 OSD 内时不隐藏）；Back 逐级：关抽屉 → 隐藏 OSD → 退出播放；Menu 打开抽屉（字幕/音轨/倍速/信息）；方向键进入焦点模式后左右选按钮、上下换行；播放结束按设置自动下一集或返回详情。
 6. **从「从头播放」语义**：`LibMpvPlaybackSession.StartAsync(..., forceStartPosition: true)` 显式写 `start=0`，避免 `startPositionMs=0` 被当成「未指定」而续播断点；「继续播放」显式传进度。桌面播放页默认参数不变，零回归。
 
+## 样式约定（ControlTemplate 内的 TextBlock）
+
+电视主题字典由 `TvTheme.Apply` 合并到窗口资源，**ControlTemplate 内的元素不会应用窗口级隐式 `TextBlock` 样式**（模板视觉树的隐式样式查找只到 Application/主题资源）。因此模板里的每个 `TextBlock` 都必须显式写 `Foreground`，不能依赖隐式样式，否则会继承 `Button.Foreground` 默认黑色，在深色背景上不可见（媒体库/首页海报标题曾因此全黑）。新增模板时请按此约定检查，并用 `grep '<TextBlock'` 逐条确认。
+
 ## 焦点
 
 进入屏幕后不按额外键即显示焦点环：屏幕挂树时立即设置逻辑焦点，`TvScreenBase.ApplyFocus` 在 `Focus()` 失败时按 Loaded/Input 优先级重试，Shell 在屏幕布局完成后再补一次 `RefocusActive()`；子屏 Back 返回走同一套 `RestoreFocus` 路径。
