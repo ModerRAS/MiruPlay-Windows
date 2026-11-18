@@ -1442,4 +1442,13 @@
   <data name="meta.loginFailedNotice" xml:space="preserve"><value>登录失败：{0}</value></data>
   <data name="meta.loginSucceeded" xml:space="preserve"><value>已登录 Bangumi。</value></data>
   <data name="meta.oauthLocalOnly" xml:space="preserve"><value>OAuth 浏览器登录需要在运行 MiruPlay 的这台电脑上操作；远程访问请改用账号密码登录，或在客户端上完成 OAuth 登录。</value></data>
+  <data name="tv.settings.gamepad" xml:space="preserve"><value>手柄输入</value></data>
+  <data name="tv.settings.gamepadHint" xml:space="preserve"><value>支持 Xbox/XInput 与 SDL3 映射的 HID 手柄（DualSense/DualShock/Switch Pro/8BitDo）；连接后自动识别，无需重启</value></data>
+  <data name="tv.settings.gamepadDeadzone" xml:space="preserve"><value>摇杆死区</value></data>
+  <data name="tv.settings.gamepadDeadzoneValue" xml:space="preserve"><value>{0}%</value></data>
+  <data name="tv.settings.gamepadLayout" xml:space="preserve"><value>手柄脸键布局</value></data>
+  <data name="tv.settings.gamepadLayoutXbox" xml:space="preserve"><value>Xbox / PS 布局</value></data>
+  <data name="tv.settings.gamepadLayoutNintendo" xml:space="preserve"><value>Nintendo 布局（A/B 交换）</value></data>
+  <data name="tv.settings.gamepadBackend" xml:space="preserve"><value>输入后端</value></data>
+  <data name="tv.settings.gamepadBackendValue" xml:space="preserve"><value>SDL3 → XInput</value></data>
 </root>

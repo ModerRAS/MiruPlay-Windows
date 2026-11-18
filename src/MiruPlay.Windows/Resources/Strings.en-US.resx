@@ -1442,4 +1442,13 @@
   <data name="meta.loginFailedNotice" xml:space="preserve"><value>Sign-in failed: {0}</value></data>
   <data name="meta.loginSucceeded" xml:space="preserve"><value>Signed in to Bangumi.</value></data>
   <data name="meta.oauthLocalOnly" xml:space="preserve"><value>OAuth browser sign-in must run on the computer hosting MiruPlay. From a remote browser, use email &amp; password sign-in, or complete OAuth on the client.</value></data>
+  <data name="tv.settings.gamepad" xml:space="preserve"><value>Gamepad input</value></data>
+  <data name="tv.settings.gamepadHint" xml:space="preserve"><value>Supports Xbox/XInput pads and SDL3-mapped HID pads (DualSense/DualShock/Switch Pro/8BitDo); detected automatically.</value></data>
+  <data name="tv.settings.gamepadDeadzone" xml:space="preserve"><value>Stick deadzone</value></data>
+  <data name="tv.settings.gamepadDeadzoneValue" xml:space="preserve"><value>{0}%</value></data>
+  <data name="tv.settings.gamepadLayout" xml:space="preserve"><value>Face-button layout</value></data>
+  <data name="tv.settings.gamepadLayoutXbox" xml:space="preserve"><value>Xbox / PS layout</value></data>
+  <data name="tv.settings.gamepadLayoutNintendo" xml:space="preserve"><value>Nintendo layout (A/B swapped)</value></data>
+  <data name="tv.settings.gamepadBackend" xml:space="preserve"><value>Input backend</value></data>
+  <data name="tv.settings.gamepadBackendValue" xml:space="preserve"><value>SDL3 → XInput</value></data>
 </root>

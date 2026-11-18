@@ -13,6 +13,8 @@ namespace MiruPlay.Windows.Tv;
 public sealed class TvShellOptions
 {
     public bool DemoMode { get; init; }
+    public bool GamepadDemo { get; init; }
+    public IXInputSource? GamepadSource { get; init; }
     public bool LoadLibrary { get; init; } = true;
     public TvAppContext? Context { get; init; }
     public Action? ExitRequested { get; init; }
@@ -37,6 +39,11 @@ public sealed partial class TvShellWindow : Window, IDisposable
     private readonly DispatcherTimer _clockTimer;
     private readonly DispatcherTimer _exitOverlayTimer;
     private readonly DispatcherTimer _demoBadgeTimer;
+    private readonly DispatcherTimer _gamepadTimer;
+    private readonly TvGamepadService _gamepad;
+    private readonly IXInputSource _gamepadSource;
+    private readonly TvActionCoalescer _coalescer = new();
+    private TvInputOrigin? _exitHoldOrigin;
     private TvOsdWindow? _osd;
     private TvScreenBase? _currentScreen;
     private TvDetailScreen? _detailScreen;
@@ -79,14 +86,26 @@ public sealed partial class TvShellWindow : Window, IDisposable
         };
         BuildNavigation();
         _input.ActionInvoked += Input_ActionInvoked;
-        _input.BackHoldStarted += (_, _) => ShowExitHoldOverlay();
-        _input.BackHoldCancelled += (_, _) => HideExitHoldOverlay();
-        _input.BackHoldProgressChanged += (_, args) => UpdateExitHoldProgress(args.Progress);
-        _input.BackHoldCompleted += (_, _) =>
+        _input.BackHoldStarted += (_, _) => BeginBackHold(TvInputOrigin.Keyboard);
+        _input.BackHoldCancelled += (_, _) => CancelBackHold(TvInputOrigin.Keyboard);
+        _input.BackHoldProgressChanged += (_, args) => ReportBackHoldProgress(TvInputOrigin.Keyboard, args.Progress);
+        _input.BackHoldCompleted += (_, _) => CompleteBackHold(TvInputOrigin.Keyboard);
+        _gamepadSource = options.GamepadSource
+            ?? (options.GamepadDemo ? new TvGamepadDemoSource() : new AutoGamepadSource());
+        _gamepad = new TvGamepadService(_context.Settings.TvExitLongPressMs)
         {
-            HideExitHoldOverlay();
-            ExitTvMode();
+            Enabled = _context.Settings.TvGamepadEnabled,
+            Deadzone = _context.Settings.TvGamepadDeadzonePercent / 100.0,
         };
+        if (_gamepadSource is AutoGamepadSource autoGamepad)
+            autoGamepad.FaceLayout = TvGamepadFaceLayouts.Parse(_context.Settings.TvGamepadFaceLayout);
+        _gamepad.ActionInvoked += Gamepad_ActionInvoked;
+        _gamepad.BackHoldStarted += (_, _) => BeginBackHold(TvInputOrigin.Gamepad);
+        _gamepad.BackHoldCancelled += (_, _) => CancelBackHold(TvInputOrigin.Gamepad);
+        _gamepad.BackHoldProgressChanged += (_, args) => ReportBackHoldProgress(TvInputOrigin.Gamepad, args.Progress);
+        _gamepad.BackHoldCompleted += (_, _) => CompleteBackHold(TvInputOrigin.Gamepad);
+        _gamepadTimer = new DispatcherTimer(DispatcherPriority.Input) { Interval = TimeSpan.FromMilliseconds(16) };
+        _gamepadTimer.Tick += (_, _) => PollGamepad();
         PreviewKeyDown += Shell_PreviewKeyDown;
         PreviewKeyUp += Shell_PreviewKeyUp;
         SourceInitialized += Shell_SourceInitialized;
@@ -95,8 +114,10 @@ public sealed partial class TvShellWindow : Window, IDisposable
         Activated += (_, _) =>
         {
             EnsureCursorHidden();
+            StartGamepadPolling();
             RestoreFocus();
         };
+        Deactivated += (_, _) => StopGamepadPolling();
         PreviewMouseMove += (_, _) => EnsureCursorHidden();
         SizeChanged += (_, _) => UpdateOsdGeometry();
     }
@@ -170,6 +191,7 @@ public sealed partial class TvShellWindow : Window, IDisposable
             if (_options.LoadLibrary) await _context.LoadAsync();
             _libraryLoaded = true;
             HideLoading();
+            StartGamepadPolling();
             if (_navigator.Current == TvScreenId.Home) ShowCurrentScreen(activate: true);
             else NavigateTo(TvScreenId.Home);
         }
@@ -275,6 +297,10 @@ public sealed partial class TvShellWindow : Window, IDisposable
     {
         ClockText.Visibility = _context.Settings.TvClockVisible ? Visibility.Visible : Visibility.Collapsed;
         UpdateClock();
+        _gamepad.Enabled = _context.Settings.TvGamepadEnabled;
+        _gamepad.Deadzone = _context.Settings.TvGamepadDeadzonePercent / 100.0;
+        if (_gamepad.Enabled) StartGamepadPolling();
+        else StopGamepadPolling();
     }
 
     internal void FocusShellForPlayback()
@@ -428,8 +454,76 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
     private void Input_ActionInvoked(object? sender, TvInputActionEventArgs e)
     {
+        if (!_coalescer.ShouldDispatch(e.Action, TvInputOrigin.Keyboard, Environment.TickCount64)) return;
         if (_options.DemoMode) ShowDemoBadge(e.Action);
         DispatchAction(e.Action);
+    }
+
+    private void Gamepad_ActionInvoked(object? sender, TvGamepadActionEventArgs e)
+    {
+        if (!_coalescer.ShouldDispatch(e.Action, TvInputOrigin.Gamepad, Environment.TickCount64)) return;
+        if (_options.DemoMode) ShowDemoBadge("\uD83C\uDFAE " + e.Label);
+        DispatchAction(e.Action);
+    }
+
+    private void StartGamepadPolling()
+    {
+        if (_disposed) return;
+        _gamepadTimer.Start();
+    }
+
+    private void StopGamepadPolling()
+    {
+        _gamepadTimer.Stop();
+        _gamepad.Reset();
+    }
+
+    private void PollGamepad()
+    {
+        if (_disposed) return;
+        if (_options.GamepadDemo && !_libraryLoaded) return; // demo clock starts with the first real UI frame
+        if (!_gamepad.Enabled)
+        {
+            _gamepad.Reset();
+            return;
+        }
+        var state = _gamepadSource.TryGetState(0, out var value)
+            ? value
+            : new TvGamepadState(false, TvGamepadButtons.None);
+        _gamepad.Poll(state);
+    }
+
+    /// <summary>Test hook: run one gamepad poll without waiting for the 16 ms timer.</summary>
+    internal void PollGamepadForTest() => PollGamepad();
+
+    internal TvGamepadService Gamepad => _gamepad;
+
+    private void BeginBackHold(TvInputOrigin origin)
+    {
+        if (_exitHoldOrigin is not null) return;
+        _exitHoldOrigin = origin;
+        ShowExitHoldOverlay();
+    }
+
+    private void ReportBackHoldProgress(TvInputOrigin origin, double progress)
+    {
+        if (_exitHoldOrigin != origin) return;
+        UpdateExitHoldProgress(progress);
+    }
+
+    private void CancelBackHold(TvInputOrigin origin)
+    {
+        if (_exitHoldOrigin != origin) return;
+        _exitHoldOrigin = null;
+        HideExitHoldOverlay();
+    }
+
+    private void CompleteBackHold(TvInputOrigin origin)
+    {
+        if (_exitHoldOrigin != origin) return;
+        _exitHoldOrigin = null;
+        HideExitHoldOverlay();
+        ExitTvMode();
     }
 
     internal void DispatchAction(TvInputAction action)
@@ -651,6 +745,9 @@ public sealed partial class TvShellWindow : Window, IDisposable
         _toastTimer.Stop();
         _exitOverlayTimer.Stop();
         _demoBadgeTimer.Stop();
+        _gamepadTimer.Stop();
+        _gamepad.Reset();
+        (_gamepadSource as IDisposable)?.Dispose();
         _input.Dispose();
         _ = NativeCursor.ShowCursor(true);
         Mouse.OverrideCursor = null;
@@ -755,12 +852,15 @@ public sealed partial class TvShellWindow : Window, IDisposable
 
     private void UpdateExitOverlay()
     {
-        ExitHoldProgressBar.Value = _input.BackHoldProgress * 100;
-        if (_exitOverlayVisible && !_input.IsBackHeld)
+        if (_exitHoldOrigin is null)
         {
             HideExitHoldOverlay();
             return;
         }
+        var held = _exitHoldOrigin == TvInputOrigin.Keyboard ? _input.IsBackHeld : _gamepad.IsBackHeld;
+        var progress = _exitHoldOrigin == TvInputOrigin.Keyboard ? _input.BackHoldProgress : _gamepad.BackHoldProgress;
+        ExitHoldProgressBar.Value = progress * 100;
+        if (!held) HideExitHoldOverlay();
     }
 
     private void HideExitHoldOverlay()
@@ -773,7 +873,13 @@ public sealed partial class TvShellWindow : Window, IDisposable
     private void ShowDemoBadge(TvInputAction action)
     {
         if (!_options.DemoMode) return;
-        DemoBadgeText.Text = TvActionLabel(action);
+        ShowDemoBadge(TvActionLabel(action));
+    }
+
+    private void ShowDemoBadge(string text)
+    {
+        if (!_options.DemoMode) return;
+        DemoBadgeText.Text = text;
         DemoBadge.Visibility = Visibility.Visible;
         _demoBadgeTimer.Stop();
         _demoBadgeTimer.Start();

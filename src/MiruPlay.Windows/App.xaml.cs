@@ -43,18 +43,19 @@ public partial class App : Application, IDisposable
             var settings = new AppSettingsStore().Load();
             if (settings.TvModeEnabled) forceTv = true;
         }
-        if (forceTv) EnterTvMode(tvLaunch.DemoBadge);
+        if (forceTv) EnterTvMode(tvLaunch.DemoBadge, tvLaunch.GamepadDemo);
         else _desktopWindow.Show();
     }
 
     /// <summary>Hides the desktop shell and opens the borderless TV shell in this process.</summary>
-    internal void EnterTvMode(bool demo = false)
+    internal void EnterTvMode(bool demo = false, bool gamepadDemo = false)
     {
         if (_tvWindow is not null || _shuttingDown) return;
         _desktopWindow?.Hide();
         var shell = new TvShellWindow(new TvShellOptions
         {
             DemoMode = demo || _tvDemo,
+            GamepadDemo = gamepadDemo,
             ExitRequested = ReturnToDesktop,
         });
         _tvWindow = shell;

@@ -29,6 +29,22 @@ public sealed class TvLaunchArgumentsTests
     }
 
     [Fact]
+    public void PadDemoSwitchEnablesDemoBadgeAndSdlDemoSourceFlag()
+    {
+        var launch = TvLaunchArguments.Parse(["--tv-pad-demo"]);
+        Assert.True(launch.StartTv);
+        Assert.True(launch.DemoBadge);
+        Assert.True(launch.GamepadDemo);
+    }
+
+    [Fact]
+    public void GamepadDemoFlagIsOffForPlainTvAndKeyboardDemo()
+    {
+        Assert.False(TvLaunchArguments.Parse(["--tv"]).GamepadDemo);
+        Assert.False(TvLaunchArguments.Parse(["--tv-demo"]).GamepadDemo);
+    }
+
+    [Fact]
     public void NoTvSwitchDoesNotStartTvMode()
     {
         var launch = TvLaunchArguments.Parse(["--background"]);
