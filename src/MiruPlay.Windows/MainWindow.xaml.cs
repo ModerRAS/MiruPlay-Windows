@@ -77,6 +77,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     private GridLength _savedNavigationWidth;
     private bool _savedPlaybackSidebarVisible;
     private bool _isFullscreen;
+    private MpvRuntimeCapabilities? _playbackCapabilities;
 
     public MainWindow() : this(false) { }
 
@@ -90,6 +91,7 @@ public partial class MainWindow : Window, IAsyncDisposable
         SeriesDetailPageView.MetadataRequested += SeriesDetailPage_MetadataRequested;
         SeriesDetailPageView.EditMetadataRequested += SeriesDetailPage_EditMetadataRequested;
         _settings = _settingsStore.Load();
+        _playbackCapabilities = MpvRuntimeCapabilityProbe.Probe(MpvPlayerLauncher.FindLibMpv(_settings.LibMpvPath));
         _bangumiMetadata = new BangumiMetadataClient(OutboundHttpProxy.CreateHandler(() => _cloudDriveConfig.Load()));
         _tmdbMetadata = new TmdbMetadataClient(OutboundHttpProxy.CreateHandler(() => _cloudDriveConfig.Load()));
         _tvMazeMetadata = new TvMazeMetadataClient(OutboundHttpProxy.CreateHandler(() => _cloudDriveConfig.Load()));
@@ -184,7 +186,8 @@ public partial class MainWindow : Window, IAsyncDisposable
             topping: _topping,
             findAudioPreset: FindAudioPreset,
             musicLibrary: _musicLibrary,
-            playMusic: PlayMusicFromWebAsync);
+            playMusic: PlayMusicFromWebAsync,
+            getRuntimeCapabilities: () => _playbackCapabilities);
         ApplySettingsToView();
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
@@ -316,6 +319,11 @@ public partial class MainWindow : Window, IAsyncDisposable
     /// running session (next playback uses it too via LibMpvPlaybackSession.Configure).</summary>
     private async Task ApplyPlaybackAudioSettingsAsync(AppSettings settings)
     {
+        // Bitstream passthrough cannot run through the PCM filter chain. Do not push
+        // a DSP graph while passthrough is selected; it takes effect on next playback.
+        if (MpvAudioPassthroughOptionMapper.IsEnabled(MpvAudioPassthroughOptionMapper.ParseMode(settings.AudioPassthroughMode)))
+            return;
+
         var audioDsp = (settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
         var preset = audioDsp.Presets!.First(item => item.Id.Equals(audioDsp.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
         var layout = AudioDspChannelLayout.ForId(preset.ChannelLayoutId);
@@ -842,7 +850,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 startPositionMs,
                 playbackProxy: playbackProxy,
                 windowHandle: windowHandle,
-                videoOptions: new MpvWindowsVideoOptions(),
+                videoOptions: MpvWindowsVideoOptionMapper.FromSettings(_settings),
                 allowDirectHttp: source?.Type == "RSS",
                 endPositionMs: endPositionMs);
             var session = launch.Session;
@@ -2548,6 +2556,85 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
     }
 
+    private void HdrMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || HdrModeBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { HdrMode = AppSettingsStore.NormalizeHdrMode(value) };
+        _settingsStore.Save(_settings);
+        StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+    }
+
+    private void AudioPassthroughMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || AudioPassthroughModeBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { AudioPassthroughMode = AppSettingsStore.NormalizeAudioPassthroughMode(value) };
+        _settingsStore.Save(_settings);
+        UpdatePassthroughUiState();
+        StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+    }
+
+    private void AudioPassthroughCodec_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loadingSettings) return;
+        var codecs = new List<string>();
+        if (PassthroughCodecTrueHd.IsChecked == true) codecs.Add("truehd");
+        if (PassthroughCodecEac3.IsChecked == true) codecs.Add("eac3");
+        if (PassthroughCodecAc3.IsChecked == true) codecs.Add("ac3");
+        if (PassthroughCodecDts.IsChecked == true) codecs.Add("dts");
+        if (PassthroughCodecDtsHd.IsChecked == true) codecs.Add("dts-hd");
+        _settings = _settings with
+        {
+            AudioPassthroughCodecs = MpvAudioPassthroughOptionMapper.ToStorageCodecs(codecs),
+        };
+        _settingsStore.Save(_settings);
+        UpdatePassthroughUiState();
+        StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+    }
+
+    private void AudioPassthroughDevice_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || AudioPassthroughDeviceBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { AudioPassthroughDevice = AppSettingsStore.NormalizeAudioPassthroughDevice(value) };
+        _settingsStore.Save(_settings);
+        StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+    }
+
+    private void UpdatePassthroughUiState()
+    {
+        var passthrough = MpvAudioPassthroughOptionMapper.IsEnabled(
+            MpvAudioPassthroughOptionMapper.ParseMode(_settings.AudioPassthroughMode));
+        AudioDspEnabledCheckBox.IsEnabled = !passthrough;
+        PassthroughConflictText.Visibility = passthrough ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void PopulateAudioDeviceOptions()
+    {
+        var current = AppSettingsStore.NormalizeAudioPassthroughDevice(_settings.AudioPassthroughDevice);
+        var items = new List<ComboBoxItem>
+        {
+            new() { Tag = "auto", Content = AppStrings.Get("playback.passthroughDeviceAuto") },
+        };
+        var devices = _playbackCapabilities?.AudioDevices
+            .Where(device => device.Name.StartsWith("wasapi/", StringComparison.OrdinalIgnoreCase)) ?? [];
+        foreach (var device in devices)
+            items.Add(new ComboBoxItem { Tag = device.Name, Content = device.Description });
+        if (!items.Any(item => Equals(item.Tag, current)))
+            items.Add(new ComboBoxItem { Tag = current, Content = current });
+        AudioPassthroughDeviceBox.ItemsSource = items;
+        AudioPassthroughDeviceBox.SelectedItem = items.FirstOrDefault(item => Equals(item.Tag, current)) ?? items[0];
+    }
+
+    private void UpdatePlaybackCapabilityText()
+    {
+        var capabilities = _playbackCapabilities;
+        DvFelCapabilityText.Text = capabilities is null
+            ? AppStrings.Get("wpf.main.capabilityUnavailable")
+            : capabilities.DolbyVisionFelSupported
+                ? AppStrings.Get("wpf.main.dvFelSupported", capabilities.LibPlaceboVersion ?? string.Empty)
+                : AppStrings.Get("wpf.main.dvFelUnsupported");
+        LibMpvVersionText.Text = capabilities?.MpvVersion ?? AppStrings.Get("wpf.main.capabilityUnavailable");
+    }
+
     private void AppLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_loadingSettings || AppLanguageBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
@@ -2632,6 +2719,25 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .OfType<ComboBoxItem>()
                 .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeAudioBalance(_settings.AudioBalance)))
                 ?? AudioBalanceBox.Items[0];
+            HdrModeBox.SelectedItem = HdrModeBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeHdrMode(_settings.HdrMode)))
+                ?? HdrModeBox.Items[0];
+            AudioPassthroughModeBox.SelectedItem = AudioPassthroughModeBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeAudioPassthroughMode(_settings.AudioPassthroughMode)))
+                ?? AudioPassthroughModeBox.Items[0];
+            var passthroughCodecs = MpvAudioPassthroughOptionMapper
+                .ParseCodecs(_settings.AudioPassthroughCodecs)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            PassthroughCodecTrueHd.IsChecked = passthroughCodecs.Contains("truehd");
+            PassthroughCodecEac3.IsChecked = passthroughCodecs.Contains("eac3");
+            PassthroughCodecAc3.IsChecked = passthroughCodecs.Contains("ac3");
+            PassthroughCodecDts.IsChecked = passthroughCodecs.Contains("dts");
+            PassthroughCodecDtsHd.IsChecked = passthroughCodecs.Contains("dts-hd");
+            PopulateAudioDeviceOptions();
+            UpdatePassthroughUiState();
+            UpdatePlaybackCapabilityText();
         }
         finally
         {

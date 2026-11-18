@@ -773,6 +773,64 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="240" />
                         </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="{services:Loc playback.hdrMode}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc playback.hdrHint}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="HdrModeBox" Grid.Column="1" SelectionChanged="HdrMode_SelectionChanged" AutomationProperties.Name="{services:Loc playback.hdrMode}">
+                            <ComboBoxItem Tag="auto"><TextBlock Text="{services:Loc playback.hdrAuto}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="passthrough"><TextBlock Text="{services:Loc playback.hdrPassthrough}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="sdr_tonemap"><TextBlock Text="{services:Loc playback.hdrSdrToneMap}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                    <Grid Margin="0,0,0,28">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="{services:Loc playback.audioPassthrough}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc playback.passthroughHint}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="AudioPassthroughModeBox" Grid.Column="1" SelectionChanged="AudioPassthroughMode_SelectionChanged" AutomationProperties.Name="{services:Loc playback.audioPassthrough}">
+                            <ComboBoxItem Tag="off"><TextBlock Text="{services:Loc playback.passthroughOff}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="auto"><TextBlock Text="{services:Loc playback.passthroughAuto}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="force"><TextBlock Text="{services:Loc playback.passthroughForce}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="{services:Loc playback.passthroughCodecs}" FontWeight="SemiBold" />
+                            <TextBlock x:Name="PassthroughConflictText" Text="{services:Loc playback.passthroughDspConflict}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <CheckBox x:Name="PassthroughCodecTrueHd" Content="TrueHD" Click="AudioPassthroughCodec_Changed" AutomationProperties.Name="TrueHD" />
+                            <CheckBox x:Name="PassthroughCodecEac3" Content="E-AC3" Click="AudioPassthroughCodec_Changed" Margin="0,4,0,0" AutomationProperties.Name="E-AC3" />
+                            <CheckBox x:Name="PassthroughCodecAc3" Content="AC-3" Click="AudioPassthroughCodec_Changed" Margin="0,4,0,0" AutomationProperties.Name="AC-3" />
+                            <CheckBox x:Name="PassthroughCodecDts" Content="DTS" Click="AudioPassthroughCodec_Changed" Margin="0,4,0,0" AutomationProperties.Name="DTS" />
+                            <CheckBox x:Name="PassthroughCodecDtsHd" Content="DTS-HD" Click="AudioPassthroughCodec_Changed" Margin="0,4,0,0" AutomationProperties.Name="DTS-HD" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="0,0,0,28">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,18,0">
+                            <TextBlock Text="{services:Loc playback.passthroughDevice}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc playback.passthroughDeviceHint}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="AudioPassthroughDeviceBox" Grid.Column="1" SelectionChanged="AudioPassthroughDevice_SelectionChanged" AutomationProperties.Name="{services:Loc playback.passthroughDevice}" />
+                    </Grid>
+                    <Grid Margin="0,0,0,28">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                        </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Text="{services:Loc playback.appLang}" FontWeight="SemiBold" />
                             <TextBlock Text="{services:Loc wpf.main.langHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" />
@@ -791,6 +849,24 @@
                     <TextBlock Text="{services:Loc wpf.main.about}" Style="{StaticResource SectionTitle}" Margin="0,28,0,12" />
                     <TextBlock Text="MiruPlay Windows" FontWeight="SemiBold" />
                     <TextBlock Text="{services:Loc wpf.main.aboutText}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
+                    <TextBlock Text="{services:Loc wpf.main.playbackCapabilities}" FontWeight="SemiBold" Margin="0,18,0,6" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{services:Loc wpf.main.dvFelSupport}" />
+                        <TextBlock x:Name="DvFelCapabilityText" Grid.Column="1" Style="{StaticResource SecondaryText}" />
+                    </Grid>
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{services:Loc wpf.main.libMpvVersion}" />
+                        <TextBlock x:Name="LibMpvVersionText" Grid.Column="1" Style="{StaticResource SecondaryText}" />
+                    </Grid>
+                    <TextBlock Text="{services:Loc wpf.main.dvOutputHint}" Style="{StaticResource SecondaryText}" Margin="0,6,0,0" TextWrapping="Wrap" />
                 </StackPanel>
             </ScrollViewer>
 

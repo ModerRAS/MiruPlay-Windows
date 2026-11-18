@@ -182,6 +182,8 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddGroup("tv.settings.group.playback");
         AddRow("endAction", "tv.settings.endAction", () => ValueEndAction(), step => ChangeEndAction(step));
         AddRow("subtitle", "tv.settings.subtitleLanguage", () => ValueSubtitle(), step => ChangeSubtitle(step));
+        AddRow("hdrMode", "tv.settings.hdrMode", () => ValueHdrMode(), step => ChangeHdrMode(step));
+        AddRow("audioPassthrough", "tv.settings.audioPassthrough", () => ValueAudioPassthrough(), step => ChangeAudioPassthrough(step));
         AddGroup("tv.settings.group.tv");
         AddRow("startMode", "tv.settings.startTvMode", () => Bool(_context.Settings.TvModeEnabled), _ => Toggle(settings => settings with { TvModeEnabled = !settings.TvModeEnabled }));
         AddRow("preset", "tv.settings.remotePreset", () => ValuePreset(), step => ChangePreset());
@@ -349,6 +351,42 @@ public sealed class TvSettingsScreen : TvScreenBase
         _context.SaveSettings(_context.Settings with { PreferredSubtitleLanguage = values[index] });
         RefreshValues();
     }
+
+    private void ChangeHdrMode(int step)
+    {
+        var values = MpvPlaybackModeSettings.HdrModeValues.ToArray();
+        var index = Array.IndexOf(values, AppSettingsStore.NormalizeHdrMode(_context.Settings.HdrMode));
+        if (index < 0) index = 0;
+        index = (index + step + values.Length) % values.Length;
+        _context.SaveSettings(_context.Settings with { HdrMode = values[index] });
+        RefreshValues();
+        _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+    }
+
+    private string ValueHdrMode() => AppSettingsStore.NormalizeHdrMode(_context.Settings.HdrMode) switch
+    {
+        MpvPlaybackModeSettings.HdrModePassthrough => AppStrings.Get("tv.settings.hdr.passthrough"),
+        MpvPlaybackModeSettings.HdrModeSdrToneMap => AppStrings.Get("tv.settings.hdr.sdrToneMap"),
+        _ => AppStrings.Get("tv.settings.hdr.auto"),
+    };
+
+    private void ChangeAudioPassthrough(int step)
+    {
+        var values = new[] { "off", "auto", "force" };
+        var index = Array.IndexOf(values, AppSettingsStore.NormalizeAudioPassthroughMode(_context.Settings.AudioPassthroughMode));
+        if (index < 0) index = 0;
+        index = (index + step + values.Length) % values.Length;
+        _context.SaveSettings(_context.Settings with { AudioPassthroughMode = values[index] });
+        RefreshValues();
+        _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+    }
+
+    private string ValueAudioPassthrough() => AppSettingsStore.NormalizeAudioPassthroughMode(_context.Settings.AudioPassthroughMode) switch
+    {
+        "auto" => AppStrings.Get("tv.settings.passthrough.auto"),
+        "force" => AppStrings.Get("tv.settings.passthrough.force"),
+        _ => AppStrings.Get("tv.settings.passthrough.off"),
+    };
 
     private void ChangePreset()
     {

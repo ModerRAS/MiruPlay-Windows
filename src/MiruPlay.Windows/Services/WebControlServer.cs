@@ -134,6 +134,7 @@ public sealed class WebControlServer : IAsyncDisposable
     private readonly Func<string, Task<bool>>? _appControl;
     private readonly Func<Task<bool>>? _installUpdate;
     private readonly Func<LibrarySeries, CancellationToken, Task<string?>> _resolvePosterPath;
+    private readonly Func<MpvRuntimeCapabilities?>? _getRuntimeCapabilities;
     private readonly bool _listenOnAnyIp;
     private readonly long _startedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     private WebApplication? _app;
@@ -181,13 +182,15 @@ public sealed class WebControlServer : IAsyncDisposable
         IBangumiOAuthFlow? bangumiOAuth = null,
         BangumiOAuthCredentialStore? bangumiOAuthCredentials = null,
         BangumiWebConsoleLogin? bangumiWebLogin = null,
-        Func<CancellationToken, Task<string?>>? getBangumiToken = null)
+        Func<CancellationToken, Task<string?>>? getBangumiToken = null,
+        Func<MpvRuntimeCapabilities?>? getRuntimeCapabilities = null)
     {
         _port = port;
         _tokens = tokens;
         _getSeries = getSeries;
         _getPlaybackStatus = getPlaybackStatus;
         _getPlaybackDiagnostics = getPlaybackDiagnostics ?? (() => null);
+        _getRuntimeCapabilities = getRuntimeCapabilities;
         _topping = topping;
         _findAudioPreset = findAudioPreset;
         _musicLibrary = musicLibrary;
@@ -1026,7 +1029,12 @@ public sealed class WebControlServer : IAsyncDisposable
         app.MapGet("/api/playback/diagnostics", () =>
         {
             var diagnostics = _getPlaybackDiagnostics();
-            return Success(new { available = diagnostics is not null, diagnostics });
+            return Success(new
+            {
+                available = diagnostics is not null,
+                diagnostics,
+                capabilities = _getRuntimeCapabilities?.Invoke(),
+            });
         });
 
         app.MapPost("/api/playback/command", async (HttpRequest request) =>
@@ -1047,7 +1055,8 @@ public sealed class WebControlServer : IAsyncDisposable
             return Success(status);
         });
 
-        app.MapGet("/api/settings/playback", () => Success(ToPlaybackSettings(_getSettings())));
+        app.MapGet("/api/settings/playback", () =>
+            Success(ToPlaybackSettings(_getSettings(), _getRuntimeCapabilities?.Invoke())));
         app.MapPut("/api/settings/playback", async (HttpRequest request) =>
         {
             var body = await JsonSerializer.DeserializeAsync<PlaybackSettingsRequest>(request.Body, JsonOptions).ConfigureAwait(false)
@@ -1056,6 +1065,29 @@ public sealed class WebControlServer : IAsyncDisposable
             if (body.PreferredSubtitleLanguage is not (null or "auto" or "zh_hans" or "zh_hant" or "zh" or "en" or "ja")) throw new BadHttpRequestException(AppStrings.Get("api.errSubLang"));
             if (body.AudioBalance is not null && !AudioBalanceLevels.StorageValues.Contains(body.AudioBalance.Trim().ToLowerInvariant()))
                 throw new BadHttpRequestException(AppStrings.Get("api.errAudioBalance"));
+            if (body.HdrMode is not null &&
+                !MpvPlaybackModeSettings.HdrModeValues.Contains(body.HdrMode.Trim().ToLowerInvariant()))
+                throw new BadHttpRequestException(AppStrings.Get("api.errHdrMode"));
+            if (body.AudioPassthroughMode is not null &&
+                body.AudioPassthroughMode.Trim().ToLowerInvariant() is not ("off" or "auto" or "force"))
+                throw new BadHttpRequestException(AppStrings.Get("api.errAudioPassthroughMode"));
+            if (body.AudioPassthroughCodecs is not null)
+            {
+                var requestedCodecs = body.AudioPassthroughCodecs
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(item => item.ToLowerInvariant())
+                    .ToArray();
+                if (requestedCodecs.Length == 0 ||
+                    requestedCodecs.Any(codec => !MpvAudioPassthroughOptionMapper.SupportedCodecs.Contains(codec)))
+                    throw new BadHttpRequestException(AppStrings.Get("api.errAudioPassthroughCodecs"));
+            }
+            if (body.AudioPassthroughDevice is not null)
+            {
+                var device = body.AudioPassthroughDevice.Trim();
+                if (device.Length > 0 && !string.Equals(device, "auto", StringComparison.OrdinalIgnoreCase) &&
+                    !device.StartsWith("wasapi/", StringComparison.OrdinalIgnoreCase))
+                    throw new BadHttpRequestException(AppStrings.Get("api.errAudioPassthroughDevice"));
+            }
             if (body.FormatAwareToneMapping is not null)
             {
                 throw new BadHttpRequestException(AppStrings.Get("api.errToneMap"), StatusCodes.Status501NotImplemented);
@@ -1067,9 +1099,21 @@ public sealed class WebControlServer : IAsyncDisposable
                 AudioBalance = body.AudioBalance is null
                     ? current.AudioBalance
                     : AppSettingsStore.NormalizeAudioBalance(body.AudioBalance),
+                HdrMode = body.HdrMode is null
+                    ? current.HdrMode
+                    : AppSettingsStore.NormalizeHdrMode(body.HdrMode),
+                AudioPassthroughMode = body.AudioPassthroughMode is null
+                    ? current.AudioPassthroughMode
+                    : AppSettingsStore.NormalizeAudioPassthroughMode(body.AudioPassthroughMode),
+                AudioPassthroughCodecs = body.AudioPassthroughCodecs is null
+                    ? current.AudioPassthroughCodecs
+                    : AppSettingsStore.NormalizeAudioPassthroughCodecs(body.AudioPassthroughCodecs),
+                AudioPassthroughDevice = body.AudioPassthroughDevice is null
+                    ? current.AudioPassthroughDevice
+                    : AppSettingsStore.NormalizeAudioPassthroughDevice(body.AudioPassthroughDevice),
             }).ConfigureAwait(false);
             if (_applyPlaybackSettings is not null) await _applyPlaybackSettings(updated).ConfigureAwait(false);
-            return Success(ToPlaybackSettings(updated));
+            return Success(ToPlaybackSettings(updated, _getRuntimeCapabilities?.Invoke()));
         });
 
         app.MapGet("/api/settings/locale", () => Success(new
@@ -1623,7 +1667,7 @@ public sealed class WebControlServer : IAsyncDisposable
         autoScanIntervalOptionsHours = MediaSourceAutoScanScheduler.IntervalOptionsHours,
     };
 
-    private static object ToPlaybackSettings(AppSettings settings) => new
+    private static object ToPlaybackSettings(AppSettings settings, MpvRuntimeCapabilities? capabilities = null) => new
     {
         endAction = settings.PlaybackEndAction,
         preferredSubtitleLanguage = settings.PreferredSubtitleLanguage,
@@ -1637,6 +1681,16 @@ public sealed class WebControlServer : IAsyncDisposable
         preferredSubtitleLanguageOptions = new[] { "auto", "zh_hans", "zh_hant", "zh", "en", "ja" },
         audioBalance = AppSettingsStore.NormalizeAudioBalance(settings.AudioBalance),
         audioBalanceOptions = AudioBalanceLevels.StorageValues,
+        hdrMode = AppSettingsStore.NormalizeHdrMode(settings.HdrMode),
+        hdrModeOptions = MpvPlaybackModeSettings.HdrModeValues,
+        audioPassthroughMode = AppSettingsStore.NormalizeAudioPassthroughMode(settings.AudioPassthroughMode),
+        audioPassthroughModeOptions = new[] { "off", "auto", "force" },
+        audioPassthroughCodecs = AppSettingsStore.NormalizeAudioPassthroughCodecs(settings.AudioPassthroughCodecs),
+        audioPassthroughCodecOptions = MpvAudioPassthroughOptionMapper.SupportedCodecs,
+        audioPassthroughDevice = AppSettingsStore.NormalizeAudioPassthroughDevice(settings.AudioPassthroughDevice),
+        audioDevices = (capabilities?.AudioDevices ?? [])
+            .Where(device => device.Name.StartsWith("wasapi/", StringComparison.OrdinalIgnoreCase))
+            .ToArray(),
     };
 
     private static string NormalizeCloudDrivePath(string path)
@@ -1777,7 +1831,11 @@ public sealed class WebControlServer : IAsyncDisposable
         string? EndAction = null,
         string? PreferredSubtitleLanguage = null,
         JsonElement? FormatAwareToneMapping = null,
-        string? AudioBalance = null);
+        string? AudioBalance = null,
+        string? HdrMode = null,
+        string? AudioPassthroughMode = null,
+        string? AudioPassthroughCodecs = null,
+        string? AudioPassthroughDevice = null);
     private sealed record ScanSettingsRequest(
         bool? AutoScanEnabled = null,
         int? AutoScanIntervalHours = null,

@@ -32,6 +32,12 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         "frame-drop-count",
         "cache-speed",
         "cache-buffering-state",
+        "audio-out-params/format",
+        "audio-out-params/channels",
+        "audio-out-params/samplerate",
+        "libplacebo-version",
+        "mpv-version",
+        "ffmpeg-version",
     ];
     private readonly ILibMpvClient _client;
     private readonly LibraryEpisode _episode;
@@ -58,6 +64,10 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     private string? _containerFormat;
     private string? _audioCodec;
     private MpvVideoTrackInfo? _video;
+    private string? _audioOutputFormat;
+    private string? _audioOutputChannels;
+    private bool _audioPassthroughActive;
+    private int _enhancementLayerDegraded;
     private AudioDspFilterGraph? _appliedAudioDsp;
     private AudioDspChannelLayout? _appliedAudioDspChannelLayout;
     private Task? _monitorTask;
@@ -502,6 +512,17 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
 
     private void CaptureNativeLog(LibMpvLogMessage message)
     {
+        // libmpv warns (not fails) when the Dolby Vision enhancement layer cannot be
+        // decoded or composed and it falls back to base-layer-only rendering.
+        if (!string.IsNullOrEmpty(message.Text) &&
+            (message.Text.Contains("enhancement-layer", StringComparison.OrdinalIgnoreCase) ||
+             message.Text.Contains("enhancement layer", StringComparison.OrdinalIgnoreCase) ||
+             message.Text.Contains("dovi_split", StringComparison.OrdinalIgnoreCase) ||
+             message.Text.Contains("rendering base layer only", StringComparison.OrdinalIgnoreCase)))
+        {
+            Interlocked.Exchange(ref _enhancementLayerDegraded, 1);
+        }
+
         var log = new MpvNativeLogMessage(
             Environment.TickCount64,
             message.Prefix,
@@ -576,21 +597,37 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         };
         if (languages is not null) SetOption("slang", languages);
 
-        ApplyAudioSrcBypass(settings);
-
-        var audioDsp = (settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
-        var preset = audioDsp.Presets!.First(item => item.Id.Equals(audioDsp.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
-        var layout = AudioDspChannelLayout.ForId(preset.ChannelLayoutId);
-        var graph = AudioDspFilterGraphCompiler.Compile(
-            audioDsp,
-            layout,
-            48_000,
-            AudioBalanceLevels.FromStorageValue(settings.AudioBalance));
-        if (graph.MpvArguments.Count > 0)
+        var audioPassthroughMode = MpvAudioPassthroughOptionMapper.ParseMode(settings.AudioPassthroughMode);
+        if (MpvAudioPassthroughOptionMapper.IsEnabled(audioPassthroughMode))
         {
-            foreach (var argument in graph.MpvArguments) SetOptionArgument(argument);
-            _appliedAudioDsp = graph;
-            _appliedAudioDspChannelLayout = layout;
+            // Bitstream passthrough needs an exclusive WASAPI stream and cannot be
+            // combined with the PCM audio filter chain (PEQ/DSP/loudness). Filters are
+            // skipped entirely while passthrough is selected; mpv falls back to PCM
+            // decoding on its own when the device/AVR rejects the passthrough format.
+            foreach (var argument in MpvAudioPassthroughOptionMapper.BuildArguments(
+                         audioPassthroughMode,
+                         settings.AudioPassthroughCodecs,
+                         settings.AudioPassthroughDevice))
+                SetOptionArgument(argument);
+        }
+        else
+        {
+            ApplyAudioSrcBypass(settings);
+
+            var audioDsp = (settings.AudioDsp ?? AudioDspConfig.Neutral()).Normalize();
+            var preset = audioDsp.Presets!.First(item => item.Id.Equals(audioDsp.SelectedPresetId, StringComparison.OrdinalIgnoreCase));
+            var layout = AudioDspChannelLayout.ForId(preset.ChannelLayoutId);
+            var graph = AudioDspFilterGraphCompiler.Compile(
+                audioDsp,
+                layout,
+                48_000,
+                AudioBalanceLevels.FromStorageValue(settings.AudioBalance));
+            if (graph.MpvArguments.Count > 0)
+            {
+                foreach (var argument in graph.MpvArguments) SetOptionArgument(argument);
+                _appliedAudioDsp = graph;
+                _appliedAudioDspChannelLayout = layout;
+            }
         }
     }
 
@@ -604,7 +641,9 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         if (mode == "direct" && !dspEnabled)
         {
             SetOption("ao", "wasapi");
-            SetOption("ao-wasapi-exclusive", "yes");
+            // mpv 0.41 removed the old --ao-wasapi-exclusive alias; exclusive WASAPI
+            // output is requested through --audio-exclusive.
+            SetOption("audio-exclusive", "yes");
             return;
         }
         if (mode == "software" || (mode == "direct" && dspEnabled))
@@ -663,6 +702,11 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         _mediaTitle = _client.GetPropertyString("media-title");
         _containerFormat = _client.GetPropertyString("file-format");
         _audioCodec = _client.GetPropertyString("audio-codec-name");
+        var audioOutputFormat = _client.GetPropertyString("audio-out-params/format");
+        _audioOutputFormat = string.IsNullOrWhiteSpace(audioOutputFormat) ? null : audioOutputFormat;
+        var audioOutputChannels = _client.GetPropertyString("audio-out-params/channels");
+        _audioOutputChannels = string.IsNullOrWhiteSpace(audioOutputChannels) ? null : audioOutputChannels;
+        _audioPassthroughActive = MpvAudioPassthroughOptionMapper.IsPassthroughFormat(_audioOutputFormat);
         var videoCodec = _client.GetPropertyString("video-codec");
         var pixelFormat = _client.GetPropertyString("video-params/pixelformat");
         var primaries = _client.GetPropertyString("video-params/primaries");
@@ -688,6 +732,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         var values = node.ArrayValue ?? node.MapValue?.Values ?? [];
         var subtitles = new List<PlaybackSubtitleTrack>();
         var audio = new List<MpvAudioTrack>();
+        int? dolbyVisionProfile = null;
+        int? dolbyVisionLevel = null;
         foreach (var item in values)
         {
             if (item.MapValue is null || GetInt(item, "id") is not { } id) continue;
@@ -700,6 +746,20 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             var selected = GetBool(item, "selected");
             if (type == "sub") subtitles.Add(new(id, language, title, codec, external, externalFileName, selected));
             if (type == "audio") audio.Add(new(id, language, title, codec, external, selected));
+            if (type == "video" && selected)
+            {
+                dolbyVisionProfile = GetInt(item, "dolby-vision-profile");
+                dolbyVisionLevel = GetInt(item, "dolby-vision-level");
+            }
+        }
+
+        if (dolbyVisionProfile is not null || dolbyVisionLevel is not null)
+        {
+            _video = (_video ?? new MpvVideoTrackInfo(null, null, null, null, null, null)) with
+            {
+                DolbyVisionProfile = dolbyVisionProfile,
+                DolbyVisionLevel = dolbyVisionLevel,
+            };
         }
 
         var subtitleChanged = false;
@@ -893,7 +953,11 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 _selectedAudioTrackId,
                 _selectedSubtitleTrackId,
                 VolumePercent,
-                IsMuted);
+                IsMuted,
+                _audioOutputFormat,
+                _audioOutputChannels,
+                _audioPassthroughActive,
+                Volatile.Read(ref _enhancementLayerDegraded) != 0);
         }
     }
 }

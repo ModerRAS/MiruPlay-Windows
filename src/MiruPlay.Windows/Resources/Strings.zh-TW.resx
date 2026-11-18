@@ -521,6 +521,13 @@
   <data name="wpf.main.subLang" xml:space="preserve"><value>偏好字幕語言</value></data>
   <data name="wpf.main.subHint" xml:space="preserve"><value>比對不到時保留播放器預設軌道</value></data>
   <data name="wpf.main.langHint" xml:space="preserve"><value>跟隨系統或固定區域設定，影響數字與日期格式</value></data>
+  <data name="wpf.main.playbackCapabilities" xml:space="preserve"><value>播放能力</value></data>
+  <data name="wpf.main.dvFelSupport" xml:space="preserve"><value>Dolby Vision P7 增強層（FEL）</value></data>
+  <data name="wpf.main.dvFelSupported" xml:space="preserve"><value>支援（libplacebo {0}）</value></data>
+  <data name="wpf.main.dvFelUnsupported" xml:space="preserve"><value>目前執行時缺少 FEL 合成所需能力</value></data>
+  <data name="wpf.main.libMpvVersion" xml:space="preserve"><value>libmpv 版本</value></data>
+  <data name="wpf.main.dvOutputHint" xml:space="preserve"><value>Windows 無法輸出 Dolby Vision 訊號：DV 內容由播放器合成後以 HDR10 輸出，需要開啟系統 HDR。</value></data>
+  <data name="wpf.main.capabilityUnavailable" xml:space="preserve"><value>不可用</value></data>
   <data name="wpf.main.about" xml:space="preserve"><value>關於</value></data>
   <data name="wpf.main.aboutText" xml:space="preserve"><value>原生 Windows 客戶端 · 支援 MLIP v1-v4</value></data>
   <data name="wpf.main.loadingLib" xml:space="preserve"><value>正在讀取媒體庫…</value></data>
@@ -1338,6 +1345,15 @@
   <data name="tv.settings.exitTv" xml:space="preserve"><value>退出电视模式</value></data>
   <data name="tv.settings.phoneHint" xml:space="preserve"><value>电视端暂不支持编辑，请在桌面模式修改</value></data>
   <data name="tv.settings.restartHint" xml:space="preserve"><value>重启 MiruPlay 后生效</value></data>
+  <data name="tv.settings.hdrMode" xml:space="preserve"><value>HDR 模式</value></data>
+  <data name="tv.settings.hdr.auto" xml:space="preserve"><value>自動</value></data>
+  <data name="tv.settings.hdr.passthrough" xml:space="preserve"><value>HDR 直通</value></data>
+  <data name="tv.settings.hdr.sdrToneMap" xml:space="preserve"><value>映射 SDR</value></data>
+  <data name="tv.settings.audioPassthrough" xml:space="preserve"><value>音訊直通</value></data>
+  <data name="tv.settings.passthrough.off" xml:space="preserve"><value>關閉</value></data>
+  <data name="tv.settings.passthrough.auto" xml:space="preserve"><value>自動</value></data>
+  <data name="tv.settings.passthrough.force" xml:space="preserve"><value>強制</value></data>
+  <data name="tv.settings.nextPlaybackHint" xml:space="preserve"><value>下次播放生效</value></data>
   <data name="tv.exit.hold" xml:space="preserve"><value>继续按住 Back 退出电视模式</value></data>
   <data name="tv.exit.hint" xml:space="preserve"><value>松开取消</value></data>
   <data name="tv.key.up" xml:space="preserve"><value>上</value></data>
@@ -1365,7 +1381,27 @@
   <data name="playback.balanceLow" xml:space="preserve"><value>低</value></data>
   <data name="playback.balanceMedium" xml:space="preserve"><value>中</value></data>
   <data name="playback.balanceHigh" xml:space="preserve"><value>高</value></data>
+  <data name="playback.hdrMode" xml:space="preserve"><value>HDR 模式</value></data>
+  <data name="playback.hdrHint" xml:space="preserve"><value>自動沿用 mpv 預設。HDR 直通使用社群參數（source 中繼資料直出），需要 Windows 系統 HDR 開啟並實機驗證；預設不改變現有畫質。</value></data>
+  <data name="playback.hdrAuto" xml:space="preserve"><value>自動（推薦）</value></data>
+  <data name="playback.hdrPassthrough" xml:space="preserve"><value>HDR 直通</value></data>
+  <data name="playback.hdrSdrToneMap" xml:space="preserve"><value>映射到 SDR</value></data>
+  <data name="playback.audioPassthrough" xml:space="preserve"><value>音訊碼流直通</value></data>
+  <data name="playback.passthroughHint" xml:space="preserve"><value>將 TrueHD/E-AC3 等碼流原樣送入 HDMI/擴大機，由擴大機解碼 Atmos；需要獨佔 WASAPI 與支援 Atmos 的擴大機，失敗時自動回復 PCM 解碼（高度資訊遺失）。</value></data>
+  <data name="playback.passthroughOff" xml:space="preserve"><value>關閉</value></data>
+  <data name="playback.passthroughAuto" xml:space="preserve"><value>自動</value></data>
+  <data name="playback.passthroughForce" xml:space="preserve"><value>強制</value></data>
+  <data name="playback.passthroughCodecs" xml:space="preserve"><value>直通編解碼</value></data>
+  <data name="playback.passthroughDevice" xml:space="preserve"><value>HDMI/擴大機裝置</value></data>
+  <data name="playback.passthroughDeviceHint" xml:space="preserve"><value>選擇連接到擴大機的 WASAPI 裝置；自動使用系統預設輸出。</value></data>
+  <data name="playback.passthroughDeviceAuto" xml:space="preserve"><value>自動（系統預設）</value></data>
+  <data name="playback.passthroughDspConflict" xml:space="preserve"><value>碼流直通與 PEQ/DSP/響度平衡互斥：開啟直通時會跳過這些處理；修改在下次播放生效。</value></data>
+  <data name="playback.appliedNextPlayback" xml:space="preserve"><value>設定已儲存，下次播放生效。</value></data>
   <data name="api.errAudioBalance" xml:space="preserve"><value>音訊平衡等級無效。</value></data>
+  <data name="api.errHdrMode" xml:space="preserve"><value>HDR 模式不正確</value></data>
+  <data name="api.errAudioPassthroughMode" xml:space="preserve"><value>音訊直通模式不正確</value></data>
+  <data name="api.errAudioPassthroughCodecs" xml:space="preserve"><value>直通編解碼集合不正確</value></data>
+  <data name="api.errAudioPassthroughDevice" xml:space="preserve"><value>直通音訊裝置不正確（應為 auto 或 wasapi/ 開頭的裝置）</value></data>
   <data name="oauth.heading" xml:space="preserve"><value>Bangumi OAuth 登入</value></data>
   <data name="oauth.start" xml:space="preserve"><value>瀏覽器登入</value></data>
   <data name="oauth.logout" xml:space="preserve"><value>登出</value></data>

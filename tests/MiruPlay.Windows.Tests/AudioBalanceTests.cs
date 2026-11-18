@@ -152,6 +152,74 @@ public sealed class AudioBalanceTests : IDisposable
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalid.StatusCode);
     }
 
+    [Fact]
+    public async Task PlaybackSettingsApiExposesAndValidatesHdrAndPassthrough()
+    {
+        var port = ReservePort();
+        var tokens = new WebControlTokenStore(Path.Combine(_directory, "web-token-modes.bin"));
+        var settings = new AppSettings(WebControlPort: port);
+        await using var server = new WebControlServer(
+            port,
+            tokens,
+            () => [],
+            () => new PlaybackRuntimeStatus(),
+            (_, _) => Task.FromResult(false),
+            _ => Task.FromResult(new PlaybackRuntimeStatus()),
+            () => settings,
+            update =>
+            {
+                settings = update(settings);
+                return Task.FromResult(settings);
+            },
+            MediaSourceActionsStub(),
+            listenOnAnyIp: false,
+            metadataTokens: new MetadataTokenStore(Path.Combine(_directory, "metadata-tokens-modes.bin")),
+            bangumiArchive: new BangumiArchiveStore(Path.Combine(_directory, "bangumi-archive-modes")),
+            localLogs: new RotatingLocalLogStore(Path.Combine(_directory, "logs-modes", "miruplay.jsonl")),
+            tasks: new HeadlessTaskScheduler(storePath: Path.Combine(_directory, "tasks-modes.json")));
+        await server.StartAsync();
+        using var client = new HttpClient { BaseAddress = new Uri($"http://localhost:{port}") };
+        client.DefaultRequestHeaders.Add("X-MiruPlay-Token", tokens.AccessToken);
+
+        var initial = await ReadData(await client.GetAsync("/api/settings/playback"));
+        Assert.Equal("auto", initial.GetProperty("hdrMode").GetString());
+        Assert.Equal("off", initial.GetProperty("audioPassthroughMode").GetString());
+        Assert.Equal(
+            ["auto", "passthrough", "sdr_tonemap"],
+            initial.GetProperty("hdrModeOptions").EnumerateArray().Select(item => item.GetString()!).ToArray());
+        Assert.Equal(
+            ["off", "auto", "force"],
+            initial.GetProperty("audioPassthroughModeOptions").EnumerateArray().Select(item => item.GetString()!).ToArray());
+        Assert.Equal(
+            ["truehd", "eac3", "ac3", "dts", "dts-hd"],
+            initial.GetProperty("audioPassthroughCodecOptions").EnumerateArray().Select(item => item.GetString()!).ToArray());
+
+        var updateResponse = await client.PutAsJsonAsync("/api/settings/playback", new
+        {
+            hdrMode = "passthrough",
+            audioPassthroughMode = "force",
+            audioPassthroughCodecs = "truehd,eac3",
+            audioPassthroughDevice = "auto",
+        });
+        updateResponse.EnsureSuccessStatusCode();
+        var updated = await ReadData(updateResponse);
+        Assert.Equal("passthrough", updated.GetProperty("hdrMode").GetString());
+        Assert.Equal("force", updated.GetProperty("audioPassthroughMode").GetString());
+        Assert.Equal("truehd,eac3", updated.GetProperty("audioPassthroughCodecs").GetString());
+        Assert.Equal("passthrough", settings.HdrMode);
+        Assert.Equal("force", settings.AudioPassthroughMode);
+        Assert.Equal("truehd,eac3", settings.AudioPassthroughCodecs);
+
+        var invalidHdr = await client.PutAsJsonAsync("/api/settings/playback", new { hdrMode = "bogus" });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidHdr.StatusCode);
+        var invalidMode = await client.PutAsJsonAsync("/api/settings/playback", new { audioPassthroughMode = "on" });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidMode.StatusCode);
+        var invalidCodecs = await client.PutAsJsonAsync("/api/settings/playback", new { audioPassthroughCodecs = "truehd,bogus" });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidCodecs.StatusCode);
+        var invalidDevice = await client.PutAsJsonAsync("/api/settings/playback", new { audioPassthroughDevice = "Speakers" });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidDevice.StatusCode);
+    }
+
     private static MediaSourceActions MediaSourceActionsStub() => new(
         () => [],
         _ => Task.FromResult(new SourceTestResponse(true, "ok")),
