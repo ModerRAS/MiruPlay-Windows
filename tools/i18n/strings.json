@@ -1463,7 +1463,7 @@
   "tv.season.group": {"zh-CN":"{0}年{1}月新番","zh-TW":"{0}年{1}月新番","zh-HK":"{0}年{1}月新番","en-US":"{0} · {1}月季","en-GB":"{0} · {1}月季"},
   "tv.season.unknown": {"zh-CN":"未识别播出日期","zh-TW":"未识别播出日期","zh-HK":"未识别播出日期","en-US":"Unknown air date","en-GB":"Unknown air date"},
   "tv.season.empty": {"zh-CN":"暂无作品","zh-TW":"暂无作品","zh-HK":"暂无作品","en-US":"No titles yet","en-GB":"No titles yet"},
-  "tv.hint.season": {"zh-CN":"←→ 选择  ↑↓ 换行  OK 详情  Back 返回","zh-TW":"←→ 选择  ↑↓ 换行  OK 详情  Back 返回","zh-HK":"←→ 选择  ↑↓ 换行  OK 详情  Back 返回","en-US":"←→ Select   ↑↓ Rows   OK Details   Back","en-GB":"←→ Select   ↑↓ Rows   OK Details   Back"},
+  "tv.hint.season": {"zh-CN":"←→ 切换视图/周  ↑↓ 换行  OK 详情  Back 返回","zh-TW":"←→ 切換檢視/週  ↑↓ 換行  OK 詳情  Back 返回","zh-HK":"←→ 切換檢視/週  ↑↓ 換行  OK 詳情  Back 返回","en-US":"←→ View/Week   ↑↓ Rows   OK Details   Back","en-GB":"←→ View/Week   ↑↓ Rows   OK Details   Back"},
   "tv.season.weekday.monday": {"zh-CN":"星期一","zh-TW":"星期一","zh-HK":"星期一","en-US":"Monday","en-GB":"Monday"},
   "tv.season.weekday.tuesday": {"zh-CN":"星期二","zh-TW":"星期二","zh-HK":"星期二","en-US":"Tuesday","en-GB":"Tuesday"},
   "tv.season.weekday.wednesday": {"zh-CN":"星期三","zh-TW":"星期三","zh-HK":"星期三","en-US":"Wednesday","en-GB":"Wednesday"},
@@ -1484,5 +1484,7 @@
   "tv.schedule.error": {"zh-CN":"日历加载失败：{0}（按 OK 重试）","zh-TW":"日历加载失败：{0}（按 OK 重试）","zh-HK":"日历加载失败：{0}（按 OK 重试）","en-US":"Calendar failed to load: {0} (press OK to retry)","en-GB":"Calendar failed to load: {0} (press OK to retry)"},
   "tv.schedule.emptyDay": {"zh-CN":"今天没有新番","zh-TW":"今天没有新番","zh-HK":"今天没有新番","en-US":"No titles today","en-GB":"No titles today"},
   "tv.schedule.emptyWeek": {"zh-CN":"这一周暂无新番","zh-TW":"这一周暂无新番","zh-HK":"这一周暂无新番","en-US":"No titles this week","en-GB":"No titles this week"},
-  "tv.hint.schedule": {"zh-CN":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","zh-TW":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","zh-HK":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","en-US":"←→ Week/Title   ↑↓ Weekday   OK Details   Back","en-GB":"←→ Week/Title   ↑↓ Weekday   OK Details   Back"}
+  "tv.hint.schedule": {"zh-CN":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","zh-TW":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","zh-HK":"←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回","en-US":"←→ Week/Title   ↑↓ Weekday   OK Details   Back","en-GB":"←→ Week/Title   ↑↓ Weekday   OK Details   Back"},
+  "tv.season.tab.schedule": {"zh-CN":"时间表","zh-TW":"時間表","zh-HK":"時間表","en-US":"Schedule","en-GB":"Schedule"},
+  "tv.season.tab.season": {"zh-CN":"季番","zh-TW":"季番","zh-HK":"季番","en-US":"Seasons","en-GB":"Seasons"}
 }

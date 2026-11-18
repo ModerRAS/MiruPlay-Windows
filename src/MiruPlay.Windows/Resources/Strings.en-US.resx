@@ -1463,7 +1463,7 @@
   <data name="tv.season.group" xml:space="preserve"><value>{0} · {1}月季</value></data>
   <data name="tv.season.unknown" xml:space="preserve"><value>Unknown air date</value></data>
   <data name="tv.season.empty" xml:space="preserve"><value>No titles yet</value></data>
-  <data name="tv.hint.season" xml:space="preserve"><value>←→ Select   ↑↓ Rows   OK Details   Back</value></data>
+  <data name="tv.hint.season" xml:space="preserve"><value>←→ View/Week   ↑↓ Rows   OK Details   Back</value></data>
   <data name="tv.season.weekday.monday" xml:space="preserve"><value>Monday</value></data>
   <data name="tv.season.weekday.tuesday" xml:space="preserve"><value>Tuesday</value></data>
   <data name="tv.season.weekday.wednesday" xml:space="preserve"><value>Wednesday</value></data>
@@ -1485,4 +1485,6 @@
   <data name="tv.schedule.emptyDay" xml:space="preserve"><value>No titles today</value></data>
   <data name="tv.schedule.emptyWeek" xml:space="preserve"><value>No titles this week</value></data>
   <data name="tv.hint.schedule" xml:space="preserve"><value>←→ Week/Title   ↑↓ Weekday   OK Details   Back</value></data>
+  <data name="tv.season.tab.schedule" xml:space="preserve"><value>Schedule</value></data>
+  <data name="tv.season.tab.season" xml:space="preserve"><value>Seasons</value></data>
 </root>

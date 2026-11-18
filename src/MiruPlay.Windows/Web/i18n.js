@@ -1460,7 +1460,7 @@ const I18N = {
   "tv.season.group": "{0}年{1}月新番",
   "tv.season.unknown": "未识别播出日期",
   "tv.season.empty": "暂无作品",
-  "tv.hint.season": "←→ 选择  ↑↓ 换行  OK 详情  Back 返回",
+  "tv.hint.season": "←→ 切换视图/周  ↑↓ 换行  OK 详情  Back 返回",
   "tv.season.weekday.monday": "星期一",
   "tv.season.weekday.tuesday": "星期二",
   "tv.season.weekday.wednesday": "星期三",
@@ -1481,7 +1481,9 @@ const I18N = {
   "tv.schedule.error": "日历加载失败：{0}（按 OK 重试）",
   "tv.schedule.emptyDay": "今天没有新番",
   "tv.schedule.emptyWeek": "这一周暂无新番",
-  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回"
+  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回",
+  "tv.season.tab.schedule": "时间表",
+  "tv.season.tab.season": "季番"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -2943,7 +2945,7 @@ const I18N = {
   "tv.season.group": "{0}年{1}月新番",
   "tv.season.unknown": "未识别播出日期",
   "tv.season.empty": "暂无作品",
-  "tv.hint.season": "←→ 选择  ↑↓ 换行  OK 详情  Back 返回",
+  "tv.hint.season": "←→ 切換檢視/週  ↑↓ 換行  OK 詳情  Back 返回",
   "tv.season.weekday.monday": "星期一",
   "tv.season.weekday.tuesday": "星期二",
   "tv.season.weekday.wednesday": "星期三",
@@ -2964,7 +2966,9 @@ const I18N = {
   "tv.schedule.error": "日历加载失败：{0}（按 OK 重试）",
   "tv.schedule.emptyDay": "今天没有新番",
   "tv.schedule.emptyWeek": "这一周暂无新番",
-  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回"
+  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回",
+  "tv.season.tab.schedule": "時間表",
+  "tv.season.tab.season": "季番"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -4426,7 +4430,7 @@ const I18N = {
   "tv.season.group": "{0}年{1}月新番",
   "tv.season.unknown": "未识别播出日期",
   "tv.season.empty": "暂无作品",
-  "tv.hint.season": "←→ 选择  ↑↓ 换行  OK 详情  Back 返回",
+  "tv.hint.season": "←→ 切換檢視/週  ↑↓ 換行  OK 詳情  Back 返回",
   "tv.season.weekday.monday": "星期一",
   "tv.season.weekday.tuesday": "星期二",
   "tv.season.weekday.wednesday": "星期三",
@@ -4447,7 +4451,9 @@ const I18N = {
   "tv.schedule.error": "日历加载失败：{0}（按 OK 重试）",
   "tv.schedule.emptyDay": "今天没有新番",
   "tv.schedule.emptyWeek": "这一周暂无新番",
-  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回"
+  "tv.hint.schedule": "←→ 切换周/剧集  ↑↓ 切换星期  OK 详情  Back 返回",
+  "tv.season.tab.schedule": "時間表",
+  "tv.season.tab.season": "季番"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -5909,7 +5915,7 @@ const I18N = {
   "tv.season.group": "{0} · {1}月季",
   "tv.season.unknown": "Unknown air date",
   "tv.season.empty": "No titles yet",
-  "tv.hint.season": "←→ Select   ↑↓ Rows   OK Details   Back",
+  "tv.hint.season": "←→ View/Week   ↑↓ Rows   OK Details   Back",
   "tv.season.weekday.monday": "Monday",
   "tv.season.weekday.tuesday": "Tuesday",
   "tv.season.weekday.wednesday": "Wednesday",
@@ -5930,7 +5936,9 @@ const I18N = {
   "tv.schedule.error": "Calendar failed to load: {0} (press OK to retry)",
   "tv.schedule.emptyDay": "No titles today",
   "tv.schedule.emptyWeek": "No titles this week",
-  "tv.hint.schedule": "←→ Week/Title   ↑↓ Weekday   OK Details   Back"
+  "tv.hint.schedule": "←→ Week/Title   ↑↓ Weekday   OK Details   Back",
+  "tv.season.tab.schedule": "Schedule",
+  "tv.season.tab.season": "Seasons"
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -7392,7 +7400,7 @@ const I18N = {
   "tv.season.group": "{0} · {1}月季",
   "tv.season.unknown": "Unknown air date",
   "tv.season.empty": "No titles yet",
-  "tv.hint.season": "←→ Select   ↑↓ Rows   OK Details   Back",
+  "tv.hint.season": "←→ View/Week   ↑↓ Rows   OK Details   Back",
   "tv.season.weekday.monday": "Monday",
   "tv.season.weekday.tuesday": "Tuesday",
   "tv.season.weekday.wednesday": "Wednesday",
@@ -7413,7 +7421,9 @@ const I18N = {
   "tv.schedule.error": "Calendar failed to load: {0} (press OK to retry)",
   "tv.schedule.emptyDay": "No titles today",
   "tv.schedule.emptyWeek": "No titles this week",
-  "tv.hint.schedule": "←→ Week/Title   ↑↓ Weekday   OK Details   Back"
+  "tv.hint.schedule": "←→ Week/Title   ↑↓ Weekday   OK Details   Back",
+  "tv.season.tab.schedule": "Schedule",
+  "tv.season.tab.season": "Seasons"
  }
 };
 let currentLocale = 'zh-CN';

@@ -31,6 +31,9 @@ public sealed class TvPosterCard : Button
     public static readonly DependencyProperty PosterHeightProperty = DependencyProperty.Register(
         nameof(PosterHeight), typeof(double), typeof(TvPosterCard), new PropertyMetadata(270d));
 
+    public static readonly DependencyProperty TitleFontSizeProperty = DependencyProperty.Register(
+        nameof(TitleFontSize), typeof(double), typeof(TvPosterCard), new PropertyMetadata(19d));
+
     public TvPosterCard()
     {
         Focusable = true;
@@ -83,6 +86,12 @@ public sealed class TvPosterCard : Button
     {
         get => (double)GetValue(PosterHeightProperty);
         set => SetValue(PosterHeightProperty, value);
+    }
+
+    public double TitleFontSize
+    {
+        get => (double)GetValue(TitleFontSizeProperty);
+        set => SetValue(TitleFontSizeProperty, value);
     }
 }
 

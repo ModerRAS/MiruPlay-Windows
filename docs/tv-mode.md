@@ -48,13 +48,15 @@
 
 进入屏幕后不按额外键即显示焦点环：屏幕挂树时立即设置逻辑焦点，`TvScreenBase.ApplyFocus` 在 `Focus()` 失败时按 Loaded/Input 优先级重试，Shell 在屏幕布局完成后再补一次 `RefocusActive()`；子屏 Back 返回走同一套 `RestoreFocus` 路径。
 
-## 新番墙
+## 新番（单入口双视图）
 
-侧边栏「新番」按本地库 `AirDate` 做两级分组：季（Android 语义 1/4/7/9 月桶，年降序→季月降序）→ 更新星期（周一…周日，未知最后）。`TvReleaseSeason` 只服务 TV 层，不改桌面 `LibraryOrganization`；同日按标题升序，无法解析日期的作品归「未识别播出日期」。海报解码在后台线程完成，避免 S: 图库阻塞 UI。
+侧边栏只有一项「新番」，顶部两个 mode tab（←→ 切换）：
+- **时间表**（默认）：Bangumi 公开日历（`https://api.bgm.tv/calendar`）的上周/本周/下周视图，按周一起算、每天一行海报；未来开播日期晚于当周周末的作品过滤；今天高亮；点击按 Bangumi id 匹配本地库，命中进详情，否则 toast「未在媒体库中」。内存 + `%LOCALAPPDATA%/MiruPlay/cache/bangumi-calendar.json` 缓存 1 小时，离线用过期缓存并提示，OK 重试；网络走现有 `OutboundHttpProxy` 代理配置。
+- **季番**：本地库 `AirDate` 两级分组：季（Android 语义 1/4/7/9 月桶，年降序→季月降序）→ 更新星期（周一…周日，未知最后）。`TvReleaseSeason` 只服务 TV 层，不改桌面 `LibraryOrganization`；同日按标题升序，无日期归「未识别播出日期」。海报解码在后台线程完成，避免 S: 图库阻塞 UI。
 
-## 时间表
+两视图复用 `TvPosterCardStyle`：标题/副标题宽度绑定 PosterWidth（长标题省略号、不压邻卡）、卡片固定宽度、日期与标题留 5px 间距；时间表小卡标题字号 15、单/双行固定高度；缺图显示底色占位；横向行末尾留 padding。
 
-侧边栏「时间表」= Bangumi 公开日历（`https://api.bgm.tv/calendar`）的上周/本周/下周视图：按周一起算，每天一行海报；未来开播日期晚于当周周末的作品过滤；今天行高亮；点击按 Bangumi id 匹配本地库，命中进详情，否则 toast「未在媒体库中」。内存 + `%LOCALAPPDATA%/MiruPlay/cache/bangumi-calendar.json` 缓存 1 小时，离线用过期缓存并提示，按 OK 重试；网络走现有 `OutboundHttpProxy` 代理配置。
+已知限制：Bangumi 官方日历/条目数据不提供放送具体时间（只有星期/日期），因此时间表只到「周几 + 日期」粒度，未接入任何第三方时间后端。
 
 ## 手柄输入
 

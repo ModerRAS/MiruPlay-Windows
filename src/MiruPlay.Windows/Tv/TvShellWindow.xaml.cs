@@ -218,7 +218,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
         AddNavItem(TvScreenId.Home, "\uE80F", "tv.nav.home");
         AddNavItem(TvScreenId.Library, "\uE8F1", "tv.nav.library");
         AddNavItem(TvScreenId.Season, "\uE787", "tv.nav.season");
-        AddNavItem(TvScreenId.Schedule, "\uE823", "tv.nav.schedule");
         AddNavItem(TvScreenId.Search, "\uE721", "tv.nav.search");
         AddNavItem(TvScreenId.Settings, "\uE713", "tv.nav.settings");
         AddNavItem(null, "\uE7E8", "tv.nav.exit");
@@ -355,7 +354,6 @@ public sealed partial class TvShellWindow : Window, IDisposable
         TvScreenId.Home => new TvHomeScreen(_context, this),
         TvScreenId.Library => new TvLibraryScreen(_context, this),
         TvScreenId.Season => new TvSeasonScreen(_context, this),
-        TvScreenId.Schedule => new TvScheduleScreen(_context, this),
         TvScreenId.Search => new TvSearchScreen(_context, this),
         TvScreenId.Settings => new TvSettingsScreen(_context, this),
         _ => throw new InvalidOperationException($"Screen {id} is not persistent."),
