@@ -112,10 +112,10 @@ function Copy-ThirdPartyLicenses {
         }
     }
 
-    [IO.File]::WriteAllText(
+    [System.IO.File]::WriteAllText(
         (Join-Path $Destination 'NuGet-Packages.json'),
         ($packageIndex | ConvertTo-Json -Depth 4),
-        [Text.UTF8Encoding]::new($false))
+        [System.Text.UTF8Encoding]::new($false))
 }
 
 function Find-SignTool {
@@ -254,7 +254,7 @@ if ($publishedSdl3Hash -ne $actualSdl3Hash) {
 foreach ($file in @('LICENSE', 'README.md', 'THIRD-PARTY-NOTICES.md')) {
     Copy-Item (Join-Path $root $file) $publishDirectory
 }
-[IO.File]::WriteAllText((Join-Path $publishDirectory 'edition.txt'), $Edition, [Text.UTF8Encoding]::new($false))
+[System.IO.File]::WriteAllText((Join-Path $publishDirectory 'edition.txt'), $Edition, [System.Text.UTF8Encoding]::new($false))
 if ($includeRife) {
     $publishedRifeManifest = Join-Path $publishDirectory 'runtime\enhance\rife\manifest.json'
     if (-not (Test-Path $publishedRifeManifest)) { throw 'csproj did not copy runtime/enhance/rife into the publish output.' }
@@ -334,7 +334,7 @@ $manifest = [ordered]@{
     }
 }
 $manifestPath = Join-Path $releaseDirectory "release-manifest-$Edition.json"
-[IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json -Depth 6), [Text.UTF8Encoding]::new($false))
+[System.IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json -Depth 6), [System.Text.UTF8Encoding]::new($false))
 Copy-Item $manifestPath (Join-Path $publishDirectory 'release-manifest.json')
 
 $symbolFiles = Get-ChildItem $publishDirectory -Filter *.pdb -File -Recurse
@@ -379,7 +379,7 @@ if (-not $SkipInstaller) {
         sha256 = (Get-FileHash $setupPath -Algorithm SHA256).Hash.ToLowerInvariant()
     }
     $windowsUpdatePath = Join-Path $releaseDirectory "windows-update-$Edition.json"
-    [IO.File]::WriteAllText($windowsUpdatePath, ($windowsUpdate | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))
+    [System.IO.File]::WriteAllText($windowsUpdatePath, ($windowsUpdate | ConvertTo-Json -Depth 4), [System.Text.UTF8Encoding]::new($false))
     Write-Output "Windows update manifest: $windowsUpdatePath"
 }
 

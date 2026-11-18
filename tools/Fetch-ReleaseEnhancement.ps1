@@ -9,11 +9,11 @@ param(
 # rife's enhancement-pack workflow as GitHub Release asset rife-<version>.7z under
 # tag enhance-rife-<version>. This script only downloads/verifies/installs it.
 $ErrorActionPreference = 'Stop'
-$manifestPath = [IO.Path]::GetFullPath($ManifestPath)
-$destination = [IO.Path]::GetFullPath($Destination)
-$cacheDirectory = [IO.Path]::GetFullPath($CacheDirectory)
+$manifestPath = [System.IO.Path]::GetFullPath($ManifestPath)
+$destination = [System.IO.Path]::GetFullPath($Destination)
+$cacheDirectory = [System.IO.Path]::GetFullPath($CacheDirectory)
 if (-not (Test-Path $manifestPath)) { throw "RIFE enhancement manifest is missing: $manifestPath" }
-$manifest = [IO.Text.Encoding]::UTF8.GetString([IO.File]::ReadAllBytes($manifestPath)) | ConvertFrom-Json
+$manifest = [System.Text.Encoding]::UTF8.GetString([System.IO.File]::ReadAllBytes($manifestPath)) | ConvertFrom-Json
 $version = [string]$manifest.version
 $archive = $manifest.sourceArchive
 if ([string]::IsNullOrWhiteSpace($version) -or $null -eq $archive) { throw 'RIFE enhancement manifest is incomplete.' }

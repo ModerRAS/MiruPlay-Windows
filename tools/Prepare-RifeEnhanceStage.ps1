@@ -16,13 +16,13 @@ function Resolve-AbsolutePath {
 $basePath = (Get-Location).Path
 function Copy-TextFileAsLf([string]$Source, [string]$Destination) {
     # Normalize CRLF to LF at the byte level, preserving any UTF-8 BOM and the final newline.
-    $bytes = [IO.File]::ReadAllBytes($Source)
+    $bytes = [System.IO.File]::ReadAllBytes($Source)
     $output = [System.Collections.Generic.List[byte]]::new($bytes.Length)
     for ($i = 0; $i -lt $bytes.Length; $i++) {
         if ($bytes[$i] -eq 13 -and ($i + 1) -lt $bytes.Length -and $bytes[$i + 1] -eq 10) { continue }
         $output.Add($bytes[$i])
     }
-    [IO.File]::WriteAllBytes($Destination, $output.ToArray())
+    [System.IO.File]::WriteAllBytes($Destination, $output.ToArray())
 }
 
 $repo = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) { [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')) } else { [System.IO.Path]::GetFullPath($RepositoryRoot) }
@@ -73,8 +73,8 @@ try {
 
     $bomOnly = [byte[]](0xEF, 0xBB, 0xBF)
     New-Item -ItemType Directory -Force -Path (Join-Path $destination 'vs-scripts'), (Join-Path $destination 'vs-plugins') | Out-Null
-    [IO.File]::WriteAllBytes((Join-Path $destination 'vs-scripts\.keep'), $bomOnly)
-    [IO.File]::WriteAllBytes((Join-Path $destination 'vs-plugins\.keep'), $bomOnly)
+    [System.IO.File]::WriteAllBytes((Join-Path $destination 'vs-scripts\.keep'), $bomOnly)
+    [System.IO.File]::WriteAllBytes((Join-Path $destination 'vs-plugins\.keep'), $bomOnly)
 
     # 2) RIFE ncnn plugin + supported models.
     Copy-Item -LiteralPath (Join-Path $rifeExtract 'librife_windows_x86-64.dll') -Destination (Join-Path $destination 'vs-plugins\librife_windows_x86-64.dll') -Force
@@ -104,7 +104,7 @@ try {
         'clip.set_output(0)'
     )
     $script = ($scriptLines -join "`n")
-    [IO.File]::WriteAllText((Join-Path $selftest 'selftest_480p.vpy'), $script, [Text.UTF8Encoding]::new($false))
+    [System.IO.File]::WriteAllText((Join-Path $selftest 'selftest_480p.vpy'), $script, [System.Text.UTF8Encoding]::new($false))
 
     $count = (Get-ChildItem $destination -Recurse -File | Measure-Object).Count
     Write-Output "stageFiles=$count"
