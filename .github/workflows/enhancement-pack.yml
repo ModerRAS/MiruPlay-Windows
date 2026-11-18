@@ -1,0 +1,151 @@
+name: Enhancement pack
+
+on:
+  push:
+    tags:
+      - 'enhance-rife-*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Enhancement pack version (must match tools/enhance/rife-enhance-manifest.json)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: enhancement-pack
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve enhancement version and tag
+        id: version
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $manifest = Get-Content tools/enhance/rife-enhance-manifest.json -Raw | ConvertFrom-Json
+          $version = [string]$manifest.version
+          if ([string]::IsNullOrWhiteSpace($version)) { throw 'Enhancement manifest has no version.' }
+          $inputVersion = '${{ inputs.version }}'
+          if (-not [string]::IsNullOrWhiteSpace($inputVersion) -and $inputVersion -ne $version) {
+            throw "workflow_dispatch version '$inputVersion' does not match the pinned manifest version '$version'."
+          }
+          if ('${{ github.ref_type }}' -eq 'tag') {
+            $expectedTag = "enhance-rife-$version"
+            if ('${{ github.ref_name }}' -ne $expectedTag) { throw "Tag '${{ github.ref_name }}' does not match '$expectedTag'." }
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=enhance-rife-$version" >> $env:GITHUB_OUTPUT
+          Write-Output "Enhancement pack version: $version"
+
+      - name: Download pinned upstream components
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path artifacts/upstreams | Out-Null
+          $inputs = @(
+            @{ Name = 'vs-portable.7z'; Sha256 = 'e3e6b432cba9f1a8f69a9d00c8d3ed8b29bec615bfd04a9409b1393adb2bc9cd';
+               Url = 'https://github.com/hooke007/dotfiles/releases/download/mpv_addones/py.3_14_3%2Bvs.R73-portable.7z' },
+            @{ Name = 'rife-models.7z'; Sha256 = '55d6fa699308db9dc1b403ff4c7e4d3ef074e567a0feb3f614497d2078ef59bf';
+               Url = 'https://github.com/hooke007/dotfiles/releases/download/mpv_addones/vs-k7sfunc.0_6_3.rife_std-core_models.7z' },
+            @{ Name = '7z-extra.7z'; Sha256 = 'cd3cf38085c2cc6839cf72716dafb3175ae425f4fd34faafc6c0b64d618d307f';
+               Url = 'https://www.7-zip.org/a/7z2501-extra.7z' }
+          )
+          foreach ($input in $inputs) {
+            $target = Join-Path artifacts/upstreams $input.Name
+            Write-Output "Downloading $($input.Url)"
+            Invoke-WebRequest -Uri $input.Url -OutFile $target -UseBasicParsing -TimeoutSec 600
+            $actual = (Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne $input.Sha256) { throw "SHA-256 mismatch for $($input.Name): $actual" }
+            Write-Output "$($input.Name): sha256 OK ($actual)"
+          }
+
+      - name: Install pinned 7-Zip (deterministic archive tool)
+        id: sevenzip
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sevenZip = (Get-Command 7z -ErrorAction SilentlyContinue).Source
+          if (-not $sevenZip) { $sevenZip = Join-Path $env:ProgramFiles '7-Zip\7z.exe' }
+          if (-not (Test-Path $sevenZip)) { throw '7-Zip is not available on the runner.' }
+          New-Item -ItemType Directory -Force -Path artifacts/7z | Out-Null
+          & $sevenZip x artifacts/upstreams/7z-extra.7z -oartifacts/7z -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned 7-Zip extraction failed.' }
+          $sevenZipExe = Join-Path artifacts/7z '7za.exe'
+          $expected = '26817725650583d99ca3e617a618dd75c0f71bd316b5761780b7361f5f824cad'
+          $actual = (Get-FileHash $sevenZipExe -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $expected) { throw "Pinned 7za.exe digest mismatch: $actual" }
+          "sevenZip=$sevenZipExe" >> $env:GITHUB_OUTPUT
+
+      - name: Stage portable VapourSynth + RIFE layout
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./tools/Prepare-RifeEnhanceStage.ps1 -VapourSynthArchive artifacts/upstreams/vs-portable.7z -RifeArchive artifacts/upstreams/rife-models.7z -SevenZipPath '${{ steps.sevenzip.outputs.sevenZip }}' -Destination artifacts/enhance-stage
+
+      - name: Build deterministic 7z and verify pinned manifest
+        id: pack
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = '${{ steps.version.outputs.version }}'
+          New-Item -ItemType Directory -Force -Path artifacts/enhance-pack | Out-Null
+          ./tools/New-RifeEnhancePack.ps1 -StagedRoot artifacts/enhance-stage -Version $version -OutputDirectory artifacts/enhance-pack -ManifestPath artifacts/enhance-pack/manifest.json -SevenZipPath '${{ steps.sevenzip.outputs.sevenZip }}'
+          $pinned = Get-Content tools/enhance/rife-enhance-manifest.json -Raw | ConvertFrom-Json
+          $built = Get-Content artifacts/enhance-pack/manifest.json -Raw | ConvertFrom-Json
+          $mismatches = @()
+          if ([string]$built.sourceArchive.sha256 -ne [string]$pinned.sourceArchive.sha256) { $mismatches += 'sha256' }
+          if ([long]$built.sourceArchive.size -ne [long]$pinned.sourceArchive.size) { $mismatches += 'size' }
+          if ([int]$built.sourceArchive.fileCount -ne [int]$pinned.sourceArchive.fileCount) { $mismatches += 'fileCount' }
+          if ([long]$built.sourceArchive.unpackedSize -ne [long]$pinned.sourceArchive.unpackedSize) { $mismatches += 'unpackedSize' }
+          if ($mismatches.Count -gt 0) { throw "Built enhancement pack does not match tools/enhance/rife-enhance-manifest.json ($($mismatches -join ', '))." }
+          $asset = Join-Path artifacts/enhance-pack "rife-$version.7z"
+          if (-not (Test-Path $asset)) { throw "Enhancement asset was not produced: $asset" }
+          $sha = (Get-FileHash $asset -Algorithm SHA256).Hash.ToLowerInvariant()
+          "asset=$asset" >> $env:GITHUB_OUTPUT
+          "sha256=$sha" >> $env:GITHUB_OUTPUT
+          "size=$((Get-Item $asset).Length)" >> $env:GITHUB_OUTPUT
+          Write-Output "Built enhancement asset: $asset ($sha)"
+
+      - name: Publish GitHub Release asset
+        if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = '${{ steps.version.outputs.tag }}'
+          $version = '${{ steps.version.outputs.version }}'
+          $asset = '${{ steps.pack.outputs.asset }}'
+          $assetName = Split-Path $asset -Leaf
+          gh release view $tag --json tagName 2>$null | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "MiruPlay RIFE enhancement $version" --notes "CI-built RIFE enhancement pack $version (deterministic 7z, pinned upstream inputs, SHA-256 verified)." | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "Failed to create release $tag." }
+          }
+          gh release upload $tag $asset --clobber | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "Failed to upload $assetName to $tag." }
+          $assets = @(gh release view $tag --json assets --jq '.assets[].name')
+          if ($assets -notcontains $assetName) { throw "Release $tag does not contain $assetName after upload." }
+          Write-Output "Published $assetName to $tag"
+
+      - name: Summary
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $tag = '${{ steps.version.outputs.tag }}'
+          $sha = '${{ steps.pack.outputs.sha256 }}'
+          $size = '${{ steps.pack.outputs.size }}'
+          $lines = @('## Enhancement pack', "- version: $version", "- release tag: $tag", "- asset: rife-$version.7z", "- sha256: $sha", "- size: $size bytes")
+          $lines | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          $lines | ForEach-Object { Write-Output $_ }

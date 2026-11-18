@@ -5,10 +5,10 @@
     "minAppVersion":  "0.2.0",
     "sourceArchive":  {
                           "url":  "https://github.com/ModerRAS/MiruPlay-Windows/releases/download/enhance-rife-2026.11/rife-2026.11.7z",
-                          "sha256":  "4e0c1afdd3d869aca1bb5ec17139045ee648b7c8e8b5d180d22eb6740093e6d6",
-                          "size":  31239766,
+                          "sha256":  "6d7b73986787273402db1ebc5d946cef63bcc209e28112cdd0c40499f79e609f",
+                          "size":  31240946,
                           "format":  "7z",
-                          "unpackedSize":  54261641,
+                          "unpackedSize":  54260553,
                           "fileCount":  69
                       },
     "components":  {
@@ -229,28 +229,28 @@
                   },
                   {
                       "path":  "licenses/ncnn-BSD-3-Clause.txt",
-                      "sha256":  "c81f07ffc8698c59a8dffdd12f6a444648b9c3b6bae16c7e1d7f2fd16a295acb",
-                      "size":  6432
+                      "sha256":  "7d398a4edfc243889bf35382b033726b6681cc51b6cb9028096ba73b3bca0554",
+                      "size":  6431
                   },
                   {
                       "path":  "licenses/Python-PSF-2.0.txt",
-                      "sha256":  "935cf13e19f8c31b497d20b05d73623431a226b230c3599bc30fa3348979bc68",
-                      "size":  35407
+                      "sha256":  "939d8e9fa591cbaff0d51e777edb4c1002045d2600ce43a1ae28530cecfc5b88",
+                      "size":  34824
                   },
                   {
                       "path":  "licenses/RIFE-MIT.txt",
-                      "sha256":  "0ed056092dc6a2f90f992623a688c9a05c450edc34e727457d92a98a80c8f0b1",
-                      "size":  1071
+                      "sha256":  "9cb67be7f523608c14291581704e27f18b4bb94f07577832ec689baa6e24add2",
+                      "size":  1070
                   },
                   {
                       "path":  "licenses/RIFE-ncnn-Vulkan-MIT.txt",
-                      "sha256":  "24b76be71c3a12b089e28828ca27a9aa11855340f5ad39422334089986f310fc",
-                      "size":  1073
+                      "sha256":  "b8f1639369f166dfc4d4277009bfa8f2faa25090e8e13888461b0f50ece55a35",
+                      "size":  1072
                   },
                   {
                       "path":  "licenses/VapourSynth-LGPL-2.1.txt",
-                      "sha256":  "92a759ec0febde4750821736bbde642a3b835c0604fc81bee62f9e428f86981f",
-                      "size":  27028
+                      "sha256":  "b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe",
+                      "size":  26526
                   },
                   {
                       "path":  "msvcp140.dll",
