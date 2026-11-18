@@ -24,7 +24,7 @@ The optional RIFE enhancement pack is not part of the lite edition; the full edi
 Windows client downloads it from the project's GitHub Release asset.
 
 - Pack version: `2026.11`; archive `rife-2026.11.7z`
-- Archive SHA-256: `4e0c1afdd3d869aca1bb5ec17139045ee648b7c8e8b5d180d22eb6740093e6d6` (31,239,766 B)
+- Archive SHA-256: `6d7b73986787273402db1ebc5d946cef63bcc209e28112cdd0c40499f79e609f` (31,240,946 B)
 - Layout: `runtime/enhance/rife/{manifest.json,vs-plugins/,licenses/,selftest/}` (installed copy under `%LOCALAPPDATA%\MiruPlay\enhance\rife`)
 - Components and licenses:
   - VapourSynth R73 (Python binding and VSScript/VSPipe binaries) - LGPL-2.1. Upstream: https://github.com/vapoursynth/vapoursynth. The DLLs are separate dynamically linked files; license text in `licenses/VapourSynth-LGPL-2.1.txt`.
