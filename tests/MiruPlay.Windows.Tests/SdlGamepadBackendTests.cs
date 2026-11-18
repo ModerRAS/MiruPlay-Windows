@@ -2,9 +2,24 @@ using MiruPlay.Windows.Tv;
 
 namespace MiruPlay.Windows.Tests;
 
-public sealed class SdlGamepadBackendTests
+public sealed class SdlGamepadBackendTests : IDisposable
 {
     private static readonly string[] ExpectedBackends = ["SDL3", "XInput", "none", "demo"];
+    private readonly string _logDirectory = Path.Combine(Path.GetTempPath(), "miruplay-gamepad-diagnostics-" + Guid.NewGuid().ToString("N"));
+    private readonly string? _previousLogDirectory = TvGamepadDiagnostics.LogDirectoryOverride;
+
+    public SdlGamepadBackendTests()
+    {
+        TvGamepadDiagnostics.LogDirectoryOverride = _logDirectory;
+    }
+
+    public void Dispose()
+    {
+        TvGamepadDiagnostics.LogDirectoryOverride = _previousLogDirectory;
+        try { Directory.Delete(_logDirectory, recursive: true); }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
+    }
     [Fact]
     public void SdlSourceSmokeDoesNotThrowWithoutControllerOrDll()
     {
@@ -53,9 +68,16 @@ public sealed class SdlGamepadBackendTests
     [Fact]
     public void Sdl3InitFailureIsExposedAsDiagnosticWarning()
     {
-        TvGamepadDiagnostics.ReportSdl3InitFailure("unit-test init failure");
-        Assert.Equal("unit-test init failure", TvGamepadDiagnostics.Sdl3InitError);
-        Assert.Contains("unit-test init failure", TvGamepadDiagnostics.LastWarning);
+        var message = "unit-test init failure " + Guid.NewGuid().ToString("N");
+        TvGamepadDiagnostics.ReportSdl3InitFailure(message);
+        Assert.Equal(message, TvGamepadDiagnostics.Sdl3InitError);
+        Assert.Contains(message, TvGamepadDiagnostics.LastWarning);
         Assert.Contains("XInput", TvGamepadDiagnostics.LastWarning);
+
+        var logPath = Path.Combine(_logDirectory, "tv-gamepad.log");
+        Assert.True(File.Exists(logPath), "SDL3 init failure should be written to the injected log directory.");
+        var log = File.ReadAllText(logPath);
+        Assert.Contains("[WARN]", log);
+        Assert.Contains(message, log);
     }
 }

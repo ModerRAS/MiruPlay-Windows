@@ -21,6 +21,9 @@ public static class TvGamepadDiagnostics
 {
     private static readonly object Sync = new();
 
+    /// <summary>Tests can point diagnostics at a temporary directory; null uses the per-user log folder.</summary>
+    public static string? LogDirectoryOverride { get; set; }
+
     public static bool Sdl3DllMissing { get; private set; }
 
     public static string? Sdl3InitError { get; private set; }
@@ -35,7 +38,7 @@ public static class TvGamepadDiagnostics
             Sdl3DllMissing = true;
             LastWarning = "SDL3.dll not found; falling back to XInput.";
         }
-        Write("WARN", LastWarning!);
+        Write("INFO", LastWarning!);
     }
 
     public static void ReportSdl3InitFailure(string? error)
@@ -55,7 +58,7 @@ public static class TvGamepadDiagnostics
         try
         {
             Trace.TraceWarning($"MiruPlay TV gamepad: {message}");
-            var directory = Path.Combine(
+            var directory = LogDirectoryOverride ?? Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "MiruPlay",
                 "logs");
