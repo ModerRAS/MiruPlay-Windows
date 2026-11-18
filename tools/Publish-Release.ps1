@@ -6,6 +6,8 @@ param(
     [string]$GitHubRepository = 'ModerRAS/MiruPlay-Windows',
     [ValidateSet('win-x64')]
     [string]$RuntimeIdentifier = 'win-x64',
+    [ValidateSet('lite', 'full')]
+    [string]$Edition = 'lite',
     [string]$ArtifactsDirectory,
     [string]$CertificatePath,
     [string]$CertificatePassword,
@@ -13,6 +15,7 @@ param(
     [switch]$SkipInstaller,
     [switch]$SkipLibMpvDownload,
     [switch]$SkipSdl3Download,
+    [switch]$SkipEnhancementDownload,
     [switch]$SkipAnime4KDownload
 )
 
@@ -21,12 +24,14 @@ $root = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 if ([string]::IsNullOrWhiteSpace($ArtifactsDirectory)) { $ArtifactsDirectory = Join-Path $root 'artifacts' }
 $artifacts = [System.IO.Path]::GetFullPath($ArtifactsDirectory)
 $releaseDirectory = Join-Path $artifacts 'release'
-$publishDirectory = Join-Path $artifacts "publish\$RuntimeIdentifier\MiruPlay"
-$symbolsDirectory = Join-Path $artifacts "symbols\$RuntimeIdentifier"
+$publishDirectory = Join-Path $artifacts "publish\$RuntimeIdentifier\$Edition\MiruPlay"
+$symbolsDirectory = Join-Path $artifacts "symbols\$RuntimeIdentifier\$Edition"
 $libMpvDirectory = Join-Path $root 'runtime\libmpv'
 $libMpvPath = Join-Path $libMpvDirectory 'libmpv-2.dll'
 $sdl3Directory = Join-Path $root 'runtime\sdl3'
 $sdl3Path = Join-Path $sdl3Directory 'SDL3.dll'
+$rifeEnhanceDirectory = Join-Path $root 'runtime\enhance\rife'
+$rifeEnhanceManifestPath = Join-Path $rifeEnhanceDirectory 'manifest.json'
 $anime4kDirectory = Join-Path $root 'runtime\shaders\anime4k'
 $anime4kArchiveHash = '139cd282086457c5adc79caf7b75b8b825091d71c9b54958c18745fea62d7ed7'
 $anime4kFiles = @(
@@ -184,11 +189,57 @@ foreach ($file in $anime4kFiles) {
     }
 }
 
-Remove-Item $publishDirectory, $symbolsDirectory, $releaseDirectory -Recurse -Force -ErrorAction SilentlyContinue
+$includeRife = $Edition -eq 'full'
+$enhancement = $null
+if ($includeRife) {
+    $getEnhance = Join-Path $PSScriptRoot 'Get-EnhancementPack.ps1'
+    if (-not (Test-Path $rifeEnhanceManifestPath)) {
+        if ($SkipEnhancementDownload) { throw "RIFE enhancement pack is missing for full edition: $rifeEnhanceManifestPath" }
+        & $getEnhance | Where-Object { $_ -match '^enhance' } | ForEach-Object { Write-Output $_ }
+    } else {
+        & $getEnhance -VerifyOnly | Where-Object { $_ -match '^enhance' } | ForEach-Object { Write-Output $_ }
+    }
+    if (-not (Test-Path $rifeEnhanceManifestPath)) { throw "RIFE enhancement pack manifest is missing: $rifeEnhanceManifestPath" }
+    $rifeManifest = Get-Content $rifeEnhanceManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    foreach ($field in @('schemaVersion', 'id', 'version', 'minAppVersion', 'sourceArchive', 'files')) {
+        if ($null -eq $rifeManifest.$field) { throw "RIFE enhancement manifest is missing $field." }
+    }
+    if ($rifeManifest.schemaVersion -ne 1 -or [string]$rifeManifest.id -ne 'rife-vulkan') { throw 'Unsupported RIFE enhancement manifest.' }
+    $rifeArchive = $rifeManifest.sourceArchive
+    foreach ($field in @('sha256', 'size', 'unpackedSize', 'fileCount')) {
+        if ($null -eq $rifeArchive.$field) { throw "RIFE enhancement sourceArchive is missing $field." }
+    }
+    if (([string]$rifeArchive.sha256) -notmatch '^[0-9a-fA-F]{64}$') { throw 'RIFE archive sha256 is invalid.' }
+    $rifeManifestHash = (Get-FileHash $rifeEnhanceManifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $enhancement = [ordered]@{
+        id = 'rife-vulkan'
+        version = [string]$rifeManifest.version
+        edition = 'full'
+        path = 'runtime/enhance/rife'
+        manifestSha256 = $rifeManifestHash
+        archiveSha256 = ([string]$rifeArchive.sha256).ToLowerInvariant()
+        archiveBytes = [long]$rifeArchive.size
+        unpackedBytes = [long]$rifeArchive.unpackedSize
+        fileCount = @($rifeManifest.files).Count
+    }
+    Write-Output "RIFE enhancement pack: $($enhancement.version) ($($enhancement.fileCount) files)"
+} else {
+    Write-Output 'Edition lite: no enhancement pack will be bundled.'
+}
+
+Remove-Item $publishDirectory, $symbolsDirectory -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $publishDirectory, $symbolsDirectory, $releaseDirectory | Out-Null
+if (Test-Path $releaseDirectory) {
+    Get-ChildItem $releaseDirectory -File | Where-Object {
+        $_.Name -match "-$Edition-(portable|symbols|setup)" -or
+        $_.Name -eq "release-manifest-$Edition.json" -or
+        $_.Name -eq "windows-update-$Edition.json"
+    } | Remove-Item -Force -ErrorAction SilentlyContinue
+}
 
 Invoke-Checked {
-    dotnet publish $project -c Release -r $RuntimeIdentifier --self-contained true -p:Version=$Version -p:PublishTrimmed=false -o $publishDirectory
+    $includeRifeValue = $includeRife.ToString().ToLowerInvariant()
+    dotnet publish $project -c Release -r $RuntimeIdentifier --self-contained true -p:Version=$Version -p:Edition=$Edition -p:IncludeRifeEnhancement=$includeRifeValue -p:PublishTrimmed=false -o $publishDirectory
 } 'dotnet publish failed'
 
 $publishedSdl3Path = Join-Path $publishDirectory 'runtime\sdl3\SDL3.dll'
@@ -200,25 +251,20 @@ if ($publishedSdl3Hash -ne $actualSdl3Hash) {
     throw "Published SDL3 runtime digest mismatch: $publishedSdl3Hash"
 }
 
-foreach ($file in $anime4kFiles) {
-    $publishedShaderPath = Join-Path $publishDirectory "runtime\shaders\anime4k\$file"
-    if (-not (Test-Path $publishedShaderPath)) {
-        throw "Anime4K shader was not copied into the publish output: $file"
-    }
-    $sourceHash = (Get-FileHash (Join-Path $anime4kDirectory $file) -Algorithm SHA256).Hash.ToLowerInvariant()
-    $publishedShaderHash = (Get-FileHash $publishedShaderPath -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($publishedShaderHash -ne $sourceHash) {
-        throw "Published Anime4K shader digest mismatch: $publishedShaderHash"
-    }
-}
-
 foreach ($file in @('LICENSE', 'README.md', 'THIRD-PARTY-NOTICES.md')) {
     Copy-Item (Join-Path $root $file) $publishDirectory
 }
-Copy-ThirdPartyLicenses `
-    (Join-Path $root 'src\MiruPlay.Windows\obj\project.assets.json') `
-    (Join-Path $publishDirectory 'licenses')
-
+[IO.File]::WriteAllText((Join-Path $publishDirectory 'edition.txt'), $Edition, [Text.UTF8Encoding]::new($false))
+if ($includeRife) {
+    $publishedRifeManifest = Join-Path $publishDirectory 'runtime\enhance\rife\manifest.json'
+    if (-not (Test-Path $publishedRifeManifest)) { throw 'csproj did not copy runtime/enhance/rife into the publish output.' }
+    if ((Get-FileHash $publishedRifeManifest -Algorithm SHA256).Hash.ToLowerInvariant() -ne $enhancement.manifestSha256) {
+        throw 'Published RIFE enhancement manifest digest mismatch.'
+    }
+} elseif (Test-Path (Join-Path $publishDirectory 'runtime\enhance')) {
+    throw 'Edition lite publish output must not contain runtime/enhance.'
+}
+Copy-ThirdPartyLicenses (Join-Path $root 'src\MiruPlay.Windows\obj\project.assets.json') (Join-Path $publishDirectory 'licenses')
 $signed = -not [string]::IsNullOrWhiteSpace($CertificatePath)
 $signTool = $null
 if ($signed) {
@@ -258,6 +304,8 @@ $manifest = [ordered]@{
     generatedAtUtc = [DateTimeOffset]::UtcNow.ToString('O')
     sourceRevision = $sourceRevision
     signing = if ($signed) { 'authenticode' } else { 'unsigned' }
+    edition = $Edition
+    enhancement = if ($includeRife) { $enhancement } else { $null }
     libmpv = [ordered]@{
         version = '20261111-git-bcde6b93cc'
         library = 'runtime/libmpv/libmpv-2.dll'
@@ -285,27 +333,28 @@ $manifest = [ordered]@{
         }
     }
 }
-$manifestPath = Join-Path $releaseDirectory 'release-manifest.json'
-[IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))
-Copy-Item $manifestPath $publishDirectory
+$manifestPath = Join-Path $releaseDirectory "release-manifest-$Edition.json"
+[IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json -Depth 6), [Text.UTF8Encoding]::new($false))
+Copy-Item $manifestPath (Join-Path $publishDirectory 'release-manifest.json')
 
 $symbolFiles = Get-ChildItem $publishDirectory -Filter *.pdb -File -Recurse
-$symbolsArchive = Join-Path $releaseDirectory "MiruPlay-$Version-$RuntimeIdentifier-symbols.zip"
+$symbolsArchive = Join-Path $releaseDirectory "MiruPlay-$Version-$RuntimeIdentifier-$Edition-symbols.zip"
 if ($symbolFiles.Count -gt 0) {
     foreach ($symbol in $symbolFiles) { Copy-Item $symbol.FullName $symbolsDirectory }
     Compress-Archive -Path (Join-Path $symbolsDirectory '*') -DestinationPath $symbolsArchive -CompressionLevel Optimal
     $symbolFiles | Remove-Item -Force
 }
 
-$portableArchive = Join-Path $releaseDirectory "MiruPlay-$Version-$RuntimeIdentifier-portable.zip"
+$portableArchive = Join-Path $releaseDirectory "MiruPlay-$Version-$RuntimeIdentifier-$Edition-portable.zip"
 Compress-Archive -Path (Join-Path $publishDirectory '*') -DestinationPath $portableArchive -CompressionLevel Optimal
 
 if (-not $SkipInstaller) {
     $iscc = Find-Iscc
     $versionMatch = [regex]::Match($Version, '^(\d+)\.(\d+)\.(\d+)')
     $numericVersion = "$($versionMatch.Groups[1].Value).$($versionMatch.Groups[2].Value).$($versionMatch.Groups[3].Value).0"
-    $setupBaseName = "MiruPlay-$Version-$RuntimeIdentifier-setup"
-    & $iscc /Qp "/DSourceDir=$publishDirectory" "/DAppVersion=$Version" "/DVersionNumeric=$numericVersion" "/DOutputDir=$releaseDirectory" "/DOutputBaseFilename=$setupBaseName" $installerScript | Out-Host
+    $setupBaseName = "MiruPlay-$Version-$RuntimeIdentifier-$Edition-setup"
+    $editionIsFull = if ($Edition -eq 'full') { '1' } else { '0' }
+    & $iscc /Qp "/DSourceDir=$publishDirectory" "/DAppVersion=$Version" "/DVersionNumeric=$numericVersion" "/DOutputDir=$releaseDirectory" "/DOutputBaseFilename=$setupBaseName" "/DMyEdition=$Edition" "/DMyEditionIsFull=$editionIsFull" $installerScript | Out-Host
     if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed (exit code $LASTEXITCODE)" }
     $setupPath = Join-Path $releaseDirectory "$setupBaseName.exe"
     if ($signed) { Sign-File $setupPath $signTool }
@@ -318,16 +367,18 @@ if (-not $SkipInstaller) {
     $windowsUpdate = [ordered]@{
         versionName = "$Version.0"
         versionCode = $null
-        releaseName = "MiruPlay $Version"
+        releaseName = "MiruPlay $Version ($Edition)"
         tagName = $tagName
         publishedAt = [DateTimeOffset]::UtcNow.ToString('O')
         releaseUrl = "$releaseRoot/releases/tag/$escapedTag"
+        edition = $Edition
+        enhancements = @($enhancements)
         assetName = $setupAsset.Name
         assetSizeBytes = [long]$setupAsset.Length
         downloadUrl = "$releaseRoot/releases/download/$escapedTag/$escapedAsset"
         sha256 = (Get-FileHash $setupPath -Algorithm SHA256).Hash.ToLowerInvariant()
     }
-    $windowsUpdatePath = Join-Path $releaseDirectory 'windows-update.json'
+    $windowsUpdatePath = Join-Path $releaseDirectory "windows-update-$Edition.json"
     [IO.File]::WriteAllText($windowsUpdatePath, ($windowsUpdate | ConvertTo-Json -Depth 4), [Text.UTF8Encoding]::new($false))
     Write-Output "Windows update manifest: $windowsUpdatePath"
 }

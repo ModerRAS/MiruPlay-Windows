@@ -21,4 +21,4 @@ runtime/libmpv/*
 runtime/sdl3/*
 !runtime/sdl3/README.md
 runtime/shaders/*
-!runtime/shaders/README.md
+runtime/enhance/

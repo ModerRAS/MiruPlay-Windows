@@ -214,7 +214,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddInfoRow("sourceHint", "tv.settings.sourceEdit", AppStrings.Get("tv.settings.sourceEditHint"));
         AddGroup("tv.settings.group.about");
         _updateRow = AddRow("updateCheck", "tv.settings.update", UpdateStatusText, _ => TriggerUpdateCheck(), actionRow: true);
-        AddInfoRow("version", "tv.settings.version", Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.1.0");
+        AddInfoRow("version", "tv.settings.version", (Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.1.0") + "  ·  " + EditionInfo.Current);
         AddInfoRow("mode", "tv.settings.appMode", AppStrings.Get(_context.ContentMode == "DRAMA" ? "tv.settings.modeDrama" : "tv.settings.modeAnime"));
         AddInfoRow("remoteDiagnostics", "tv.settings.diagnostics", AppStrings.Get("tv.settings.diagnosticsHint"));
         AddRow("exit", "tv.settings.exitTv", () => string.Empty, _ => _shell.ExitTvMode(), actionRow: true);

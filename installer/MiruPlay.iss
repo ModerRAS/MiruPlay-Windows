@@ -13,17 +13,33 @@
 #ifndef OutputBaseFilename
   #define OutputBaseFilename "MiruPlay-setup"
 #endif
+#ifndef MyEdition
+  #define MyEdition "lite"
+#endif
+#ifndef MyEditionIsFull
+  #define MyEditionIsFull "0"
+#endif
+
+#if MyEditionIsFull == "1"
+  #define MyAppId "{{C4B2D913-7A61-4B7E-9F4D-2C8B9A5D6E71}"
+  #define MyAppName "MiruPlay Full"
+  #define MyDefaultDir "{localappdata}\Programs\MiruPlay Full"
+#else
+  #define MyAppId "{{9A0FC862-354F-4D39-958B-26DCAB4B2235}"
+  #define MyAppName "MiruPlay"
+  #define MyDefaultDir "{localappdata}\Programs\MiruPlay"
+#endif
 
 [Setup]
-AppId={{9A0FC862-354F-4D39-958B-26DCAB4B2235}
-AppName=MiruPlay
+AppId={#MyAppId}
+AppName={#MyAppName}
 AppVersion={#AppVersion}
-AppVerName=MiruPlay {#AppVersion}
+AppVerName={#MyAppName} {#AppVersion}
 AppPublisher=MiruPlay
 AppPublisherURL=https://github.com/ModerRAS/MiruPlay-Windows
 AppSupportURL=https://github.com/ModerRAS/MiruPlay-Windows/issues
-DefaultDirName={localappdata}\Programs\MiruPlay
-DefaultGroupName=MiruPlay
+DefaultDirName={#MyDefaultDir}
+DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir={#OutputDir}
 OutputBaseFilename={#OutputBaseFilename}
@@ -52,9 +68,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; edition.txt (written by Publish-Release.ps1) is copied by the recursive entry above; it identifies lite/full after install.
 
 [Icons]
-Name: "{group}\MiruPlay"; Filename: "{app}\MiruPlay.exe"; WorkingDir: "{app}"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\MiruPlay.exe"; WorkingDir: "{app}"
 Name: "{autodesktop}\MiruPlay"; Filename: "{app}\MiruPlay.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]

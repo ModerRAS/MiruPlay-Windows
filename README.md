@@ -18,6 +18,15 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 提供默认端口 `9978` 的原生 WebUI 与 WebControl API，支持媒体库/详情/播放/字幕、来源 CRUD/测试/扫描、Anime/Drama 模式、CloudDrive2/RSS、Bangumi/TMDB、播放设置和令牌轮换，并使用 DPAPI 保护 WebControl、媒体源、Bangumi、TMDB 与 CloudDrive 凭据
 - 将客户端设置保存在 `%LOCALAPPDATA%\MiruPlay\settings.json`
 
+## 发布版本（lite / full）
+
+Windows 安装包分两个 edition：
+
+- **lite（默认）**：应用 + libmpv + SDL3 + 基础 Anime4K Fast 等轻量资产，零额外依赖。
+- **full**：lite + 可选增强包（portable VapourSynth + MVTools、RIFE ncnn + 模型、可选大 shader）；增强包从 `runtime/enhance/` 打包，不进 git，版本/哈希由 `tools/Get-EnhancementPack.ps1` 固定。增强包未交付前 CI 只发布 lite。
+
+产物文件名包含 edition：`MiruPlay-<ver>-win-x64-<edition>-portable.zip` / `-setup.exe` / `-symbols.zip`；manifest 与自动更新清单也按 edition 区分，lite/full 不会互相升级。详见 [docs/distribution.md](docs/distribution.md)。
+
 ## 开发
 
 需要 Windows 10/11 和 .NET 10 SDK。
