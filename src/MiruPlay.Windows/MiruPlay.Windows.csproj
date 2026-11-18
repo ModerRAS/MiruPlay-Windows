@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -26,6 +26,13 @@
   <ItemGroup Condition="Exists('..\..\runtime\libmpv\libmpv-2.dll')">
     <Content Include="..\..\runtime\libmpv\libmpv-2.dll"
              Link="runtime\libmpv\libmpv-2.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('..\..\runtime\sdl3\SDL3.dll')">
+    <Content Include="..\..\runtime\sdl3\SDL3.dll"
+             Link="runtime\sdl3\SDL3.dll"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

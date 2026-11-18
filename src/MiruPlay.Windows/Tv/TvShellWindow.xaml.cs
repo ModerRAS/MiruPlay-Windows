@@ -299,6 +299,8 @@ public sealed partial class TvShellWindow : Window, IDisposable
         UpdateClock();
         _gamepad.Enabled = _context.Settings.TvGamepadEnabled;
         _gamepad.Deadzone = _context.Settings.TvGamepadDeadzonePercent / 100.0;
+        if (_gamepadSource is AutoGamepadSource autoGamepad)
+            autoGamepad.FaceLayout = TvGamepadFaceLayouts.Parse(_context.Settings.TvGamepadFaceLayout);
         if (_gamepad.Enabled) StartGamepadPolling();
         else StopGamepadPolling();
     }

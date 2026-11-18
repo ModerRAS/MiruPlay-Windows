@@ -18,3 +18,5 @@ docs/superpowers/
 *.appinstaller
 runtime/libmpv/*
 !runtime/libmpv/README.md
+runtime/sdl3/*
+!runtime/sdl3/README.md
