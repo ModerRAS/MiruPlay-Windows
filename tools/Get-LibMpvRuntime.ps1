@@ -3,10 +3,10 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$version = '20261021'
-$asset = 'mpv-dev-x86_64-20261021-git-e471496c56.7z'
-$expectedArchiveHash = 'efc719eff3dc5954b4a5efc800632808bcec01cc9034940dd14e5eb7fe9ea633'
-$expectedLibraryHash = '04e4d27dc385dc18ddd93fbe69c75e635b864f3c6ec53a9122df54c2f7842f4a'
+$version = '20261111'
+$asset = 'mpv-dev-x86_64-20261111-git-bcde6b93cc.7z'
+$expectedArchiveHash = '273c079b11ea5575822f972756f4c9a71149a5c10130353abeb8586738938452'
+$expectedLibraryHash = '88504ee5560942a955405e99dfb5971368e4cf851321f36565bf2a667271db1b'
 $url = "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/$version/$asset"
 $destination = [System.IO.Path]::GetFullPath($Destination)
 $archive = Join-Path $destination $asset

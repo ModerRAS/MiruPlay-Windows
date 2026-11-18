@@ -50,11 +50,11 @@ Atmos 在消费级片源里是 TrueHD（UHD BD）或 E-AC-3 JOC（流媒体）�
 
 ## 3. Dolby Vision（含 Profile 7 FEL）
 
-当前固定运行时（`runtime/libmpv/libmpv-2.dll`，shinchiro mpv 20261021-git-e471496c56）的实测能力：
+当前固定运行时（`runtime/libmpv/libmpv-2.dll`，shinchiro mpv 20261111-git-bcde6b93cc）的实测能力：
 
-- 版本：mpv **v0.41.0-1227-ge471496c5**；libplacebo **v7.377.0**（PL_API_VER 377）；FFmpeg **N-127893-g9a861e968**（含 `dovi_split` 位流过滤器）。
+- 版本：mpv **v0.42.0-38-gbcde6b93c**；libplacebo **v7.391.0**（PL_API_VER 391）；FFmpeg **N-128766-gcd4e96eb3**（含 `dovi_split` 位流过滤器）。官方 mpv 0.42.0 发布线要求 libplacebo ≥7.387.0，当前 7.391.0 已满足。
 - 上游 DV Profile 7 FEL 支持已合入 mpv master（PR #17932，2026-07-01；mpv v0.42.0 的 release notes 将其列为 gpu-next 能力）。
-- pinned 源码包含 `demux/dovi_split.c`、`filters/f_enhancement_pair.c`、`vf=format=enhancement-layer`、`vo_gpu_next` 的 EL 映射，且 libplacebo 的 FEL NLQ 合成 API（API 366/367/369）在 377 中可用；设置页“播放能力”会显示当前运行时的探测结果（FEL 支持：是/否 + libmpv/libplacebo 版本）。
+- pinned 源码包含 `demux/dovi_split.c`、`filters/f_enhancement_pair.c`、`vf=format=enhancement-layer`、`vo_gpu_next` 的 EL 映射，且 libplacebo 的 FEL NLQ 合成 API（API 366/367/369）在 PL_API_VER 391 中可用；设置页“播放能力”会显示当前运行时的探测结果（FEL 支持：是/否 + libmpv/libplacebo 版本）。
 - DV P5/P8（单层）与 P7 FEL（双层增强层）都由 gpu-next/libplacebo 在播放器内合成；**Windows 不能向显示器发送 DV 信号**，最终输出为 HDR10 PQ。
 - 增强层解码/合成失败时 mpv 会回退基础层并打印 warn；MiruPlay 会将诊断状态标记为“增强层已回退（BL）”，在播放诊断接口中可查。
 - 运行时要求：FEL 需要 libplacebo 具备 enhancement-layer/NLQ API（本仓库以 PL_API_VER ≥ 370 作为保守判定）与带 `dovi_split` 的 FFmpeg。更换 libmpv 构建后，设置页能力探测会自动变为“不支持”，不会假装支持。

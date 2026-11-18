@@ -106,7 +106,7 @@ public static class MpvRuntimeCapabilityProbe
 
     private static int? ParseLibPlaceboApi(string? version)
     {
-        // libplacebo reports e.g. "v7.377.0 (v7.360.0-176-g...)" where the minor part
+        // libplacebo reports e.g. "v7.391.0 (v7.387.0-37-g...)" where the minor part
         // is the API version (366 is the first version with FEL NLQ composition).
         if (string.IsNullOrWhiteSpace(version)) return null;
         var normalized = version.TrimStart('v', 'V');
