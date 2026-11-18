@@ -1487,4 +1487,37 @@
   <data name="tv.hint.schedule" xml:space="preserve"><value>←→ Week/Title   ↑↓ Weekday   OK Details   Back</value></data>
   <data name="tv.season.tab.schedule" xml:space="preserve"><value>Schedule</value></data>
   <data name="tv.season.tab.season" xml:space="preserve"><value>Seasons</value></data>
+  <data name="wpf.main.appUpdate" xml:space="preserve"><value>App updates</value></data>
+  <data name="wpf.main.autoUpdateMode" xml:space="preserve"><value>Automatic update mode</value></data>
+  <data name="wpf.main.autoUpdateHint" xml:space="preserve"><value>Checks automatically; download mode prepares the installer and waits for confirmation, install mode installs on exit.</value></data>
+  <data name="wpf.main.updateModeOff" xml:space="preserve"><value>Off</value></data>
+  <data name="wpf.main.updateModeCheck" xml:space="preserve"><value>Check only</value></data>
+  <data name="wpf.main.updateModeDownload" xml:space="preserve"><value>Download (recommended)</value></data>
+  <data name="wpf.main.updateModeInstall" xml:space="preserve"><value>Install on exit</value></data>
+  <data name="wpf.main.checkUpdate" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="wpf.main.installUpdate" xml:space="preserve"><value>Install now</value></data>
+  <data name="wpf.update.currentVersion" xml:space="preserve"><value>Current version: {0}</value></data>
+  <data name="wpf.update.checking" xml:space="preserve"><value>Checking for updates…</value></data>
+  <data name="wpf.update.downloading" xml:space="preserve"><value>Downloading the new version…</value></data>
+  <data name="wpf.update.available" xml:space="preserve"><value>Version {0} is available.</value></data>
+  <data name="wpf.update.ready" xml:space="preserve"><value>Version {0} is downloaded and ready to install.</value></data>
+  <data name="wpf.update.failed" xml:space="preserve"><value>Update failed: {0}</value></data>
+  <data name="wpf.update.idle" xml:space="preserve"><value>You are up to date.</value></data>
+  <data name="wpf.update.lastChecked" xml:space="preserve"><value>Last checked: {0}</value></data>
+  <data name="wpf.update.neverChecked" xml:space="preserve"><value>Not checked yet.</value></data>
+  <data name="wpf.update.installConfirm" xml:space="preserve"><value>MiruPlay will close and run the installer. Continue?</value></data>
+  <data name="tv.settings.update" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="tv.update.available" xml:space="preserve"><value>New version {0} available</value></data>
+  <data name="tv.update.unavailable" xml:space="preserve"><value>Updates unavailable (manifest not configured)</value></data>
+  <data name="tv.update.guideDesktop" xml:space="preserve"><value>Update ready; install from desktop mode</value></data>
+  <data name="tv.update.idle" xml:space="preserve"><value>Up to date</value></data>
+  <data name="tv.update.checking" xml:space="preserve"><value>Checking for updates…</value></data>
+  <data name="tv.update.downloading" xml:space="preserve"><value>Downloading the new version…</value></data>
+  <data name="tv.update.ready" xml:space="preserve"><value>Update ready (press OK for guidance)</value></data>
+  <data name="tv.update.failed" xml:space="preserve"><value>Update check failed: {0}</value></data>
+  <data name="tv.update.modeOff" xml:space="preserve"><value>Automatic updates are off</value></data>
+  <data name="wpf.update.installPromptTitle" xml:space="preserve"><value>Install update</value></data>
+  <data name="wpf.update.installPrompt" xml:space="preserve"><value>MiruPlay will install the downloaded update after closing.</value></data>
+  <data name="wpf.update.installCountdown" xml:space="preserve"><value>Installing in {0}s. You can cancel.</value></data>
+  <data name="wpf.update.installCancel" xml:space="preserve"><value>Cancel install</value></data>
 </root>

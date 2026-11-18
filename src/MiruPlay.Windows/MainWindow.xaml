@@ -372,6 +372,36 @@
                     </Grid>
 
                     <Separator Background="{StaticResource SubtleBorder}" />
+                    <TextBlock Text="{services:Loc wpf.main.appUpdate}" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
+                    <Grid Margin="0,14,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{services:Loc wpf.main.autoUpdateMode}" FontWeight="SemiBold" />
+                            <TextBlock Text="{services:Loc wpf.main.autoUpdateHint}" Style="{StaticResource SecondaryText}" Margin="0,4,18,0" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <ComboBox x:Name="AutoUpdateModeCombo" Grid.Column="1" Width="220" VerticalAlignment="Center" SelectionChanged="AutoUpdateMode_SelectionChanged">
+                            <ComboBoxItem Tag="off"><TextBlock Text="{services:Loc wpf.main.updateModeOff}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="check"><TextBlock Text="{services:Loc wpf.main.updateModeCheck}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="download"><TextBlock Text="{services:Loc wpf.main.updateModeDownload}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                            <ComboBoxItem Tag="install"><TextBlock Text="{services:Loc wpf.main.updateModeInstall}" Style="{StaticResource ComboItemText}" /></ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="AutoUpdateCheckButton" Content="{services:Loc wpf.main.checkUpdate}" Click="CheckAppUpdate_Click" AutomationProperties.Name="{services:Loc wpf.main.checkUpdate}" />
+                        <Button x:Name="AutoUpdateInstallButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="{services:Loc wpf.main.installUpdate}" Click="InstallAppUpdate_Click" IsEnabled="False" Margin="10,0,0,0" HorizontalAlignment="Left" AutomationProperties.Name="{services:Loc wpf.main.installUpdate}" />
+                    </Grid>
+                    <TextBlock x:Name="AutoUpdateCurrentVersionText" Style="{StaticResource SecondaryText}" Margin="0,0,0,4" />
+                    <TextBlock x:Name="AutoUpdateStatusText" Style="{StaticResource SecondaryText}" Margin="0,0,0,4" TextWrapping="Wrap" />
+                    <TextBlock x:Name="AutoUpdateLastCheckedText" Style="{StaticResource SecondaryText}" Margin="0,0,0,20" />
+
+                    <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="{services:Loc tv.settings.entry}" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
                     <Grid Margin="0,14,0,14">
                         <Grid.ColumnDefinitions>

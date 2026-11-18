@@ -17,6 +17,7 @@ public sealed class TvSettingsScreen : TvScreenBase
     private readonly List<SettingRow> _rows = [];
     private readonly DispatcherTimer _statusTimer;
     private SettingRow? _gamepadStatusRow;
+    private SettingRow? _updateRow;
     private TextBlock? _gamepadWarningText;
     private TvZone? _zone;
 
@@ -44,7 +45,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         scroll.Content = content;
         Content = scroll;
         _statusTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(1) };
-        _statusTimer.Tick += (_, _) => UpdateGamepadStatus();
+        _statusTimer.Tick += (_, _) => { UpdateGamepadStatus(); UpdateUpdateStatus(); };
         Build();
     }
 
@@ -92,6 +93,50 @@ public sealed class TvSettingsScreen : TvScreenBase
                 : AppStrings.Get("tv.settings.gamepadStatusDisconnected");
 
     private string GamepadStatusText() => GamepadStatusTextFor(_shell.GamepadStatus);
+
+    private AutoUpdateScheduler? UpdateScheduler => _shell.AutoUpdate;
+
+    private string UpdateStatusText()
+    {
+        var state = UpdateScheduler?.State;
+        if (state is null) return AppStrings.Get("tv.update.unavailable");
+        if (string.Equals(_context.Settings.AutoUpdateMode, AutoUpdateScheduler.ModeOff, StringComparison.OrdinalIgnoreCase) &&
+            state.Kind == AutoUpdateStateKind.Idle)
+            return AppStrings.Get("tv.update.modeOff");
+        return state.Kind switch
+        {
+            AutoUpdateStateKind.Checking => AppStrings.Get("tv.update.checking"),
+            AutoUpdateStateKind.Downloading => AppStrings.Get("tv.update.downloading"),
+            AutoUpdateStateKind.Available => AppStrings.Get("tv.update.available", state.VersionName ?? string.Empty),
+            AutoUpdateStateKind.Ready => AppStrings.Get("tv.update.ready"),
+            AutoUpdateStateKind.Failed => AppStrings.Get("tv.update.failed", state.Error ?? string.Empty),
+            _ => AppStrings.Get("tv.update.idle"),
+        };
+    }
+
+    private void UpdateUpdateStatus()
+    {
+        if (_updateRow is null) return;
+        _updateRow.ValueText.Text = UpdateStatusText();
+    }
+
+    private void TriggerUpdateCheck()
+    {
+        var scheduler = UpdateScheduler;
+        if (scheduler is null)
+        {
+            _shell.ShowToast(AppStrings.Get("tv.update.unavailable"));
+            return;
+        }
+        if (scheduler.State.Kind == AutoUpdateStateKind.Ready)
+        {
+            _shell.ShowToast(AppStrings.Get("tv.update.guideDesktop"));
+            return;
+        }
+        _ = scheduler.CheckNowAsync();
+        _shell.ShowToast(AppStrings.Get("tv.update.checking"));
+        UpdateUpdateStatus();
+    }
 
     private void UpdateGamepadStatus()
     {
@@ -163,6 +208,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddInfoRow("sourcePath", "tv.settings.sourcePath", source?.Location ?? AppStrings.Get("tv.settings.sourceNone"));
         AddInfoRow("sourceHint", "tv.settings.sourceEdit", AppStrings.Get("tv.settings.sourceEditHint"));
         AddGroup("tv.settings.group.about");
+        _updateRow = AddRow("updateCheck", "tv.settings.update", UpdateStatusText, _ => TriggerUpdateCheck(), actionRow: true);
         AddInfoRow("version", "tv.settings.version", Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.1.0");
         AddInfoRow("mode", "tv.settings.appMode", AppStrings.Get(_context.ContentMode == "DRAMA" ? "tv.settings.modeDrama" : "tv.settings.modeAnime"));
         AddInfoRow("remoteDiagnostics", "tv.settings.diagnostics", AppStrings.Get("tv.settings.diagnosticsHint"));
@@ -198,7 +244,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         });
     }
 
-    private void AddRow(string id, string labelKey, Func<string> value, Action<int> adjust, bool actionRow = false)
+    private SettingRow AddRow(string id, string labelKey, Func<string> value, Action<int> adjust, bool actionRow = false)
     {
         var valueText = new TextBlock
         {
@@ -226,6 +272,7 @@ public sealed class TvSettingsScreen : TvScreenBase
         _list.Children.Add(row);
         var settingRow = new SettingRow(id, row, valueText, value, adjust, Focusable: true);
         _rows.Add(settingRow);
+        return settingRow;
     }
 
     private SettingRow AddInfoRow(string id, string labelKey, string value)

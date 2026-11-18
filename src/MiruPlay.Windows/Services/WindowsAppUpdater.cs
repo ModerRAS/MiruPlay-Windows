@@ -29,7 +29,16 @@ public sealed record WindowsUpdateStatus(
     string? StagedInstallerPath = null,
     string ManifestUrl = "");
 
-public sealed class WindowsAppUpdater : IDisposable
+/// <summary>Contract used by the auto-update scheduler (fakeable in tests).</summary>
+public interface IUpdateChecker
+{
+    bool IsSupported { get; }
+    WindowsUpdateStatus Status { get; }
+    Task<WindowsUpdateStatus> CheckAsync(CancellationToken cancellationToken = default);
+    Task<WindowsUpdateStatus> DownloadAsync(CancellationToken cancellationToken = default);
+}
+
+public sealed class WindowsAppUpdater : IUpdateChecker, IDisposable
 {
     private const long MaxManifestBytes = 1 * 1024 * 1024;
     private const long MaxDownloadBytes = 512L * 1024 * 1024;
