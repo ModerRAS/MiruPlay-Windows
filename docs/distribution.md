@@ -1,11 +1,17 @@
 # Windows distribution
 
-MiruPlay publishes Windows x64 artifacts from one self-contained `.NET 10` publish directory:
+MiruPlay publishes Windows x64 artifacts in two editions from one self-contained `.NET 10` publish directory:
 
-- `MiruPlay-<version>-win-x64-portable.zip`: portable application with the .NET runtime, pinned in-process libmpv runtime, and the optional pinned SDL3 runtime for the TV-mode gamepad backend.
-- `MiruPlay-<version>-win-x64-setup.exe`: per-user Inno Setup installer. The default directory is `%LOCALAPPDATA%\Programs\MiruPlay`; elevation is not required.
-- `MiruPlay-<version>-win-x64-symbols.zip`: first-party portable PDB files.
-- `release-manifest.json`: build/runtime metadata, signing state, mpv provenance, and SDL3 provenance.
+- **lite** (default): application + pinned in-process libmpv + SDL3 + base Anime4K Fast assets.
+- **full**: lite + optional enhancement pack from `runtime/enhance/` (portable VapourSynth + MVTools, RIFE ncnn + models, optional large shaders). The pack is not in git; `tools/Get-EnhancementPack.ps1` pins its version, archive SHA-256 and file manifest. `Publish-Release.ps1 -Edition full` fails if the pack is missing; CI skips full until the pack is delivered.
+
+Artifacts are edition-scoped:
+
+- `MiruPlay-<version>-win-x64-<edition>-portable.zip`: portable application with the .NET runtime, pinned in-process libmpv runtime, and the optional pinned SDL3 runtime for the TV-mode gamepad backend.
+- `MiruPlay-<version>-win-x64-<edition>-setup.exe`: per-user Inno Setup installer. lite uses `%LOCALAPPDATA%\Programs\MiruPlay`; full uses `%LOCALAPPDATA%\Programs\MiruPlay Full` and a distinct AppId, so both editions can coexist. `edition.txt` is written into the install directory.
+- `MiruPlay-<version>-win-x64-<edition>-symbols.zip`: first-party portable PDB files.
+- `release-manifest-<edition>.json`: build/runtime metadata, `edition`, `enhancements[]`, signing state, mpv provenance, and SDL3 provenance.
+- `windows-update-<edition>.json`: edition-scoped update manifest; lite installs only lite updates and full only full updates.
 - `windows-update.json`: updater-compatible GitHub Release metadata and SHA-256/size for the `*-setup.exe` asset (generated when `-SkipInstaller` is not used).
 - `SHA256SUMS.txt`: SHA-256 for every release artifact and manifest.
 
@@ -54,4 +60,4 @@ Pull requests and branch pushes run restore, warning-as-error Release build, tes
 
 - **v0.1.5** (2026-10-20, `Latest`): portable-only release, built locally from `2c715a6` via `Publish-Release.ps1 -Version 0.1.5 -SkipInstaller` and verified with `Test-ReleaseArtifacts.ps1 -SkipInstaller` (3 hashes, portable launch test). Assets: portable ZIP, symbols ZIP, `SHA256SUMS.txt`, `release-manifest.json`; unsigned. No installer/`windows-update.json` in this release (installer deferred: no Inno Setup on the build machine, no code-signing certificate).
 
-`tools/Test-ReleaseArtifacts.ps1` verifies every checksum, expands and launches the portable package, silently installs and launches the installer, closes the application through its normal WPF lifecycle, and silently uninstalls it. GitHub-hosted Windows runners provide the clean-user validation lane.
+`tools/Test-ReleaseArtifacts.ps1` verifies every checksum, expands and launches the portable package, silently installs and launches the installer, closes the application through its normal WPF lifecycle, and silently uninstalls it. GitHub-hosted Windows runners provide the clean-user validation lane. The release job builds lite always and full only when `runtime/enhance/manifest.json` exists; `Test-ReleaseArtifacts.ps1 -Edition <edition>` asserts lite has no enhancement assets and full contains the VapourSynth/RIFE components plus license files and hashes.

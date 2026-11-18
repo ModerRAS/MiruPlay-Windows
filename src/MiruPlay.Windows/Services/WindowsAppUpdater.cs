@@ -16,7 +16,8 @@ public sealed record WindowsUpdateInfo(
     string AssetName,
     long AssetSizeBytes,
     string DownloadUrl,
-    string Sha256 = "");
+    string Sha256 = "",
+    string Edition = "");
 
 public sealed record WindowsUpdateStatus(
     bool Supported,
@@ -27,7 +28,8 @@ public sealed record WindowsUpdateStatus(
     long LastCheckedAt = 0,
     string? LastError = null,
     string? StagedInstallerPath = null,
-    string ManifestUrl = "");
+    string ManifestUrl = "",
+    string Edition = "");
 
 /// <summary>Contract used by the auto-update scheduler (fakeable in tests).</summary>
 public interface IUpdateChecker
@@ -64,7 +66,7 @@ public sealed class WindowsAppUpdater : IUpdateChecker, IDisposable
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MiruPlay", "updates");
         _currentVersionName = currentVersionName ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0";
         _currentVersionCode = currentVersionCode ?? 0;
-        _status = new WindowsUpdateStatus(false, _currentVersionName, _currentVersionCode);
+        _status = new WindowsUpdateStatus(false, _currentVersionName, _currentVersionCode, Edition: EditionInfo.Current);
         ConfigureManifest(manifestUrl);
     }
 
@@ -73,7 +75,8 @@ public sealed class WindowsAppUpdater : IUpdateChecker, IDisposable
         var normalized = NormalizeManifestUrl(manifestUrl);
         _manifestUri = normalized.Length == 0 ? null : new Uri(normalized, UriKind.Absolute);
         _status = new WindowsUpdateStatus(
-            _manifestUri is not null, _currentVersionName, _currentVersionCode, ManifestUrl: _manifestUri?.AbsoluteUri ?? string.Empty);
+            _manifestUri is not null, _currentVersionName, _currentVersionCode,
+            ManifestUrl: _manifestUri?.AbsoluteUri ?? string.Empty, Edition: EditionInfo.Current);
     }
 
     public static string NormalizeManifestUrl(string? manifestUrl) => string.IsNullOrWhiteSpace(manifestUrl)
@@ -234,6 +237,9 @@ public sealed class WindowsAppUpdater : IUpdateChecker, IDisposable
 
     private static WindowsUpdateInfo NormalizeInfo(WindowsUpdateInfo info)
     {
+        var manifestEdition = string.IsNullOrWhiteSpace(info.Edition) ? EditionInfo.Lite : EditionInfo.Normalize(info.Edition);
+        if (!manifestEdition.Equals(EditionInfo.Current, StringComparison.Ordinal))
+            throw new InvalidDataException(AppStrings.Get("upd.wrongEdition", manifestEdition, EditionInfo.Current));
         if (string.IsNullOrWhiteSpace(info.VersionName) || string.IsNullOrWhiteSpace(info.AssetName) ||
             string.IsNullOrWhiteSpace(info.DownloadUrl) || string.IsNullOrWhiteSpace(info.Sha256) || info.AssetSizeBytes <= 0 ||
             info.Sha256.Length != 64 || info.Sha256.Any(character => !Uri.IsHexDigit(character)))

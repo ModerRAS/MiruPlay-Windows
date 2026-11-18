@@ -213,7 +213,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             return;
         }
         var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0";
-        AutoUpdateCurrentVersionText.Text = AppStrings.Get("wpf.update.currentVersion", version);
+        AutoUpdateCurrentVersionText.Text = AppStrings.Get("wpf.update.currentVersion", version) + "  ·  " + EditionInfo.Current;
         AutoUpdateStatusText.Text = AppStrings.Get(state.Kind switch
         {
             AutoUpdateStateKind.Checking => "wpf.update.checking",

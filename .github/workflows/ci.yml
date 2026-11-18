@@ -95,14 +95,25 @@ jobs:
               $parameters.CertificatePath = $certificatePath
               $parameters.CertificatePassword = $certificatePassword
             }
+            $parameters.Edition = 'lite'
             .\tools\Publish-Release.ps1 @parameters
+            if (Test-Path .\runtime\enhance\manifest.json) {
+              $parameters.Edition = 'full'
+              .\tools\Publish-Release.ps1 @parameters
+            } else {
+              Write-Warning 'Full edition skipped: runtime/enhance/manifest.json is absent (enhancement pack not delivered yet).'
+            }
           } finally {
             Remove-Item $certificatePath -Force -ErrorAction SilentlyContinue
           }
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-      - name: Validate portable and installer artifacts
+      - name: Validate portable and installer artifacts (lite)
         shell: powershell
-        run: .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
+        run: .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release -Edition lite
+      - name: Validate portable and installer artifacts (full)
+        if: ${{ hashFiles('runtime/enhance/manifest.json') != '' }}
+        shell: powershell
+        run: .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release -Edition full
       - uses: actions/upload-artifact@v4
         with:
           name: MiruPlay-${{ steps.package.outputs.version }}-win-x64

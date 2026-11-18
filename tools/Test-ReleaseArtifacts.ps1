@@ -2,25 +2,29 @@
 param(
     [Parameter(Mandatory)]
     [string]$ReleaseDirectory,
+    [ValidateSet('lite', 'full')]
+    [string]$Edition = 'lite',
     [switch]$SkipInstaller
 )
 
 $ErrorActionPreference = 'Stop'
 $release = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ReleaseDirectory)
-$manifestPath = Join-Path $release 'release-manifest.json'
+$manifestPath = Join-Path $release "release-manifest-$Edition.json"
 $checksumsPath = Join-Path $release 'SHA256SUMS.txt'
 if (-not (Test-Path $manifestPath) -or -not (Test-Path $checksumsPath)) {
-    throw 'release-manifest.json and SHA256SUMS.txt are required.'
+    throw "release-manifest-$Edition.json and SHA256SUMS.txt are required."
 }
 $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
-$portable = Get-ChildItem $release -Filter "MiruPlay-$($manifest.appVersion)-$($manifest.runtimeIdentifier)-portable.zip" -File | Select-Object -First 1
-$setup = Get-ChildItem $release -Filter "MiruPlay-$($manifest.appVersion)-$($manifest.runtimeIdentifier)-setup.exe" -File | Select-Object -First 1
+if ([string]$manifest.edition -ne $Edition) { throw "release-manifest-$Edition.json edition mismatch: $($manifest.edition)" }
+$portable = Get-ChildItem $release -Filter "MiruPlay-$($manifest.appVersion)-$($manifest.runtimeIdentifier)-$Edition-portable.zip" -File | Select-Object -First 1
+$setup = Get-ChildItem $release -Filter "MiruPlay-$($manifest.appVersion)-$($manifest.runtimeIdentifier)-$Edition-setup.exe" -File | Select-Object -First 1
 if (-not $portable) { throw 'Portable release archive was not found.' }
 if (-not $SkipInstaller -and -not $setup) { throw 'Installer release artifact was not found.' }
 if (-not $SkipInstaller) {
-    $updateManifestPath = Join-Path $release 'windows-update.json'
-    if (-not (Test-Path $updateManifestPath)) { throw 'windows-update.json is required when the installer is included.' }
+    $updateManifestPath = Join-Path $release "windows-update-$Edition.json"
+    if (-not (Test-Path $updateManifestPath)) { throw "windows-update-$Edition.json is required when the installer is included." }
     $update = Get-Content $updateManifestPath -Raw | ConvertFrom-Json
+    if ([string]$update.edition -ne $Edition) { throw "windows-update-$Edition.json edition mismatch: $($update.edition)" }
     $releaseUri = [Uri]$update.releaseUrl
     $downloadUri = [Uri]$update.downloadUrl
     $setupHash = (Get-FileHash $setup.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -91,6 +95,47 @@ try {
     )) {
         if (-not (Test-Path (Join-Path $portableDirectory $required))) { throw "Portable package is missing $required" }
     }
+    $editionMarker = Join-Path $portableDirectory 'edition.txt'
+    if (-not (Test-Path $editionMarker) -or ((Get-Content $editionMarker -Raw).Trim() -ne $Edition)) {
+        throw "Portable package is missing the $Edition edition marker."
+    }
+    if (-not (Test-Path (Join-Path $portableDirectory 'release-manifest.json'))) { throw 'Portable release manifest is missing.' }
+    $portableEnhanceRoot = Join-Path $portableDirectory 'runtime\enhance'
+    $enhanceFilesInPortable = @(Get-ChildItem $portableDirectory -Recurse -File | Where-Object {
+        $_.Name -match '^(VSPipe\.exe|vapoursynth|rife-ncnn|rife)' -or $_.FullName -match '\\runtime\\enhance\\'
+    })
+    if ($Edition -eq 'lite') {
+        if ($manifest.enhancements -and @($manifest.enhancements).Count -gt 0) { throw 'Lite manifest must not list enhancements.' }
+        if ((Test-Path $portableEnhanceRoot) -or $enhanceFilesInPortable.Count -gt 0) {
+            throw 'Lite portable package must not contain enhancement assets (runtime/enhance, VapourSynth, RIFE).'
+        }
+    } else {
+        $manifestEnhancements = @($manifest.enhancements)
+        if ($manifestEnhancements.Count -eq 0) { throw 'Full manifest must list enhancement files.' }
+        if (-not (Test-Path (Join-Path $portableEnhanceRoot 'manifest.json'))) { throw 'Full portable package is missing runtime\enhance\manifest.json.' }
+        foreach ($enhancement in $manifestEnhancements) {
+            $relative = [string]$enhancement.path
+            if (-not $relative.StartsWith('runtime/enhance/')) { throw "Unexpected enhancement path: $relative" }
+            $fileRelative = $relative.Substring('runtime/enhance/'.Length)
+            $enhancementPath = Join-Path $portableEnhanceRoot ($fileRelative.Replace('/', '\'))
+            if (-not (Test-Path $enhancementPath)) { throw "Full portable package is missing enhancement file: $relative" }
+            if ((Get-FileHash $enhancementPath -Algorithm SHA256).Hash.ToLowerInvariant() -ne [string]$enhancement.sha256) {
+                throw "Enhancement digest mismatch: $relative"
+            }
+        }
+        $enhanceNames = @($enhanceFilesInPortable | ForEach-Object { $_.Name })
+        if ($enhanceNames.Count -eq 0) { throw 'Full portable package is missing VapourSynth/RIFE enhancement files.' }
+        if (-not (Get-ChildItem $portableEnhanceRoot -Recurse -File | Where-Object { $_.Name -match 'VSPipe|vapoursynth' })) {
+            throw 'Full portable package is missing the VapourSynth component.'
+        }
+        if (-not (Get-ChildItem $portableEnhanceRoot -Recurse -File | Where-Object { $_.Name -match 'rife' })) {
+            throw 'Full portable package is missing the RIFE component.'
+        }
+        if (-not (Get-ChildItem $portableEnhanceRoot -Recurse -File | Where-Object { $_.Name -match 'LICENSE|NOTICE|COPYING|LGPL' })) {
+            throw 'Full portable package is missing enhancement license files.'
+        }
+    }
+
     if (-not $manifest.sdl3) { throw 'release-manifest.json is missing the SDL3 runtime metadata section.' }
     if ($manifest.sdl3.version -ne '3.4.20') { throw "Unexpected SDL3 version in manifest: $($manifest.sdl3.version)" }
     if ($manifest.sdl3.library -ne 'runtime/sdl3/SDL3.dll') { throw "Unexpected SDL3 manifest path: $($manifest.sdl3.library)" }
@@ -142,6 +187,17 @@ try {
             throw 'Installed package contains the removed external mpv runtime.'
         }
         if (-not (Test-Path (Join-Path $installDirectory 'licenses\NuGet-Packages.json'))) { throw 'Silent installation did not install third-party license metadata.' }
+        $installedEditionMarker = Join-Path $installDirectory 'edition.txt'
+        if (-not (Test-Path $installedEditionMarker) -or ((Get-Content $installedEditionMarker -Raw).Trim() -ne $Edition)) {
+            throw "Silent installation is missing the $Edition edition marker."
+        }
+        $installedEnhanceRoot = Join-Path $installDirectory 'runtime\enhance'
+        if ($Edition -eq 'lite' -and (Test-Path $installedEnhanceRoot)) {
+            throw 'Lite installation must not contain runtime/enhance.'
+        }
+        if ($Edition -eq 'full' -and -not (Test-Path $installedEnhanceRoot)) {
+            throw 'Full installation is missing runtime/enhance.'
+        }
         Test-AppLaunch $installedExecutable
         $uninstallerPath = Join-Path $installDirectory 'unins000.exe'
         if (-not (Test-Path $uninstallerPath)) { throw 'Installer did not create an uninstaller.' }
@@ -154,6 +210,7 @@ try {
     [pscustomobject]@{
         Version = $manifest.appVersion
         RuntimeIdentifier = $manifest.runtimeIdentifier
+        Edition = $Edition
         Signing = $manifest.signing
         VerifiedHashes = $verifiedHashes
         PortableLaunch = $true
