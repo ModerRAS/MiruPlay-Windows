@@ -388,13 +388,17 @@ public sealed class LibMpvPlaybackSessionTests : IDisposable
 
         var direct = await StartWith(new AppSettings(AudioSrcBypass: "direct"));
         Assert.Equal("wasapi", direct["ao"]);
-        Assert.Equal("yes", direct["ao-wasapi-exclusive"]);
+        Assert.Equal("yes", direct["audio-exclusive"]);
+        Assert.False(direct.ContainsKey("ao-wasapi-exclusive"));
         Assert.False(direct.ContainsKey("audio-samplerate"));
 
         var dspFallback = await StartWith(new AppSettings(
             AudioSrcBypass: "direct",
             AudioDsp: new AudioDspConfig(Enabled: true)));
         Assert.Equal("48000", dspFallback["audio-samplerate"]);
+        // The DSP graph explicitly disables passthrough when it builds the filter chain.
+        Assert.Equal("no", dspFallback["audio-exclusive"]);
+        Assert.Equal("no", dspFallback["audio-spdif"]);
         Assert.False(dspFallback.ContainsKey("ao-wasapi-exclusive"));
 
         var system = await StartWith(new AppSettings(AudioSrcBypass: "system"));
@@ -471,6 +475,120 @@ public sealed class LibMpvPlaybackSessionTests : IDisposable
 
         Assert.Equal("120", client.Options["start"]);
         await session.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task HdrAndBitstreamPassthroughMapToNativeOptionsAndSuppressDsp()
+    {
+        var client = new FakeLibMpvClient();
+        var settings = new AppSettings(
+            HdrMode: "passthrough",
+            AudioPassthroughMode: "force",
+            AudioPassthroughCodecs: "truehd,eac3",
+            AudioSrcBypass: "direct",
+            AudioBalance: "high",
+            AudioDsp: new AudioDspConfig(Enabled: true));
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(Path.Combine(_directory, $"passthrough-{Guid.NewGuid():N}.mkv")),
+            settings,
+            new PlaybackProgressStore(Path.Combine(_directory, $"passthrough-{Guid.NewGuid():N}.db")),
+            headless: false,
+            windowHandle: new IntPtr(1234),
+            transportLease: null,
+            videoOptions: MpvWindowsVideoOptionMapper.FromSettings(settings));
+        await session.DisposeAsync();
+
+        Assert.Equal("yes", client.Options["target-colorspace-hint"]);
+        Assert.Equal("source", client.Options["target-colorspace-hint-mode"]);
+        Assert.Equal("10000", client.Options["target-peak"]);
+        Assert.Equal("clip", client.Options["tone-mapping"]);
+        Assert.Equal("no", client.Options["hdr-compute-peak"]);
+        Assert.Equal("wasapi", client.Options["ao"]);
+        Assert.Equal("yes", client.Options["audio-exclusive"]);
+        Assert.Equal("truehd,eac3", client.Options["audio-spdif"]);
+        Assert.DoesNotContain("af", client.Options.Keys);
+        Assert.DoesNotContain("audio-samplerate", client.Options.Keys);
+        Assert.DoesNotContain("ao-wasapi-exclusive", client.Options.Keys);
+    }
+
+    [Fact]
+    public async Task DolbyVisionTrackMetadataIsExposedInPlaybackInfo()
+    {
+        var client = new FakeLibMpvClient();
+        client.Properties["video-codec"] = "hevc";
+        client.Properties["video-params/pixelformat"] = "yuv420p10";
+        client.Properties["video-params/primaries"] = "bt.2020";
+        client.Properties["video-params/gamma"] = "pq";
+        client.TrackList = new LibMpvNodeValue(LibMpvNodeKind.Array, ArrayValue:
+        [
+            new(LibMpvNodeKind.Map, MapValue: new Dictionary<string, LibMpvNodeValue>(StringComparer.Ordinal)
+            {
+                ["id"] = new(LibMpvNodeKind.Int64, Int64Value: 1),
+                ["type"] = new(LibMpvNodeKind.String, StringValue: "video"),
+                ["selected"] = new(LibMpvNodeKind.Flag, FlagValue: true),
+                ["dolby-vision-profile"] = new(LibMpvNodeKind.Int64, Int64Value: 7),
+                ["dolby-vision-level"] = new(LibMpvNodeKind.Int64, Int64Value: 6),
+            }),
+        ]);
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(Path.Combine(_directory, $"dv-{Guid.NewGuid():N}.mkv")),
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, $"dv-{Guid.NewGuid():N}.db")),
+            headless: true,
+            windowHandle: null,
+            transportLease: null,
+            videoOptions: null);
+
+        var info = await session.GetPlaybackInfoAsync();
+        Assert.NotNull(info.Video);
+        Assert.True(info.Video!.IsDolbyVision);
+        Assert.Equal(7, info.Video.DolbyVisionProfile);
+        Assert.Equal(6, info.Video.DolbyVisionLevel);
+    }
+
+    [Fact]
+    public async Task EnhancementLayerWarningsMarkDegradedFallback()
+    {
+        var client = new FakeLibMpvClient(
+            new LibMpvEvent(2, 0, 0, IntPtr.Zero, LogMessage: new LibMpvLogMessage(
+                "vo", 20, "Failed sampling enhancement layer; falling back to base-layer-only rendering")),
+            new LibMpvEvent(8, 0, 0, IntPtr.Zero));
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(Path.Combine(_directory, $"el-{Guid.NewGuid():N}.mkv")),
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, $"el-{Guid.NewGuid():N}.db")),
+            headless: true,
+            windowHandle: null,
+            transportLease: null,
+            videoOptions: null);
+
+        Assert.True(session.PlaybackInfo.EnhancementLayerDegraded);
+    }
+
+    [Fact]
+    public async Task AudioPassthroughOffKeepsPcmSrcBypassAndDsp()
+    {
+        var client = new FakeLibMpvClient();
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(Path.Combine(_directory, $"pcm-{Guid.NewGuid():N}.mkv")),
+            new AppSettings(AudioSrcBypass: "software", AudioOutputSampleRate: 44100),
+            new PlaybackProgressStore(Path.Combine(_directory, $"pcm-{Guid.NewGuid():N}.db")),
+            headless: true,
+            windowHandle: null,
+            transportLease: null,
+            videoOptions: null);
+        await session.DisposeAsync();
+
+        Assert.Equal("44100", client.Options["audio-samplerate"]);
+        Assert.True(!client.Options.TryGetValue("audio-exclusive", out var exclusive) || exclusive == "no");
+        Assert.True(!client.Options.TryGetValue("audio-spdif", out var spdif) || spdif == "no");
     }
 
     private static LibraryEpisode CreateEpisode(string mediaPath, IReadOnlyList<string>? subtitles = null) => new(

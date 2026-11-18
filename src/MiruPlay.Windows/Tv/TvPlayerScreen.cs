@@ -121,7 +121,7 @@ public sealed class TvPlayerScreen : TvScreenBase, IDisposable
                 resumePosition,
                 playbackProxy: proxy,
                 windowHandle: _videoHost.NativeHandle,
-                videoOptions: new MpvWindowsVideoOptions(),
+                videoOptions: MpvWindowsVideoOptionMapper.FromSettings(_context.Settings),
                 allowDirectHttp: source?.Type == "RSS",
                 forceStartPosition: !resume).ConfigureAwait(true);
             if (_disposed)

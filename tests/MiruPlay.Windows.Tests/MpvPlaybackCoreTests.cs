@@ -5,6 +5,8 @@ namespace MiruPlay.Windows.Tests;
 
 public sealed class MpvPlaybackCoreTests
 {
+    private static readonly string[] DefaultArguments = ["--vo=gpu-next", "--gpu-api=d3d11", "--hwdec=auto-safe"];
+
     [Fact]
     public void SdrMapperUsesWindowsD3d11ToneMappingAndClampsTarget()
     {
@@ -26,17 +28,42 @@ public sealed class MpvPlaybackCoreTests
     }
 
     [Fact]
-    public void HdrMapperKeepsBt2020PqOutputAndDoesNotAddSdrToneMapTarget()
+    public void HdrPassthroughSignalsSourceColorspaceWithoutForcingTargetPrimaries()
     {
         var arguments = MpvWindowsVideoOptionMapper.BuildArguments(new MpvWindowsVideoOptions(
             MpvDisplayPipeline.HdrPassthrough,
             TargetHdrPeakNits: 50));
 
-        Assert.Contains("--target-prim=bt.2020", arguments);
-        Assert.Contains("--target-trc=pq", arguments);
-        Assert.Contains("--target-peak=203", arguments);
+        Assert.Contains("--target-colorspace-hint=yes", arguments);
+        Assert.Contains("--target-colorspace-hint-mode=source", arguments);
+        Assert.Contains("--target-peak=10000", arguments);
         Assert.Contains("--tone-mapping=clip", arguments);
-        Assert.DoesNotContain(arguments, argument => argument == "--target-trc=bt.1886");
+        Assert.Contains("--hdr-compute-peak=no", arguments);
+        Assert.DoesNotContain(arguments, argument => argument.StartsWith("--target-prim", StringComparison.Ordinal));
+        Assert.DoesNotContain(arguments, argument => argument.StartsWith("--target-trc", StringComparison.Ordinal));
+        Assert.DoesNotContain(arguments, argument => argument.Contains("--tone-mapping-param", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void DefaultHdrModeKeepsMpvDefaultsAndAddsNoColorOptions()
+    {
+        var arguments = MpvWindowsVideoOptionMapper.BuildArguments(new MpvWindowsVideoOptions());
+
+        Assert.Equal(DefaultArguments, arguments);
+    }
+
+    [Fact]
+    public void SettingsHdrModeMapsToDisplayPipeline()
+    {
+        Assert.Equal(
+            MpvDisplayPipeline.Auto,
+            MpvWindowsVideoOptionMapper.FromSettings(new AppSettings()).DisplayPipeline);
+        Assert.Equal(
+            MpvDisplayPipeline.HdrPassthrough,
+            MpvWindowsVideoOptionMapper.FromSettings(new AppSettings(HdrMode: "PASSTHROUGH")).DisplayPipeline);
+        Assert.Equal(
+            MpvDisplayPipeline.SdrToneMap,
+            MpvWindowsVideoOptionMapper.FromSettings(new AppSettings(HdrMode: "sdr-tonemap")).DisplayPipeline);
     }
 
     [Fact]

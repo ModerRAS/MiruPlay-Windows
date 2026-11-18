@@ -521,6 +521,13 @@
   <data name="wpf.main.subLang" xml:space="preserve"><value>Preferred subtitle language</value></data>
   <data name="wpf.main.subHint" xml:space="preserve"><value>Keep the player default track when nothing matches</value></data>
   <data name="wpf.main.langHint" xml:space="preserve"><value>Follow the system or pin a locale; affects number and date formats</value></data>
+  <data name="wpf.main.playbackCapabilities" xml:space="preserve"><value>Playback capabilities</value></data>
+  <data name="wpf.main.dvFelSupport" xml:space="preserve"><value>Dolby Vision P7 enhancement layer (FEL)</value></data>
+  <data name="wpf.main.dvFelSupported" xml:space="preserve"><value>Supported (libplacebo {0})</value></data>
+  <data name="wpf.main.dvFelUnsupported" xml:space="preserve"><value>Current runtime lacks the capabilities required for FEL composition</value></data>
+  <data name="wpf.main.libMpvVersion" xml:space="preserve"><value>libmpv version</value></data>
+  <data name="wpf.main.dvOutputHint" xml:space="preserve"><value>Windows cannot output a Dolby Vision signal: DV content is composed by the player and output as HDR10, which requires Windows HDR to be on.</value></data>
+  <data name="wpf.main.capabilityUnavailable" xml:space="preserve"><value>Unavailable</value></data>
   <data name="wpf.main.about" xml:space="preserve"><value>About</value></data>
   <data name="wpf.main.aboutText" xml:space="preserve"><value>Native Windows client · MLIP v1-v4 supported</value></data>
   <data name="wpf.main.loadingLib" xml:space="preserve"><value>Loading library…</value></data>
@@ -1338,6 +1345,15 @@
   <data name="tv.settings.exitTv" xml:space="preserve"><value>Exit TV mode</value></data>
   <data name="tv.settings.phoneHint" xml:space="preserve"><value>Not editable on TV; please use desktop mode</value></data>
   <data name="tv.settings.restartHint" xml:space="preserve"><value>Takes effect after restarting MiruPlay</value></data>
+  <data name="tv.settings.hdrMode" xml:space="preserve"><value>HDR mode</value></data>
+  <data name="tv.settings.hdr.auto" xml:space="preserve"><value>Auto</value></data>
+  <data name="tv.settings.hdr.passthrough" xml:space="preserve"><value>HDR passthrough</value></data>
+  <data name="tv.settings.hdr.sdrToneMap" xml:space="preserve"><value>Map to SDR</value></data>
+  <data name="tv.settings.audioPassthrough" xml:space="preserve"><value>Audio passthrough</value></data>
+  <data name="tv.settings.passthrough.off" xml:space="preserve"><value>Off</value></data>
+  <data name="tv.settings.passthrough.auto" xml:space="preserve"><value>Auto</value></data>
+  <data name="tv.settings.passthrough.force" xml:space="preserve"><value>Force</value></data>
+  <data name="tv.settings.nextPlaybackHint" xml:space="preserve"><value>Takes effect on the next playback</value></data>
   <data name="tv.exit.hold" xml:space="preserve"><value>Keep holding Back to exit TV mode</value></data>
   <data name="tv.exit.hint" xml:space="preserve"><value>Release to cancel</value></data>
   <data name="tv.key.up" xml:space="preserve"><value>Up</value></data>
@@ -1365,7 +1381,27 @@
   <data name="playback.balanceLow" xml:space="preserve"><value>Low</value></data>
   <data name="playback.balanceMedium" xml:space="preserve"><value>Medium</value></data>
   <data name="playback.balanceHigh" xml:space="preserve"><value>High</value></data>
+  <data name="playback.hdrMode" xml:space="preserve"><value>HDR mode</value></data>
+  <data name="playback.hdrHint" xml:space="preserve"><value>Auto keeps mpv defaults. Passthrough uses community parameters (source-metadata output); it requires Windows HDR and real-device verification. The default does not change current picture quality.</value></data>
+  <data name="playback.hdrAuto" xml:space="preserve"><value>Auto (recommended)</value></data>
+  <data name="playback.hdrPassthrough" xml:space="preserve"><value>HDR passthrough</value></data>
+  <data name="playback.hdrSdrToneMap" xml:space="preserve"><value>Map to SDR</value></data>
+  <data name="playback.audioPassthrough" xml:space="preserve"><value>Audio bitstream passthrough</value></data>
+  <data name="playback.passthroughHint" xml:space="preserve"><value>Send TrueHD/E-AC3 bitstreams untouched to an HDMI AVR so the AVR decodes Atmos. Requires exclusive WASAPI and an Atmos-capable AVR; on failure mpv falls back to PCM decoding (height information is lost).</value></data>
+  <data name="playback.passthroughOff" xml:space="preserve"><value>Off</value></data>
+  <data name="playback.passthroughAuto" xml:space="preserve"><value>Auto</value></data>
+  <data name="playback.passthroughForce" xml:space="preserve"><value>Force</value></data>
+  <data name="playback.passthroughCodecs" xml:space="preserve"><value>Passthrough codecs</value></data>
+  <data name="playback.passthroughDevice" xml:space="preserve"><value>HDMI/AVR device</value></data>
+  <data name="playback.passthroughDeviceHint" xml:space="preserve"><value>Select the WASAPI device connected to the AVR; Auto uses the system default output.</value></data>
+  <data name="playback.passthroughDeviceAuto" xml:space="preserve"><value>Auto (system default)</value></data>
+  <data name="playback.passthroughDspConflict" xml:space="preserve"><value>Bitstream passthrough is mutually exclusive with PEQ/DSP/loudness balance: these are skipped while passthrough is on. Changes apply to the next playback.</value></data>
+  <data name="playback.appliedNextPlayback" xml:space="preserve"><value>Saved. Takes effect on the next playback.</value></data>
   <data name="api.errAudioBalance" xml:space="preserve"><value>Invalid audio balance level.</value></data>
+  <data name="api.errHdrMode" xml:space="preserve"><value>Invalid HDR mode</value></data>
+  <data name="api.errAudioPassthroughMode" xml:space="preserve"><value>Invalid audio passthrough mode</value></data>
+  <data name="api.errAudioPassthroughCodecs" xml:space="preserve"><value>Invalid passthrough codec set</value></data>
+  <data name="api.errAudioPassthroughDevice" xml:space="preserve"><value>Invalid passthrough audio device (expected auto or a wasapi/ device)</value></data>
   <data name="oauth.heading" xml:space="preserve"><value>Bangumi OAuth sign-in</value></data>
   <data name="oauth.start" xml:space="preserve"><value>Sign in with browser</value></data>
   <data name="oauth.logout" xml:space="preserve"><value>Sign out</value></data>

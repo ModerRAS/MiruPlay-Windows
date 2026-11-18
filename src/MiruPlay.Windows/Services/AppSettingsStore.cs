@@ -43,7 +43,11 @@ public sealed record AppSettings(
     bool TvGamepadEnabled = true,
     int TvGamepadDeadzonePercent = 50,
     string TvGamepadFaceLayout = "xbox",
-    string AudioBalance = "off");
+    string AudioBalance = "off",
+    string HdrMode = "auto",
+    string AudioPassthroughMode = "off",
+    string AudioPassthroughCodecs = "truehd,eac3,ac3,dts,dts-hd",
+    string AudioPassthroughDevice = "auto");
 
 public sealed class AppSettingsStore
 {
@@ -145,6 +149,10 @@ public sealed class AppSettingsStore
                 : 50;
             var normalizedGamepadLayout = TvGamepadFaceLayouts.Normalize(settings.TvGamepadFaceLayout);
             var normalizedBalance = NormalizeAudioBalance(settings.AudioBalance);
+            var normalizedHdrMode = NormalizeHdrMode(settings.HdrMode);
+            var normalizedPassthroughMode = NormalizeAudioPassthroughMode(settings.AudioPassthroughMode);
+            var normalizedPassthroughCodecs = NormalizeAudioPassthroughCodecs(settings.AudioPassthroughCodecs);
+            var normalizedPassthroughDevice = NormalizeAudioPassthroughDevice(settings.AudioPassthroughDevice);
             if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate ||
                 settings.AppLanguage != normalizedLanguage ||
                 settings.TvRemotePreset != normalizedTvPreset ||
@@ -153,7 +161,11 @@ public sealed class AppSettingsStore
                 settings.TvExitLongPressMs != normalizedTvExitHold ||
                 settings.AutoUpdateMode != normalizedAutoUpdateMode ||
                 settings.AutoUpdateIntervalHours != normalizedAutoUpdateInterval ||
-                settings.AudioBalance != normalizedBalance)
+                settings.AudioBalance != normalizedBalance ||
+                settings.HdrMode != normalizedHdrMode ||
+                settings.AudioPassthroughMode != normalizedPassthroughMode ||
+                settings.AudioPassthroughCodecs != normalizedPassthroughCodecs ||
+                settings.AudioPassthroughDevice != normalizedPassthroughDevice)
             {
                 settings = settings with
                 {
@@ -167,6 +179,10 @@ public sealed class AppSettingsStore
                     AutoUpdateMode = normalizedAutoUpdateMode,
                     AutoUpdateIntervalHours = normalizedAutoUpdateInterval,
                     AudioBalance = normalizedBalance,
+                    HdrMode = normalizedHdrMode,
+                    AudioPassthroughMode = normalizedPassthroughMode,
+                    AudioPassthroughCodecs = normalizedPassthroughCodecs,
+                    AudioPassthroughDevice = normalizedPassthroughDevice,
                 };
                 needsCleanup = true;
             }
@@ -202,6 +218,17 @@ public sealed class AppSettingsStore
 
     public static string NormalizeAudioBalance(string? value) =>
         AudioBalanceLevels.ToStorageValue(AudioBalanceLevels.FromStorageValue(value));
+
+    public static string NormalizeHdrMode(string? value) => MpvPlaybackModeSettings.NormalizeHdrMode(value);
+
+    public static string NormalizeAudioPassthroughMode(string? value) =>
+        MpvAudioPassthroughOptionMapper.ToStorageMode(MpvAudioPassthroughOptionMapper.ParseMode(value));
+
+    public static string NormalizeAudioPassthroughCodecs(string? value) =>
+        MpvAudioPassthroughOptionMapper.ToStorageCodecs(value);
+
+    public static string NormalizeAudioPassthroughDevice(string? value) =>
+        MpvAudioPassthroughOptionMapper.NormalizeDevice(value);
 
     public void Save(AppSettings settings)
     {

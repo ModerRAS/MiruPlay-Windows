@@ -39,17 +39,19 @@
 |---|---|---|---|
 | 内嵌播放器与基础控制 | TV 遥控器优先的时间轴、播放/暂停、跳转、倍速、音轨/字幕、上一集/下一集和信息面板 | 部分对齐 | 进程内 libmpv 通过 HWND 嵌入 WPF；WPF/WebControl/WebUI 共享播放、暂停、寻道、倍速、音量、静音和版本队列。实机验证 RSS 播放、外置音轨、双击全屏及来源删除；缺 Android 性能诊断侧栏和完整专用媒体键交互 |
 | 播放后端 | 标准 Exo、实验 GL、内嵌 mpv 和实验 ijkplayer，并按字幕/HDR 能力回退 | 平台差异 | Windows 以固定 mpv 为唯一完整后端；系统默认播放器只作明确降级。不会移植 Exo/ijkplayer，也不会把降级启动报告为完整会话 |
-| HDR/SDR 与色调映射 | 按 SDR、HDR10、HDR10+、Dolby Vision、未知 HDR 保存后端与 tone-mapping 规则 | 部分对齐 | mpv 使用 `gpu-next`/D3D11，已有 SDR tone-map、HDR passthrough、曲线和目标亮度参数映射测试；当前只启用默认 `Auto`，缺按信号持久化的 WPF/WebUI 设置与共享 DTO 支持 |
+| HDR/SDR 与色调映射 | 按 SDR、HDR10、HDR10+、Dolby Vision、未知 HDR 保存后端与 tone-mapping 规则 | 部分对齐 | mpv 使用 `gpu-next`/D3D11。现有 `Auto` 默认行为逐字节不变；新增 `HDR 直通`（`target-colorspace-hint=yes` + `target-colorspace-hint-mode=source` + `target-peak=10000` + `tone-mapping=clip` + `hdr-compute-peak=no`，社区参数、待实机画质验证）与 `映射到 SDR`，`AppSettings.HdrMode` 贯穿 WPF/WebUI/TV/WebControl，Windows 需开启系统 HDR。自动化：`PlaybackModeMapperTests`、`PlaybackModeSettingsTests` |
 | 内封/外挂字幕与语言偏好 | 轨道自动/手动选择、关闭、透明背景和分层 ASS；补充分支增加 zlib Matroska 解压，移除密集普通对话的固定 cue 上限，保留非默认/作者定位、位图、Ruby/强调/Voice 等 span 与样式差异，并统一字幕变换流、释放旧视图、隔离陈旧监听及为控制栏留出安全区 | 部分对齐 | mpv 原生处理内封/外挂、ASS/libass 与 Matroska zlib，WPF/WebControl 共用轨道状态和语言偏好；缺 `subtitleBackgroundTransparent` 设置。Media3 cue 布局与 `PlayerView` 生命周期属于 Android 专属实现，不移植 |
 | 播放进度、播完动作与队列 | 断点续播、完成判定、返回详情/自动下一集及逻辑上一集/下一集 | 对齐 | `state.db` 提供 15 秒保存、90% 完成判定和继续观看；WPF/WebControl/WebUI 共享逻辑上一集/下一集，WPF 会话在自然完成后按设置自动下一集。实机验证前后集和只读状态轮询；系统播放器降级不具备这些会话能力 |
 | 音频平衡（响度 AGC） | Exo/Media3 PCM 处理器按 off/low/medium/high 做流式响度平衡（RMS 目标、attack/release、噪声门、峰值上限） | 对齐（平台等价） | Windows 以 mpv/FFmpeg `dynaudnorm` 实现 off/low/medium/high（存储值小写，未知值归 OFF），参数按等级单调（boost 上限/帧窗/平滑窗/峰值目标），固定排在现有 PEQ/DSP 链（含 downmix、limiter）之后；DSP 关闭且平衡 OFF 时不插入任何滤镜，af 与 master 逐字节一致。设置持久化到 `AppSettings.AudioBalance`，`/api/settings/playback` 与 WPF/WebUI 双入口，改动对运行中会话立即生效并用于下次播放；视频与音乐播放共用同一 mpv 会话配置。自动化：`AudioBalanceTests`、`AudioDspFilterGraphCompilerTests`；未做听感实测，Exo 与 mpv 数值不逐位相同（属平台差异） |
 | 音频 PEQ / DSP | Android `master` 支持 PEQ、最小相位/线性相位 FIR、通道规则、limiter、保留/立体声/HRTF 输出、TV 投影和完整 WebUI | 部分对齐 | Windows 0.1.4 对齐模型语义和数值范围，提供 WPF/WebAPI/WebUI、频响预览、REW 导入、mpv `lavfi` 运行时应用及自动化测试；目前只作用于 mpv，WebUI 缺完整预设 CRUD/JSON 导入导出，且 C# 枚举的设置/API 序列化尚未对齐 Android 字符串存储值 |
+| 音频码流直通（Atmos/TrueHD/E-AC3） | Android 走系统直通/解码路径 | 部分对齐（无 AVR 实测） | Windows 使用 `ao=wasapi` + `audio-exclusive=yes` + `audio-spdif=truehd,eac3,ac3,dts,dts-hd`（可选设备）把码流送 HDMI/AVR；设备/功放不支持时 libmpv 自动回退 PCM（丢高度信息），用 `audio-out-params/format` 判定实际输出；与 PEQ/DSP/响度平衡互斥（开启直通时跳过滤镜并在 UI/API 说明）。`AppSettings.AudioPassthroughMode/Codecs/Device` 贯穿 WPF/WebUI/TV/WebControl；自动化：`PlaybackModeMapperTests`、`PlaybackModeSettingsTests`、`LibMpvPlaybackSessionTests`。本机无 AVR，真实 Atmos 直通未验收 |
+| Dolby Vision（P5/P8/P7 FEL） | Android 依赖设备/SoC 能力 | 部分对齐（无 DV 片源实测） | pinned libmpv v0.41.0-1227（libplacebo v7.377.0 / PL_API_VER 377、FFmpeg 含 `dovi_split`）已含上游 mpv PR #17932 的 P7 FEL 解码与 libplacebo NLQ 合成；`vo_gpu-next` 下 EL 配对/上传/合成，失败自动回退 BL 并记录 warn。Windows 无法输出 DV 信号，最终为 HDR10 PQ。设置页“播放能力”与 `/api/playback/diagnostics` 暴露运行时探测（FEL 支持、libmpv/libplacebo 版本），`track-list` 的 DV profile/level 进入播放信息。未分发 FEL 测试片源，未做真实片源画质验收 |
 
 ## WebControl、自动化与发布
 
 | 能力 | Android 当前能力 | Windows 状态 | Windows 当前边界与证据 |
 |---|---|---|---|
-| WebControl/WebUI | 默认关闭；令牌认证下覆盖媒体库、来源、扫描、播放、Cloud/RSS、元数据、日志、更新和设置 | 部分对齐 | Windows 已覆盖主要媒体与运维流程并轮换 DPAPI 令牌；提供串行全源扫描、持久任务查询/取消、可配置更新清单、更新安装确认和远程重启/退出。后台可用 `--background` 隐藏窗口；`tools/Register-BackgroundTask.ps1` 可选注册当前用户登录启动，不会自动修改任务计划。Bangumi Archive 支持上传/导入/搜索和匹配回填。仍缺 Android HDR 设置和原生播放诊断等共享路由 |
+| WebControl/WebUI | 默认关闭；令牌认证下覆盖媒体库、来源、扫描、播放、Cloud/RSS、元数据、日志、更新和设置 | 部分对齐 | Windows 已覆盖主要媒体与运维流程并轮换 DPAPI 令牌；提供串行全源扫描、持久任务查询/取消、可配置更新清单、更新安装确认和远程重启/退出。后台可用 `--background` 隐藏窗口；`tools/Register-BackgroundTask.ps1` 可选注册当前用户登录启动，不会自动修改任务计划。Bangumi Archive 支持上传/导入/搜索和匹配回填。已提供 HDR 三模式、音频码流直通设置与播放能力诊断路由；仍缺 Android 专属 HDR 规则模型与性能诊断侧栏 |
 | CloudDrive2/RSS | 官方 gRPC 登录/Token、根目录约束、RSS/Atom 预览、过滤去重、torrent staging、整理、回扫与周期任务 | 部分对齐 | Windows 保留成功门控回扫和原有 RSS 专用代理配置；周期调度可在桌面或 `--background` 进程内运行，登录启动需用户显式运行 `tools/Register-BackgroundTask.ps1`，退出后由 Windows Task Scheduler 下次登录重新启动 |
 | 统一出站代理 | Bangumi API、Bangumi Archive 与 RSS 共用 HTTP 代理设置 | 部分对齐 | 复用现有 CloudDrive/RSS HTTP 代理设置，动态接入 Bangumi、TMDB、TVMaze、Archive 与 RSS 在线目录/订阅请求；保留 CloudDrive RSS 提交的按请求配置，不触碰 WebDAV dispatcher 身份边界。代理仅支持无凭据 HTTP 主机和端口，通过 WebUI CloudDrive 设置调整 |
 | 本地日志与 OpenObserve | 有界本地日志、下载、平台加密 Token 和自动/手动上报 | 部分对齐 | `RotatingLocalLogStore` 有界轮转并脱敏；记录 WebControl 请求耗时/状态、播放器生命周期、扫描结果与启动事件。CurrentUser DPAPI Token 支持手动及 opt-in 每小时后台上报；上报失败留在本地并写入持久任务状态，不影响播放/扫描。外部 OpenObserve 账号未验收 |
@@ -149,6 +151,16 @@ dotnet build MiruPlay.Windows.slnx -c Release
 - 音乐端到端验证：WebUI 音乐页对真实库扫描发现 SPY×FAMILY/TRIGUN 等真实专辑；点击播放后 PLAYING、Ep 1 · theme、5 秒推进约 4.8 秒；随后停止回到 IDLE。大库全树扫描以 60 秒服务端超时+请求取消为界。
 
 涉及真实播放、WebDAV 或发布产物时，还需分别运行固定 mpv 集成测试、真实 Local/WebDAV/SMB smoke 和 `tools/Test-ReleaseArtifacts.ps1`；仅有单元测试不能把这些场景升级为“对齐”。
+## 2026-11-18 HDR / 音频直通 / DV 增量
+
+- 修复 `ApplyAudioSrcBypass` 使用 mpv 0.41 已不存在的 `ao-wasapi-exclusive` 的问题（实测 set 返回 -5，真实播放会抛异常并降级系统播放器），改为 `audio-exclusive=yes`，并补 fake-client 回归断言。
+- 新增 `AppSettings.HdrMode`（auto/passthrough/sdr_tonemap）、`AudioPassthroughMode`（off/auto/force）、`AudioPassthroughCodecs`、`AudioPassthroughDevice`；旧 settings.json 自动补默认值，非法值归一化。
+- HDR 直通模式使用 `target-colorspace-hint=yes` + `mode=source` + `target-peak=10000` + `tone-mapping=clip` + `hdr-compute-peak=no`；默认 Auto 零参数不变。
+- 音频直通使用 WASAPI 独占 + `audio-spdif`，与 DSP/PEQ/响度平衡互斥；回退状态用 `audio-out-params/format` 判定。
+- DV：播放信息暴露 `track-list/N/dolby-vision-profile|level`；warn 日志命中增强层失败时标记“已回退 BL”；运行时能力探测（FEL 支持/libmpv/libplacebo 版本）加入 `/api/playback/diagnostics` 与设置页。
+- 入口：WPF 设置页、WebControl `GET/PUT /api/settings/playback`（非法值 400）、WebUI 设置页、TV 设置页；i18n 五语言补齐。
+- 未验证：真实 AVR 的 Atmos 直通、真实 HDR 显示链路画质、DV P7 FEL 片源合成效果/性能（本机无硬件/片源）。
+
 # In-process libmpv playback
 
 Windows playback uses the pinned `runtime/libmpv/libmpv-2.dll` backend, which
