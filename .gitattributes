@@ -1,0 +1,4 @@
+# Packaging inputs must be byte-stable regardless of the runner's core.autocrlf setting.
+licenses/* text eol=lf
+tools/*.ps1 text eol=lf
+tools/enhance/*.json text eol=lf

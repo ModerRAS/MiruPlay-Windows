@@ -28,6 +28,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Normalize checkout line endings
+        shell: pwsh
+        run: |
+          git config core.autocrlf false
+          git config core.eol lf
+          git rm --cached -r . | Out-Null
+          git reset --hard | Out-Null
+          Write-Output "core.autocrlf=$($(git config --get core.autocrlf))"
+          Write-Output "core.eol=$($(git config --get core.eol))"
+          git ls-files --eol -- licenses tools/Prepare-RifeEnhanceStage.ps1 tools/New-RifeEnhancePack.ps1 tools/enhance/rife-enhance-manifest.json | Select-Object -First 25
+
       - name: Resolve enhancement version and tag
         id: version
         shell: pwsh
@@ -129,7 +140,28 @@ jobs:
           if ([long]$built.sourceArchive.size -ne [long]$pinned.sourceArchive.size) { $mismatches += 'size' }
           if ([int]$built.sourceArchive.fileCount -ne [int]$pinned.sourceArchive.fileCount) { $mismatches += 'fileCount' }
           if ([long]$built.sourceArchive.unpackedSize -ne [long]$pinned.sourceArchive.unpackedSize) { $mismatches += 'unpackedSize' }
-          if ($mismatches.Count -gt 0) { throw "Built enhancement pack does not match tools/enhance/rife-enhance-manifest.json ($($mismatches -join ', '))." }
+          if ($mismatches.Count -gt 0) {
+            Write-Output "::error::Built enhancement pack does not match tools/enhance/rife-enhance-manifest.json ($($mismatches -join ', '))."
+            $pinnedByPath = @{}
+            foreach ($file in @($pinned.files)) { $pinnedByPath[[string]$file.path] = $file }
+            $builtByPath = @{}
+            foreach ($file in @($built.files)) { $builtByPath[[string]$file.path] = $file }
+            $paths = @($pinnedByPath.Keys + $builtByPath.Keys) | Sort-Object -Unique
+            $diffs = @()
+            foreach ($path in $paths) {
+              $pinnedFile = $pinnedByPath[$path]
+              $builtFile = $builtByPath[$path]
+              if ($null -eq $pinnedFile) { $diffs += "only-in-built: $path"; continue }
+              if ($null -eq $builtFile) { $diffs += "missing-in-built: $path"; continue }
+              if ([long]$pinnedFile.size -ne [long]$builtFile.size -or [string]$pinnedFile.sha256 -ne [string]$builtFile.sha256) {
+                $diffs += "diff: $path pinnedSize=$($pinnedFile.size) builtSize=$($builtFile.size) pinnedSha=$([string]$pinnedFile.sha256) builtSha=$([string]$builtFile.sha256)"
+              }
+            }
+            Write-Output "core.autocrlf=$($(git config --get core.autocrlf)) core.eol=$($(git config --get core.eol))"
+            git ls-files --eol -- licenses tools/Prepare-RifeEnhanceStage.ps1 tools/New-RifeEnhancePack.ps1 tools/enhance/rife-enhance-manifest.json | Select-Object -First 25
+            $diffs | Select-Object -First 200 | ForEach-Object { Write-Output "::error::file-diff $_" }
+            throw "Built enhancement pack does not match tools/enhance/rife-enhance-manifest.json; see per-file diffs above."
+          }
           $asset = Join-Path $outputDirectory "rife-$version.7z"
           if (-not (Test-Path $asset)) { throw "Enhancement asset was not produced: $asset" }
           $sha = (Get-FileHash $asset -Algorithm SHA256).Hash.ToLowerInvariant()
