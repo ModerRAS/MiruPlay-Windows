@@ -52,7 +52,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          New-Item -ItemType Directory -Force -Path artifacts/upstreams | Out-Null
+          $workspace = $env:GITHUB_WORKSPACE
+          $upstreams = Join-Path $workspace 'artifacts/upstreams'
+          New-Item -ItemType Directory -Force -Path $upstreams | Out-Null
           $inputs = @(
             @{ Name = 'vs-portable.7z'; Sha256 = 'e3e6b432cba9f1a8f69a9d00c8d3ed8b29bec615bfd04a9409b1393adb2bc9cd';
                Url = 'https://github.com/hooke007/dotfiles/releases/download/mpv_addones/py.3_14_3%2Bvs.R73-portable.7z' },
@@ -62,7 +64,7 @@ jobs:
                Url = 'https://www.7-zip.org/a/7z2501-extra.7z' }
           )
           foreach ($input in $inputs) {
-            $target = Join-Path artifacts/upstreams $input.Name
+            $target = Join-Path $upstreams $input.Name
             Write-Output "Downloading $($input.Url)"
             Invoke-WebRequest -Uri $input.Url -OutFile $target -UseBasicParsing -TimeoutSec 600
             $actual = (Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -91,30 +93,49 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          ./tools/Prepare-RifeEnhanceStage.ps1 -VapourSynthArchive artifacts/upstreams/vs-portable.7z -RifeArchive artifacts/upstreams/rife-models.7z -SevenZipPath '${{ steps.sevenzip.outputs.sevenZip }}' -Destination artifacts/enhance-stage
+          $workspace = $env:GITHUB_WORKSPACE
+          ./tools/Prepare-RifeEnhanceStage.ps1 `
+            -VapourSynthArchive (Join-Path $workspace 'artifacts/upstreams/vs-portable.7z') `
+            -RifeArchive (Join-Path $workspace 'artifacts/upstreams/rife-models.7z') `
+            -SevenZipPath '${{ steps.sevenzip.outputs.sevenZip }}' `
+            -Destination (Join-Path $workspace 'artifacts/enhance-stage')
 
       - name: Build deterministic 7z and verify pinned manifest
         id: pack
-        shell: pwsh
+        # Windows PowerShell 5.1 is pinned here on purpose: Sort-Object uses NLS collation in
+        # 5.1 (matching the checked-in digest), while PowerShell 7 uses ICU and orders the
+        # archive entries differently. The build script is otherwise path-normalized and the
+        # aggregate manifest uses a fixed serializer, so 5.1 on windows-latest reproduces the
+        # pinned 7z byte-for-byte.
+        shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
           $version = '${{ steps.version.outputs.version }}'
-          New-Item -ItemType Directory -Force -Path artifacts/enhance-pack | Out-Null
-          ./tools/New-RifeEnhancePack.ps1 -StagedRoot artifacts/enhance-stage -Version $version -OutputDirectory artifacts/enhance-pack -ManifestPath artifacts/enhance-pack/manifest.json -SevenZipPath '${{ steps.sevenzip.outputs.sevenZip }}'
-          $pinned = Get-Content tools/enhance/rife-enhance-manifest.json -Raw | ConvertFrom-Json
-          $built = Get-Content artifacts/enhance-pack/manifest.json -Raw | ConvertFrom-Json
+          $workspace = $env:GITHUB_WORKSPACE
+          $stage = Join-Path $workspace 'artifacts/enhance-stage'
+          $outputDirectory = Join-Path $workspace 'artifacts/enhance-pack'
+          $builtManifest = Join-Path $outputDirectory 'manifest.json'
+          New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
+          ./tools/New-RifeEnhancePack.ps1 `
+            -StagedRoot $stage `
+            -Version $version `
+            -OutputDirectory $outputDirectory `
+            -ManifestPath $builtManifest `
+            -SevenZipPath '${{ steps.sevenzip.outputs.sevenZip }}'
+          $pinned = Get-Content (Join-Path $workspace 'tools/enhance/rife-enhance-manifest.json') -Raw | ConvertFrom-Json
+          $built = Get-Content $builtManifest -Raw | ConvertFrom-Json
           $mismatches = @()
           if ([string]$built.sourceArchive.sha256 -ne [string]$pinned.sourceArchive.sha256) { $mismatches += 'sha256' }
           if ([long]$built.sourceArchive.size -ne [long]$pinned.sourceArchive.size) { $mismatches += 'size' }
           if ([int]$built.sourceArchive.fileCount -ne [int]$pinned.sourceArchive.fileCount) { $mismatches += 'fileCount' }
           if ([long]$built.sourceArchive.unpackedSize -ne [long]$pinned.sourceArchive.unpackedSize) { $mismatches += 'unpackedSize' }
           if ($mismatches.Count -gt 0) { throw "Built enhancement pack does not match tools/enhance/rife-enhance-manifest.json ($($mismatches -join ', '))." }
-          $asset = Join-Path artifacts/enhance-pack "rife-$version.7z"
+          $asset = Join-Path $outputDirectory "rife-$version.7z"
           if (-not (Test-Path $asset)) { throw "Enhancement asset was not produced: $asset" }
           $sha = (Get-FileHash $asset -Algorithm SHA256).Hash.ToLowerInvariant()
-          "asset=$asset" >> $env:GITHUB_OUTPUT
-          "sha256=$sha" >> $env:GITHUB_OUTPUT
-          "size=$((Get-Item $asset).Length)" >> $env:GITHUB_OUTPUT
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "asset=$asset" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "sha256=$sha" -Encoding utf8
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "size=$((Get-Item $asset).Length)" -Encoding utf8
           Write-Output "Built enhancement asset: $asset ($sha)"
 
       - name: Publish GitHub Release asset

@@ -10,6 +10,38 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+function Resolve-AbsolutePath {
+    param([string]$Path, [string]$BasePath)
+    if ([System.IO.Path]::IsPathRooted($Path)) { return [System.IO.Path]::GetFullPath($Path) }
+    return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Path))
+}
+$basePath = (Get-Location).Path
+function ConvertTo-JsonLiteral([string]$Value) {
+    return $Value.Replace('\', '\\').Replace('"', '\"')
+}
+
+# Fixed serializer for the aggregate manifest embedded in the archive. Windows PowerShell 5.1
+# and PowerShell 7 format ConvertTo-Json differently, which would make the 7z digest depend on
+# the shell version; this reproduces the pinned 5.1 layout byte-for-byte on both.
+function ConvertTo-AggregateJson([string]$Version, $Files) {
+    $sb = [System.Text.StringBuilder]::new()
+    [void]$sb.Append("{`r`n")
+    [void]$sb.Append('    "version":  "').Append((ConvertTo-JsonLiteral $Version)).Append('",').Append("`r`n")
+    [void]$sb.Append('    "files":  [').Append("`r`n")
+    $first = $true
+    foreach ($file in $Files) {
+        if (-not $first) { [void]$sb.Append(',').Append("`r`n") }
+        $first = $false
+        [void]$sb.Append('                  {').Append("`r`n")
+        [void]$sb.Append('                      "path":  "').Append((ConvertTo-JsonLiteral ([string]$file.path))).Append('",').Append("`r`n")
+        [void]$sb.Append('                      "sha256":  "').Append((ConvertTo-JsonLiteral ([string]$file.sha256))).Append('"').Append("`r`n")
+        [void]$sb.Append('                  }')
+    }
+    if (-not $first) { [void]$sb.Append("`r`n") }
+    [void]$sb.Append('              ]').Append("`r`n").Append('}')
+    return $sb.ToString()
+}
+
 $repo = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) { [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')) } else { [System.IO.Path]::GetFullPath($RepositoryRoot) }
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) { $OutputDirectory = Join-Path $repo 'artifacts\enhance' }
 if ([string]::IsNullOrWhiteSpace($ManifestPath)) { $ManifestPath = Join-Path $repo 'tools\enhance\rife-enhance-manifest.json' }
@@ -20,10 +52,15 @@ if ([string]::IsNullOrWhiteSpace($SevenZipPath)) {
     $candidate = @('7za', '7z') | ForEach-Object { Get-Command $_ -ErrorAction SilentlyContinue } | Select-Object -First 1
     if ($candidate) { $SevenZipPath = $candidate.Source }
 }
-if ([string]::IsNullOrWhiteSpace($SevenZipPath) -or -not (Test-Path -LiteralPath $SevenZipPath)) {
+if (-not [string]::IsNullOrWhiteSpace($RepositoryRoot)) { $repo = Resolve-AbsolutePath $RepositoryRoot $basePath }
+$OutputDirectory = Resolve-AbsolutePath $OutputDirectory $basePath
+$ManifestPath = Resolve-AbsolutePath $ManifestPath $basePath
+$SevenZipPath = Resolve-AbsolutePath $SevenZipPath $basePath
+$stage = Resolve-AbsolutePath $StagedRoot $basePath
+
+if (-not (Test-Path -LiteralPath $SevenZipPath)) {
     throw '7-Zip (7za.exe/7z.exe) is required to build the enhancement pack; pass -SevenZipPath.'
 }
-$stage = [System.IO.Path]::GetFullPath($StagedRoot)
 foreach ($required in @(
     'VSScript.dll',
     'VSPipe.exe',
@@ -43,7 +80,7 @@ $fileEntries = @(Get-ChildItem -LiteralPath $stage -Recurse -File |
             sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             size = $_.Length
         }
-    } | Sort-Object { $_.path })
+    } | Sort-Object -Property { $_.path } -Culture 'zh-CN')
 $unpacked = [long]0
 foreach ($entry in $fileEntries) { $unpacked += [long]$entry.size }
 
@@ -53,7 +90,7 @@ $aggregate = [ordered]@{
 }
 [IO.File]::WriteAllText(
     (Join-Path $stage 'manifest.json'),
-    ($aggregate | ConvertTo-Json -Depth 6),
+    (ConvertTo-AggregateJson -Version $Version -Files $fileEntries),
     [Text.UTF8Encoding]::new($false))
 
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
@@ -64,7 +101,7 @@ Remove-Item -LiteralPath $archivePath -Force -ErrorAction SilentlyContinue
 $listPath = Join-Path $OutputDirectory "rife-$Version.files.txt"
 $sorted = @(Get-ChildItem -LiteralPath $stage -Recurse -File |
     ForEach-Object { $_.FullName.Substring($stage.Length + 1).Replace('\', '/') } |
-    Sort-Object)
+    Sort-Object -Culture 'zh-CN')
 [IO.File]::WriteAllLines($listPath, $sorted, [Text.UTF8Encoding]::new($false))
 Push-Location $stage
 try {

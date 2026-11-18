@@ -8,13 +8,24 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+function Resolve-AbsolutePath {
+    param([string]$Path, [string]$BasePath)
+    if ([System.IO.Path]::IsPathRooted($Path)) { return [System.IO.Path]::GetFullPath($Path) }
+    return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Path))
+}
+$basePath = (Get-Location).Path
 $repo = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) { [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')) } else { [System.IO.Path]::GetFullPath($RepositoryRoot) }
 if ([string]::IsNullOrWhiteSpace($Destination)) { $Destination = Join-Path $repo 'artifacts\enhance-stage' }
+$SevenZipPath = Resolve-AbsolutePath $SevenZipPath $basePath
+$VapourSynthArchive = Resolve-AbsolutePath $VapourSynthArchive $basePath
+$RifeArchive = Resolve-AbsolutePath $RifeArchive $basePath
+$Destination = Resolve-AbsolutePath $Destination $basePath
+if (-not [string]::IsNullOrWhiteSpace($RepositoryRoot)) { $repo = Resolve-AbsolutePath $RepositoryRoot $basePath }
 if (-not (Test-Path -LiteralPath $SevenZipPath)) { throw "7-Zip was not found: $SevenZipPath" }
 if (-not (Test-Path -LiteralPath $VapourSynthArchive)) { throw "VapourSynth archive not found: $VapourSynthArchive" }
 if (-not (Test-Path -LiteralPath $RifeArchive)) { throw "RIFE archive not found: $RifeArchive" }
 
-$destination = [System.IO.Path]::GetFullPath($Destination)
+$destination = $Destination
 Remove-Item $destination -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $destination | Out-Null
 $stageParent = Split-Path -Parent $destination
