@@ -67,6 +67,15 @@ jobs:
       - name: Install Inno Setup
         shell: powershell
         run: choco install innosetup --no-progress -y
+      - name: Download RIFE enhancement pack
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if (-not (Get-Command 7z.exe -ErrorAction SilentlyContinue)) {
+            throw '7-Zip is required to extract the RIFE enhancement pack on this runner.'
+          }
+          .\tools\Fetch-ReleaseEnhancement.ps1
       - name: Build release artifacts
         id: package
         shell: powershell
@@ -97,12 +106,8 @@ jobs:
             }
             $parameters.Edition = 'lite'
             .\tools\Publish-Release.ps1 @parameters
-            if (Test-Path .\runtime\enhance\manifest.json) {
-              $parameters.Edition = 'full'
-              .\tools\Publish-Release.ps1 @parameters
-            } else {
-              Write-Warning 'Full edition skipped: runtime/enhance/manifest.json is absent (enhancement pack not delivered yet).'
-            }
+            $parameters.Edition = 'full'
+            .\tools\Publish-Release.ps1 @parameters
           } finally {
             Remove-Item $certificatePath -Force -ErrorAction SilentlyContinue
           }
@@ -111,7 +116,6 @@ jobs:
         shell: powershell
         run: .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release -Edition lite
       - name: Validate portable and installer artifacts (full)
-        if: ${{ hashFiles('runtime/enhance/manifest.json') != '' }}
         shell: powershell
         run: .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release -Edition full
       - uses: actions/upload-artifact@v4
