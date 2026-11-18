@@ -12,7 +12,8 @@ param(
     [string]$TimestampUrl = 'http://timestamp.digicert.com',
     [switch]$SkipInstaller,
     [switch]$SkipLibMpvDownload,
-    [switch]$SkipSdl3Download
+    [switch]$SkipSdl3Download,
+    [switch]$SkipAnime4KDownload
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,6 +27,19 @@ $libMpvDirectory = Join-Path $root 'runtime\libmpv'
 $libMpvPath = Join-Path $libMpvDirectory 'libmpv-2.dll'
 $sdl3Directory = Join-Path $root 'runtime\sdl3'
 $sdl3Path = Join-Path $sdl3Directory 'SDL3.dll'
+$anime4kDirectory = Join-Path $root 'runtime\shaders\anime4k'
+$anime4kArchiveHash = '139cd282086457c5adc79caf7b75b8b825091d71c9b54958c18745fea62d7ed7'
+$anime4kFiles = @(
+    'Anime4K_Clamp_Highlights.glsl',
+    'Anime4K_Restore_CNN_M.glsl',
+    'Anime4K_Restore_CNN_S.glsl',
+    'Anime4K_Restore_CNN_Soft_M.glsl',
+    'Anime4K_Upscale_CNN_x2_M.glsl',
+    'Anime4K_Upscale_CNN_x2_S.glsl',
+    'Anime4K_Upscale_Denoise_CNN_x2_M.glsl',
+    'Anime4K_AutoDownscalePre_x2.glsl',
+    'Anime4K_AutoDownscalePre_x4.glsl'
+)
 $project = Join-Path $root 'src\MiruPlay.Windows\MiruPlay.Windows.csproj'
 $installerScript = Join-Path $root 'installer\MiruPlay.iss'
 
@@ -159,6 +173,17 @@ if ($actualSdl3Hash -ne $expectedSdl3Hash) {
     throw "SDL3 runtime digest mismatch: $actualSdl3Hash"
 }
 
+$missingAnime4K = @($anime4kFiles | Where-Object { -not (Test-Path (Join-Path $anime4kDirectory $_)) })
+if ($missingAnime4K.Count -gt 0) {
+    if ($SkipAnime4KDownload) { throw "Anime4K shader assets are missing: $($missingAnime4K -join ', ')" }
+    Invoke-Checked { & (Join-Path $PSScriptRoot 'Get-Anime4KShaders.ps1') -Destination $anime4kDirectory } 'Anime4K shader download failed'
+}
+foreach ($file in $anime4kFiles) {
+    if (-not (Test-Path (Join-Path $anime4kDirectory $file))) {
+        throw "Anime4K shader is missing after download: $file"
+    }
+}
+
 Remove-Item $publishDirectory, $symbolsDirectory, $releaseDirectory -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $publishDirectory, $symbolsDirectory, $releaseDirectory | Out-Null
 
@@ -173,6 +198,18 @@ if (-not (Test-Path $publishedSdl3Path)) {
 $publishedSdl3Hash = (Get-FileHash -Algorithm SHA256 $publishedSdl3Path).Hash.ToLowerInvariant()
 if ($publishedSdl3Hash -ne $actualSdl3Hash) {
     throw "Published SDL3 runtime digest mismatch: $publishedSdl3Hash"
+}
+
+foreach ($file in $anime4kFiles) {
+    $publishedShaderPath = Join-Path $publishDirectory "runtime\shaders\anime4k\$file"
+    if (-not (Test-Path $publishedShaderPath)) {
+        throw "Anime4K shader was not copied into the publish output: $file"
+    }
+    $sourceHash = (Get-FileHash (Join-Path $anime4kDirectory $file) -Algorithm SHA256).Hash.ToLowerInvariant()
+    $publishedShaderHash = (Get-FileHash $publishedShaderPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($publishedShaderHash -ne $sourceHash) {
+        throw "Published Anime4K shader digest mismatch: $publishedShaderHash"
+    }
 }
 
 foreach ($file in @('LICENSE', 'README.md', 'THIRD-PARTY-NOTICES.md')) {
@@ -232,6 +269,20 @@ $manifest = [ordered]@{
         library = 'runtime/sdl3/SDL3.dll'
         librarySha256 = $actualSdl3Hash
         distribution = 'libsdl-org/SDL'
+    }
+    shaders = [ordered]@{
+        anime4k = [ordered]@{
+            version = '4.0.1'
+            asset = 'Anime4K_v4.0.zip'
+            archiveSha256 = $anime4kArchiveHash
+            directory = 'runtime/shaders/anime4k'
+            files = @($anime4kFiles | ForEach-Object {
+                [ordered]@{
+                    name = $_
+                    sha256 = (Get-FileHash (Join-Path $anime4kDirectory $_) -Algorithm SHA256).Hash.ToLowerInvariant()
+                }
+            })
+        }
     }
 }
 $manifestPath = Join-Path $releaseDirectory 'release-manifest.json'

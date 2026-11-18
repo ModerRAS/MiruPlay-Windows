@@ -39,7 +39,8 @@ public sealed record MpvWindowsVideoOptions(
     MpvToneMappingCurve ToneMappingCurve = MpvToneMappingCurve.Mobius,
     int TargetSdrNits = 100,
     int TargetHdrPeakNits = 1_000,
-    bool ComputeHdrPeak = true)
+    bool ComputeHdrPeak = true,
+    MpvQualityEnhancementOptions? Quality = null)
 {
     public int SafeTargetSdrNits => Math.Clamp(TargetSdrNits, 80, 240);
     public int SafeTargetHdrPeakNits => Math.Clamp(TargetHdrPeakNits, 203, 10_000);
@@ -218,10 +219,17 @@ public sealed record MpvPlaybackLaunchResult(
 
 public static class MpvWindowsVideoOptionMapper
 {
-    public static MpvWindowsVideoOptions FromSettings(AppSettings settings)
+    public static MpvWindowsVideoOptions FromSettings(AppSettings settings, string? shaderDirectory = null)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        return new MpvWindowsVideoOptions(MpvPlaybackModeSettings.ToDisplayPipeline(settings.HdrMode));
+        var quality = new MpvQualityEnhancementOptions(
+            MpvQualityPresetSettings.ParseUpscale(settings.MpvUpscalePreset),
+            MpvQualityPresetSettings.ParseAnime4K(settings.MpvAnime4KPreset),
+            MpvFrameInterpolationModes.Parse(settings.FrameInterpolationMode),
+            shaderDirectory ?? MpvQualityEnhancementPaths.ResolveShaderDirectory());
+        return new MpvWindowsVideoOptions(
+            MpvPlaybackModeSettings.ToDisplayPipeline(settings.HdrMode),
+            Quality: quality);
     }
 
     public static IReadOnlyList<string> BuildArguments(MpvWindowsVideoOptions? options)
@@ -259,6 +267,7 @@ public static class MpvWindowsVideoOptionMapper
                 break;
         }
 
+        arguments.AddRange(MpvQualityEnhancementPlanner.BuildInitialArguments(options.Quality));
         return arguments;
     }
 

@@ -1290,7 +1290,8 @@ public partial class MainWindow : Window, IAsyncDisposable
             CanPlayNext: _activePlaybackQueue?.CanPlayNext ?? false,
             NextEpisodeVersions: _settings.EpisodeVersionSelectionPolicy == "manual" && _activePlaybackQueue?.NextEntry is { Versions.Count: > 1 } entry
                 ? entry.Versions.Select(version => new PlaybackVersionChoice(version.ApiId, version.VersionLabel)).ToArray()
-                : []);
+                : [],
+            Quality: session.QualityEnhancement);
     }
 
     private async Task<bool> PlayQueueNextAsync(bool allowManualPrompt)
@@ -2624,6 +2625,42 @@ public partial class MainWindow : Window, IAsyncDisposable
         AudioPassthroughDeviceBox.SelectedItem = items.FirstOrDefault(item => Equals(item.Tag, current)) ?? items[0];
     }
 
+    private void QualityUpscale_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || QualityUpscaleBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { MpvUpscalePreset = AppSettingsStore.NormalizeMpvUpscalePreset(value) };
+        _settingsStore.Save(_settings);
+        StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+    }
+
+    private void QualityAnime4K_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || QualityAnime4KBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { MpvAnime4KPreset = AppSettingsStore.NormalizeMpvAnime4KPreset(value) };
+        _settingsStore.Save(_settings);
+        UpdateQualityShaderHint();
+        StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+    }
+
+    private void QualityInterpolation_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || QualityInterpolationBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        _settings = _settings with { FrameInterpolationMode = AppSettingsStore.NormalizeFrameInterpolationMode(value) };
+        _settingsStore.Save(_settings);
+        StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+    }
+
+    /// <summary>Warn on the settings page when the user selected Anime4K but this
+    /// package does not contain the shader files (e.g. a broken/partial build).</summary>
+    private void UpdateQualityShaderHint()
+    {
+        var requested = AppSettingsStore.NormalizeMpvAnime4KPreset(_settings.MpvAnime4KPreset) !=
+            MpvQualityPresetSettings.Anime4KOff;
+        var available = MpvAnime4KShaderCatalog.IsAvailable(MpvQualityEnhancementPaths.ResolveShaderDirectory());
+        QualityShaderHintText.Text = AppStrings.Get("quality.reason.assetsMissing");
+        QualityShaderHintText.Visibility = requested && !available ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void UpdatePlaybackCapabilityText()
     {
         var capabilities = _playbackCapabilities;
@@ -2737,6 +2774,19 @@ public partial class MainWindow : Window, IAsyncDisposable
             PassthroughCodecDtsHd.IsChecked = passthroughCodecs.Contains("dts-hd");
             PopulateAudioDeviceOptions();
             UpdatePassthroughUiState();
+            QualityUpscaleBox.SelectedItem = QualityUpscaleBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeMpvUpscalePreset(_settings.MpvUpscalePreset)))
+                ?? QualityUpscaleBox.Items[0];
+            QualityAnime4KBox.SelectedItem = QualityAnime4KBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeMpvAnime4KPreset(_settings.MpvAnime4KPreset)))
+                ?? QualityAnime4KBox.Items[0];
+            QualityInterpolationBox.SelectedItem = QualityInterpolationBox.Items
+                .OfType<ComboBoxItem>()
+                .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeFrameInterpolationMode(_settings.FrameInterpolationMode)))
+                ?? QualityInterpolationBox.Items[0];
+            UpdateQualityShaderHint();
             UpdatePlaybackCapabilityText();
         }
         finally

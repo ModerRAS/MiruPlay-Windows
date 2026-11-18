@@ -124,6 +124,156 @@ public sealed class LibMpvPlaybackSessionTests : IDisposable
     }
 
     [Fact]
+    public async Task SdrPlaybackAppliesAnime4KShaderListAfterFileLoaded()
+    {
+        var client = new FakeLibMpvClient();
+        client.Properties["video-params/gamma"] = "bt.1886";
+        client.Properties["video-params/primaries"] = "bt.709";
+        client.Properties["video-params/w"] = "1920";
+        client.Properties["video-params/h"] = "1080";
+        var mediaPath = Path.Combine(_directory, "quality-sdr.mkv");
+        File.WriteAllBytes(mediaPath, []);
+        var shaderDirectory = CreateShaderDirectory();
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(mediaPath),
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, "quality-sdr-state.db")),
+            headless: false,
+            windowHandle: new IntPtr(1234),
+            transportLease: null,
+            videoOptions: new MpvWindowsVideoOptions(Quality: new MpvQualityEnhancementOptions(
+                Anime4K: MpvAnime4KPreset.A,
+                ShaderDirectory: shaderDirectory)));
+
+        var shaderList = client.Properties["glsl-shaders"];
+        Assert.Contains("Anime4K_Clamp_Highlights.glsl", shaderList, StringComparison.Ordinal);
+        Assert.Contains("Anime4K_Upscale_CNN_x2_S.glsl", shaderList, StringComparison.Ordinal);
+        Assert.Equal(MpvQualityShaderStates.Applied, session.QualityEnhancement?.ShaderState);
+        Assert.Equal(6, session.QualityEnhancement?.AppliedShaderFiles.Count);
+        Assert.Contains(client.Options, option => option.Key == "gpu-shader-cache" && option.Value == "yes");
+    }
+
+    [Fact]
+    public async Task HdrPlaybackSkipsAnime4KAndReportsTheReason()
+    {
+        var client = new FakeLibMpvClient();
+        client.Properties["video-params/gamma"] = "pq";
+        client.Properties["video-params/primaries"] = "bt.2020";
+        client.Properties["video-params/w"] = "3840";
+        client.Properties["video-params/h"] = "2160";
+        client.Properties["video-params/sig-peak"] = "4";
+        var mediaPath = Path.Combine(_directory, "quality-hdr.mkv");
+        File.WriteAllBytes(mediaPath, []);
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(mediaPath),
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, "quality-hdr-state.db")),
+            headless: false,
+            windowHandle: new IntPtr(1234),
+            transportLease: null,
+            videoOptions: new MpvWindowsVideoOptions(Quality: new MpvQualityEnhancementOptions(
+                Anime4K: MpvAnime4KPreset.A,
+                ShaderDirectory: CreateShaderDirectory())));
+
+        Assert.False(client.Properties.ContainsKey("glsl-shaders"));
+        Assert.Equal(MpvQualityShaderStates.SkippedHdr, session.QualityEnhancement?.ShaderState);
+        Assert.Equal(MpvQualityDegradedReasons.HdrContent, session.QualityEnhancement?.DegradedReasonKey);
+    }
+
+    [Fact]
+    public async Task MissingShaderAssetsSkipAnime4KWithoutFailingPlayback()
+    {
+        var client = new FakeLibMpvClient();
+        client.Properties["video-params/gamma"] = "bt.1886";
+        client.Properties["video-params/w"] = "1920";
+        client.Properties["video-params/h"] = "1080";
+        var mediaPath = Path.Combine(_directory, "quality-missing.mkv");
+        File.WriteAllBytes(mediaPath, []);
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(mediaPath),
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, "quality-missing-state.db")),
+            headless: false,
+            windowHandle: new IntPtr(1234),
+            transportLease: null,
+            videoOptions: new MpvWindowsVideoOptions(Quality: new MpvQualityEnhancementOptions(
+                Anime4K: MpvAnime4KPreset.A,
+                ShaderDirectory: Path.Combine(_directory, "missing-shaders"))));
+
+        Assert.False(client.Properties.ContainsKey("glsl-shaders"));
+        Assert.Equal(MpvQualityShaderStates.SkippedAssets, session.QualityEnhancement?.ShaderState);
+        Assert.Equal(MpvQualityDegradedReasons.AssetsMissing, session.QualityEnhancement?.DegradedReasonKey);
+        Assert.NotNull(client.Commands.FirstOrDefault(command => command.SequenceEqual(["loadfile", mediaPath, "replace"])));
+    }
+
+    [Fact]
+    public async Task InterpolationAndUpscalePresetsUseStableNativeOptions()
+    {
+        var client = new FakeLibMpvClient();
+        var mediaPath = Path.Combine(_directory, "quality-options.mkv");
+        File.WriteAllBytes(mediaPath, []);
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(mediaPath),
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, "quality-options-state.db")),
+            headless: false,
+            windowHandle: new IntPtr(1234),
+            transportLease: null,
+            videoOptions: new MpvWindowsVideoOptions(Quality: new MpvQualityEnhancementOptions(
+                MpvUpscaleQualityPreset.Medium,
+                Interpolation: MpvFrameInterpolationMode.MpvBuiltIn)));
+
+        Assert.Equal("lanczos", client.Options["scale"]);
+        Assert.Equal("spline36", client.Options["cscale"]);
+        Assert.Equal("mitchell", client.Options["dscale"]);
+        Assert.Equal("yes", client.Options["interpolation"]);
+        Assert.Equal("display-resample", client.Options["video-sync"]);
+        Assert.Equal("oversample", client.Options["tscale"]);
+        Assert.Equal("8", client.Options["hwdec-extra-frames"]);
+        Assert.False(client.Properties.ContainsKey("glsl-shaders"));
+    }
+
+    [Fact]
+    public async Task QualityOptionsOffKeepLegacyNativeOptions()
+    {
+        var client = new FakeLibMpvClient();
+        var mediaPath = Path.Combine(_directory, "quality-off.mkv");
+        File.WriteAllBytes(mediaPath, []);
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(mediaPath),
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, "quality-off-state.db")),
+            headless: false,
+            windowHandle: new IntPtr(1234),
+            transportLease: null,
+            videoOptions: new MpvWindowsVideoOptions(Quality: new MpvQualityEnhancementOptions()));
+
+        Assert.False(client.Options.ContainsKey("scale"));
+        Assert.False(client.Options.ContainsKey("interpolation"));
+        Assert.False(client.Options.ContainsKey("gpu-shader-cache"));
+        Assert.Null(session.QualityEnhancement);
+    }
+
+    private string CreateShaderDirectory()
+    {
+        var directory = Path.Combine(_directory, "shaders-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        foreach (var file in MpvAnime4KShaderCatalog.RequiredFiles)
+            File.WriteAllText(Path.Combine(directory, file), "// test shader");
+        return directory;
+    }
+
+    [Fact]
     public async Task ErrorEndFileDoesNotCompletePlaybackAndExposesTheNativeFailure()
     {
         var client = new FakeLibMpvClient(

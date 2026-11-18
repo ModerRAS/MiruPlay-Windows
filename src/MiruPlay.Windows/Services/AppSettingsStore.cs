@@ -47,7 +47,10 @@ public sealed record AppSettings(
     string HdrMode = "auto",
     string AudioPassthroughMode = "off",
     string AudioPassthroughCodecs = "truehd,eac3,ac3,dts,dts-hd",
-    string AudioPassthroughDevice = "auto");
+    string AudioPassthroughDevice = "auto",
+    string MpvUpscalePreset = "off",
+    string MpvAnime4KPreset = "off",
+    string FrameInterpolationMode = "off");
 
 public sealed class AppSettingsStore
 {
@@ -153,6 +156,17 @@ public sealed class AppSettingsStore
             var normalizedPassthroughMode = NormalizeAudioPassthroughMode(settings.AudioPassthroughMode);
             var normalizedPassthroughCodecs = NormalizeAudioPassthroughCodecs(settings.AudioPassthroughCodecs);
             var normalizedPassthroughDevice = NormalizeAudioPassthroughDevice(settings.AudioPassthroughDevice);
+            var normalizedUpscalePreset = NormalizeMpvUpscalePreset(settings.MpvUpscalePreset);
+            var normalizedAnime4KPreset = NormalizeMpvAnime4KPreset(settings.MpvAnime4KPreset);
+            // Before the interpolation mode became extensible it was stored as a bool.
+            // Migrate a legacy true value to the built-in mpv mode once.
+            var legacyInterpolationEnabled =
+                json.Contains("\"MpvInterpolationEnabled\":true", StringComparison.Ordinal) ||
+                json.Contains("\"MpvInterpolationEnabled\": true", StringComparison.Ordinal);
+            var normalizedFrameInterpolation = legacyInterpolationEnabled &&
+                string.Equals(settings.FrameInterpolationMode, MpvFrameInterpolationModes.Off, StringComparison.Ordinal)
+                    ? MpvFrameInterpolationModes.MpvBuiltIn
+                    : NormalizeFrameInterpolationMode(settings.FrameInterpolationMode);
             if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate ||
                 settings.AppLanguage != normalizedLanguage ||
                 settings.TvRemotePreset != normalizedTvPreset ||
@@ -165,7 +179,10 @@ public sealed class AppSettingsStore
                 settings.HdrMode != normalizedHdrMode ||
                 settings.AudioPassthroughMode != normalizedPassthroughMode ||
                 settings.AudioPassthroughCodecs != normalizedPassthroughCodecs ||
-                settings.AudioPassthroughDevice != normalizedPassthroughDevice)
+                settings.AudioPassthroughDevice != normalizedPassthroughDevice ||
+                settings.MpvUpscalePreset != normalizedUpscalePreset ||
+                settings.MpvAnime4KPreset != normalizedAnime4KPreset ||
+                settings.FrameInterpolationMode != normalizedFrameInterpolation)
             {
                 settings = settings with
                 {
@@ -183,6 +200,9 @@ public sealed class AppSettingsStore
                     AudioPassthroughMode = normalizedPassthroughMode,
                     AudioPassthroughCodecs = normalizedPassthroughCodecs,
                     AudioPassthroughDevice = normalizedPassthroughDevice,
+                    MpvUpscalePreset = normalizedUpscalePreset,
+                    MpvAnime4KPreset = normalizedAnime4KPreset,
+                    FrameInterpolationMode = normalizedFrameInterpolation,
                 };
                 needsCleanup = true;
             }
@@ -229,6 +249,15 @@ public sealed class AppSettingsStore
 
     public static string NormalizeAudioPassthroughDevice(string? value) =>
         MpvAudioPassthroughOptionMapper.NormalizeDevice(value);
+
+    public static string NormalizeMpvUpscalePreset(string? value) =>
+        MpvQualityPresetSettings.NormalizeUpscale(value);
+
+    public static string NormalizeMpvAnime4KPreset(string? value) =>
+        MpvQualityPresetSettings.NormalizeAnime4K(value);
+
+    public static string NormalizeFrameInterpolationMode(string? value) =>
+        MpvFrameInterpolationModes.Normalize(value);
 
     public void Save(AppSettings settings)
     {

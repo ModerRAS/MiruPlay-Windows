@@ -37,6 +37,13 @@
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup Condition="Exists('..\..\runtime\shaders\anime4k\Anime4K_Clamp_Highlights.glsl')">
+    <Content Include="..\..\runtime\shaders\anime4k\**\*.glsl"
+             Link="runtime\shaders\anime4k\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Google.Protobuf" Version="3.35.1" />

@@ -32,6 +32,22 @@ MiruPlay loads SDL3 dynamically for the optional TV-mode gamepad backend
 (DualSense/DualShock/Switch Pro/8BitDo and Xbox controllers). When the DLL is
 absent, MiruPlay falls back to the Windows XInput backend.
 
+## Anime4K (optional video shaders)
+
+- Project: Anime4K
+- Upstream: https://github.com/bloc97/Anime4K
+- Release: v4.0.1, asset `Anime4K_v4.0.zip`
+- Archive SHA-256: `139cd282086457c5adc79caf7b75b8b825091d71c9b54958c18745fea62d7ed7`
+- Packaged files: nine shader files under `runtime/shaders/anime4k/` (see
+  `runtime/shaders/README.md`; each file is verified by SHA-256 in
+  `tools/Get-Anime4KShaders.ps1`)
+- License: MIT (see `licenses/Anime4K-MIT.txt`)
+
+MiruPlay loads these GLSL shaders through libmpv's `--glsl-shaders` user-shader
+support when the user enables an Anime4K preset. The presets are optional and are
+skipped for HDR content; when the packaged shader files are missing playback falls
+back to the built-in scaler.
+
 ## .NET and NuGet components
 
 The self-contained package includes the Microsoft .NET runtime and the dependencies declared in `src/MiruPlay.Windows/MiruPlay.Windows.csproj`, including ASP.NET Core, Microsoft.Data.Sqlite, SQLitePCLRaw, Google.Protobuf, and gRPC for .NET.
