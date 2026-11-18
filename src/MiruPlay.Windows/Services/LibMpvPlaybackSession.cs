@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Security;
 using MiruPlay.Windows.Models;
 
 namespace MiruPlay.Windows.Services;
@@ -45,6 +46,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         "interpolation",
         "video-sync",
         "tscale",
+        "vf",
+        "avsync",
     ];
     private readonly ILibMpvClient _client;
     private readonly LibraryEpisode _episode;
@@ -79,6 +82,12 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     private MpvDisplayPipeline _qualityDisplayPipeline;
     private MpvQualityEnhancementStatus? _qualityStatus;
     private int _qualityApplied;
+    private RifePlaybackRequest? _rifeRequest;
+    private string _rifeState = RifeEnhancementStates.NotRequested;
+    private string? _rifeReason;
+    private int _rifeDegradeRequested;
+    private int _rifeDropBaseline = -1;
+    private int _rifeDropTicks;
     private AudioDspFilterGraph? _appliedAudioDsp;
     private AudioDspChannelLayout? _appliedAudioDspChannelLayout;
     private Task? _monitorTask;
@@ -130,6 +139,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             session.Configure(settings, headless, windowHandle, videoOptions, startPositionMs, endPositionMs, forceStartPosition);
             client.RequestLogMessages("warn");
             EnsureNativeSuccess(client.Initialize(), AppStrings.Get("mpv.initFailed"));
+            session.TryApplyRife();
             EnsureNativeSuccess(client.Command(["loadfile", episode.MediaPath, "replace"]), AppStrings.Get("mpv.loadFailed"));
             await session.WaitForFileLoadedAsync().ConfigureAwait(false);
             session.LoadExternalSubtitles(episode.SubtitlePaths, settings.PreferredSubtitleLanguage);
@@ -528,6 +538,12 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
 
     private void CaptureNativeLog(LibMpvLogMessage message)
     {
+        if (_rifeRequest?.Plan is not null && Volatile.Read(ref _rifeDegradeRequested) == 0 &&
+            IsRifeInitFailure(message.Text))
+        {
+            DegradeRife(RifeEnhancementReasons.InitFailed, fallbackInterpolation: true);
+        }
+
         // User shaders are optional. If libmpv reports a shader compilation problem
         // after we applied the Anime4K chain, clear the shaders and degrade gracefully
         // instead of leaving the session in a half-applied state.
@@ -594,6 +610,18 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             foreach (var argument in MpvWindowsVideoOptionMapper.BuildArguments(videoOptions)) SetOptionArgument(argument);
             _qualityOptions = videoOptions?.Quality;
             _qualityDisplayPipeline = videoOptions?.DisplayPipeline ?? MpvDisplayPipeline.Auto;
+            _rifeRequest = videoOptions?.Rife;
+            if (_rifeRequest?.Plan is { } rifePlan)
+            {
+                try
+                {
+                    Environment.SetEnvironmentVariable("VSSCRIPT_PATH", rifePlan.VSScriptPath);
+                }
+                catch (Exception error) when (error is ArgumentException or SecurityException or InvalidOperationException)
+                {
+                    RecordQualityLog(2, $"Could not configure VSSCRIPT_PATH for the RIFE enhancement pack: {error.Message}");
+                }
+            }
             foreach (var argument in MpvQualityEnhancementPlanner.BuildInitialArguments(_qualityOptions))
                 TrySetOptionArgument(argument);
             ConfigureQualityShaderCache();
@@ -756,6 +784,132 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         }
     }
 
+    /// <summary>Adds the RIFE vapoursynth filter before loadfile so the first frame is
+    /// already interpolated. Skipped plans keep a status reason so the UI can explain the
+    /// degradation instead of silently pretending RIFE is running.</summary>
+    private void TryApplyRife()
+    {
+        var request = _rifeRequest;
+        if (request is null)
+        {
+            _rifeState = RifeEnhancementStates.NotRequested;
+            return;
+        }
+        var plan = request.Plan;
+        if (plan is null)
+        {
+            _rifeState = RifeEnhancementStates.Skipped;
+            _rifeReason = request.DegradedReasonKey ?? RifeEnhancementReasons.NotInstalled;
+            UpdateRifeQualityStatus();
+            return;
+        }
+        var argument = "@rife:" + RifePlaybackScriptBuilder.BuildFilterArgument(plan.ScriptPath);
+        var result = _client.Command(["vf", "add", argument]);
+        if (result < 0)
+        {
+            DegradeRife(RifeEnhancementReasons.InitFailed, fallbackInterpolation: true);
+            return;
+        }
+        _rifeState = RifeEnhancementStates.Applied;
+        _rifeReason = null;
+        _rifeDropBaseline = -1;
+        RecordQualityLog(
+            1,
+            $"RIFE frame interpolation enabled (model={plan.Model}, factor={plan.Factor}x, " +
+            $"processingHeight={plan.ProcessingHeight}, gpuThread={plan.GpuThread}).");
+        UpdateRifeQualityStatus();
+    }
+
+    private void DegradeRife(string reasonKey, bool fallbackInterpolation)
+    {
+        if (Interlocked.Exchange(ref _rifeDegradeRequested, 1) != 0) return;
+        _rifeState = RifeEnhancementStates.Failed;
+        _rifeReason = reasonKey;
+        try
+        {
+            _client.Command(["vf", "remove", "@rife"]);
+        }
+        catch (Exception error) when (error is ObjectDisposedException or InvalidOperationException)
+        {
+        }
+        if (fallbackInterpolation)
+        {
+            TrySetOptionalProperty("video-sync", "display-resample");
+            TrySetOptionalProperty("interpolation", "yes");
+            TrySetOptionalProperty("tscale", "oversample");
+        }
+        RecordQualityLog(2, $"RIFE frame interpolation disabled ({reasonKey}); falling back to standard mpv playback.");
+        UpdateRifeQualityStatus();
+    }
+
+    private void TrySetOptionalProperty(string name, string value)
+    {
+        try
+        {
+            _client.SetPropertyString(name, value);
+        }
+        catch (Exception error) when (error is ObjectDisposedException or InvalidOperationException)
+        {
+        }
+    }
+
+    private void UpdateRifeQualityStatus()
+    {
+        var options = _qualityOptions;
+        if (options is null) return;
+        var rifePlan = _rifeRequest?.Plan;
+        var current = Volatile.Read(ref _qualityStatus);
+        if (current is not null)
+        {
+            Volatile.Write(ref _qualityStatus, current with
+            {
+                RifeState = _rifeState,
+                RifeDegradedReasonKey = _rifeReason,
+                RifeFactor = rifePlan?.Factor,
+                RifeProcessingHeight = rifePlan?.ProcessingHeight,
+            });
+            return;
+        }
+        Volatile.Write(ref _qualityStatus, MpvQualityEnhancementPlanner.BuildStatus(
+            options,
+            new MpvQualityShaderPlan(MpvQualityShaderDecision.NotRequested, []),
+            rifeState: _rifeState,
+            rifeDegradedReasonKey: _rifeReason,
+            rifeFactor: rifePlan?.Factor,
+            rifeProcessingHeight: rifePlan?.ProcessingHeight));
+    }
+
+    /// <summary>Detects HDR content and sustained A/V desync while RIFE is running and
+    /// degrades to plain mpv without interrupting playback.</summary>
+    private void MonitorRifeRuntime()
+    {
+        if (_rifeRequest?.Plan is null) return;
+        if (Volatile.Read(ref _rifeDegradeRequested) != 0) return;
+        if (!string.Equals(_rifeState, RifeEnhancementStates.Applied, StringComparison.Ordinal)) return;
+        if (_video is { IsHdr: true })
+        {
+            DegradeRife(RifeEnhancementReasons.HdrContent, fallbackInterpolation: false);
+            return;
+        }
+        var now = Environment.TickCount64;
+        if (_rifeDropBaseline < 0)
+        {
+            _rifeDropBaseline = TryReadInt("frame-drop-count") ?? 0;
+            _rifeDropTicks = (int)Math.Min(int.MaxValue, now);
+            return;
+        }
+        if (now - _rifeDropTicks < 2_000) return;
+        var drops = TryReadInt("frame-drop-count") ?? _rifeDropBaseline;
+        var avsync = TryReadDouble("avsync") ?? 0;
+        if (drops - _rifeDropBaseline >= 8 || Math.Abs(avsync) > 0.2)
+        {
+            DegradeRife(RifeEnhancementReasons.Performance, fallbackInterpolation: true);
+            return;
+        }
+        _rifeDropBaseline = drops;
+        _rifeDropTicks = (int)Math.Min(int.MaxValue, now);
+    }
+
     /// <summary>Applies the requested Anime4K chain once the video color space is
     /// known. HDR content and HDR passthrough deliberately skip the SDR-tuned shaders
     /// while keeping the built-in scaler/interpolation options.</summary>
@@ -820,9 +974,18 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         string? shaderStateOverride = null,
         string? degradedReasonOverride = null)
     {
+        var rifePlan = _rifeRequest?.Plan;
         Volatile.Write(
             ref _qualityStatus,
-            MpvQualityEnhancementPlanner.BuildStatus(options, plan, shaderStateOverride, degradedReasonOverride));
+            MpvQualityEnhancementPlanner.BuildStatus(
+                options,
+                plan,
+                shaderStateOverride,
+                degradedReasonOverride,
+                _rifeState,
+                _rifeReason,
+                rifePlan?.Factor,
+                rifePlan?.ProcessingHeight));
         Interlocked.Exchange(ref _qualityApplied, 1);
     }
 
@@ -838,6 +1001,22 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
 
     private static bool IsRemotePath(string path) =>
         Uri.TryCreate(path, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https";
+
+    private static bool IsRifeInitFailure(string? text)
+    {
+        if (string.IsNullOrEmpty(text)) return false;
+        if (text.IndexOf("vapoursynth", StringComparison.OrdinalIgnoreCase) < 0 &&
+            text.IndexOf("could not init vs", StringComparison.OrdinalIgnoreCase) < 0)
+        {
+            return false;
+        }
+        return text.Contains("could not init", StringComparison.OrdinalIgnoreCase) ||
+            text.Contains("script evaluation failed", StringComparison.OrdinalIgnoreCase) ||
+            text.Contains("failed to load", StringComparison.OrdinalIgnoreCase) ||
+            text.Contains("creating filter", StringComparison.OrdinalIgnoreCase) ||
+            text.Contains("disabling filter", StringComparison.OrdinalIgnoreCase) ||
+            text.Contains("failed", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static bool IsShaderCompilationFailure(string? text)
     {
@@ -874,6 +1053,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         _video = videoCodec is null && pixelFormat is null && primaries is null && transfer is null && width is null && height is null
             ? null
             : new(videoCodec, pixelFormat, primaries, transfer, width, height);
+        MonitorRifeRuntime();
         UpdateTracks();
         PlaybackInfoChanged?.Invoke(this, EventArgs.Empty);
         if (TryReadBoolean("eof-reached") == true)

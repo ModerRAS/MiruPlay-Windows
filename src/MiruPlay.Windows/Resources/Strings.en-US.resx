@@ -1595,4 +1595,55 @@
   <data name="tv.settings.interpolation.mpv" xml:space="preserve"><value>Built-in</value></data>
   <data name="api.errFrameInterpolationMode" xml:space="preserve"><value>Invalid frame interpolation mode.</value></data>
   <data name="upd.wrongEdition" xml:space="preserve"><value>Update manifest edition ({0}) does not match this app ({1}).</value></data>
+  <data name="playback.interpolationRife" xml:space="preserve"><value>RIFE frame interpolation (enhancement pack)</value></data>
+  <data name="quality.rifeHeading" xml:space="preserve"><value>RIFE frame interpolation (experimental pack)</value></data>
+  <data name="quality.rifeNote" xml:space="preserve"><value>Downloads a ~35 MB enhancement pack. Only works with in-process libmpv on SDR content; VSPipe self-test picks the processing height and failures fall back to normal playback.</value></data>
+  <data name="quality.rifeStatusUnknown" xml:space="preserve"><value>Reading RIFE enhancement pack status…</value></data>
+  <data name="quality.rifeStatusNotInstalled" xml:space="preserve"><value>The RIFE enhancement pack is not installed.</value></data>
+  <data name="quality.rifeStatusInstalled" xml:space="preserve"><value>RIFE enhancement pack ({0}) · version {1}</value></data>
+  <data name="quality.rifeSourceInstalled" xml:space="preserve"><value>installed</value></data>
+  <data name="quality.rifeSourceBundled" xml:space="preserve"><value>bundled</value></data>
+  <data name="quality.rifeStatusSelftest" xml:space="preserve"><value>self-test {0} fps ({1}, recommends {2}p)</value></data>
+  <data name="quality.rifeStatusSelftestFailed" xml:space="preserve"><value>self-test failed: {0}</value></data>
+  <data name="quality.rifeInstall" xml:space="preserve"><value>Download and install</value></data>
+  <data name="quality.rifeUninstall" xml:space="preserve"><value>Uninstall</value></data>
+  <data name="quality.rifeSelftest" xml:space="preserve"><value>Run self-test</value></data>
+  <data name="quality.rifeFactor" xml:space="preserve"><value>RIFE frame-rate factor</value></data>
+  <data name="quality.rifeModel" xml:space="preserve"><value>RIFE model</value></data>
+  <data name="quality.rifeProcessingHeight" xml:space="preserve"><value>RIFE processing height</value></data>
+  <data name="quality.rifeHeightAuto" xml:space="preserve"><value>Auto (self-test)</value></data>
+  <data name="quality.rifeGpuThread" xml:space="preserve"><value>RIFE GPU threads</value></data>
+  <data name="quality.rifeHint" xml:space="preserve"><value>RIFE will not take effect: {0}</value></data>
+  <data name="quality.rifeInstalling" xml:space="preserve"><value>Downloading and installing the RIFE enhancement pack…</value></data>
+  <data name="quality.rifeSelftesting" xml:space="preserve"><value>Running the RIFE self-test…</value></data>
+  <data name="quality.rifeUninstalling" xml:space="preserve"><value>Uninstalling the RIFE enhancement pack…</value></data>
+  <data name="quality.rifeOperationFailed" xml:space="preserve"><value>RIFE operation failed: {0}</value></data>
+  <data name="quality.rifeReadyToast" xml:space="preserve"><value>RIFE self-test passed; it will apply on the next playback.</value></data>
+  <data name="quality.rifeUninstalledToast" xml:space="preserve"><value>The RIFE enhancement pack was uninstalled.</value></data>
+  <data name="rife.reason.notInstalled" xml:space="preserve"><value>enhancement pack is not installed</value></data>
+  <data name="rife.reason.invalidPack" xml:space="preserve"><value>enhancement pack files are missing or corrupt</value></data>
+  <data name="rife.reason.selftestRequired" xml:space="preserve"><value>self-test has not run yet</value></data>
+  <data name="rife.reason.selftestFailed" xml:space="preserve"><value>self-test failed</value></data>
+  <data name="rife.reason.selftestSlow" xml:space="preserve"><value>this GPU cannot interpolate in real time (self-test too slow)</value></data>
+  <data name="rife.reason.selftestTimeout" xml:space="preserve"><value>self-test timed out</value></data>
+  <data name="rife.reason.selftestExit" xml:space="preserve"><value>self-test process failed</value></data>
+  <data name="rife.reason.vulkanUnavailable" xml:space="preserve"><value>Vulkan is unavailable or the driver failed</value></data>
+  <data name="rife.reason.hdrPassthrough" xml:space="preserve"><value>RIFE is disabled in HDR passthrough mode</value></data>
+  <data name="rife.reason.hdrContent" xml:space="preserve"><value>RIFE is disabled for HDR content</value></data>
+  <data name="rife.reason.initFailed" xml:space="preserve"><value>RIFE failed to initialise; fell back to normal playback</value></data>
+  <data name="rife.reason.performance" xml:space="preserve"><value>real-time interpolation is not sustainable at this resolution; fell back to normal playback</value></data>
+  <data name="rife.reason.pathUnsupported" xml:space="preserve"><value>the user profile path is not ASCII and no compatible cache could be created</value></data>
+  <data name="rife.reason.mirrorFailed" xml:space="preserve"><value>could not create the RIFE-compatible cache path</value></data>
+  <data name="rife.reason.archiveUnsupported" xml:space="preserve"><value>unsupported enhancement pack format</value></data>
+  <data name="rife.reason.downloadFailed" xml:space="preserve"><value>enhancement pack download or verification failed</value></data>
+  <data name="rife.reason.insufficientDisk" xml:space="preserve"><value>not enough disk space</value></data>
+  <data name="api.errRifeSettings" xml:space="preserve"><value>Invalid RIFE settings.</value></data>
+  <data name="api.errRifeUnavailable" xml:space="preserve"><value>The RIFE enhancement service is unavailable.</value></data>
+  <data name="tv.settings.rifeFactor" xml:space="preserve"><value>RIFE frame-rate factor</value></data>
+  <data name="tv.settings.rifeModel" xml:space="preserve"><value>RIFE model</value></data>
+  <data name="tv.settings.rifeHeight" xml:space="preserve"><value>RIFE processing height</value></data>
+  <data name="tv.settings.rifeGpuThread" xml:space="preserve"><value>RIFE GPU threads</value></data>
+  <data name="tv.settings.rifeUnavailable" xml:space="preserve"><value>The RIFE enhancement pack is not installed or has not passed its self-test</value></data>
+  <data name="playback.rifeBadge" xml:space="preserve"><value>RIFE {0}</value></data>
+  <data name="web.rifeStatus" xml:space="preserve"><value>RIFE enhancement pack</value></data>
 </root>

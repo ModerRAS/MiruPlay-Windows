@@ -78,6 +78,7 @@ public partial class MainWindow : Window, IAsyncDisposable
     private bool _savedPlaybackSidebarVisible;
     private bool _isFullscreen;
     private MpvRuntimeCapabilities? _playbackCapabilities;
+    private readonly RifeEnhancementService _rifeEnhancement = new();
 
     public MainWindow() : this(false) { }
 
@@ -187,7 +188,8 @@ public partial class MainWindow : Window, IAsyncDisposable
             findAudioPreset: FindAudioPreset,
             musicLibrary: _musicLibrary,
             playMusic: PlayMusicFromWebAsync,
-            getRuntimeCapabilities: () => _playbackCapabilities);
+            getRuntimeCapabilities: () => _playbackCapabilities,
+            rifeEnhancement: _rifeEnhancement);
         ApplySettingsToView();
         Loaded += MainWindow_Loaded;
         Closing += MainWindow_Closing;
@@ -850,7 +852,11 @@ public partial class MainWindow : Window, IAsyncDisposable
                 startPositionMs,
                 playbackProxy: playbackProxy,
                 windowHandle: windowHandle,
-                videoOptions: MpvWindowsVideoOptionMapper.FromSettings(_settings),
+                videoOptions: MpvWindowsVideoOptionMapper.FromSettings(
+                    _settings,
+                    rife: _rifeEnhancement.ResolvePlaybackRequest(
+                        _settings,
+                        MpvPlaybackModeSettings.ToDisplayPipeline(_settings.HdrMode))),
                 allowDirectHttp: source?.Type == "RSS",
                 endPositionMs: endPositionMs);
             var session = launch.Session;
@@ -2648,6 +2654,180 @@ public partial class MainWindow : Window, IAsyncDisposable
         _settings = _settings with { FrameInterpolationMode = AppSettingsStore.NormalizeFrameInterpolationMode(value) };
         _settingsStore.Save(_settings);
         StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+        UpdateRifeSettingsUi();
+    }
+
+    private void RifeFactor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || RifeFactorBox.SelectedItem is not ComboBoxItem { Tag: string value } ||
+            !int.TryParse(value, out var factor)) return;
+        SaveRifeEnhancement(settings => settings with { Factor = factor });
+    }
+
+    private void RifeModel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || RifeModelBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        SaveRifeEnhancement(settings => settings with { Model = value });
+    }
+
+    private void RifeHeight_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || RifeHeightBox.SelectedItem is not ComboBoxItem { Tag: string value }) return;
+        SaveRifeEnhancement(settings => settings with { ProcessingHeight = value });
+    }
+
+    private void RifeGpuThread_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings || RifeGpuThreadBox.SelectedItem is not ComboBoxItem { Tag: string value } ||
+            !int.TryParse(value, out var threads)) return;
+        SaveRifeEnhancement(settings => settings with { GpuThread = threads });
+    }
+
+    private void SaveRifeEnhancement(Func<RifeEnhancementSettings, RifeEnhancementSettings> update)
+    {
+        var current = RifeEnhancementSettings.Normalize(_settings.RifeEnhancement);
+        _settings = _settings with { RifeEnhancement = RifeEnhancementSettings.Normalize(update(current)) };
+        _settingsStore.Save(_settings);
+        StatusText.Text = AppStrings.Get("playback.appliedNextPlayback");
+        UpdateRifeSettingsUi();
+    }
+
+    private async void RifeInstall_Click(object sender, RoutedEventArgs e) =>
+        await RunRifeOperationAsync("quality.rifeInstalling", async cancellationToken =>
+        {
+            var status = await _rifeEnhancement.InstallAsync(null, cancellationToken);
+            if (status.Ready) StatusText.Text = AppStrings.Get("quality.rifeReadyToast");
+        });
+
+    private async void RifeSelftest_Click(object sender, RoutedEventArgs e) =>
+        await RunRifeOperationAsync("quality.rifeSelftesting", async cancellationToken =>
+        {
+            var result = await _rifeEnhancement.RunSelfTestAsync(cancellationToken);
+            StatusText.Text = result.Ok
+                ? AppStrings.Get("quality.rifeReadyToast")
+                : AppStrings.Get("quality.rifeOperationFailed", AppStrings.Get(result.ErrorKey ?? "rife.reason.selftestFailed"));
+        });
+
+    private async void RifeUninstall_Click(object sender, RoutedEventArgs e) =>
+        await RunRifeOperationAsync("quality.rifeUninstalling", async cancellationToken =>
+        {
+            await _rifeEnhancement.UninstallAsync(cancellationToken);
+            StatusText.Text = AppStrings.Get("quality.rifeUninstalledToast");
+        });
+
+    private async Task RunRifeOperationAsync(string busyKey, Func<CancellationToken, Task> operation)
+    {
+        BusyOperationText.Text = AppStrings.Get(busyKey);
+        BusyProgressBar.IsIndeterminate = true;
+        BusyOverlay.Visibility = Visibility.Visible;
+        try
+        {
+            await operation(CancellationToken.None);
+        }
+        catch (Exception error) when (error is InvalidOperationException or IOException or UnauthorizedAccessException or HttpRequestException)
+        {
+            StatusText.Text = AppStrings.Get("quality.rifeOperationFailed", error.Message);
+        }
+        finally
+        {
+            BusyOverlay.Visibility = Visibility.Collapsed;
+            UpdateRifeSettingsUi();
+        }
+    }
+
+    private void ApplyRifeSettingsToView()
+    {
+        var rife = RifeEnhancementSettings.Normalize(_settings.RifeEnhancement);
+        RifeFactorBox.SelectedItem = RifeFactorBox.Items
+            .OfType<ComboBoxItem>()
+            .FirstOrDefault(item => Equals(item.Tag, rife.Factor.ToString(System.Globalization.CultureInfo.InvariantCulture)))
+            ?? RifeFactorBox.Items[0];
+        RifeModelBox.SelectedItem = RifeModelBox.Items
+            .OfType<ComboBoxItem>()
+            .FirstOrDefault(item => Equals(item.Tag, rife.Model))
+            ?? RifeModelBox.Items[0];
+        RifeHeightBox.SelectedItem = RifeHeightBox.Items
+            .OfType<ComboBoxItem>()
+            .FirstOrDefault(item => Equals(item.Tag, rife.ProcessingHeight))
+            ?? RifeHeightBox.Items[0];
+        RifeGpuThreadBox.SelectedItem = RifeGpuThreadBox.Items
+            .OfType<ComboBoxItem>()
+            .FirstOrDefault(item => Equals(item.Tag, rife.GpuThread.ToString(System.Globalization.CultureInfo.InvariantCulture)))
+            ?? RifeGpuThreadBox.Items[1];
+        UpdateRifeSettingsUi();
+    }
+
+    private void UpdateRifeSettingsUi()
+    {
+        RifeEnhancementStatus status;
+        try
+        {
+            status = _rifeEnhancement.GetStatus(refresh: true);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            RifeStatusText.Text = AppStrings.Get("quality.rifeOperationFailed", error.Message);
+            return;
+        }
+
+        var installed = status.Installed;
+        RifeInstallButton.IsEnabled = !installed;
+        RifeUninstallButton.IsEnabled = installed;
+        RifeSelftestButton.IsEnabled = installed;
+        RifeFactorBox.IsEnabled = installed;
+        RifeModelBox.IsEnabled = installed;
+        RifeHeightBox.IsEnabled = installed;
+        RifeGpuThreadBox.IsEnabled = installed;
+
+        if (!installed)
+        {
+            RifeStatusText.Text = AppStrings.Get("quality.rifeStatusNotInstalled");
+        }
+        else
+        {
+            var source = string.Equals(status.Source, "bundled", StringComparison.Ordinal)
+                ? AppStrings.Get("quality.rifeSourceBundled")
+                : AppStrings.Get("quality.rifeSourceInstalled");
+            var text = AppStrings.Get("quality.rifeStatusInstalled", source, status.Version ?? "?");
+            if (status.SelfTest is { Ok: true } passed)
+            {
+                text += " · " + AppStrings.Get(
+                    "quality.rifeStatusSelftest",
+                    (passed.OutputFps480p ?? 0).ToString("0.0", System.Globalization.CultureInfo.CurrentCulture),
+                    passed.Gpu ?? "?",
+                    passed.RecommendedHeight ?? "480");
+            }
+            else if (status.SelfTest is { } failed)
+            {
+                text += " · " + AppStrings.Get(
+                    "quality.rifeStatusSelftestFailed",
+                    AppStrings.Get(failed.ErrorKey ?? "rife.reason.selftestFailed"));
+            }
+            RifeStatusText.Text = text;
+        }
+
+        string? reason = null;
+        var requested = AppSettingsStore.NormalizeFrameInterpolationMode(_settings.FrameInterpolationMode) ==
+            MpvFrameInterpolationModes.Rife;
+        if (requested)
+        {
+            if (!installed)
+            {
+                reason = "rife.reason.notInstalled";
+            }
+            else if (status.SelfTest is not { Ok: true })
+            {
+                reason = status.SelfTest?.ErrorKey ?? "rife.reason.selftestRequired";
+            }
+            else if (MpvPlaybackModeSettings.ToDisplayPipeline(_settings.HdrMode) == MpvDisplayPipeline.HdrPassthrough)
+            {
+                reason = "rife.reason.hdrPassthrough";
+            }
+        }
+        RifeHintText.Text = reason is null
+            ? string.Empty
+            : AppStrings.Get("quality.rifeHint", AppStrings.Get(reason));
+        RifeHintText.Visibility = reason is null ? Visibility.Collapsed : Visibility.Visible;
     }
 
     /// <summary>Warn on the settings page when the user selected Anime4K but this
@@ -2787,6 +2967,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .FirstOrDefault(item => Equals(item.Tag, AppSettingsStore.NormalizeFrameInterpolationMode(_settings.FrameInterpolationMode)))
                 ?? QualityInterpolationBox.Items[0];
             UpdateQualityShaderHint();
+            ApplyRifeSettingsToView();
             UpdatePlaybackCapabilityText();
         }
         finally

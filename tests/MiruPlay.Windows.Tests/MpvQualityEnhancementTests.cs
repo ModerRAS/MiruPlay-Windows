@@ -65,13 +65,14 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         ], arguments);
         Assert.DoesNotContain(arguments, argument => argument.Contains("tscale=linear", StringComparison.Ordinal));
 
-        // Reserved RIFE mode is a future extension point and must not silently run the
-        // mpv built-in frame mixing pipeline in v1.
+        // RIFE is a real mode now: it runs through the vapoursynth filter (added by the
+        // playback session), not through mpv's built-in frame mixing arguments.
         Assert.Empty(MpvQualityEnhancementPlanner.BuildInitialArguments(
             new MpvQualityEnhancementOptions(Interpolation: MpvFrameInterpolationMode.Rife)));
-        Assert.Equal(["off", "mpv"], MpvFrameInterpolationModes.SupportedValues);
-        Assert.DoesNotContain("rife", MpvFrameInterpolationModes.SupportedValues);
-        Assert.Contains("rife", MpvFrameInterpolationModes.ReservedValues);
+        Assert.Equal(["off", "mpv", "rife"], MpvFrameInterpolationModes.SupportedValues);
+        Assert.Contains("rife", MpvFrameInterpolationModes.SupportedValues);
+        Assert.Empty(MpvFrameInterpolationModes.ReservedValues);
+        Assert.Equal(MpvFrameInterpolationMode.Rife, MpvFrameInterpolationModes.Parse("rife"));
     }
 
     [Fact]
@@ -278,10 +279,13 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         Assert.Equal("a_plus_a", normalized.MpvAnime4KPreset);
         Assert.Equal("mpv", normalized.FrameInterpolationMode);
 
-        // The RIFE value is reserved for the future enhancement pack; an older build
-        // must fall back to off instead of pretending to run RIFE.
+        // RIFE is a first-class mode; its tuning sub-settings default to 2x/4.6/2/auto.
         File.WriteAllText(path, "{\"FrameInterpolationMode\":\"rife\"}");
-        Assert.Equal("off", store.Load().FrameInterpolationMode);
+        var rife = store.Load();
+        Assert.Equal("rife", rife.FrameInterpolationMode);
+        Assert.Equal(RifeEnhancementSettings.Default, rife.RifeEnhancement);
+        File.WriteAllText(path, "{\"FrameInterpolationMode\":\"rife\",\"RifeEnhancement\":{\"Factor\":9,\"Model\":\"bogus\",\"GpuThread\":9,\"ProcessingHeight\":\"2160\"}}");
+        Assert.Equal(RifeEnhancementSettings.Default, store.Load().RifeEnhancement);
 
         // Legacy boolean field from the first v1 iteration migrates to the mpv mode.
         File.WriteAllText(path, "{\"MpvInterpolationEnabled\":true}");
@@ -325,9 +329,9 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         Assert.Equal(MpvAnime4KPreset.C, options.Anime4K);
         Assert.Equal(MpvFrameInterpolationMode.MpvBuiltIn, options.Interpolation);
 
-        var reserved = MpvWindowsVideoOptionMapper.FromSettings(
+        var rife = MpvWindowsVideoOptionMapper.FromSettings(
             settings with { FrameInterpolationMode = "rife" }, CreateShaderDirectory()).Quality;
-        Assert.Equal(MpvFrameInterpolationMode.Off, reserved!.Interpolation);
+        Assert.Equal(MpvFrameInterpolationMode.Rife, rife!.Interpolation);
     }
 
     [Fact]
@@ -370,8 +374,10 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         Assert.Equal("off", initial.GetProperty("anime4kPreset").GetString());
         Assert.Equal("off", initial.GetProperty("frameInterpolationMode").GetString());
         Assert.Equal(
-            ["off", "mpv"],
+            ["off", "mpv", "rife"],
             initial.GetProperty("frameInterpolationModeOptions").EnumerateArray().Select(item => item.GetString()!).ToArray());
+        Assert.False(initial.GetProperty("rifeEnhancementStatus").GetProperty("installed").GetBoolean());
+        Assert.Equal(2, initial.GetProperty("rifeEnhancement").GetProperty("factor").GetInt32());
         Assert.Equal(
             ["off", "low", "medium", "high"],
             initial.GetProperty("upscalePresetOptions").EnumerateArray().Select(item => item.GetString()!).ToArray());
@@ -401,9 +407,25 @@ public sealed class MpvQualityEnhancementTests : IDisposable
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidAnime4K.StatusCode);
         var invalidInterpolation = await client.PutAsJsonAsync("/api/settings/playback", new { frameInterpolationMode = "bogus" });
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidInterpolation.StatusCode);
-        // Reserved RIFE value is not accepted by v1 (the future pack will extend the allowed set).
-        var reservedInterpolation = await client.PutAsJsonAsync("/api/settings/playback", new { frameInterpolationMode = "rife" });
-        Assert.Equal(System.Net.HttpStatusCode.BadRequest, reservedInterpolation.StatusCode);
+        var rifeResponse = await client.PutAsJsonAsync("/api/settings/playback", new
+        {
+            frameInterpolationMode = "rife",
+            rifeEnhancement = new { factor = 3, model = "4.25-lite", gpuThread = 4, processingHeight = "576" },
+        });
+        rifeResponse.EnsureSuccessStatusCode();
+        var rifeUpdated = await ReadData(rifeResponse);
+        Assert.Equal("rife", rifeUpdated.GetProperty("frameInterpolationMode").GetString());
+        Assert.Equal(3, rifeUpdated.GetProperty("rifeEnhancement").GetProperty("factor").GetInt32());
+        Assert.Equal("4.25-lite", rifeUpdated.GetProperty("rifeEnhancement").GetProperty("model").GetString());
+        Assert.Equal(4, rifeUpdated.GetProperty("rifeEnhancement").GetProperty("gpuThread").GetInt32());
+        Assert.Equal("576", rifeUpdated.GetProperty("rifeEnhancement").GetProperty("processingHeight").GetString());
+        Assert.Equal(3, settings.RifeEnhancement?.Factor);
+
+        var invalidRife = await client.PutAsJsonAsync("/api/settings/playback", new
+        {
+            rifeEnhancement = new { factor = 7, model = "4.6", gpuThread = 2, processingHeight = "auto" },
+        });
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, invalidRife.StatusCode);
     }
 
     private static MpvVideoTrackInfo SdrVideo() => new("h264", "yuv420p", "bt.709", "bt.1886", 1920, 1080);

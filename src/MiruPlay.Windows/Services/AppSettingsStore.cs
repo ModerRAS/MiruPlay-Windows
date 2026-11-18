@@ -50,7 +50,8 @@ public sealed record AppSettings(
     string AudioPassthroughDevice = "auto",
     string MpvUpscalePreset = "off",
     string MpvAnime4KPreset = "off",
-    string FrameInterpolationMode = "off");
+    string FrameInterpolationMode = "off",
+    RifeEnhancementSettings? RifeEnhancement = null);
 
 public sealed class AppSettingsStore
 {
@@ -167,6 +168,7 @@ public sealed class AppSettingsStore
                 string.Equals(settings.FrameInterpolationMode, MpvFrameInterpolationModes.Off, StringComparison.Ordinal)
                     ? MpvFrameInterpolationModes.MpvBuiltIn
                     : NormalizeFrameInterpolationMode(settings.FrameInterpolationMode);
+            var normalizedRifeEnhancement = RifeEnhancementSettings.Normalize(settings.RifeEnhancement);
             if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate ||
                 settings.AppLanguage != normalizedLanguage ||
                 settings.TvRemotePreset != normalizedTvPreset ||
@@ -182,7 +184,9 @@ public sealed class AppSettingsStore
                 settings.AudioPassthroughDevice != normalizedPassthroughDevice ||
                 settings.MpvUpscalePreset != normalizedUpscalePreset ||
                 settings.MpvAnime4KPreset != normalizedAnime4KPreset ||
-                settings.FrameInterpolationMode != normalizedFrameInterpolation)
+                settings.FrameInterpolationMode != normalizedFrameInterpolation ||
+                settings.RifeEnhancement is null ||
+                !settings.RifeEnhancement.Equals(normalizedRifeEnhancement))
             {
                 settings = settings with
                 {
@@ -203,6 +207,7 @@ public sealed class AppSettingsStore
                     MpvUpscalePreset = normalizedUpscalePreset,
                     MpvAnime4KPreset = normalizedAnime4KPreset,
                     FrameInterpolationMode = normalizedFrameInterpolation,
+                    RifeEnhancement = normalizedRifeEnhancement,
                 };
                 needsCleanup = true;
             }

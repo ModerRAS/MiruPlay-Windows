@@ -8,10 +8,11 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 校验协议版本、必需表、capability 和不安全路径
 - 按 Anime/Drama 模式隔离媒体源，并提供海报墙、搜索、作品详情和剧集列表
 - 使用内置 libmpv 或 Windows 默认播放器播放本地视频
-- 可选画质增强：缩放质量预设（低/中/高）、Anime4K SDR 动画着色器（A/A+A/B/C）与插帧方式（off/mpv 内置帧混合，非 MEMC；预留 RIFE 扩展）；HDR 片源自动跳过 Anime4K
+- 可选画质增强：缩放质量预设（低/中/高）、Anime4K SDR 动画着色器（A/A+A/B/C）与插帧方式（off/mpv 内置帧混合，非 MEMC；RIFE 真帧插帧通过可选增强包启用）；HDR 片源自动跳过 Anime4K
 - 显示模式支持自动（默认，不改变现有画质）、HDR 直通、映射到 SDR；Windows 需开启系统 HDR，HDR 直通参数需实机验证
 - 音频码流直通（关闭/自动/强制 + TrueHD/E-AC3/AC-3/DTS/DTS-HD）可把 Atmos 原样送入 HDMI/AVR；需要独占 WASAPI，失败自动回退 PCM，并与 PEQ/DSP/响度平衡互斥
 - 内置 libmpv 已支持 Dolby Vision Profile 7 FEL 播放器侧解码与合成（Windows 输出 HDR10，不输出 DV 信号）；设置页展示运行时 FEL 支持与 libmpv/libplacebo 版本
+- 可选画质增强：缩放预设、Anime4K、mpv 内置平滑插帧，以及可下载/随 full 版提供的 RIFE 真帧插帧增强包（SDR 限定，失败自动回退）
 - 通过内置 libmpv 枚举内封与 MLIP 外挂字幕，按语言偏好自动选择，并可在 WPF 或 WebUI 中手动切换/关闭
 - 通过内置 libmpv 读取播放位置，并以 `%LOCALAPPDATA%\MiruPlay\state.db` 作为唯一续播状态源
 - 通过官方 .NET gRPC 客户端连接 CloudDrive2，验证登录或 API Token 成功后才写入 DPAPI 凭据
@@ -23,7 +24,7 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 Windows 安装包分两个 edition：
 
 - **lite（默认）**：应用 + libmpv + SDL3 + 基础 Anime4K Fast 等轻量资产，零额外依赖。
-- **full**：lite + 可选增强包（portable VapourSynth + MVTools、RIFE ncnn + 模型、可选大 shader）；增强包从 `runtime/enhance/` 打包，不进 git，版本/哈希由 `tools/Get-EnhancementPack.ps1` 固定。增强包未交付前 CI 只发布 lite。
+- **full**：lite + 可选增强包（portable VapourSynth + RIFE ncnn + 模型、可选大 shader）；增强包从 `runtime/enhance/rife/` 打包，不进 git，版本/哈希由 `tools/Get-EnhancementPack.ps1` 固定。增强包未交付前 CI 只发布 lite。
 
 产物文件名包含 edition：`MiruPlay-<ver>-win-x64-<edition>-portable.zip` / `-setup.exe` / `-symbols.zip`；manifest 与自动更新清单也按 edition 区分，lite/full 不会互相升级。详见 [docs/distribution.md](docs/distribution.md)。
 
