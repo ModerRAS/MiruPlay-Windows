@@ -95,7 +95,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         IAsyncDisposable? transportLease,
         MpvWindowsVideoOptions? videoOptions,
         long? startPositionMs = null,
-        long? endPositionMs = null)
+        long? endPositionMs = null,
+        bool forceStartPosition = false)
     {
         var session = new LibMpvPlaybackSession(
             client,
@@ -105,7 +106,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
             surfaceAttached: !headless && windowHandle is { } handle && handle != IntPtr.Zero);
         try
         {
-            session.Configure(settings, headless, windowHandle, videoOptions, startPositionMs, endPositionMs);
+            session.Configure(settings, headless, windowHandle, videoOptions, startPositionMs, endPositionMs, forceStartPosition);
             client.RequestLogMessages("warn");
             EnsureNativeSuccess(client.Initialize(), AppStrings.Get("mpv.initFailed"));
             EnsureNativeSuccess(client.Command(["loadfile", episode.MediaPath, "replace"]), AppStrings.Get("mpv.loadFailed"));
@@ -133,7 +134,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         IAsyncDisposable? transportLease,
         MpvWindowsVideoOptions? videoOptions,
         long? startPositionMs = null,
-        long? endPositionMs = null)
+        long? endPositionMs = null,
+        bool forceStartPosition = false)
     {
         var client = LibMpvClient.Create(libraryPath);
         try
@@ -148,7 +150,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 transportLease,
                 videoOptions,
                 startPositionMs,
-                endPositionMs);
+                endPositionMs,
+                forceStartPosition);
         }
         catch
         {
@@ -517,7 +520,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         IntPtr? windowHandle,
         MpvWindowsVideoOptions? videoOptions,
         long? startPositionMs,
-        long? endPositionMs)
+        long? endPositionMs,
+        bool forceStartPosition)
     {
         SetOption("idle", "yes");
         SetOption("force-window", headless ? "no" : "yes");
@@ -544,6 +548,12 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         if (startPositionMs is > 0)
         {
             SetOption("start", (startPositionMs.Value / 1_000d).ToString(CultureInfo.InvariantCulture));
+        }
+        else if (forceStartPosition)
+        {
+            // Explicit "play from the beginning": startPositionMs = 0 normally means
+            // "not supplied", which would silently resume the stored position.
+            SetOption("start", "0");
         }
         else
         {

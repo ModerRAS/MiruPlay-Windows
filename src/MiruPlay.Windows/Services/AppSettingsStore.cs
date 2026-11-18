@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using MiruPlay.Windows.Models;
+using MiruPlay.Windows.Tv;
 
 namespace MiruPlay.Windows.Services;
 
@@ -30,6 +31,13 @@ public sealed record AppSettings(
     string AudioSrcBypass = "software",
     int AudioOutputSampleRate = 48000,
     string AppLanguage = "system",
+    bool TvModeEnabled = false,
+    int TvUiScalePercent = 100,
+    bool TvSoundFeedback = true,
+    bool TvClockVisible = true,
+    string TvRemotePreset = "general",
+    string TvVolumeKeyTarget = "system",
+    int TvExitLongPressMs = 2000,
     string AudioBalance = "off");
 
 public sealed class AppSettingsStore
@@ -121,15 +129,28 @@ public sealed class AppSettingsStore
             var normalizedSrcBypass = NormalizeAudioSrcBypass(settings.AudioSrcBypass);
             var normalizedSampleRate = NormalizeAudioOutputSampleRate(settings.AudioOutputSampleRate);
             var normalizedLanguage = AppLocale.Normalize(settings.AppLanguage);
+            var normalizedTvPreset = TvKeyMap.NormalizePresetId(settings.TvRemotePreset);
+            var normalizedTvScale = settings.TvUiScalePercent is 100 or 125 or 150 ? settings.TvUiScalePercent : 100;
+            var normalizedTvVolumeTarget = settings.TvVolumeKeyTarget is "system" or "application" ? settings.TvVolumeKeyTarget : "system";
+            var normalizedTvExitHold = Math.Clamp(settings.TvExitLongPressMs, 1000, 5000);
             var normalizedBalance = NormalizeAudioBalance(settings.AudioBalance);
             if (settings.AudioSrcBypass != normalizedSrcBypass || settings.AudioOutputSampleRate != normalizedSampleRate ||
-                settings.AppLanguage != normalizedLanguage || settings.AudioBalance != normalizedBalance)
+                settings.AppLanguage != normalizedLanguage ||
+                settings.TvRemotePreset != normalizedTvPreset ||
+                settings.TvUiScalePercent != normalizedTvScale ||
+                settings.TvVolumeKeyTarget != normalizedTvVolumeTarget ||
+                settings.TvExitLongPressMs != normalizedTvExitHold ||
+                settings.AudioBalance != normalizedBalance)
             {
                 settings = settings with
                 {
                     AudioSrcBypass = normalizedSrcBypass,
                     AudioOutputSampleRate = normalizedSampleRate,
                     AppLanguage = normalizedLanguage,
+                    TvRemotePreset = normalizedTvPreset,
+                    TvUiScalePercent = normalizedTvScale,
+                    TvVolumeKeyTarget = normalizedTvVolumeTarget,
+                    TvExitLongPressMs = normalizedTvExitHold,
                     AudioBalance = normalizedBalance,
                 };
                 needsCleanup = true;

@@ -1184,6 +1184,181 @@
   <data name="wpf.music.albumOne" xml:space="preserve"><value>共 {0} 张专辑。</value></data>
   <data name="wpf.music.trackOne" xml:space="preserve"><value>共 {0} 首。</value></data>
   <data name="wpf.music.trackCount" xml:space="preserve"><value>共 {0} 首。</value></data>
+  <data name="tv.shell.title" xml:space="preserve"><value>MiruPlay 电视模式</value></data>
+  <data name="tv.nav.home" xml:space="preserve"><value>首页</value></data>
+  <data name="tv.nav.library" xml:space="preserve"><value>媒体库</value></data>
+  <data name="tv.nav.search" xml:space="preserve"><value>搜索</value></data>
+  <data name="tv.nav.settings" xml:space="preserve"><value>设置</value></data>
+  <data name="tv.nav.exit" xml:space="preserve"><value>退出</value></data>
+  <data name="tv.hint.nav" xml:space="preserve"><value>↑↓ 选择   OK 进入   → 返回内容   Back 返回</value></data>
+  <data name="tv.hint.home" xml:space="preserve"><value>←→ 选择   OK 打开   Back 上一层   长按 Back 退出电视模式</value></data>
+  <data name="tv.hint.library" xml:space="preserve"><value>←→ 选择  ↑↓ 换行  翻页在边缘   OK 详情   Back 返回</value></data>
+  <data name="tv.hint.detail" xml:space="preserve"><value>←→ 选择剧集   OK 播放   Back 返回</value></data>
+  <data name="tv.hint.search" xml:space="preserve"><value>OK 输入   ←→ 移动   Back 返回</value></data>
+  <data name="tv.hint.settings" xml:space="preserve"><value>←→ 修改   OK 切换   Back 返回</value></data>
+  <data name="tv.loading" xml:space="preserve"><value>正在加载媒体库…</value></data>
+  <data name="tv.loading.detail" xml:space="preserve"><value>读取已配置的 MLIP 来源（不会扫描）</value></data>
+  <data name="tv.error.library" xml:space="preserve"><value>无法加载媒体库</value></data>
+  <data name="tv.error.retry" xml:space="preserve"><value>重试</value></data>
+  <data name="tv.error.hint" xml:space="preserve"><value>OK 重试   Back 退出电视模式</value></data>
+  <data name="tv.toast.atHome" xml:space="preserve"><value>已经在首页</value></data>
+  <data name="tv.toast.noEpisodes" xml:space="preserve"><value>这部作品没有可播放的剧集</value></data>
+  <data name="tv.card.episodes" xml:space="preserve"><value>{0} 集</value></data>
+  <data name="tv.card.watched" xml:space="preserve"><value>已看 {0}/{1}</value></data>
+  <data name="tv.card.remainingM" xml:space="preserve"><value>剩 {0} 分钟</value></data>
+  <data name="tv.card.remainingHm" xml:space="preserve"><value>剩 {0} 小时 {1} 分</value></data>
+  <data name="tv.genre.unknown" xml:space="preserve"><value>未分类</value></data>
+  <data name="tv.home.hero.continue" xml:space="preserve"><value>继续观看</value></data>
+  <data name="tv.home.hero.featured" xml:space="preserve"><value>精选作品</value></data>
+  <data name="tv.home.hero.resume" xml:space="preserve"><value>继续播放</value></data>
+  <data name="tv.home.hero.play" xml:space="preserve"><value>播放</value></data>
+  <data name="tv.home.hero.detail" xml:space="preserve"><value>查看详情</value></data>
+  <data name="tv.home.empty" xml:space="preserve"><value>媒体库还是空的</value></data>
+  <data name="tv.home.row.continue" xml:space="preserve"><value>继续观看</value></data>
+  <data name="tv.home.row.recent" xml:space="preserve"><value>最近添加</value></data>
+  <data name="tv.home.row.categories" xml:space="preserve"><value>分类</value></data>
+  <data name="tv.home.row.all" xml:space="preserve"><value>全部作品</value></data>
+  <data name="tv.home.allMore" xml:space="preserve"><value>查看全部</value></data>
+  <data name="tv.home.allCount" xml:space="preserve"><value>共 {0} 部作品</value></data>
+  <data name="tv.home.genre" xml:space="preserve"><value>分类</value></data>
+  <data name="tv.home.genre.count" xml:space="preserve"><value>{0} 部作品</value></data>
+  <data name="tv.library.filter.all" xml:space="preserve"><value>全部</value></data>
+  <data name="tv.library.filter.allGenres" xml:space="preserve"><value>全部</value></data>
+  <data name="tv.library.filter.genre" xml:space="preserve"><value>分类</value></data>
+  <data name="tv.library.filter.genreValue" xml:space="preserve"><value>分类：{0}</value></data>
+  <data name="tv.library.filter.sort" xml:space="preserve"><value>排序</value></data>
+  <data name="tv.library.filter.search" xml:space="preserve"><value>搜索</value></data>
+  <data name="tv.library.sort.title" xml:space="preserve"><value>排序：标题</value></data>
+  <data name="tv.library.sort.date" xml:space="preserve"><value>排序：日期</value></data>
+  <data name="tv.library.summary" xml:space="preserve"><value>共 {0} 部作品</value></data>
+  <data name="tv.library.page" xml:space="preserve"><value>第 {0} / {1} 页</value></data>
+  <data name="tv.detail.play" xml:space="preserve"><value>播放</value></data>
+  <data name="tv.detail.resume" xml:space="preserve"><value>继续播放</value></data>
+  <data name="tv.detail.fromStart" xml:space="preserve"><value>从头播放</value></data>
+  <data name="tv.detail.version" xml:space="preserve"><value>版本</value></data>
+  <data name="tv.detail.versions" xml:space="preserve"><value>{0} 个版本</value></data>
+  <data name="tv.detail.versionTitle" xml:space="preserve"><value>选择版本</value></data>
+  <data name="tv.detail.favorite" xml:space="preserve"><value>收藏</value></data>
+  <data name="tv.detail.favorited" xml:space="preserve"><value>已收藏</value></data>
+  <data name="tv.detail.favoriteOn" xml:space="preserve"><value>已加入收藏（仅本机演示）</value></data>
+  <data name="tv.detail.favoriteOff" xml:space="preserve"><value>已取消收藏</value></data>
+  <data name="tv.detail.episodes" xml:space="preserve"><value>剧集</value></data>
+  <data name="tv.detail.episodeCount" xml:space="preserve"><value>共 {0} 集</value></data>
+  <data name="tv.detail.watched" xml:space="preserve"><value>已看</value></data>
+  <data name="tv.detail.progress" xml:space="preserve"><value>已看 {0}%</value></data>
+  <data name="tv.detail.noSummary" xml:space="preserve"><value>暂无简介</value></data>
+  <data name="tv.player.loading" xml:space="preserve"><value>正在打开视频…</value></data>
+  <data name="tv.player.back" xml:space="preserve"><value>Back 返回</value></data>
+  <data name="tv.player.prev" xml:space="preserve"><value>上一集</value></data>
+  <data name="tv.player.next" xml:space="preserve"><value>下一集</value></data>
+  <data name="tv.player.seekBack" xml:space="preserve"><value>-10 秒</value></data>
+  <data name="tv.player.seekForward" xml:space="preserve"><value>+30 秒</value></data>
+  <data name="tv.player.play" xml:space="preserve"><value>播放</value></data>
+  <data name="tv.player.pause" xml:space="preserve"><value>暂停</value></data>
+  <data name="tv.player.playing" xml:space="preserve"><value>播放中</value></data>
+  <data name="tv.player.paused" xml:space="preserve"><value>已暂停</value></data>
+  <data name="tv.player.finished" xml:space="preserve"><value>播放结束</value></data>
+  <data name="tv.player.stopped" xml:space="preserve"><value>已停止</value></data>
+  <data name="tv.player.nextNow" xml:space="preserve"><value>即将播放下一集</value></data>
+  <data name="tv.player.noAdjacent" xml:space="preserve"><value>没有更远的剧集了</value></data>
+  <data name="tv.player.seekBackDone" xml:space="preserve"><value>后退 {0} 秒</value></data>
+  <data name="tv.player.seekForwardDone" xml:space="preserve"><value>前进 {0} 秒</value></data>
+  <data name="tv.player.speedSet" xml:space="preserve"><value>播放速度 {0}</value></data>
+  <data name="tv.player.speedValue" xml:space="preserve"><value>倍速 {0}</value></data>
+  <data name="tv.player.volume" xml:space="preserve"><value>音量 {0}%</value></data>
+  <data name="tv.player.muted" xml:space="preserve"><value>已静音</value></data>
+  <data name="tv.player.unmuted" xml:space="preserve"><value>已取消静音</value></data>
+  <data name="tv.player.subtitleValue" xml:space="preserve"><value>字幕：{0}</value></data>
+  <data name="tv.player.audioValue" xml:space="preserve"><value>音轨：{0}</value></data>
+  <data name="tv.player.subtitleOff" xml:space="preserve"><value>关闭</value></data>
+  <data name="tv.player.subtitleOn" xml:space="preserve"><value>开启</value></data>
+  <data name="tv.player.subtitleSet" xml:space="preserve"><value>字幕：{0}</value></data>
+  <data name="tv.player.audioDefault" xml:space="preserve"><value>默认</value></data>
+  <data name="tv.player.audioSet" xml:space="preserve"><value>音轨：{0}</value></data>
+  <data name="tv.player.external" xml:space="preserve"><value>外挂</value></data>
+  <data name="tv.player.info" xml:space="preserve"><value>信息</value></data>
+  <data name="tv.player.drawer.subtitles" xml:space="preserve"><value>字幕</value></data>
+  <data name="tv.player.drawer.audio" xml:space="preserve"><value>音轨</value></data>
+  <data name="tv.player.drawer.speed" xml:space="preserve"><value>倍速</value></data>
+  <data name="tv.player.drawer.info" xml:space="preserve"><value>播放信息</value></data>
+  <data name="tv.player.info.file" xml:space="preserve"><value>文件</value></data>
+  <data name="tv.player.info.video" xml:space="preserve"><value>视频</value></data>
+  <data name="tv.player.info.audio" xml:space="preserve"><value>音频</value></data>
+  <data name="tv.player.info.container" xml:space="preserve"><value>封装</value></data>
+  <data name="tv.player.info.speed" xml:space="preserve"><value>倍速</value></data>
+  <data name="tv.player.info.volume" xml:space="preserve"><value>音量</value></data>
+  <data name="tv.player.info.status" xml:space="preserve"><value>状态</value></data>
+  <data name="tv.player.error.title" xml:space="preserve"><value>播放失败</value></data>
+  <data name="tv.player.error.hint" xml:space="preserve"><value>OK 重试   Back 返回</value></data>
+  <data name="tv.player.error.degraded" xml:space="preserve"><value>无法在电视模式下使用系统播放器降级：{0}</value></data>
+  <data name="tv.search.title" xml:space="preserve"><value>搜索</value></data>
+  <data name="tv.search.placeholder" xml:space="preserve"><value>输入作品名称（电视端暂不支持中文输入，请用实体键盘）</value></data>
+  <data name="tv.search.space" xml:space="preserve"><value>空格</value></data>
+  <data name="tv.search.clear" xml:space="preserve"><value>清空</value></data>
+  <data name="tv.search.recent" xml:space="preserve"><value>最近搜索</value></data>
+  <data name="tv.search.results" xml:space="preserve"><value>结果</value></data>
+  <data name="tv.search.empty" xml:space="preserve"><value>没有匹配的作品</value></data>
+  <data name="tv.settings.title" xml:space="preserve"><value>设置</value></data>
+  <data name="tv.settings.subtitle" xml:space="preserve"><value>电视模式设置；文本类配置请在桌面模式修改</value></data>
+  <data name="tv.settings.group.playback" xml:space="preserve"><value>播放</value></data>
+  <data name="tv.settings.group.tv" xml:space="preserve"><value>电视与遥控器</value></data>
+  <data name="tv.settings.group.source" xml:space="preserve"><value>媒体源</value></data>
+  <data name="tv.settings.group.about" xml:space="preserve"><value>关于</value></data>
+  <data name="tv.settings.endAction" xml:space="preserve"><value>播放结束动作</value></data>
+  <data name="tv.settings.endAction.next" xml:space="preserve"><value>自动播放下一集</value></data>
+  <data name="tv.settings.endAction.return" xml:space="preserve"><value>返回详情页</value></data>
+  <data name="tv.settings.subtitleLanguage" xml:space="preserve"><value>字幕语言优先级</value></data>
+  <data name="tv.settings.subtitle.auto" xml:space="preserve"><value>自动</value></data>
+  <data name="tv.settings.subtitle.zhHans" xml:space="preserve"><value>简体中文</value></data>
+  <data name="tv.settings.subtitle.zhHant" xml:space="preserve"><value>繁体中文</value></data>
+  <data name="tv.settings.subtitle.en" xml:space="preserve"><value>英语</value></data>
+  <data name="tv.settings.subtitle.ja" xml:space="preserve"><value>日语</value></data>
+  <data name="tv.settings.startTvMode" xml:space="preserve"><value>启动时进入电视模式</value></data>
+  <data name="tv.settings.remotePreset" xml:space="preserve"><value>遥控器预设</value></data>
+  <data name="tv.settings.preset.general" xml:space="preserve"><value>通用键盘</value></data>
+  <data name="tv.settings.preset.mce" xml:space="preserve"><value>MCE RC6</value></data>
+  <data name="tv.settings.preset.firetv" xml:space="preserve"><value>Fire TV</value></data>
+  <data name="tv.settings.exitHold" xml:space="preserve"><value>长按返回退出时长</value></data>
+  <data name="tv.settings.exitHoldValue" xml:space="preserve"><value>{0} 毫秒</value></data>
+  <data name="tv.settings.clock" xml:space="preserve"><value>首页时钟</value></data>
+  <data name="tv.settings.sound" xml:space="preserve"><value>焦点音效（预留，暂未启用）</value></data>
+  <data name="tv.settings.on" xml:space="preserve"><value>开</value></data>
+  <data name="tv.settings.off" xml:space="preserve"><value>关</value></data>
+  <data name="tv.settings.source" xml:space="preserve"><value>当前来源</value></data>
+  <data name="tv.settings.sourcePath" xml:space="preserve"><value>位置</value></data>
+  <data name="tv.settings.sourceNone" xml:space="preserve"><value>未配置来源</value></data>
+  <data name="tv.settings.sourceEdit" xml:space="preserve"><value>文本配置请在桌面模式修改</value></data>
+  <data name="tv.settings.sourceEditHint" xml:space="preserve"><value>电视端不弹出键盘，请在桌面模式编辑</value></data>
+  <data name="tv.settings.version" xml:space="preserve"><value>版本</value></data>
+  <data name="tv.settings.appMode" xml:space="preserve"><value>内容模式</value></data>
+  <data name="tv.settings.modeAnime" xml:space="preserve"><value>动画</value></data>
+  <data name="tv.settings.modeDrama" xml:space="preserve"><value>剧集</value></data>
+  <data name="tv.settings.diagnostics" xml:space="preserve"><value>遥控器诊断</value></data>
+  <data name="tv.settings.diagnosticsHint" xml:space="preserve"><value>按键会显示在演示角标（--tv-demo）</value></data>
+  <data name="tv.settings.exitTv" xml:space="preserve"><value>退出电视模式</value></data>
+  <data name="tv.settings.phoneHint" xml:space="preserve"><value>电视端暂不支持编辑，请在桌面模式修改</value></data>
+  <data name="tv.settings.restartHint" xml:space="preserve"><value>重启 MiruPlay 后生效</value></data>
+  <data name="tv.exit.hold" xml:space="preserve"><value>继续按住 Back 退出电视模式</value></data>
+  <data name="tv.exit.hint" xml:space="preserve"><value>松开取消</value></data>
+  <data name="tv.key.up" xml:space="preserve"><value>上</value></data>
+  <data name="tv.key.down" xml:space="preserve"><value>下</value></data>
+  <data name="tv.key.left" xml:space="preserve"><value>左</value></data>
+  <data name="tv.key.right" xml:space="preserve"><value>右</value></data>
+  <data name="tv.key.select" xml:space="preserve"><value>确定</value></data>
+  <data name="tv.key.back" xml:space="preserve"><value>返回</value></data>
+  <data name="tv.key.home" xml:space="preserve"><value>首页</value></data>
+  <data name="tv.key.menu" xml:space="preserve"><value>菜单</value></data>
+  <data name="tv.key.playPause" xml:space="preserve"><value>播放/暂停</value></data>
+  <data name="tv.key.seekBack" xml:space="preserve"><value>快退</value></data>
+  <data name="tv.key.seekForward" xml:space="preserve"><value>快进</value></data>
+  <data name="tv.key.prev" xml:space="preserve"><value>上一集</value></data>
+  <data name="tv.key.next" xml:space="preserve"><value>下一集</value></data>
+  <data name="tv.settings.entry" xml:space="preserve"><value>电视模式</value></data>
+  <data name="tv.settings.entryTitle" xml:space="preserve"><value>大屏遥控模式</value></data>
+  <data name="tv.settings.entryHint" xml:space="preserve"><value>无边框全屏、左侧导航、按遥控器操作；长按 Back 2 秒返回桌面模式。</value></data>
+  <data name="tv.settings.enter" xml:space="preserve"><value>进入电视模式</value></data>
+  <data name="tv.settings.startWithTv" xml:space="preserve"><value>启动时进入电视模式</value></data>
+  <data name="tv.player.error.retry" xml:space="preserve"><value>重试</value></data>
   <data name="playback.balance" xml:space="preserve"><value>响度平衡</value></data>
   <data name="playback.balanceHint" xml:space="preserve"><value>自动压低过响片段、提升偏轻片段。仅作用于内嵌 mpv 播放；正在播放时会立即应用。</value></data>
   <data name="playback.balanceOff" xml:space="preserve"><value>关闭</value></data>

@@ -1184,6 +1184,181 @@
   <data name="wpf.music.albumOne" xml:space="preserve"><value>{0} album.</value></data>
   <data name="wpf.music.trackOne" xml:space="preserve"><value>{0} track.</value></data>
   <data name="wpf.music.trackCount" xml:space="preserve"><value>{0} tracks.</value></data>
+  <data name="tv.shell.title" xml:space="preserve"><value>MiruPlay TV</value></data>
+  <data name="tv.nav.home" xml:space="preserve"><value>Home</value></data>
+  <data name="tv.nav.library" xml:space="preserve"><value>Library</value></data>
+  <data name="tv.nav.search" xml:space="preserve"><value>Search</value></data>
+  <data name="tv.nav.settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="tv.nav.exit" xml:space="preserve"><value>Exit</value></data>
+  <data name="tv.hint.nav" xml:space="preserve"><value>↑↓ Select   OK Open   → Content   Back Close</value></data>
+  <data name="tv.hint.home" xml:space="preserve"><value>←→ Select   OK Open   Back Previous   Hold Back to exit</value></data>
+  <data name="tv.hint.library" xml:space="preserve"><value>←→ Select   ↑↓ Rows  Edges flip pages   OK Details   Back</value></data>
+  <data name="tv.hint.detail" xml:space="preserve"><value>←→ Select episode   OK Play   Back Return</value></data>
+  <data name="tv.hint.search" xml:space="preserve"><value>OK Type   ←→ Move   Back Return</value></data>
+  <data name="tv.hint.settings" xml:space="preserve"><value>←→ Adjust   OK Toggle   Back Return</value></data>
+  <data name="tv.loading" xml:space="preserve"><value>Loading library…</value></data>
+  <data name="tv.loading.detail" xml:space="preserve"><value>Reading the configured MLIP source (no scan)</value></data>
+  <data name="tv.error.library" xml:space="preserve"><value>Could not load the library</value></data>
+  <data name="tv.error.retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="tv.error.hint" xml:space="preserve"><value>OK Retry   Back Exit TV mode</value></data>
+  <data name="tv.toast.atHome" xml:space="preserve"><value>Already on Home</value></data>
+  <data name="tv.toast.noEpisodes" xml:space="preserve"><value>No playable episodes in this title</value></data>
+  <data name="tv.card.episodes" xml:space="preserve"><value>{0} episodes</value></data>
+  <data name="tv.card.watched" xml:space="preserve"><value>Watched {0}/{1}</value></data>
+  <data name="tv.card.remainingM" xml:space="preserve"><value>{0} min left</value></data>
+  <data name="tv.card.remainingHm" xml:space="preserve"><value>{0} h {1} min left</value></data>
+  <data name="tv.genre.unknown" xml:space="preserve"><value>Uncategorised</value></data>
+  <data name="tv.home.hero.continue" xml:space="preserve"><value>Continue watching</value></data>
+  <data name="tv.home.hero.featured" xml:space="preserve"><value>Featured</value></data>
+  <data name="tv.home.hero.resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="tv.home.hero.play" xml:space="preserve"><value>Play</value></data>
+  <data name="tv.home.hero.detail" xml:space="preserve"><value>View details</value></data>
+  <data name="tv.home.empty" xml:space="preserve"><value>Library is empty</value></data>
+  <data name="tv.home.row.continue" xml:space="preserve"><value>Continue watching</value></data>
+  <data name="tv.home.row.recent" xml:space="preserve"><value>Recently added</value></data>
+  <data name="tv.home.row.categories" xml:space="preserve"><value>Categories</value></data>
+  <data name="tv.home.row.all" xml:space="preserve"><value>All titles</value></data>
+  <data name="tv.home.allMore" xml:space="preserve"><value>See all</value></data>
+  <data name="tv.home.allCount" xml:space="preserve"><value>{0} titles</value></data>
+  <data name="tv.home.genre" xml:space="preserve"><value>Category</value></data>
+  <data name="tv.home.genre.count" xml:space="preserve"><value>{0} titles</value></data>
+  <data name="tv.library.filter.all" xml:space="preserve"><value>All</value></data>
+  <data name="tv.library.filter.allGenres" xml:space="preserve"><value>All</value></data>
+  <data name="tv.library.filter.genre" xml:space="preserve"><value>Category</value></data>
+  <data name="tv.library.filter.genreValue" xml:space="preserve"><value>Category: {0}</value></data>
+  <data name="tv.library.filter.sort" xml:space="preserve"><value>Sort</value></data>
+  <data name="tv.library.filter.search" xml:space="preserve"><value>Search</value></data>
+  <data name="tv.library.sort.title" xml:space="preserve"><value>Sort: Title</value></data>
+  <data name="tv.library.sort.date" xml:space="preserve"><value>Sort: Date</value></data>
+  <data name="tv.library.summary" xml:space="preserve"><value>{0} titles</value></data>
+  <data name="tv.library.page" xml:space="preserve"><value>Page {0} / {1}</value></data>
+  <data name="tv.detail.play" xml:space="preserve"><value>Play</value></data>
+  <data name="tv.detail.resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="tv.detail.fromStart" xml:space="preserve"><value>From start</value></data>
+  <data name="tv.detail.version" xml:space="preserve"><value>Versions</value></data>
+  <data name="tv.detail.versions" xml:space="preserve"><value>{0} versions</value></data>
+  <data name="tv.detail.versionTitle" xml:space="preserve"><value>Choose a version</value></data>
+  <data name="tv.detail.favorite" xml:space="preserve"><value>Favourite</value></data>
+  <data name="tv.detail.favorited" xml:space="preserve"><value>Favourited</value></data>
+  <data name="tv.detail.favoriteOn" xml:space="preserve"><value>Added to favourites (local demo)</value></data>
+  <data name="tv.detail.favoriteOff" xml:space="preserve"><value>Removed from favourites</value></data>
+  <data name="tv.detail.episodes" xml:space="preserve"><value>Episodes</value></data>
+  <data name="tv.detail.episodeCount" xml:space="preserve"><value>{0} episodes</value></data>
+  <data name="tv.detail.watched" xml:space="preserve"><value>Watched</value></data>
+  <data name="tv.detail.progress" xml:space="preserve"><value>{0}% watched</value></data>
+  <data name="tv.detail.noSummary" xml:space="preserve"><value>No summary</value></data>
+  <data name="tv.player.loading" xml:space="preserve"><value>Opening video…</value></data>
+  <data name="tv.player.back" xml:space="preserve"><value>Back Return</value></data>
+  <data name="tv.player.prev" xml:space="preserve"><value>Previous</value></data>
+  <data name="tv.player.next" xml:space="preserve"><value>Next</value></data>
+  <data name="tv.player.seekBack" xml:space="preserve"><value>-10s</value></data>
+  <data name="tv.player.seekForward" xml:space="preserve"><value>+30s</value></data>
+  <data name="tv.player.play" xml:space="preserve"><value>Play</value></data>
+  <data name="tv.player.pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="tv.player.playing" xml:space="preserve"><value>Playing</value></data>
+  <data name="tv.player.paused" xml:space="preserve"><value>Paused</value></data>
+  <data name="tv.player.finished" xml:space="preserve"><value>Playback finished</value></data>
+  <data name="tv.player.stopped" xml:space="preserve"><value>Stopped</value></data>
+  <data name="tv.player.nextNow" xml:space="preserve"><value>Playing next episode</value></data>
+  <data name="tv.player.noAdjacent" xml:space="preserve"><value>No more episodes</value></data>
+  <data name="tv.player.seekBackDone" xml:space="preserve"><value>Rewound {0}s</value></data>
+  <data name="tv.player.seekForwardDone" xml:space="preserve"><value>Forwarded {0}s</value></data>
+  <data name="tv.player.speedSet" xml:space="preserve"><value>Speed {0}</value></data>
+  <data name="tv.player.speedValue" xml:space="preserve"><value>Speed {0}</value></data>
+  <data name="tv.player.volume" xml:space="preserve"><value>Volume {0}%</value></data>
+  <data name="tv.player.muted" xml:space="preserve"><value>Muted</value></data>
+  <data name="tv.player.unmuted" xml:space="preserve"><value>Unmuted</value></data>
+  <data name="tv.player.subtitleValue" xml:space="preserve"><value>Subtitle: {0}</value></data>
+  <data name="tv.player.audioValue" xml:space="preserve"><value>Audio: {0}</value></data>
+  <data name="tv.player.subtitleOff" xml:space="preserve"><value>Off</value></data>
+  <data name="tv.player.subtitleOn" xml:space="preserve"><value>On</value></data>
+  <data name="tv.player.subtitleSet" xml:space="preserve"><value>Subtitle: {0}</value></data>
+  <data name="tv.player.audioDefault" xml:space="preserve"><value>Default</value></data>
+  <data name="tv.player.audioSet" xml:space="preserve"><value>Audio: {0}</value></data>
+  <data name="tv.player.external" xml:space="preserve"><value>External</value></data>
+  <data name="tv.player.info" xml:space="preserve"><value>Info</value></data>
+  <data name="tv.player.drawer.subtitles" xml:space="preserve"><value>Subtitles</value></data>
+  <data name="tv.player.drawer.audio" xml:space="preserve"><value>Audio</value></data>
+  <data name="tv.player.drawer.speed" xml:space="preserve"><value>Speed</value></data>
+  <data name="tv.player.drawer.info" xml:space="preserve"><value>Playback info</value></data>
+  <data name="tv.player.info.file" xml:space="preserve"><value>File</value></data>
+  <data name="tv.player.info.video" xml:space="preserve"><value>Video</value></data>
+  <data name="tv.player.info.audio" xml:space="preserve"><value>Audio</value></data>
+  <data name="tv.player.info.container" xml:space="preserve"><value>Container</value></data>
+  <data name="tv.player.info.speed" xml:space="preserve"><value>Speed</value></data>
+  <data name="tv.player.info.volume" xml:space="preserve"><value>Volume</value></data>
+  <data name="tv.player.info.status" xml:space="preserve"><value>Status</value></data>
+  <data name="tv.player.error.title" xml:space="preserve"><value>Playback failed</value></data>
+  <data name="tv.player.error.hint" xml:space="preserve"><value>OK Retry   Back Return</value></data>
+  <data name="tv.player.error.degraded" xml:space="preserve"><value>System player fallback is unavailable in TV mode: {0}</value></data>
+  <data name="tv.search.title" xml:space="preserve"><value>Search</value></data>
+  <data name="tv.search.placeholder" xml:space="preserve"><value>Type a title (Chinese input isn't available on TV; use a physical keyboard)</value></data>
+  <data name="tv.search.space" xml:space="preserve"><value>Space</value></data>
+  <data name="tv.search.clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="tv.search.recent" xml:space="preserve"><value>Recent searches</value></data>
+  <data name="tv.search.results" xml:space="preserve"><value>Results</value></data>
+  <data name="tv.search.empty" xml:space="preserve"><value>No matching titles</value></data>
+  <data name="tv.settings.title" xml:space="preserve"><value>Settings</value></data>
+  <data name="tv.settings.subtitle" xml:space="preserve"><value>TV mode settings; edit text fields in desktop mode</value></data>
+  <data name="tv.settings.group.playback" xml:space="preserve"><value>Playback</value></data>
+  <data name="tv.settings.group.tv" xml:space="preserve"><value>TV &amp; remote</value></data>
+  <data name="tv.settings.group.source" xml:space="preserve"><value>Media source</value></data>
+  <data name="tv.settings.group.about" xml:space="preserve"><value>About</value></data>
+  <data name="tv.settings.endAction" xml:space="preserve"><value>Playback end action</value></data>
+  <data name="tv.settings.endAction.next" xml:space="preserve"><value>Play next episode</value></data>
+  <data name="tv.settings.endAction.return" xml:space="preserve"><value>Return to details</value></data>
+  <data name="tv.settings.subtitleLanguage" xml:space="preserve"><value>Subtitle language priority</value></data>
+  <data name="tv.settings.subtitle.auto" xml:space="preserve"><value>Automatic</value></data>
+  <data name="tv.settings.subtitle.zhHans" xml:space="preserve"><value>Simplified Chinese</value></data>
+  <data name="tv.settings.subtitle.zhHant" xml:space="preserve"><value>Traditional Chinese</value></data>
+  <data name="tv.settings.subtitle.en" xml:space="preserve"><value>English</value></data>
+  <data name="tv.settings.subtitle.ja" xml:space="preserve"><value>Japanese</value></data>
+  <data name="tv.settings.startTvMode" xml:space="preserve"><value>Start in TV mode</value></data>
+  <data name="tv.settings.remotePreset" xml:space="preserve"><value>Remote preset</value></data>
+  <data name="tv.settings.preset.general" xml:space="preserve"><value>General keyboard</value></data>
+  <data name="tv.settings.preset.mce" xml:space="preserve"><value>MCE RC6</value></data>
+  <data name="tv.settings.preset.firetv" xml:space="preserve"><value>Fire TV</value></data>
+  <data name="tv.settings.exitHold" xml:space="preserve"><value>Hold Back to exit</value></data>
+  <data name="tv.settings.exitHoldValue" xml:space="preserve"><value>{0} ms</value></data>
+  <data name="tv.settings.clock" xml:space="preserve"><value>Clock</value></data>
+  <data name="tv.settings.sound" xml:space="preserve"><value>Focus sounds (reserved, not enabled yet)</value></data>
+  <data name="tv.settings.on" xml:space="preserve"><value>On</value></data>
+  <data name="tv.settings.off" xml:space="preserve"><value>Off</value></data>
+  <data name="tv.settings.source" xml:space="preserve"><value>Active source</value></data>
+  <data name="tv.settings.sourcePath" xml:space="preserve"><value>Location</value></data>
+  <data name="tv.settings.sourceNone" xml:space="preserve"><value>No source configured</value></data>
+  <data name="tv.settings.sourceEdit" xml:space="preserve"><value>Edit text settings in desktop mode</value></data>
+  <data name="tv.settings.sourceEditHint" xml:space="preserve"><value>No keyboard on TV; edit this in desktop mode</value></data>
+  <data name="tv.settings.version" xml:space="preserve"><value>Version</value></data>
+  <data name="tv.settings.appMode" xml:space="preserve"><value>Content mode</value></data>
+  <data name="tv.settings.modeAnime" xml:space="preserve"><value>Anime</value></data>
+  <data name="tv.settings.modeDrama" xml:space="preserve"><value>Drama</value></data>
+  <data name="tv.settings.diagnostics" xml:space="preserve"><value>Remote diagnostics</value></data>
+  <data name="tv.settings.diagnosticsHint" xml:space="preserve"><value>Keys show in the demo badge (--tv-demo)</value></data>
+  <data name="tv.settings.exitTv" xml:space="preserve"><value>Exit TV mode</value></data>
+  <data name="tv.settings.phoneHint" xml:space="preserve"><value>Not editable on TV; please use desktop mode</value></data>
+  <data name="tv.settings.restartHint" xml:space="preserve"><value>Takes effect after restarting MiruPlay</value></data>
+  <data name="tv.exit.hold" xml:space="preserve"><value>Keep holding Back to exit TV mode</value></data>
+  <data name="tv.exit.hint" xml:space="preserve"><value>Release to cancel</value></data>
+  <data name="tv.key.up" xml:space="preserve"><value>Up</value></data>
+  <data name="tv.key.down" xml:space="preserve"><value>Down</value></data>
+  <data name="tv.key.left" xml:space="preserve"><value>Left</value></data>
+  <data name="tv.key.right" xml:space="preserve"><value>Right</value></data>
+  <data name="tv.key.select" xml:space="preserve"><value>OK</value></data>
+  <data name="tv.key.back" xml:space="preserve"><value>Back</value></data>
+  <data name="tv.key.home" xml:space="preserve"><value>Home</value></data>
+  <data name="tv.key.menu" xml:space="preserve"><value>Menu</value></data>
+  <data name="tv.key.playPause" xml:space="preserve"><value>Play/Pause</value></data>
+  <data name="tv.key.seekBack" xml:space="preserve"><value>Rewind</value></data>
+  <data name="tv.key.seekForward" xml:space="preserve"><value>Forward</value></data>
+  <data name="tv.key.prev" xml:space="preserve"><value>Previous</value></data>
+  <data name="tv.key.next" xml:space="preserve"><value>Next</value></data>
+  <data name="tv.settings.entry" xml:space="preserve"><value>TV mode</value></data>
+  <data name="tv.settings.entryTitle" xml:space="preserve"><value>Big-screen remote mode</value></data>
+  <data name="tv.settings.entryHint" xml:space="preserve"><value>Borderless full screen with left navigation and remote-first controls. Hold Back for 2 seconds to return to desktop mode.</value></data>
+  <data name="tv.settings.enter" xml:space="preserve"><value>Enter TV mode</value></data>
+  <data name="tv.settings.startWithTv" xml:space="preserve"><value>Start in TV mode</value></data>
+  <data name="tv.player.error.retry" xml:space="preserve"><value>Retry</value></data>
   <data name="playback.balance" xml:space="preserve"><value>Loudness balance</value></data>
   <data name="playback.balanceHint" xml:space="preserve"><value>Automatically lowers loud passages and lifts quiet ones. Applies to embedded mpv playback only; changes take effect immediately while playing.</value></data>
   <data name="playback.balanceOff" xml:space="preserve"><value>Off</value></data>

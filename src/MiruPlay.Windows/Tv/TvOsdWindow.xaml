@@ -1,0 +1,144 @@
+<Window x:Class="MiruPlay.Windows.Tv.TvOsdWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MiruPlay TV OSD"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        Topmost="True"
+        Focusable="False"
+        IsHitTestVisible="False"
+        Width="1920" Height="1080">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiruPlay;component/Tv/TvTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="OsdButton" TargetType="Border">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="3" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Padding" Value="18,10" />
+                <Setter Property="Margin" Value="5,0" />
+                <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid x:Name="RootLayer" Opacity="0" IsHitTestVisible="False">
+        <!-- top bar -->
+        <Grid VerticalAlignment="Top" Margin="68,48,68,0" IsHitTestVisible="False">
+            <StackPanel HorizontalAlignment="Left">
+                <TextBlock x:Name="TitleText" FontSize="30" FontWeight="SemiBold" />
+                <TextBlock x:Name="SubtitleText" FontSize="17" Margin="0,5,0,0"
+                           Foreground="{StaticResource TvTextSecondaryBrush}" />
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                <Border Background="#990B0B0D" CornerRadius="8" Padding="12,7" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <TextBlock x:Name="MetaText" FontSize="16" VerticalAlignment="Center"
+                               Foreground="{StaticResource TvTextSecondaryBrush}" />
+                </Border>
+                <Border Background="#B3121216" CornerRadius="8" Padding="14,7" VerticalAlignment="Center">
+                    <TextBlock x:Name="BackHintText" FontSize="16" IsHitTestVisible="False" />
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- bottom control panel -->
+        <Border x:Name="BottomPanel" VerticalAlignment="Bottom" Margin="68,0,68,56"
+                Background="#F0121216" CornerRadius="16" Padding="34,22,30,18"
+                BorderBrush="#26FFFFFF" BorderThickness="1" IsHitTestVisible="False">
+            <StackPanel>
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="ElapsedText" FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <ProgressBar x:Name="TimelineBar" Grid.Column="1" Height="6" Margin="20,0"
+                                 Style="{StaticResource TvProgressBar}" Maximum="1" Value="0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="DurationText" Grid.Column="2" FontSize="19" VerticalAlignment="Center"
+                               Foreground="{StaticResource TvTextSecondaryBrush}" />
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Border x:Name="Transport0" Style="{StaticResource OsdButton}">
+                            <TextBlock x:Name="TransportText0" FontSize="19" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="Transport1" Style="{StaticResource OsdButton}">
+                            <TextBlock x:Name="TransportText1" FontSize="19" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="Transport2" Style="{StaticResource OsdButton}" Padding="22,8">
+                            <TextBlock x:Name="TransportText2" FontSize="24" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="Transport3" Style="{StaticResource OsdButton}">
+                            <TextBlock x:Name="TransportText3" FontSize="19" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="Transport4" Style="{StaticResource OsdButton}">
+                            <TextBlock x:Name="TransportText4" FontSize="19" VerticalAlignment="Center" />
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Border x:Name="Chip0" Style="{StaticResource OsdButton}" Padding="16,9" Margin="4,0">
+                            <TextBlock x:Name="ChipText0" FontSize="17" VerticalAlignment="Center"
+                                       Foreground="{StaticResource TvTextSecondaryBrush}" />
+                        </Border>
+                        <Border x:Name="Chip1" Style="{StaticResource OsdButton}" Padding="16,9" Margin="4,0">
+                            <TextBlock x:Name="ChipText1" FontSize="17" VerticalAlignment="Center"
+                                       Foreground="{StaticResource TvTextSecondaryBrush}" />
+                        </Border>
+                        <Border x:Name="Chip2" Style="{StaticResource OsdButton}" Padding="16,9" Margin="4,0">
+                            <TextBlock x:Name="ChipText2" FontSize="17" VerticalAlignment="Center"
+                                       Foreground="{StaticResource TvTextSecondaryBrush}" />
+                        </Border>
+                        <Border x:Name="Chip3" Style="{StaticResource OsdButton}" Padding="16,9" Margin="4,0">
+                            <TextBlock x:Name="ChipText3" FontSize="17" VerticalAlignment="Center"
+                                       Foreground="{StaticResource TvTextSecondaryBrush}" />
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- right drawer -->
+        <Border x:Name="DrawerPanel" HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="500"
+                Margin="0,24,24,24" Background="#F2121216" CornerRadius="16"
+                BorderBrush="#26FFFFFF" BorderThickness="1" IsHitTestVisible="False" Visibility="Collapsed">
+            <DockPanel Margin="32,28,24,24">
+                <TextBlock x:Name="DrawerTitle" DockPanel.Dock="Top" FontSize="26" FontWeight="SemiBold"
+                           Margin="0,0,0,16" />
+                <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="DrawerList" />
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- transient status -->
+        <Border x:Name="StatusPill" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="#E6121216" CornerRadius="12" Padding="28,14" Visibility="Collapsed"
+                Margin="0,0,0,120" IsHitTestVisible="False">
+            <TextBlock x:Name="StatusText" FontSize="24" />
+        </Border>
+
+        <!-- error layer -->
+        <Border x:Name="ErrorLayer" Background="#E60B0B0D" Visibility="Collapsed" IsHitTestVisible="False">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="1050">
+                <TextBlock x:Name="ErrorTitle" FontSize="32" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                <TextBlock x:Name="ErrorMessage" FontSize="19" Margin="0,16,0,0" TextWrapping="Wrap"
+                           TextAlignment="Center" Foreground="{StaticResource TvTextSecondaryBrush}" />
+                <TextBlock x:Name="ErrorHint" FontSize="17" Margin="0,22,0,0" HorizontalAlignment="Center"
+                           Foreground="{StaticResource TvTextMutedBrush}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
