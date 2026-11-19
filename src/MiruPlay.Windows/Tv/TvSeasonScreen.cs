@@ -43,6 +43,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
     private readonly List<(TvPosterCard Card, string? Path)> _seasonPosterSources = [];
     private readonly List<TvZone> _scheduleRowZones = [];
     private readonly TvBangumiCalendarService _calendar;
+    private readonly AirRadarScheduleService _airRadar;
     private IReadOnlyList<LibrarySeries>? _seasonBuiltFor;
     private int _seasonBuildVersion;
     private TvZone? _modeZone;
@@ -55,6 +56,12 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
     private bool _calendarLoading;
     private string? _calendarError;
     private bool _calendarStale;
+    private bool _airRadarLoading;
+    private AirRadarScheduleData? _airRadarData;
+    private string? _airRadarError;
+    private bool _airRadarStale;
+    private bool _scheduleLoadStarted;
+    private string _scheduleUrlLoaded = string.Empty;
     private bool _disposed;
 
     public TvSeasonScreen(TvAppContext context, TvShellWindow shell)
@@ -66,6 +73,9 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
 
         var config = new CloudDriveAutomationStore().Load();
         _calendar = new TvBangumiCalendarService(
+            handler: OutboundHttpProxy.CreateHandler(config.RssProxyEnabled, config.RssProxyHost, config.RssProxyPort));
+        _airRadar = new AirRadarScheduleService(
+            () => _context.Settings.ScheduleDataSourceUrl,
             handler: OutboundHttpProxy.CreateHandler(config.RssProxyEnabled, config.RssProxyHost, config.RssProxyPort));
 
         var header = new StackPanel { Margin = new Thickness(64, 26, 64, 0) };
@@ -173,14 +183,23 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
         }
         if (_mode == NewSeasonMode.Season) EnsureSeasonBuilt();
         base.OnActivated(focusKey);
-        if (_mode == NewSeasonMode.Schedule && !_calendarLoaded && !_calendarLoading) _ = LoadCalendarAsync();
+        if (_mode == NewSeasonMode.Schedule)
+        {
+            var url = AppSettingsStore.NormalizeScheduleDataSourceUrl(_context.Settings.ScheduleDataSourceUrl);
+            if (!_scheduleLoadStarted || !string.Equals(url, _scheduleUrlLoaded, StringComparison.Ordinal))
+            {
+                _scheduleLoadStarted = true;
+                _scheduleUrlLoaded = url;
+                _ = LoadScheduleAsync();
+            }
+        }
     }
 
     public override bool HandleAction(TvInputAction action)
     {
-        if (action == TvInputAction.Select && _mode == NewSeasonMode.Schedule && _calendarError is not null)
+        if (action == TvInputAction.Select && _mode == NewSeasonMode.Schedule && (_calendarError is not null || _airRadarError is not null))
         {
-            _ = LoadCalendarAsync(forceRefresh: true);
+            _ = LoadScheduleAsync(forceRefresh: true);
             return true;
         }
         if (ActiveZone == _modeZone)
@@ -197,7 +216,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
             }
             if (action == TvInputAction.Down)
             {
-                if (_mode == NewSeasonMode.Schedule) FocusZone(_weekZone!, _weekOffset + 1);
+                if (_mode == NewSeasonMode.Schedule && _airRadarData is null) FocusZone(_weekZone!, _weekOffset + 1);
                 else FocusContent();
                 return true;
             }
@@ -216,7 +235,8 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
             {
                 if (action == TvInputAction.Up && rowIndex == 0)
                 {
-                    FocusZone(_weekZone!, _weekOffset + 1);
+                    if (_airRadarData is not null) FocusZone(_modeZone!, (int)NewSeasonMode.Schedule);
+                    else FocusZone(_weekZone!, _weekOffset + 1);
                     return true;
                 }
                 var target = Math.Clamp(rowIndex + (action == TvInputAction.Down ? 1 : -1), 0, Math.Max(0, _scheduleRowZones.Count - 1));
@@ -237,7 +257,14 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
         _mode = mode;
         UpdateModeUi();
         if (mode == NewSeasonMode.Season) EnsureSeasonBuilt();
-        if (mode == NewSeasonMode.Schedule && !_calendarLoaded && !_calendarLoading) _ = LoadCalendarAsync();
+        if (mode == NewSeasonMode.Schedule && (!_scheduleLoadStarted || !string.Equals(
+                AppSettingsStore.NormalizeScheduleDataSourceUrl(_context.Settings.ScheduleDataSourceUrl),
+                _scheduleUrlLoaded, StringComparison.Ordinal)))
+        {
+            _scheduleLoadStarted = true;
+            _scheduleUrlLoaded = AppSettingsStore.NormalizeScheduleDataSourceUrl(_context.Settings.ScheduleDataSourceUrl);
+            _ = LoadScheduleAsync();
+        }
         FocusZone(_modeZone!, (int)mode);
     }
 
@@ -245,7 +272,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
     {
         for (var index = 0; index < _modeButtons.Count; index++)
             _modeButtons[index].Tag = index == (int)_mode ? "active" : null;
-        _weekHost.Visibility = _mode == NewSeasonMode.Schedule ? Visibility.Visible : Visibility.Collapsed;
+        _weekHost.Visibility = _mode == NewSeasonMode.Schedule && _airRadarData is null ? Visibility.Visible : Visibility.Collapsed;
         _seasonScroll.Visibility = _mode == NewSeasonMode.Season ? Visibility.Visible : Visibility.Collapsed;
         _scheduleScroll.Visibility = _mode == NewSeasonMode.Schedule ? Visibility.Visible : Visibility.Collapsed;
         UpdateWeekSelection();
@@ -258,6 +285,18 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
         {
             var count = _seasonCards.Count;
             _status.Text = count > 0 ? AppStrings.Get("tv.season.summary", count) : AppStrings.Get("tv.season.empty");
+        }
+        else if (_airRadarData is not null)
+        {
+            _status.Text = _airRadarStale
+                ? AppStrings.Get("tv.schedule.airradarStale")
+                : string.IsNullOrWhiteSpace(_airRadarData.Season)
+                    ? string.Empty
+                    : AppStrings.Get("tv.schedule.airradarSeason", _airRadarData.Season);
+        }
+        else if (_airRadarError is not null)
+        {
+            _status.Text = AppStrings.Get("tv.schedule.airradarFallback");
         }
         else if (_calendarError is not null)
         {
@@ -306,6 +345,48 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
         FocusZone(_scheduleRowZones[row], Math.Clamp(column, 0, _scheduleRowZones[row].Items.Count - 1));
     }
 
+    private async Task LoadScheduleAsync(bool forceRefresh = false)
+    {
+        var url = AppSettingsStore.NormalizeScheduleDataSourceUrl(_context.Settings.ScheduleDataSourceUrl);
+        if (url.Length == 0)
+        {
+            await LoadCalendarAsync(forceRefresh);
+            return;
+        }
+        if (_airRadarLoading || _calendarLoading) return;
+        _airRadarLoading = true;
+        _airRadarError = null;
+        UpdateStatusText();
+        try
+        {
+            var result = await _airRadar.LoadAsync(forceRefresh);
+            if (_disposed) return;
+            if (result.Data is null)
+            {
+                _airRadarData = null;
+                _airRadarError = result.Error ?? "unknown";
+                _shell.ShowToast(AppStrings.Get("tv.schedule.airradarFallback"));
+                await LoadCalendarAsync(forceRefresh);
+                return;
+            }
+            _airRadarData = result.Data;
+            _airRadarStale = result.Stale;
+            _calendarData = null;
+            UpdateWeekVisibility();
+            BuildSchedule();
+            UpdateStatusText();
+        }
+        finally
+        {
+            _airRadarLoading = false;
+            UpdateStatusText();
+        }
+    }
+
+    private void UpdateWeekVisibility() =>
+        _weekHost.Visibility = _mode == NewSeasonMode.Schedule && _airRadarData is null
+            ? Visibility.Visible : Visibility.Collapsed;
+
     private async Task LoadCalendarAsync(bool forceRefresh = false)
     {
         if (_calendarLoading) return;
@@ -340,6 +421,11 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
         foreach (var zone in _scheduleRowZones) UnregisterZone(zone);
         _scheduleRowZones.Clear();
         _scheduleBody.Children.Clear();
+        if (_airRadarData is not null)
+        {
+            BuildAirRadarSchedule();
+            return;
+        }
         if (_calendarData is null) return;
 
         var today = DateOnly.FromDateTime(DateTime.Now);
@@ -417,6 +503,123 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
             _scheduleRowZones.Add(zone);
         }
     }
+
+    private void BuildAirRadarSchedule()
+    {
+        if (_airRadarData is null) return;
+        var days = AirRadarScheduleService.BuildWeek(_airRadarData);
+        var hasEntries = days.Any(day => day.Entries.Count > 0);
+        if (!hasEntries)
+        {
+            _scheduleBody.Children.Add(new TextBlock
+            {
+                Text = AppStrings.Get("tv.schedule.emptyWeek"),
+                FontSize = 20,
+                Foreground = (Brush)FindResource("TvTextMutedBrush"),
+                Margin = new Thickness(0, 20, 0, 0),
+            });
+            return;
+        }
+        foreach (var day in days)
+        {
+            var header = new TextBlock
+            {
+                Text = TvAirWeekdayLabels.Title(ToTvWeekday(day.Weekday)),
+                FontSize = 24,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = (Brush)FindResource("TvTextBrush"),
+                Margin = new Thickness(0, 22, 0, 8),
+            };
+            _scheduleBody.Children.Add(header);
+            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 24, 0) };
+            var cards = new List<FrameworkElement>();
+            if (day.Entries.Count == 0)
+            {
+                row.Children.Add(new TextBlock
+                {
+                    Text = AppStrings.Get("tv.schedule.emptyDay"),
+                    FontSize = 16,
+                    Foreground = (Brush)FindResource("TvTextMutedBrush"),
+                    Margin = new Thickness(4, 8, 0, 16),
+                });
+            }
+            foreach (var entry in day.Entries)
+            {
+                var card = CreateAirRadarCard(entry);
+                row.Children.Add(card);
+                cards.Add(card);
+            }
+            var scroller = new ScrollViewer
+            {
+                Style = TvTheme.Style(this, "TvScrollViewerStyle"),
+                Content = row,
+                Margin = new Thickness(0, 0, 0, 6),
+            };
+            _scheduleBody.Children.Add(scroller);
+            var zone = new TvZone($"schedule-day-{(int)ToTvWeekday(day.Weekday)}", TvZoneKind.Horizontal, cards);
+            RegisterZone(zone);
+            _scheduleRowZones.Add(zone);
+        }
+    }
+
+    private TvPosterCard CreateAirRadarCard(AirRadarLocalEntry entry)
+    {
+        var dayLabel = TvAirWeekdayLabels.Title(ToTvWeekday(entry.LocalTime.DayOfWeek));
+        var timeLabel = string.IsNullOrEmpty(entry.TimeText)
+            ? dayLabel + "  " + AppStrings.Get("tv.schedule.timeUnknown")
+            : $"{dayLabel} {entry.TimeText}";
+        var local = AirRadarScheduleService.MatchLibrary(_context.AllSeries, entry.Item);
+        var card = new TvPosterCard
+        {
+            Style = TvTheme.Style(this, "TvPosterCardStyle"),
+            TitleText = entry.Item.DisplayName(),
+            SubtitleText = timeLabel,
+            PosterWidth = SchedulePosterWidth + 22,
+            PosterHeight = SchedulePosterHeight + 22,
+            TitleFontSize = 14,
+            BadgeText = local is null ? AppStrings.Get("tv.schedule.notInLibraryShort") : string.Empty,
+            Margin = new Thickness(0, 0, 14, 14),
+        };
+        card.Click += (_, _) =>
+        {
+            if (local is not null) _shell.ShowDetail(local);
+            else _shell.ShowToast(AppStrings.Get("tv.schedule.notInLibrary", entry.Item.DisplayName()));
+        };
+        _ = LoadAirRadarPosterAsync(card, entry.Item.Image);
+        return card;
+    }
+
+    private async Task LoadAirRadarPosterAsync(TvPosterCard card, string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return;
+        try
+        {
+            if (!PosterCache.TryGetValue(url, out var image))
+            {
+                var bytes = await _airRadar.GetImageAsync(url);
+                if (bytes is null) return;
+                using var stream = new MemoryStream(bytes);
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.DecodePixelWidth = 220;
+                bitmap.StreamSource = stream;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                image = bitmap;
+                PosterCache[url] = image;
+            }
+            if (!_disposed && image is not null) card.PosterSource = image;
+        }
+        catch (Exception error) when (error is IOException or NotSupportedException or ArgumentException or InvalidOperationException)
+        {
+            // Missing poster must not hide the schedule entry.
+        }
+    }
+
+    private static TvAirWeekday ToTvWeekday(DayOfWeek weekday) => weekday == DayOfWeek.Sunday
+        ? TvAirWeekday.Sunday
+        : (TvAirWeekday)(int)weekday;
 
     private void ChangeWeek(int offset)
     {
@@ -598,6 +801,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        _airRadar.Dispose();
         _calendar.Dispose();
     }
 }

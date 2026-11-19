@@ -10574,8 +10574,8 @@
     "zh-CN": "「{0}」未在媒体库中",
     "zh-TW": "「{0}」未在媒体库中",
     "zh-HK": "「{0}」未在媒体库中",
-    "en-US": "\"{0}\" is not in your library",
-    "en-GB": "\"{0}\" is not in your library"
+    "en-US": "Not in library: {0}",
+    "en-GB": "Not in library: {0}"
   },
   "tv.schedule.loading": {
     "zh-CN": "正在加载 Bangumi 日历…",
@@ -11493,5 +11493,159 @@
     "zh-HK": "RIFE 增強包",
     "en-US": "RIFE enhancement pack",
     "en-GB": "RIFE enhancement pack"
+  },
+  "wpf.main.scheduleSource": {
+    "zh-CN": "新番时间表数据源",
+    "zh-TW": "新番時間表資料源",
+    "zh-HK": "新番時間表資料源",
+    "en-US": "Schedule data source",
+    "en-GB": "Schedule data source"
+  },
+  "wpf.main.scheduleSourceHint": {
+    "zh-CN": "可选：填写兼容时间表 API 的根地址，留空则使用内置 Bangumi 日历。",
+    "zh-TW": "可選：填寫相容時間表 API 的根位址，留空則使用內建 Bangumi 日曆。",
+    "zh-HK": "可選：填寫相容時間表 API 的根位址，留空則使用內建 Bangumi 日曆。",
+    "en-US": "Optional: base URL of a compatible schedule API. Leave empty to use the built-in Bangumi calendar.",
+    "en-GB": "Optional: base URL of a compatible schedule API. Leave empty to use the built-in Bangumi calendar."
+  },
+  "wpf.main.scheduleTest": {
+    "zh-CN": "测试连接",
+    "zh-TW": "測試連線",
+    "zh-HK": "測試連線",
+    "en-US": "Test connection",
+    "en-GB": "Test connection"
+  },
+  "wpf.schedule.notConfigured": {
+    "zh-CN": "未配置（使用内置 Bangumi 日历）",
+    "zh-TW": "未設定（使用內建 Bangumi 日曆）",
+    "zh-HK": "未設定（使用內建 Bangumi 日曆）",
+    "en-US": "Not configured (using built-in Bangumi calendar)",
+    "en-GB": "Not configured (using built-in Bangumi calendar)"
+  },
+  "wpf.schedule.saved": {
+    "zh-CN": "已保存",
+    "zh-TW": "已儲存",
+    "zh-HK": "已儲存",
+    "en-US": "Saved",
+    "en-GB": "Saved"
+  },
+  "wpf.schedule.urlInvalid": {
+    "zh-CN": "URL 无效：仅支持 http/https 绝对地址",
+    "zh-TW": "URL 無效：僅支援 http/https 絕對位址",
+    "zh-HK": "URL 無效：僅支援 http/https 絕對位址",
+    "en-US": "Invalid URL: only absolute http/https URLs are supported",
+    "en-GB": "Invalid URL: only absolute http/https URLs are supported"
+  },
+  "wpf.schedule.testing": {
+    "zh-CN": "正在测试连接…",
+    "zh-TW": "正在測試連線…",
+    "zh-HK": "正在測試連線…",
+    "en-US": "Testing connection…",
+    "en-GB": "Testing connection…"
+  },
+  "wpf.schedule.testOk": {
+    "zh-CN": "连接成功，共 {0} 条时间表数据",
+    "zh-TW": "連線成功，共 {0} 筆時間表資料",
+    "zh-HK": "連線成功，共 {0} 筆時間表資料",
+    "en-US": "Connection succeeded: {0} schedule entries",
+    "en-GB": "Connection succeeded: {0} schedule entries"
+  },
+  "wpf.schedule.testFailed": {
+    "zh-CN": "连接失败：{0}",
+    "zh-TW": "連線失敗：{0}",
+    "zh-HK": "連線失敗：{0}",
+    "en-US": "Connection failed: {0}",
+    "en-GB": "Connection failed: {0}"
+  },
+  "playback.scheduleSource": {
+    "zh-CN": "时间表数据源 URL",
+    "zh-TW": "時間表資料源 URL",
+    "zh-HK": "時間表資料源 URL",
+    "en-US": "Schedule data source URL",
+    "en-GB": "Schedule data source URL"
+  },
+  "playback.scheduleSourcePlaceholder": {
+    "zh-CN": "留空使用内置 Bangumi 日历",
+    "zh-TW": "留空使用內建 Bangumi 日曆",
+    "zh-HK": "留空使用內建 Bangumi 日曆",
+    "en-US": "Leave empty to use the built-in Bangumi calendar",
+    "en-GB": "Leave empty to use the built-in Bangumi calendar"
+  },
+  "playback.scheduleSourceHint": {
+    "zh-CN": "可选：兼容时间表 API 的根地址；保存后 TV 新番时间表将优先显示该数据。",
+    "zh-TW": "可選：相容時間表 API 的根位址；儲存後 TV 新番時間表將優先顯示該資料。",
+    "zh-HK": "可選：相容時間表 API 的根位址；儲存後 TV 新番時間表將優先顯示該資料。",
+    "en-US": "Optional: base URL of a compatible schedule API; after saving, the TV schedule prefers this data.",
+    "en-GB": "Optional: base URL of a compatible schedule API; after saving, the TV schedule prefers this data."
+  },
+  "tv.settings.scheduleSource": {
+    "zh-CN": "时间表数据源",
+    "zh-TW": "時間表資料源",
+    "zh-HK": "時間表資料源",
+    "en-US": "Schedule data source",
+    "en-GB": "Schedule data source"
+  },
+  "tv.settings.scheduleSourceHint": {
+    "zh-CN": "请在桌面端设置或 WebUI 配置时间表数据源",
+    "zh-TW": "請在桌面端設定或 WebUI 配置時間表資料源",
+    "zh-HK": "請在桌面端設定或 WebUI 配置時間表資料源",
+    "en-US": "Configure the schedule data source on desktop settings or WebUI",
+    "en-GB": "Configure the schedule data source on desktop settings or WebUI"
+  },
+  "tv.schedule.sourceConfigured": {
+    "zh-CN": "已配置",
+    "zh-TW": "已設定",
+    "zh-HK": "已設定",
+    "en-US": "Configured",
+    "en-GB": "Configured"
+  },
+  "tv.schedule.sourceNotConfigured": {
+    "zh-CN": "未配置",
+    "zh-TW": "未設定",
+    "zh-HK": "未設定",
+    "en-US": "Not configured",
+    "en-GB": "Not configured"
+  },
+  "tv.schedule.airradarFallback": {
+    "zh-CN": "时间表数据源不可用，已回退到内置日历",
+    "zh-TW": "時間表資料源不可用，已回退到內建日曆",
+    "zh-HK": "時間表資料源不可用，已回退到內建日曆",
+    "en-US": "Schedule data source unavailable; using the built-in calendar",
+    "en-GB": "Schedule data source unavailable; using the built-in calendar"
+  },
+  "tv.schedule.airradarSeason": {
+    "zh-CN": "{0} 新番时间表",
+    "zh-TW": "{0} 新番時間表",
+    "zh-HK": "{0} 新番時間表",
+    "en-US": "{0} schedule",
+    "en-GB": "{0} schedule"
+  },
+  "tv.schedule.airradarStale": {
+    "zh-CN": "时间表数据源暂不可用，显示缓存数据",
+    "zh-TW": "時間表資料源暫時不可用，顯示快取資料",
+    "zh-HK": "時間表資料源暫時不可用，顯示快取資料",
+    "en-US": "Schedule data source unavailable; showing cached data",
+    "en-GB": "Schedule data source unavailable; showing cached data"
+  },
+  "tv.schedule.timeUnknown": {
+    "zh-CN": "时间未知",
+    "zh-TW": "時間未知",
+    "zh-HK": "時間未知",
+    "en-US": "Time unknown",
+    "en-GB": "Time unknown"
+  },
+  "api.errScheduleUrl": {
+    "zh-CN": "时间表数据源地址无效",
+    "zh-TW": "時間表資料源位址無效",
+    "zh-HK": "時間表資料源位址無效",
+    "en-US": "Invalid schedule data source URL",
+    "en-GB": "Invalid schedule data source URL"
+  },
+  "tv.schedule.notInLibraryShort": {
+    "zh-CN": "未在媒体库",
+    "zh-TW": "未在媒體庫",
+    "zh-HK": "未在媒體庫",
+    "en-US": "Not in library",
+    "en-GB": "Not in library"
   }
 }

@@ -216,6 +216,11 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddInfoRow("sourceName", "tv.settings.source", source is null ? AppStrings.Get("tv.settings.sourceNone") : $"{source.Name}  ·  {source.TypeLabel}");
         AddInfoRow("sourcePath", "tv.settings.sourcePath", source?.Location ?? AppStrings.Get("tv.settings.sourceNone"));
         AddInfoRow("sourceHint", "tv.settings.sourceEdit", AppStrings.Get("tv.settings.sourceEditHint"));
+        AddRow("scheduleSource", "tv.settings.scheduleSource",
+            () => _context.Settings.ScheduleDataSourceUrl.Length > 0
+                ? AppStrings.Get("tv.schedule.sourceConfigured")
+                : AppStrings.Get("tv.schedule.sourceNotConfigured"),
+            _ => _shell.ShowToast(AppStrings.Get("tv.settings.scheduleSourceHint")), actionRow: true);
         AddGroup("tv.settings.group.about");
         _updateRow = AddRow("updateCheck", "tv.settings.update", UpdateStatusText, _ => TriggerUpdateCheck(), actionRow: true);
         AddInfoRow("version", "tv.settings.version", (Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.1.0") + "  ·  " + EditionInfo.Current);

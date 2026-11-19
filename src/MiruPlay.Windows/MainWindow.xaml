@@ -401,6 +401,22 @@
                     <TextBlock x:Name="AutoUpdateStatusText" Style="{StaticResource SecondaryText}" Margin="0,0,0,4" TextWrapping="Wrap" />
                     <TextBlock x:Name="AutoUpdateLastCheckedText" Style="{StaticResource SecondaryText}" Margin="0,0,0,20" />
 
+                    <TextBlock Text="{services:Loc wpf.main.scheduleSource}" Style="{StaticResource SectionTitle}" Margin="0,0,0,0" />
+                    <TextBlock Text="{services:Loc wpf.main.scheduleSourceHint}" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,10" />
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="ScheduleDataSourceBox" Grid.Column="0" Margin="0,0,10,0"
+                                 LostFocus="ScheduleDataSourceBox_LostFocus" />
+                        <Button x:Name="TestScheduleDataSourceButton" Grid.Column="1" Content="{services:Loc wpf.main.scheduleTest}"
+                                Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                                Click="TestScheduleDataSource_Click" />
+                    </Grid>
+                    <TextBlock x:Name="ScheduleDataSourceStatusText" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,20" />
+
                     <Separator Background="{StaticResource SubtleBorder}" />
                     <TextBlock Text="{services:Loc tv.settings.entry}" Style="{StaticResource SectionTitle}" Margin="0,28,0,0" />
                     <Grid Margin="0,14,0,14">

@@ -1067,6 +1067,13 @@ public sealed class WebControlServer : IAsyncDisposable
                 ?? new PlaybackSettingsRequest();
             if (body.EndAction is not (null or "return_to_detail" or "play_next_episode")) throw new BadHttpRequestException(AppStrings.Get("api.errEndAction"));
             if (body.PreferredSubtitleLanguage is not (null or "auto" or "zh_hans" or "zh_hant" or "zh" or "en" or "ja")) throw new BadHttpRequestException(AppStrings.Get("api.errSubLang"));
+            if (body.ScheduleDataSourceUrl is not null)
+            {
+                var trimmedScheduleUrl = body.ScheduleDataSourceUrl.Trim();
+                if (trimmedScheduleUrl.Length > 0 &&
+                    AppSettingsStore.NormalizeScheduleDataSourceUrl(trimmedScheduleUrl).Length == 0)
+                    throw new BadHttpRequestException(AppStrings.Get("api.errScheduleUrl"));
+            }
             if (body.AudioBalance is not null && !AudioBalanceLevels.StorageValues.Contains(body.AudioBalance.Trim().ToLowerInvariant()))
                 throw new BadHttpRequestException(AppStrings.Get("api.errAudioBalance"));
             if (body.HdrMode is not null &&
@@ -1150,6 +1157,9 @@ public sealed class WebControlServer : IAsyncDisposable
                 RifeEnhancement = body.RifeEnhancement is null
                     ? current.RifeEnhancement
                     : RifeEnhancementSettings.Normalize(body.RifeEnhancement),
+                ScheduleDataSourceUrl = body.ScheduleDataSourceUrl is null
+                    ? current.ScheduleDataSourceUrl
+                    : AppSettingsStore.NormalizeScheduleDataSourceUrl(body.ScheduleDataSourceUrl),
             }).ConfigureAwait(false);
             if (_applyPlaybackSettings is not null) await _applyPlaybackSettings(updated).ConfigureAwait(false);
             return Success(ToPlaybackSettings(updated, _getRuntimeCapabilities?.Invoke()));
@@ -1733,6 +1743,7 @@ public sealed class WebControlServer : IAsyncDisposable
     {
         endAction = settings.PlaybackEndAction,
         preferredSubtitleLanguage = settings.PreferredSubtitleLanguage,
+        scheduleDataSourceUrl = AppSettingsStore.NormalizeScheduleDataSourceUrl(settings.ScheduleDataSourceUrl),
         formatAwareToneMapping = new
         {
             supported = false,
@@ -1919,7 +1930,8 @@ public sealed class WebControlServer : IAsyncDisposable
         string? UpscalePreset = null,
         string? Anime4KPreset = null,
         string? FrameInterpolationMode = null,
-        RifeEnhancementSettings? RifeEnhancement = null);
+        RifeEnhancementSettings? RifeEnhancement = null,
+        string? ScheduleDataSourceUrl = null);
     private sealed record ScanSettingsRequest(
         bool? AutoScanEnabled = null,
         int? AutoScanIntervalHours = null,

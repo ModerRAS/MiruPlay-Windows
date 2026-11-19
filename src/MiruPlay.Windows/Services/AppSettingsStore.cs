@@ -28,6 +28,7 @@ public sealed record AppSettings(
     string PosterWallArrangement = "TITLE",
     string EpisodeVersionSelectionPolicy = "auto_nearest",
     string AppUpdateManifestUrl = "",
+    string ScheduleDataSourceUrl = "",
     string AutoUpdateMode = "download",
     int AutoUpdateIntervalHours = 6,
     string AudioSrcBypass = "software",
@@ -146,6 +147,7 @@ public sealed class AppSettingsStore
             var normalizedTvScale = settings.TvUiScalePercent is 100 or 125 or 150 ? settings.TvUiScalePercent : 100;
             var normalizedTvVolumeTarget = settings.TvVolumeKeyTarget is "system" or "application" ? settings.TvVolumeKeyTarget : "system";
             var normalizedTvExitHold = Math.Clamp(settings.TvExitLongPressMs, 1000, 5000);
+            var normalizedScheduleDataSourceUrl = NormalizeScheduleDataSourceUrl(settings.ScheduleDataSourceUrl);
             var normalizedAutoUpdateMode = AutoUpdateScheduler.NormalizeMode(settings.AutoUpdateMode);
             var normalizedAutoUpdateInterval = Math.Clamp(settings.AutoUpdateIntervalHours, 1, 168);
             var normalizedGamepadDeadzone = settings.TvGamepadDeadzonePercent is >= 20 and <= 80
@@ -177,6 +179,7 @@ public sealed class AppSettingsStore
                 settings.TvExitLongPressMs != normalizedTvExitHold ||
                 settings.AutoUpdateMode != normalizedAutoUpdateMode ||
                 settings.AutoUpdateIntervalHours != normalizedAutoUpdateInterval ||
+                settings.ScheduleDataSourceUrl != normalizedScheduleDataSourceUrl ||
                 settings.AudioBalance != normalizedBalance ||
                 settings.HdrMode != normalizedHdrMode ||
                 settings.AudioPassthroughMode != normalizedPassthroughMode ||
@@ -199,6 +202,7 @@ public sealed class AppSettingsStore
                     TvExitLongPressMs = normalizedTvExitHold,
                     AutoUpdateMode = normalizedAutoUpdateMode,
                     AutoUpdateIntervalHours = normalizedAutoUpdateInterval,
+                    ScheduleDataSourceUrl = normalizedScheduleDataSourceUrl,
                     AudioBalance = normalizedBalance,
                     HdrMode = normalizedHdrMode,
                     AudioPassthroughMode = normalizedPassthroughMode,
@@ -243,6 +247,17 @@ public sealed class AppSettingsStore
 
     public static string NormalizeAudioBalance(string? value) =>
         AudioBalanceLevels.ToStorageValue(AudioBalanceLevels.FromStorageValue(value));
+
+    public static string NormalizeScheduleDataSourceUrl(string? value)
+    {
+        var trimmed = value?.Trim() ?? string.Empty;
+        if (trimmed.Length == 0) return string.Empty;
+        if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) ||
+            uri.Scheme is not ("http" or "https") ||
+            uri.UserInfo.Length > 0 || uri.Query.Length > 0 || uri.Fragment.Length > 0)
+            return string.Empty;
+        return trimmed;
+    }
 
     public static string NormalizeHdrMode(string? value) => MpvPlaybackModeSettings.NormalizeHdrMode(value);
 
