@@ -1514,7 +1514,7 @@
   <data name="tv.schedule.thisWeek" xml:space="preserve"><value>This week</value></data>
   <data name="tv.schedule.nextWeek" xml:space="preserve"><value>Next week</value></data>
   <data name="tv.schedule.today" xml:space="preserve"><value>Today</value></data>
-  <data name="tv.schedule.notInLibrary" xml:space="preserve"><value>&quot;{0}&quot; is not in your library</value></data>
+  <data name="tv.schedule.notInLibrary" xml:space="preserve"><value>Not in library: {0}</value></data>
   <data name="tv.schedule.loading" xml:space="preserve"><value>Loading the Bangumi calendar…</value></data>
   <data name="tv.schedule.stale" xml:space="preserve"><value>Offline: showing the cached calendar</value></data>
   <data name="tv.schedule.error" xml:space="preserve"><value>Calendar failed to load: {0} (press OK to retry)</value></data>
@@ -1646,4 +1646,26 @@
   <data name="tv.settings.rifeUnavailable" xml:space="preserve"><value>The RIFE enhancement pack is not installed or has not passed its self-test</value></data>
   <data name="playback.rifeBadge" xml:space="preserve"><value>RIFE {0}</value></data>
   <data name="web.rifeStatus" xml:space="preserve"><value>RIFE enhancement pack</value></data>
+  <data name="wpf.main.scheduleSource" xml:space="preserve"><value>Schedule data source</value></data>
+  <data name="wpf.main.scheduleSourceHint" xml:space="preserve"><value>Optional: base URL of a compatible schedule API. Leave empty to use the built-in Bangumi calendar.</value></data>
+  <data name="wpf.main.scheduleTest" xml:space="preserve"><value>Test connection</value></data>
+  <data name="wpf.schedule.notConfigured" xml:space="preserve"><value>Not configured (using built-in Bangumi calendar)</value></data>
+  <data name="wpf.schedule.saved" xml:space="preserve"><value>Saved</value></data>
+  <data name="wpf.schedule.urlInvalid" xml:space="preserve"><value>Invalid URL: only absolute http/https URLs are supported</value></data>
+  <data name="wpf.schedule.testing" xml:space="preserve"><value>Testing connection…</value></data>
+  <data name="wpf.schedule.testOk" xml:space="preserve"><value>Connection succeeded: {0} schedule entries</value></data>
+  <data name="wpf.schedule.testFailed" xml:space="preserve"><value>Connection failed: {0}</value></data>
+  <data name="playback.scheduleSource" xml:space="preserve"><value>Schedule data source URL</value></data>
+  <data name="playback.scheduleSourcePlaceholder" xml:space="preserve"><value>Leave empty to use the built-in Bangumi calendar</value></data>
+  <data name="playback.scheduleSourceHint" xml:space="preserve"><value>Optional: base URL of a compatible schedule API; after saving, the TV schedule prefers this data.</value></data>
+  <data name="tv.settings.scheduleSource" xml:space="preserve"><value>Schedule data source</value></data>
+  <data name="tv.settings.scheduleSourceHint" xml:space="preserve"><value>Configure the schedule data source on desktop settings or WebUI</value></data>
+  <data name="tv.schedule.sourceConfigured" xml:space="preserve"><value>Configured</value></data>
+  <data name="tv.schedule.sourceNotConfigured" xml:space="preserve"><value>Not configured</value></data>
+  <data name="tv.schedule.airradarFallback" xml:space="preserve"><value>Schedule data source unavailable; using the built-in calendar</value></data>
+  <data name="tv.schedule.airradarSeason" xml:space="preserve"><value>{0} schedule</value></data>
+  <data name="tv.schedule.airradarStale" xml:space="preserve"><value>Schedule data source unavailable; showing cached data</value></data>
+  <data name="tv.schedule.timeUnknown" xml:space="preserve"><value>Time unknown</value></data>
+  <data name="api.errScheduleUrl" xml:space="preserve"><value>Invalid schedule data source URL</value></data>
+  <data name="tv.schedule.notInLibraryShort" xml:space="preserve"><value>Not in library</value></data>
 </root>

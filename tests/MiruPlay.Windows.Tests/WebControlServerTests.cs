@@ -513,6 +513,20 @@ public sealed class WebControlServerTests : IDisposable
         var playbackSettings = await ReadJson(await client.GetAsync("/api/settings/playback"));
         Assert.False(
             playbackSettings.RootElement.GetProperty("data").GetProperty("formatAwareToneMapping").GetProperty("supported").GetBoolean());
+        var scheduleUrlResponse = await client.PutAsJsonAsync("/api/settings/playback", new
+        {
+            scheduleDataSourceUrl = "https://schedule.example/base",
+        });
+        Assert.Equal(HttpStatusCode.OK, scheduleUrlResponse.StatusCode);
+        Assert.Equal("https://schedule.example/base", settings.ScheduleDataSourceUrl);
+        var scheduleSettings = await ReadJson(await client.GetAsync("/api/settings/playback"));
+        Assert.Equal("https://schedule.example/base",
+            scheduleSettings.RootElement.GetProperty("data").GetProperty("scheduleDataSourceUrl").GetString());
+        var invalidScheduleUrl = await client.PutAsJsonAsync("/api/settings/playback", new
+        {
+            scheduleDataSourceUrl = "ftp://schedule.example",
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidScheduleUrl.StatusCode);
         var unsupportedToneMapping = await client.PutAsJsonAsync("/api/settings/playback", new
         {
             formatAwareToneMapping = new { defaultBackend = "EXPERIMENTAL_MPV_EMBEDDED" },

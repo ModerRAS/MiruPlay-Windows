@@ -2877,12 +2877,69 @@ public partial class MainWindow : Window, IAsyncDisposable
         StatusText.Text = AppStrings.Get(_settings.TvModeEnabled ? "tv.settings.startWithTv" : "tv.settings.exitTv");
     }
 
+    private void ScheduleDataSourceBox_LostFocus(object sender, RoutedEventArgs e) => SaveScheduleDataSourceUrl();
+
+    private bool SaveScheduleDataSourceUrl()
+    {
+        var raw = ScheduleDataSourceBox.Text.Trim();
+        var normalized = AppSettingsStore.NormalizeScheduleDataSourceUrl(raw);
+        if (raw.Length > 0 && normalized.Length == 0)
+        {
+            ScheduleDataSourceStatusText.Text = AppStrings.Get("wpf.schedule.urlInvalid");
+            return false;
+        }
+        if (!string.Equals(normalized, _settings.ScheduleDataSourceUrl, StringComparison.Ordinal))
+        {
+            _settings = _settings with { ScheduleDataSourceUrl = normalized };
+            _settingsStore.Save(_settings);
+        }
+        ScheduleDataSourceStatusText.Text = normalized.Length == 0
+            ? AppStrings.Get("wpf.schedule.notConfigured")
+            : AppStrings.Get("wpf.schedule.saved");
+        return true;
+    }
+
+    private async void TestScheduleDataSource_Click(object sender, RoutedEventArgs e)
+    {
+        if (!SaveScheduleDataSourceUrl()) return;
+        var url = _settings.ScheduleDataSourceUrl;
+        if (url.Length == 0)
+        {
+            ScheduleDataSourceStatusText.Text = AppStrings.Get("wpf.schedule.notConfigured");
+            return;
+        }
+        TestScheduleDataSourceButton.IsEnabled = false;
+        ScheduleDataSourceStatusText.Text = AppStrings.Get("wpf.schedule.testing");
+        try
+        {
+            using var service = new AirRadarScheduleService(
+                () => url,
+                handler: OutboundHttpProxy.CreateHandler(() => _cloudDriveConfig.Load()));
+            var result = await service.LoadAsync(forceRefresh: true);
+            ScheduleDataSourceStatusText.Text = result.Data is null
+                ? AppStrings.Get("wpf.schedule.testFailed", result.Error ?? "unknown")
+                : AppStrings.Get("wpf.schedule.testOk", result.Data.Items.Count);
+        }
+        catch (Exception error) when (error is not OutOfMemoryException)
+        {
+            ScheduleDataSourceStatusText.Text = AppStrings.Get("wpf.schedule.testFailed", error.Message);
+        }
+        finally
+        {
+            TestScheduleDataSourceButton.IsEnabled = true;
+        }
+    }
+
     private void ApplySettingsToView()
     {
         _loadingSettings = true;
         try
         {
             LibraryRootValue.Text = _settings.LibraryRoot ?? AppStrings.Get("wpf.main.notSet");
+            ScheduleDataSourceBox.Text = _settings.ScheduleDataSourceUrl;
+            ScheduleDataSourceStatusText.Text = _settings.ScheduleDataSourceUrl.Length == 0
+                ? AppStrings.Get("wpf.schedule.notConfigured")
+                : AppStrings.Get("wpf.schedule.saved");
             SourceList.ItemsSource = _settings.MediaSources ?? [];
             AppModeSelector.SelectedItem = AppModeSelector.Items
                 .OfType<ComboBoxItem>()
