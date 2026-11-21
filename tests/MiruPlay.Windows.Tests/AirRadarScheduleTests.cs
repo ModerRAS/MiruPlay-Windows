@@ -152,6 +152,11 @@ public sealed class AirRadarScheduleTests
 
     [Theory]
     [InlineData(" https://schedule.example ", "https://schedule.example")]
+    [InlineData("https://schedule.example/", "https://schedule.example")]
+    [InlineData("https://schedule.example/api/schedule/latest", "https://schedule.example")]
+    [InlineData("https://schedule.example/api/schedule/latest/", "https://schedule.example")]
+    [InlineData("https://schedule.example/base/", "https://schedule.example/base")]
+    [InlineData("https://schedule.example/base/api/schedule/latest", "https://schedule.example/base")]
     [InlineData("http://schedule.example/base", "http://schedule.example/base")]
     [InlineData("", "")]
     [InlineData("   ", "")]

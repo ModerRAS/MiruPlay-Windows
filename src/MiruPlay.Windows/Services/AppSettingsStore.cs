@@ -256,7 +256,13 @@ public sealed class AppSettingsStore
             uri.Scheme is not ("http" or "https") ||
             uri.UserInfo.Length > 0 || uri.Query.Length > 0 || uri.Fragment.Length > 0)
             return string.Empty;
-        return trimmed;
+        // Accept users pasting the full endpoint as well as the base URL; the
+        // service always appends /api/schedule/latest itself.
+        var baseUrl = trimmed.TrimEnd('/');
+        const string endpointPath = "/api/schedule/latest";
+        if (baseUrl.EndsWith(endpointPath, StringComparison.OrdinalIgnoreCase))
+            baseUrl = baseUrl[..^endpointPath.Length].TrimEnd('/');
+        return baseUrl.Length == 0 ? string.Empty : baseUrl;
     }
 
     public static string NormalizeHdrMode(string? value) => MpvPlaybackModeSettings.NormalizeHdrMode(value);
