@@ -574,9 +574,9 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
             Style = TvTheme.Style(this, "TvPosterCardStyle"),
             TitleText = entry.Item.DisplayName(),
             SubtitleText = timeLabel,
-            PosterWidth = SchedulePosterWidth + 22,
-            PosterHeight = SchedulePosterHeight + 22,
-            TitleFontSize = 14,
+            PosterWidth = SchedulePosterWidth,
+            PosterHeight = SchedulePosterHeight,
+            TitleFontSize = 15,
             BadgeText = local is null ? AppStrings.Get("tv.schedule.notInLibraryShort") : string.Empty,
             Margin = new Thickness(0, 0, 14, 14),
         };
