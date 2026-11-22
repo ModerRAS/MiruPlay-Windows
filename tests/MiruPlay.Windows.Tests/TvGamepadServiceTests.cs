@@ -233,4 +233,37 @@ public sealed class TvGamepadServiceTests
         Assert.Equal(0.8, service.Deadzone);
         service.Dispose();
     }
+
+    [Theory]
+    [InlineData(short.MinValue, (short)0, TvInputAction.Left)]
+    [InlineData(short.MaxValue, (short)0, TvInputAction.Right)]
+    [InlineData((short)0, short.MinValue, TvInputAction.Down)]
+    [InlineData((short)0, short.MaxValue, TvInputAction.Up)]
+    [InlineData(short.MinValue, short.MinValue, TvInputAction.Left)]
+    [InlineData(short.MaxValue, short.MaxValue, TvInputAction.Right)]
+    public void ExtremeLeftStickValuesDoNotOverflow(short lx, short ly, TvInputAction expected)
+    {
+        var (service, clock, actions) = Create();
+        var error = Record.Exception(() => service.Poll(Pad(lx: lx, ly: ly), clock.Now));
+        Assert.Null(error);
+        Assert.Equal(expected, Assert.Single(actions).Action);
+        service.Dispose();
+    }
+
+    [Fact]
+    public void ExtremeRightStickValueDoesNotOverflow()
+    {
+        var (service, clock, actions) = Create();
+        var error = Record.Exception(() => service.Poll(Pad(rx: short.MinValue), clock.Now));
+        Assert.Null(error);
+        Assert.Equal(TvInputAction.SeekBack, Assert.Single(actions).Action);
+        service.Dispose();
+    }
+
+    [Theory]
+    [InlineData(short.MinValue, short.MaxValue)]
+    [InlineData(short.MaxValue, (short)-32767)]
+    [InlineData((short)0, (short)0)]
+    public void SdlYAxisInversionHandlesShortExtremes(short input, short expected) =>
+        Assert.Equal(expected, SdlGamepadSource.InvertSdlY(input));
 }

@@ -129,8 +129,18 @@ public sealed class SdlGamepadSource : IXInputSource, IDisposable
             LeftTrigger: ToByte(api.GetAxis(pad, AxisTriggerLeft)),
             RightTrigger: ToByte(api.GetAxis(pad, AxisTriggerRight)),
             LeftThumbX: leftX,
-            LeftThumbY: leftY == short.MinValue ? short.MaxValue : (short)-leftY, // SDL: +Y is down
+            LeftThumbY: InvertSdlY(leftY), // SDL: +Y is down
             RightThumbX: api.GetAxis(pad, AxisRightX));
+    }
+
+    internal static short InvertSdlY(short leftY)
+    {
+        // Negate in int and clamp back to the short range; short.MinValue is
+        // the one value whose negation cannot be represented as a short.
+        var inverted = -(int)leftY;
+        return leftY == short.MinValue
+            ? short.MaxValue
+            : (short)Math.Clamp(inverted, short.MinValue, short.MaxValue);
     }
 
     private static byte ToByte(short trigger) =>
