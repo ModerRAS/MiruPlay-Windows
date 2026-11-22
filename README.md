@@ -19,6 +19,12 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 提供默认端口 `9978` 的原生 WebUI 与 WebControl API，支持媒体库/详情/播放/字幕、来源 CRUD/测试/扫描、Anime/Drama 模式、CloudDrive2/RSS、Bangumi/TMDB、播放设置和令牌轮换，并使用 DPAPI 保护 WebControl、媒体源、Bangumi、TMDB 与 CloudDrive 凭据
 - 将客户端设置保存在 `%LOCALAPPDATA%\MiruPlay\settings.json`
 
+## 近期修复（0.1.9）
+
+- **TV 模式 RIFE 状态与自动自检**：此前 TV 切到 RIFE 只会提示「RIFE 增强包未安装或自检未通过」，即使 full 版已内置增强包（Ready 需要一次自检记录，而 TV 没有自检入口）。现在切换时按真实状态分支：已就绪 → 直接启用；内置/已下载但尚未自检 → 自动异步执行一次自检（不抢焦点，成功则保持启用并提示 GPU/帧率，失败则回退原插帧方式并给出具体原因）；自检失败 → 显示具体原因；lite / 未安装 → 明确提示使用 full 版或在桌面端下载增强包。
+- **TV 设置新增「RIFE 状态」行**：显示「已内置 / 已下载 · 自检通过 / 未自检 / 自检失败」；打开设置后会在后台静默检查状态并按需自动补做自检；重复点击不会并发启动多次自检（自检去重）。
+- 同步 5 种界面语言文案；已在 FLP01（4K / 225% 缩放，full 版）实机验证：状态显示「已内置 · 自检通过」，启用 RIFE 不再误报未安装。
+
 ## 近期修复（0.1.8）
 
 - **在线源播放修复（libmpv 代理）**：TV / 桌面通过内置 libmpv 播放 ANi RSS 在线源时不再报 `mpv media load ended before file-loaded (error code -13)`。原因是直链 301 跳转到 Cloudflare Workers 域名、本机直连不可达，而 libmpv 不经过系统代理；现在播放前按「App 出站代理（RSS/CloudDrive）→ Windows 系统代理（默认开启，可在「设置 → 播放 → 播放时使用系统代理」关闭）」顺序解析代理并作为 `http-proxy` 传给 libmpv，loopback 与本地文件不代理。加载失败时异常会附带 mpv 原生日志尾部（URL 只保留 `scheme://host`）。已用系统代理在 TV 模式实测播放 ANi RSS 在线源成功。
@@ -72,7 +78,7 @@ WebControl 默认监听 `9978`。在浏览器打开设置页显示的地址，�
 Windows x64 发布由同一个自包含目录生成便携 ZIP、每用户 Inno Setup 安装包、符号包、发布清单和 `SHA256SUMS.txt`。本地生成并验证：
 
 ```powershell
-.\tools\Publish-Release.ps1 -Version 0.1.8
+.\tools\Publish-Release.ps1 -Version 0.1.9
 .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
 ```
 
