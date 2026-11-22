@@ -17,7 +17,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid x:Name="RootGrid" Background="{StaticResource TvBackgroundBrush}" Cursor="None" Focusable="True">
+    <Grid x:Name="RootGrid" Background="{StaticResource TvBackgroundBrush}" Cursor="None" Focusable="True" FocusVisualStyle="{x:Null}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />

@@ -76,6 +76,7 @@
     <!-- Left navigation entry: 56px tall, focus expands the rail (host animates width). -->
     <Style x:Key="TvNavButton" TargetType="Button">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="56" />
         <Setter Property="Margin" Value="8,4" />
         <Setter Property="Cursor" Value="None" />
@@ -106,6 +107,7 @@
 
     <Style x:Key="TvPrimaryButton" TargetType="Button">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="54" />
         <Setter Property="Padding" Value="30,0" />
         <Setter Property="FontSize" Value="20" />
@@ -157,6 +159,7 @@
 
     <Style x:Key="TvSecondaryButton" TargetType="Button">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="54" />
         <Setter Property="Padding" Value="26,0" />
         <Setter Property="FontSize" Value="20" />
@@ -208,6 +211,7 @@
 
     <Style x:Key="TvChipButton" TargetType="Button">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="46" />
         <Setter Property="Padding" Value="20,0" />
         <Setter Property="FontSize" Value="17" />
@@ -262,6 +266,7 @@
     <!-- Poster / wide still card. Implicit style: created by screens via TvTheme.Style(this, "TvPosterCardStyle"). -->
     <Style x:Key="TvPosterCardStyle" TargetType="{x:Type tv:TvPosterCard}">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Cursor" Value="None" />
         <Setter Property="Template">
             <Setter.Value>
@@ -300,7 +305,7 @@
                                        TextTrimming="CharacterEllipsis"
                                        HorizontalAlignment="Center" TextAlignment="Center" />
                         </StackPanel>
-                        <Border x:Name="Ring" Margin="-6" CornerRadius="13" BorderThickness="3"
+                        <Border x:Name="Ring" Margin="-2" CornerRadius="10" BorderThickness="3"
                                 BorderBrush="{StaticResource TvAccentBrush}" Opacity="0" />
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -308,8 +313,8 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1.06" Duration="0:0:0.13" />
-                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1.06" Duration="0:0:0.13" />
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1.03" Duration="0:0:0.13" />
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1.03" Duration="0:0:0.13" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
@@ -337,6 +342,7 @@
 
     <Style x:Key="TvTextCardStyle" TargetType="{x:Type tv:TvTextCard}">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Cursor" Value="None" />
         <Setter Property="Template">
             <Setter.Value>
@@ -361,7 +367,7 @@
                                            HorizontalAlignment="Stretch" TextAlignment="Center" />
                             </StackPanel>
                         </Border>
-                        <Border x:Name="Ring" Margin="-6" CornerRadius="14" BorderThickness="3"
+                        <Border x:Name="Ring" Margin="-2" CornerRadius="10" BorderThickness="3"
                                 BorderBrush="{StaticResource TvAccentBrush}" Opacity="0" />
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -369,8 +375,8 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1.06" Duration="0:0:0.13" />
-                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1.06" Duration="0:0:0.13" />
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1.03" Duration="0:0:0.13" />
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1.03" Duration="0:0:0.13" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
@@ -392,6 +398,7 @@
 
     <Style x:Key="TvEpisodeCardStyle" TargetType="{x:Type tv:TvEpisodeCard}">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Cursor" Value="None" />
         <Setter Property="Template">
             <Setter.Value>
@@ -424,7 +431,7 @@
                                            Foreground="{StaticResource TvAccentBrush}" Visibility="Collapsed" />
                             </Grid>
                         </Border>
-                        <Border x:Name="Ring" Margin="-6" CornerRadius="13" BorderThickness="3"
+                        <Border x:Name="Ring" Margin="-2" CornerRadius="10" BorderThickness="3"
                                 BorderBrush="{StaticResource TvAccentBrush}" Opacity="0" />
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -432,8 +439,8 @@
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1.06" Duration="0:0:0.13" />
-                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1.06" Duration="0:0:0.13" />
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleX" To="1.03" Duration="0:0:0.13" />
+                                        <DoubleAnimation Storyboard.TargetName="Scale" Storyboard.TargetProperty="ScaleY" To="1.03" Duration="0:0:0.13" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
@@ -464,6 +471,7 @@
 
     <Style x:Key="TvKeyButton" TargetType="Button">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Width" Value="62" />
         <Setter Property="Height" Value="58" />
         <Setter Property="FontSize" Value="22" />
@@ -505,6 +513,7 @@
     <!-- Settings / info row: full-width content with focus ring. -->
     <Style x:Key="TvRowButton" TargetType="Button">
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="62" />
         <Setter Property="Cursor" Value="None" />
         <Setter Property="Template">
