@@ -1681,4 +1681,6 @@
   <data name="tv.settings.rifeSelftestRunning" xml:space="preserve"><value>Testing RIFE…</value></data>
   <data name="tv.settings.rifeSelftestPassed" xml:space="preserve"><value>RIFE self-test passed ({0})</value></data>
   <data name="tv.settings.rifeSelftestFailed" xml:space="preserve"><value>RIFE self-test failed: {0}</value></data>
+  <data name="tv.settings.rifeSourceBundled" xml:space="preserve"><value>Bundled</value></data>
+  <data name="tv.settings.rifeSourceInstalled" xml:space="preserve"><value>Downloaded</value></data>
 </root>

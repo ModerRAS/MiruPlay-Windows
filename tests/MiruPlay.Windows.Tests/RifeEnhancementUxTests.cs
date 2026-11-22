@@ -55,8 +55,8 @@ public sealed class RifeEnhancementUxTests
     [Fact]
     public void SourceAndReadyStateKeysMatchPackSource()
     {
-        Assert.Equal("quality.rifeSourceBundled", RifeEnhancementUx.SourceKey(Status(source: "bundled")));
-        Assert.Equal("quality.rifeSourceInstalled", RifeEnhancementUx.SourceKey(Status(source: "installed")));
+        Assert.Equal("tv.settings.rifeSourceBundled", RifeEnhancementUx.SourceKey(Status(source: "bundled")));
+        Assert.Equal("tv.settings.rifeSourceInstalled", RifeEnhancementUx.SourceKey(Status(source: "installed")));
         Assert.Equal("tv.settings.rifeStatusPassed", RifeEnhancementUx.StateKey(Status(ready: true, reason: null)));
     }
 

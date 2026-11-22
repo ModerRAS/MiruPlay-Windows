@@ -36,8 +36,8 @@ public static class RifeEnhancementUx
     public static string SourceKey(RifeEnhancementStatus status) => !status.Installed
         ? "tv.settings.rifeStatusNotInstalled"
         : status.Source == "bundled"
-            ? "quality.rifeSourceBundled"
-            : "quality.rifeSourceInstalled";
+            ? "tv.settings.rifeSourceBundled"
+            : "tv.settings.rifeSourceInstalled";
 
     public static string StateKey(RifeEnhancementStatus status)
     {

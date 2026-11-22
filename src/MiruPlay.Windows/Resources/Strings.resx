@@ -1681,4 +1681,6 @@
   <data name="tv.settings.rifeSelftestRunning" xml:space="preserve"><value>正在检测 RIFE…</value></data>
   <data name="tv.settings.rifeSelftestPassed" xml:space="preserve"><value>RIFE 自检通过（{0}）</value></data>
   <data name="tv.settings.rifeSelftestFailed" xml:space="preserve"><value>RIFE 自检失败：{0}</value></data>
+  <data name="tv.settings.rifeSourceBundled" xml:space="preserve"><value>已内置</value></data>
+  <data name="tv.settings.rifeSourceInstalled" xml:space="preserve"><value>已下载</value></data>
 </root>

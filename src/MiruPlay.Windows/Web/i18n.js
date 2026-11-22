@@ -1677,7 +1677,9 @@ const I18N = {
   "tv.settings.rifeLiteHint": "当前为 lite 版，不含 RIFE；请使用 full 版或在桌面端下载增强包",
   "tv.settings.rifeSelftestRunning": "正在检测 RIFE…",
   "tv.settings.rifeSelftestPassed": "RIFE 自检通过（{0}）",
-  "tv.settings.rifeSelftestFailed": "RIFE 自检失败：{0}"
+  "tv.settings.rifeSelftestFailed": "RIFE 自检失败：{0}",
+  "tv.settings.rifeSourceBundled": "已内置",
+  "tv.settings.rifeSourceInstalled": "已下载"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -3356,7 +3358,9 @@ const I18N = {
   "tv.settings.rifeLiteHint": "目前為 lite 版，不含 RIFE；請使用 full 版或在桌面端下載增強包",
   "tv.settings.rifeSelftestRunning": "正在檢測 RIFE…",
   "tv.settings.rifeSelftestPassed": "RIFE 自檢通過（{0}）",
-  "tv.settings.rifeSelftestFailed": "RIFE 自檢失敗：{0}"
+  "tv.settings.rifeSelftestFailed": "RIFE 自檢失敗：{0}",
+  "tv.settings.rifeSourceBundled": "已內建",
+  "tv.settings.rifeSourceInstalled": "已下載"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -5035,7 +5039,9 @@ const I18N = {
   "tv.settings.rifeLiteHint": "目前為 lite 版，不含 RIFE；請使用 full 版或在桌面端下載增強包",
   "tv.settings.rifeSelftestRunning": "正在檢測 RIFE…",
   "tv.settings.rifeSelftestPassed": "RIFE 自檢通過（{0}）",
-  "tv.settings.rifeSelftestFailed": "RIFE 自檢失敗：{0}"
+  "tv.settings.rifeSelftestFailed": "RIFE 自檢失敗：{0}",
+  "tv.settings.rifeSourceBundled": "已內建",
+  "tv.settings.rifeSourceInstalled": "已下載"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -6714,7 +6720,9 @@ const I18N = {
   "tv.settings.rifeLiteHint": "This is the lite edition without RIFE. Use the full edition or download the pack on desktop.",
   "tv.settings.rifeSelftestRunning": "Testing RIFE…",
   "tv.settings.rifeSelftestPassed": "RIFE self-test passed ({0})",
-  "tv.settings.rifeSelftestFailed": "RIFE self-test failed: {0}"
+  "tv.settings.rifeSelftestFailed": "RIFE self-test failed: {0}",
+  "tv.settings.rifeSourceBundled": "Bundled",
+  "tv.settings.rifeSourceInstalled": "Downloaded"
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -8393,7 +8401,9 @@ const I18N = {
   "tv.settings.rifeLiteHint": "This is the lite edition without RIFE. Use the full edition or download the pack on desktop.",
   "tv.settings.rifeSelftestRunning": "Testing RIFE…",
   "tv.settings.rifeSelftestPassed": "RIFE self-test passed ({0})",
-  "tv.settings.rifeSelftestFailed": "RIFE self-test failed: {0}"
+  "tv.settings.rifeSelftestFailed": "RIFE self-test failed: {0}",
+  "tv.settings.rifeSourceBundled": "Bundled",
+  "tv.settings.rifeSourceInstalled": "Downloaded"
  }
 };
 let currentLocale = 'zh-CN';

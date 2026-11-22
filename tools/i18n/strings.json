@@ -11738,5 +11738,19 @@
     "zh-HK": "RIFE 自檢失敗：{0}",
     "en-US": "RIFE self-test failed: {0}",
     "en-GB": "RIFE self-test failed: {0}"
+  },
+  "tv.settings.rifeSourceBundled": {
+    "zh-CN": "已内置",
+    "zh-TW": "已內建",
+    "zh-HK": "已內建",
+    "en-US": "Bundled",
+    "en-GB": "Bundled"
+  },
+  "tv.settings.rifeSourceInstalled": {
+    "zh-CN": "已下载",
+    "zh-TW": "已下載",
+    "zh-HK": "已下載",
+    "en-US": "Downloaded",
+    "en-GB": "Downloaded"
   }
 }
