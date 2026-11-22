@@ -498,6 +498,8 @@
     </Style>
 
     <Style x:Key="TvScrollViewerStyle" TargetType="ScrollViewer">
+        <!-- Six-pixel viewport padding keeps focus rings (and their 1.03 scale) from being clipped by the row scissor. -->
+        <Setter Property="Padding" Value="6" />
         <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
         <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
         <Setter Property="PanningMode" Value="Both" />

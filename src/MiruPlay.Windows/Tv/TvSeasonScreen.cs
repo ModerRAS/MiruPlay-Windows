@@ -473,7 +473,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
             }
             _scheduleBody.Children.Add(header);
 
-            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 24, 0) };
+            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(6, 6, 30, 6) };
             if (section.Entries.Count == 0)
             {
                 row.Children.Add(new TextBlock
@@ -495,7 +495,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
             {
                 Style = TvTheme.Style(this, "TvScrollViewerStyle"),
                 Content = row,
-                Margin = new Thickness(0, 0, 0, 6),
+                Margin = new Thickness(0, 0, 0, 0),
             };
             _scheduleBody.Children.Add(scroller);
             var zone = new TvZone($"schedule-day-{(int)section.Weekday}", TvZoneKind.Horizontal, cards);
@@ -531,7 +531,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
                 Margin = new Thickness(0, 22, 0, 8),
             };
             _scheduleBody.Children.Add(header);
-            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 24, 0) };
+            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(6, 6, 30, 6) };
             var cards = new List<FrameworkElement>();
             if (day.Entries.Count == 0)
             {
@@ -553,7 +553,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
             {
                 Style = TvTheme.Style(this, "TvScrollViewerStyle"),
                 Content = row,
-                Margin = new Thickness(0, 0, 0, 6),
+                Margin = new Thickness(0, 0, 0, 0),
             };
             _scheduleBody.Children.Add(scroller);
             var zone = new TvZone($"schedule-day-{(int)ToTvWeekday(day.Weekday)}", TvZoneKind.Horizontal, cards);
