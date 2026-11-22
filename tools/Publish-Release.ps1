@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [ValidatePattern('^\d+\.\d+\.\d+$')]
-    [string]$Version = '0.1.6',
+    [string]$Version = '0.1.7',
     [ValidatePattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')]
     [string]$GitHubRepository = 'ModerRAS/MiruPlay-Windows',
     [ValidateSet('win-x64')]

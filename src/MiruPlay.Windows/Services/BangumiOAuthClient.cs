@@ -9,7 +9,7 @@ public static class BangumiOAuthConstants
     public const string AuthorizeUrl = "https://bgm.tv/oauth/authorize";
     public const string TokenUrl = "https://bgm.tv/oauth/access_token";
     public const string UserInfoUrl = "https://api.bgm.tv/v0/me";
-    public const string UserAgent = "ModerRAS/MiruPlay-Windows/0.1.6 (Windows) (https://github.com/ModerRAS/MiruPlay-Windows)";
+    public const string UserAgent = "ModerRAS/MiruPlay-Windows/0.1.7 (Windows) (https://github.com/ModerRAS/MiruPlay-Windows)";
     public const int DefaultCallbackPort = 13712;
     public const string CallbackPath = "/callback";
 
