@@ -11668,5 +11668,89 @@
     "zh-HK": "使用系統代理",
     "en-US": "Use system proxy",
     "en-GB": "Use system proxy"
+  },
+  "tv.settings.rifeStatus": {
+    "zh-CN": "RIFE 状态",
+    "zh-TW": "RIFE 狀態",
+    "zh-HK": "RIFE 狀態",
+    "en-US": "RIFE status",
+    "en-GB": "RIFE status"
+  },
+  "tv.settings.rifeStatusNotInstalled": {
+    "zh-CN": "未安装",
+    "zh-TW": "未安裝",
+    "zh-HK": "未安裝",
+    "en-US": "Not installed",
+    "en-GB": "Not installed"
+  },
+  "tv.settings.rifeStatusNotTested": {
+    "zh-CN": "未自检",
+    "zh-TW": "未自檢",
+    "zh-HK": "未自檢",
+    "en-US": "Not self-tested",
+    "en-GB": "Not self-tested"
+  },
+  "tv.settings.rifeStatusPassed": {
+    "zh-CN": "自检通过",
+    "zh-TW": "自檢通過",
+    "zh-HK": "自檢通過",
+    "en-US": "Self-test passed",
+    "en-GB": "Self-test passed"
+  },
+  "tv.settings.rifeStatusFailed": {
+    "zh-CN": "自检失败",
+    "zh-TW": "自檢失敗",
+    "zh-HK": "自檢失敗",
+    "en-US": "Self-test failed",
+    "en-GB": "Self-test failed"
+  },
+  "tv.settings.rifeStatusTesting": {
+    "zh-CN": "自检中…",
+    "zh-TW": "自檢中…",
+    "zh-HK": "自檢中…",
+    "en-US": "Self-testing…",
+    "en-GB": "Self-testing…"
+  },
+  "tv.settings.rifeLiteHint": {
+    "zh-CN": "当前为 lite 版，不含 RIFE；请使用 full 版或在桌面端下载增强包",
+    "zh-TW": "目前為 lite 版，不含 RIFE；請使用 full 版或在桌面端下載增強包",
+    "zh-HK": "目前為 lite 版，不含 RIFE；請使用 full 版或在桌面端下載增強包",
+    "en-US": "This is the lite edition without RIFE. Use the full edition or download the pack on desktop.",
+    "en-GB": "This is the lite edition without RIFE. Use the full edition or download the pack on desktop."
+  },
+  "tv.settings.rifeSelftestRunning": {
+    "zh-CN": "正在检测 RIFE…",
+    "zh-TW": "正在檢測 RIFE…",
+    "zh-HK": "正在檢測 RIFE…",
+    "en-US": "Testing RIFE…",
+    "en-GB": "Testing RIFE…"
+  },
+  "tv.settings.rifeSelftestPassed": {
+    "zh-CN": "RIFE 自检通过（{0}）",
+    "zh-TW": "RIFE 自檢通過（{0}）",
+    "zh-HK": "RIFE 自檢通過（{0}）",
+    "en-US": "RIFE self-test passed ({0})",
+    "en-GB": "RIFE self-test passed ({0})"
+  },
+  "tv.settings.rifeSelftestFailed": {
+    "zh-CN": "RIFE 自检失败：{0}",
+    "zh-TW": "RIFE 自檢失敗：{0}",
+    "zh-HK": "RIFE 自檢失敗：{0}",
+    "en-US": "RIFE self-test failed: {0}",
+    "en-GB": "RIFE self-test failed: {0}"
+  },
+  "tv.settings.rifeSourceBundled": {
+    "zh-CN": "已内置",
+    "zh-TW": "已內建",
+    "zh-HK": "已內建",
+    "en-US": "Bundled",
+    "en-GB": "Bundled"
+  },
+  "tv.settings.rifeSourceInstalled": {
+    "zh-CN": "已下载",
+    "zh-TW": "已下載",
+    "zh-HK": "已下載",
+    "en-US": "Downloaded",
+    "en-GB": "Downloaded"
   }
 }

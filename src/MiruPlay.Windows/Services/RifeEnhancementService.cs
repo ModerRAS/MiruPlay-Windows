@@ -131,6 +131,8 @@ public sealed class RifeEnhancementService : IDisposable
         return candidates;
     }
 
+    public bool IsSelfTestRunning => _selftestLock.CurrentCount == 0;
+
     public RifeEnhancementStatus GetStatus(bool refresh = false)
     {
         lock (_sync)

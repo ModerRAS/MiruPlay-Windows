@@ -1667,7 +1667,19 @@ const I18N = {
   "tv.schedule.notInLibraryShort": "未在媒体库",
   "playback.systemProxy": "播放时使用系统代理",
   "playback.systemProxyHint": "libmpv 播放网络视频时回退使用 Windows 系统代理；App 已配置的出站代理优先。",
-  "playback.systemProxyEnabled": "使用系统代理"
+  "playback.systemProxyEnabled": "使用系统代理",
+  "tv.settings.rifeStatus": "RIFE 状态",
+  "tv.settings.rifeStatusNotInstalled": "未安装",
+  "tv.settings.rifeStatusNotTested": "未自检",
+  "tv.settings.rifeStatusPassed": "自检通过",
+  "tv.settings.rifeStatusFailed": "自检失败",
+  "tv.settings.rifeStatusTesting": "自检中…",
+  "tv.settings.rifeLiteHint": "当前为 lite 版，不含 RIFE；请使用 full 版或在桌面端下载增强包",
+  "tv.settings.rifeSelftestRunning": "正在检测 RIFE…",
+  "tv.settings.rifeSelftestPassed": "RIFE 自检通过（{0}）",
+  "tv.settings.rifeSelftestFailed": "RIFE 自检失败：{0}",
+  "tv.settings.rifeSourceBundled": "已内置",
+  "tv.settings.rifeSourceInstalled": "已下载"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -3336,7 +3348,19 @@ const I18N = {
   "tv.schedule.notInLibraryShort": "未在媒體庫",
   "playback.systemProxy": "播放時使用系統代理",
   "playback.systemProxyHint": "libmpv 播放網路影片時回退使用 Windows 系統代理；App 已設定的出站代理優先。",
-  "playback.systemProxyEnabled": "使用系統代理"
+  "playback.systemProxyEnabled": "使用系統代理",
+  "tv.settings.rifeStatus": "RIFE 狀態",
+  "tv.settings.rifeStatusNotInstalled": "未安裝",
+  "tv.settings.rifeStatusNotTested": "未自檢",
+  "tv.settings.rifeStatusPassed": "自檢通過",
+  "tv.settings.rifeStatusFailed": "自檢失敗",
+  "tv.settings.rifeStatusTesting": "自檢中…",
+  "tv.settings.rifeLiteHint": "目前為 lite 版，不含 RIFE；請使用 full 版或在桌面端下載增強包",
+  "tv.settings.rifeSelftestRunning": "正在檢測 RIFE…",
+  "tv.settings.rifeSelftestPassed": "RIFE 自檢通過（{0}）",
+  "tv.settings.rifeSelftestFailed": "RIFE 自檢失敗：{0}",
+  "tv.settings.rifeSourceBundled": "已內建",
+  "tv.settings.rifeSourceInstalled": "已下載"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -5005,7 +5029,19 @@ const I18N = {
   "tv.schedule.notInLibraryShort": "未在媒體庫",
   "playback.systemProxy": "播放時使用系統代理",
   "playback.systemProxyHint": "libmpv 播放網路影片時回退使用 Windows 系統代理；App 已設定的出站代理優先。",
-  "playback.systemProxyEnabled": "使用系統代理"
+  "playback.systemProxyEnabled": "使用系統代理",
+  "tv.settings.rifeStatus": "RIFE 狀態",
+  "tv.settings.rifeStatusNotInstalled": "未安裝",
+  "tv.settings.rifeStatusNotTested": "未自檢",
+  "tv.settings.rifeStatusPassed": "自檢通過",
+  "tv.settings.rifeStatusFailed": "自檢失敗",
+  "tv.settings.rifeStatusTesting": "自檢中…",
+  "tv.settings.rifeLiteHint": "目前為 lite 版，不含 RIFE；請使用 full 版或在桌面端下載增強包",
+  "tv.settings.rifeSelftestRunning": "正在檢測 RIFE…",
+  "tv.settings.rifeSelftestPassed": "RIFE 自檢通過（{0}）",
+  "tv.settings.rifeSelftestFailed": "RIFE 自檢失敗：{0}",
+  "tv.settings.rifeSourceBundled": "已內建",
+  "tv.settings.rifeSourceInstalled": "已下載"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -6674,7 +6710,19 @@ const I18N = {
   "tv.schedule.notInLibraryShort": "Not in library",
   "playback.systemProxy": "Use Windows system proxy for playback",
   "playback.systemProxyHint": "When libmpv plays network videos, fall back to the Windows system proxy. The app outgoing proxy configured for RSS takes priority.",
-  "playback.systemProxyEnabled": "Use system proxy"
+  "playback.systemProxyEnabled": "Use system proxy",
+  "tv.settings.rifeStatus": "RIFE status",
+  "tv.settings.rifeStatusNotInstalled": "Not installed",
+  "tv.settings.rifeStatusNotTested": "Not self-tested",
+  "tv.settings.rifeStatusPassed": "Self-test passed",
+  "tv.settings.rifeStatusFailed": "Self-test failed",
+  "tv.settings.rifeStatusTesting": "Self-testing…",
+  "tv.settings.rifeLiteHint": "This is the lite edition without RIFE. Use the full edition or download the pack on desktop.",
+  "tv.settings.rifeSelftestRunning": "Testing RIFE…",
+  "tv.settings.rifeSelftestPassed": "RIFE self-test passed ({0})",
+  "tv.settings.rifeSelftestFailed": "RIFE self-test failed: {0}",
+  "tv.settings.rifeSourceBundled": "Bundled",
+  "tv.settings.rifeSourceInstalled": "Downloaded"
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -8343,7 +8391,19 @@ const I18N = {
   "tv.schedule.notInLibraryShort": "Not in library",
   "playback.systemProxy": "Use Windows system proxy for playback",
   "playback.systemProxyHint": "When libmpv plays network videos, fall back to the Windows system proxy. The app outgoing proxy configured for RSS takes priority.",
-  "playback.systemProxyEnabled": "Use system proxy"
+  "playback.systemProxyEnabled": "Use system proxy",
+  "tv.settings.rifeStatus": "RIFE status",
+  "tv.settings.rifeStatusNotInstalled": "Not installed",
+  "tv.settings.rifeStatusNotTested": "Not self-tested",
+  "tv.settings.rifeStatusPassed": "Self-test passed",
+  "tv.settings.rifeStatusFailed": "Self-test failed",
+  "tv.settings.rifeStatusTesting": "Self-testing…",
+  "tv.settings.rifeLiteHint": "This is the lite edition without RIFE. Use the full edition or download the pack on desktop.",
+  "tv.settings.rifeSelftestRunning": "Testing RIFE…",
+  "tv.settings.rifeSelftestPassed": "RIFE self-test passed ({0})",
+  "tv.settings.rifeSelftestFailed": "RIFE self-test failed: {0}",
+  "tv.settings.rifeSourceBundled": "Bundled",
+  "tv.settings.rifeSourceInstalled": "Downloaded"
  }
 };
 let currentLocale = 'zh-CN';

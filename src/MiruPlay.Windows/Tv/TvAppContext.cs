@@ -37,6 +37,22 @@ public sealed class TvAppContext : IAsyncDisposable
         _mediaSources = new MediaSourceRegistry(
             () => Settings,
             updated => { Settings = updated; });
+        _ = WarmRifeStatusAsync();
+    }
+
+    private async Task WarmRifeStatusAsync()
+    {
+        try
+        {
+            var status = RifeEnhancement.GetStatus(refresh: true);
+            if (status.Installed && !status.Ready &&
+                status.ReasonKey == RifeEnhancementReasons.SelftestRequired)
+                await RifeEnhancement.RunSelfTestAsync().ConfigureAwait(false);
+        }
+        catch (Exception error) when (error is IOException or InvalidOperationException or ObjectDisposedException or OperationCanceledException)
+        {
+            // The TV settings row will surface the failed/required state.
+        }
     }
 
     public AppSettings Settings { get; private set; }

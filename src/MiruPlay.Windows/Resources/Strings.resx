@@ -1671,4 +1671,16 @@
   <data name="playback.systemProxy" xml:space="preserve"><value>播放时使用系统代理</value></data>
   <data name="playback.systemProxyHint" xml:space="preserve"><value>libmpv 播放网络视频时回退使用 Windows 系统代理；App 已配置的出站代理优先。</value></data>
   <data name="playback.systemProxyEnabled" xml:space="preserve"><value>使用系统代理</value></data>
+  <data name="tv.settings.rifeStatus" xml:space="preserve"><value>RIFE 状态</value></data>
+  <data name="tv.settings.rifeStatusNotInstalled" xml:space="preserve"><value>未安装</value></data>
+  <data name="tv.settings.rifeStatusNotTested" xml:space="preserve"><value>未自检</value></data>
+  <data name="tv.settings.rifeStatusPassed" xml:space="preserve"><value>自检通过</value></data>
+  <data name="tv.settings.rifeStatusFailed" xml:space="preserve"><value>自检失败</value></data>
+  <data name="tv.settings.rifeStatusTesting" xml:space="preserve"><value>自检中…</value></data>
+  <data name="tv.settings.rifeLiteHint" xml:space="preserve"><value>当前为 lite 版，不含 RIFE；请使用 full 版或在桌面端下载增强包</value></data>
+  <data name="tv.settings.rifeSelftestRunning" xml:space="preserve"><value>正在检测 RIFE…</value></data>
+  <data name="tv.settings.rifeSelftestPassed" xml:space="preserve"><value>RIFE 自检通过（{0}）</value></data>
+  <data name="tv.settings.rifeSelftestFailed" xml:space="preserve"><value>RIFE 自检失败：{0}</value></data>
+  <data name="tv.settings.rifeSourceBundled" xml:space="preserve"><value>已内置</value></data>
+  <data name="tv.settings.rifeSourceInstalled" xml:space="preserve"><value>已下载</value></data>
 </root>

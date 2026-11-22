@@ -18,8 +18,12 @@ public sealed class TvSettingsScreen : TvScreenBase
     private readonly DispatcherTimer _statusTimer;
     private SettingRow? _gamepadStatusRow;
     private SettingRow? _updateRow;
+    private SettingRow? _rifeStatusRow;
     private TextBlock? _gamepadWarningText;
     private TvZone? _zone;
+    private readonly RifeEnableFlow _rifeFlow = new();
+    private string _rifeStatusText = string.Empty;
+    private bool _rifeStatusCheckStarted;
 
     public TvSettingsScreen(TvAppContext context, TvShellWindow shell)
     {
@@ -45,7 +49,13 @@ public sealed class TvSettingsScreen : TvScreenBase
         scroll.Content = content;
         Content = scroll;
         _statusTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromSeconds(1) };
-        _statusTimer.Tick += (_, _) => { UpdateGamepadStatus(); UpdateUpdateStatus(); };
+        _statusTimer.Tick += (_, _) =>
+        {
+            UpdateGamepadStatus();
+            UpdateUpdateStatus();
+            if (_rifeStatusRow is not null && !_rifeFlow.IsRunning)
+                UpdateRifeStatus(_context.RifeEnhancement.GetStatus());
+        };
         Build();
     }
 
@@ -191,6 +201,8 @@ public sealed class TvSettingsScreen : TvScreenBase
         AddRow("rifeModel", "tv.settings.rifeModel", () => ValueRifeModel(), step => ChangeRifeModel(step));
         AddRow("rifeHeight", "tv.settings.rifeHeight", () => ValueRifeHeight(), step => ChangeRifeHeight(step));
         AddRow("rifeGpuThread", "tv.settings.rifeGpuThread", () => ValueRifeGpuThread(), step => ChangeRifeGpuThread(step));
+        _rifeStatusText = RifeEnhancementUx.StatusText(_context.RifeEnhancement.GetStatus());
+        _rifeStatusRow = AddInfoRow("rifeStatus", "tv.settings.rifeStatus", ValueRifeStatus());
         AddGroup("tv.settings.group.tv");
         AddRow("startMode", "tv.settings.startTvMode", () => Bool(_context.Settings.TvModeEnabled), _ => Toggle(settings => settings with { TvModeEnabled = !settings.TvModeEnabled }));
         AddRow("preset", "tv.settings.remotePreset", () => ValuePreset(), step => ChangePreset());
@@ -232,6 +244,11 @@ public sealed class TvSettingsScreen : TvScreenBase
         _zone = new TvZone("settings", TvZoneKind.Vertical, items, onFocusChanged: index => items[index].BringIntoView());
         RegisterZone(_zone);
         if (ActiveZone is null) FocusInitial();
+        if (!_rifeStatusCheckStarted)
+        {
+            _rifeStatusCheckStarted = true;
+            _ = CheckRifeStatusSilentlyAsync();
+        }
     }
 
     private void AddHintRow(string textKey)
@@ -439,19 +456,107 @@ public sealed class TvSettingsScreen : TvScreenBase
         _ => AppStrings.Get("tv.settings.anime4k.off"),
     };
 
-    private void ChangeFrameInterpolation(int step)
+    private async void ChangeFrameInterpolation(int step)
     {
-        // SupportedValues now includes Rife; playback falls back with a reason when the pack is not ready.
         var values = MpvFrameInterpolationModes.SupportedValues.ToArray();
         var index = Array.IndexOf(values, AppSettingsStore.NormalizeFrameInterpolationMode(_context.Settings.FrameInterpolationMode));
         if (index < 0) index = 0;
         index = (index + step + values.Length) % values.Length;
-        _context.SaveSettings(_context.Settings with { FrameInterpolationMode = values[index] });
+        var next = values[index];
+        if (next != MpvFrameInterpolationModes.Rife)
+        {
+            _context.SaveSettings(_context.Settings with { FrameInterpolationMode = next });
+            RefreshValues();
+            _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+            return;
+        }
+
+        var status = _context.RifeEnhancement.GetStatus(refresh: true);
+        var decision = RifeEnhancementUx.Decide(status);
+        switch (decision.Action)
+        {
+            case RifeEnableAction.Enable:
+                _context.SaveSettings(_context.Settings with { FrameInterpolationMode = next });
+                UpdateRifeStatus(status);
+                RefreshValues();
+                _shell.ShowToast(AppStrings.Get("tv.settings.nextPlaybackHint"));
+                return;
+            case RifeEnableAction.RejectNotInstalled:
+                _shell.ShowToast(AppStrings.Get("tv.settings.rifeLiteHint"));
+                return;
+            case RifeEnableAction.RejectSelftestFailed:
+                _shell.ShowToast(AppStrings.Get(decision.MessageKey));
+                return;
+        }
+
+        if (_rifeFlow.IsRunning || _context.RifeEnhancement.IsSelfTestRunning)
+        {
+            _shell.ShowToast(AppStrings.Get("tv.settings.rifeSelftestRunning"));
+            return;
+        }
+        _rifeStatusText = AppStrings.Get("tv.settings.rifeStatusTesting");
         RefreshValues();
-        var status = _context.RifeEnhancement.GetStatus();
-        _shell.ShowToast(values[index] == MpvFrameInterpolationModes.Rife && !status.Ready
-            ? AppStrings.Get("tv.settings.rifeUnavailable")
-            : AppStrings.Get("tv.settings.nextPlaybackHint"));
+        _shell.ShowToast(AppStrings.Get("tv.settings.rifeSelftestRunning"));
+        var originalMode = _context.Settings.FrameInterpolationMode;
+        RifeEnableResult result;
+        try
+        {
+            result = await _rifeFlow.EnableAsync(status, _context.Settings, () => _context.RifeEnhancement.RunSelfTestAsync());
+        }
+        catch (Exception error) when (error is IOException or InvalidOperationException or ObjectDisposedException or OperationCanceledException)
+        {
+            _context.SaveSettings(_context.Settings with { FrameInterpolationMode = originalMode });
+            UpdateRifeStatus(_context.RifeEnhancement.GetStatus(refresh: true));
+            RefreshValues();
+            _shell.ShowToast(AppStrings.Get("tv.settings.rifeSelftestFailed", error.Message));
+            return;
+        }
+        var updated = _context.RifeEnhancement.GetStatus(refresh: true);
+        UpdateRifeStatus(updated);
+        if (result.Duplicate)
+        {
+            RefreshValues();
+            _shell.ShowToast(AppStrings.Get("tv.settings.rifeSelftestRunning"));
+            return;
+        }
+        if (result.SelfTest is { Ok: true } passed)
+        {
+            _context.SaveSettings(_context.Settings with { FrameInterpolationMode = next });
+            RefreshValues();
+            _shell.ShowToast(AppStrings.Get("tv.settings.rifeSelftestPassed", passed.Gpu ?? passed.OutputFps480p?.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "RIFE"));
+            return;
+        }
+        _context.SaveSettings(_context.Settings with { FrameInterpolationMode = originalMode });
+        RefreshValues();
+        var reason = result.ErrorKey ?? RifeEnhancementReasons.SelftestFailed;
+        _shell.ShowToast(AppStrings.Get("tv.settings.rifeSelftestFailed", AppStrings.Get(reason)));
+    }
+
+    private string ValueRifeStatus() => _rifeStatusText;
+
+    private void UpdateRifeStatus(RifeEnhancementStatus status)
+    {
+        _rifeStatusText = RifeEnhancementUx.StatusText(status);
+        _rifeStatusRow?.ValueText.Text = _rifeStatusText;
+    }
+
+    private async Task CheckRifeStatusSilentlyAsync()
+    {
+        try
+        {
+            var status = _context.RifeEnhancement.GetStatus(refresh: true);
+            UpdateRifeStatus(status);
+            if (RifeEnhancementUx.Decide(status).Action != RifeEnableAction.RunSelftest ||
+                _rifeFlow.IsRunning || _context.RifeEnhancement.IsSelfTestRunning) return;
+            _rifeStatusText = AppStrings.Get("tv.settings.rifeStatusTesting");
+            _rifeStatusRow?.ValueText.Text = _rifeStatusText;
+            await _rifeFlow.EnableAsync(status, _context.Settings, () => _context.RifeEnhancement.RunSelfTestAsync());
+            UpdateRifeStatus(_context.RifeEnhancement.GetStatus(refresh: true));
+        }
+        catch (Exception error) when (error is IOException or InvalidOperationException or ObjectDisposedException or OperationCanceledException)
+        {
+            UpdateRifeStatus(_context.RifeEnhancement.GetStatus(refresh: true));
+        }
     }
 
     private string ValueFrameInterpolation() =>
