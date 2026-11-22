@@ -19,6 +19,11 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 提供默认端口 `9978` 的原生 WebUI 与 WebControl API，支持媒体库/详情/播放/字幕、来源 CRUD/测试/扫描、Anime/Drama 模式、CloudDrive2/RSS、Bangumi/TMDB、播放设置和令牌轮换，并使用 DPAPI 保护 WebControl、媒体源、Bangumi、TMDB 与 CloudDrive 凭据
 - 将客户端设置保存在 `%LOCALAPPDATA%\MiruPlay\settings.json`
 
+## 近期修复（0.1.7）
+
+- **TV 手柄摇杆极值崩溃修复**：手柄摇杆推到 `short.MinValue`（-32768）等极值时，方向判定与右摇杆快进/快退不再因 `Math.Abs`/取反溢出抛 `OverflowException` 导致进程崩溃；方向判定改为全程 int 运算，SDL Y 轴（+Y 向下）反向为 XInput 向上时安全取反并钳制回 short 范围。
+- **4K / 高缩放 TV 媒体库海报墙自适应**：6×3 海报墙改为按可用视口高度动态计算海报尺寸（扣除标题/副标题与行边距，高度 140–219 DIP 钳制）；4K + 225% 缩放（有效 DIP 1707×960）时每行高度不足不再被固定 296 DIP 卡片盖住番名，1080p 仍保持 219×146。
+
 ## TV 新番时间表（AirRadar）
 
 TV 模式的「新番」页提供「时间表 / 季番」两个模式（左右键切换，默认「时间表」）。
@@ -60,7 +65,7 @@ WebControl 默认监听 `9978`。在浏览器打开设置页显示的地址，�
 Windows x64 发布由同一个自包含目录生成便携 ZIP、每用户 Inno Setup 安装包、符号包、发布清单和 `SHA256SUMS.txt`。本地生成并验证：
 
 ```powershell
-.\tools\Publish-Release.ps1 -Version 0.1.6
+.\tools\Publish-Release.ps1 -Version 0.1.7
 .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
 ```
 
