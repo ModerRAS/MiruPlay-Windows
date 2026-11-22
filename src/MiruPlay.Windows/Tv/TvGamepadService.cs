@@ -222,13 +222,17 @@ public sealed class TvGamepadService : IDisposable
         if ((state.Buttons & TvGamepadButtons.DPadDown) != 0) return (TvInputAction.Down, "↓");
         if ((state.Buttons & TvGamepadButtons.DPadLeft) != 0) return (TvInputAction.Left, "←");
         if ((state.Buttons & TvGamepadButtons.DPadRight) != 0) return (TvInputAction.Right, "→");
-        var deadzone = (short)Math.Round(Deadzone * short.MaxValue);
-        var x = state.LeftThumbX;
-        var y = state.LeftThumbY; // XInput: positive Y is up
-        var horizontal = Math.Abs(x) >= deadzone;
-        var vertical = Math.Abs(y) >= deadzone;
+        // Work in int: negating/abs-ing short.MinValue overflows. XInput values
+        // are short, so int is always a safe range for the deadzone math.
+        var deadzone = (int)Math.Round(Deadzone * short.MaxValue);
+        var x = (int)state.LeftThumbX;
+        var y = (int)state.LeftThumbY; // XInput: positive Y is up
+        var absX = Math.Abs(x);
+        var absY = Math.Abs(y);
+        var horizontal = absX >= deadzone;
+        var vertical = absY >= deadzone;
         if (!horizontal && !vertical) return (null, string.Empty);
-        if (horizontal && (!vertical || Math.Abs(x) >= Math.Abs(y)))
+        if (horizontal && (!vertical || absX >= absY))
             return x >= 0 ? (TvInputAction.Right, "Ls→") : (TvInputAction.Left, "Ls←");
         return y >= 0 ? (TvInputAction.Up, "Ls↑") : (TvInputAction.Down, "Ls↓");
     }
@@ -262,8 +266,8 @@ public sealed class TvGamepadService : IDisposable
 
     private void ProcessRightStick(TvGamepadState state, long nowMs)
     {
-        var deadzone = (short)Math.Round(Math.Max(0.5, Deadzone) * short.MaxValue);
-        if (Math.Abs(state.RightThumbX) < deadzone)
+        var deadzone = (int)Math.Round(Math.Max(0.5, Deadzone) * short.MaxValue);
+        if (Math.Abs((int)state.RightThumbX) < deadzone)
         {
             _rightStickHeld = false;
             return;
