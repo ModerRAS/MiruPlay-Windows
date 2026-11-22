@@ -2,10 +2,10 @@
   #error SourceDir must point to the self-contained publish directory.
 #endif
 #ifndef AppVersion
-  #define AppVersion "0.1.0"
+  #define AppVersion "0.1.6"
 #endif
 #ifndef VersionNumeric
-  #define VersionNumeric "0.1.0.0"
+  #define VersionNumeric "0.1.6.0"
 #endif
 #ifndef OutputDir
   #define OutputDir "..\artifacts\release"

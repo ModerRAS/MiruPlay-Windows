@@ -19,6 +19,19 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 提供默认端口 `9978` 的原生 WebUI 与 WebControl API，支持媒体库/详情/播放/字幕、来源 CRUD/测试/扫描、Anime/Drama 模式、CloudDrive2/RSS、Bangumi/TMDB、播放设置和令牌轮换，并使用 DPAPI 保护 WebControl、媒体源、Bangumi、TMDB 与 CloudDrive 凭据
 - 将客户端设置保存在 `%LOCALAPPDATA%\MiruPlay\settings.json`
 
+## TV 新番时间表（AirRadar）
+
+TV 模式的「新番」页提供「时间表 / 季番」两个模式（左右键切换，默认「时间表」）。
+
+- **内置 Bangumi 日历**：未配置数据源时显示上周/本周/下周的 Bangumi 周历，今天高亮；条目按 Bangumi subject id 匹配媒体库，匹配到的可进入作品详情。
+- **AirRadar 数据源（可选）**：配置兼容 AirRadar 的时间表 API 后，「时间表」优先显示数据源发布的整季周表（如 `2026-fall`，含 `seasonStart`/`seasonEnd`），按周一到周日分组；播出时刻以数据源的 JST 周几 + `HH:mm` 为准换算到设备本地时区，跨零点会落到正确的本地周几；`time` 为空或 `timeKnown=false` 的条目仍按数据源周几分组并标注「时间未知」；`disputed`、`confidence` 等可选字段会被解析保留。
+- **媒体库匹配**：按 Bangumi subject id 匹配；未匹配的卡片显示「未在媒体库」，匹配到的按确定进入详情。
+- **缓存与回退**：响应按数据源地址缓存 1 小时（`%LOCALAPPDATA%\MiruPlay\cache`），1 小时内不重复请求；请求超时（10 秒）、网络失败或 404 `no_schedule_data` 时回退到上次缓存并提示「时间表数据源暂不可用，显示缓存数据」，没有缓存则回退内置 Bangumi 日历并提示。数据源地址变化后会自动重新加载。
+- **设置路径**：桌面端「设置 → 新番时间表数据源」填写地址，可用「测试连接」验证；WebUI「设置 → 回放 → 时间表数据源 URL」同样可配置（WebControl API 使用 `GET/PUT /api/settings/playback` 的 `scheduleDataSourceUrl` 字段）。TV 端「设置 → 媒体源 → 时间表数据源」只读显示「已配置 / 未配置」，修改需回到桌面端或 WebUI。
+- **地址格式**：可填 base URL（如 `https://schedule.example.com`）或完整的 `/api/schedule/latest`，保存时自动去掉接口后缀和末尾 `/`；只接受 http/https，且不允许 query、fragment 或 URL 内嵌凭据。地址只保存在本机设置（`settings.json`）中，仓库不内置任何默认地址。
+
+数据格式与发布策略见 AirRadar 仓库的 README（`schemaVersion` 1；客户端固定请求 `/api/schedule/latest`）。
+
 ## 发布版本（lite / full）
 
 Windows 安装包分两个 edition：
@@ -47,7 +60,7 @@ WebControl 默认监听 `9978`。在浏览器打开设置页显示的地址，�
 Windows x64 发布由同一个自包含目录生成便携 ZIP、每用户 Inno Setup 安装包、符号包、发布清单和 `SHA256SUMS.txt`。本地生成并验证：
 
 ```powershell
-.\tools\Publish-Release.ps1 -Version 0.1.0
+.\tools\Publish-Release.ps1 -Version 0.1.6
 .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
 ```
 
