@@ -72,7 +72,7 @@ WebControl 默认监听 `9978`。在浏览器打开设置页显示的地址，�
 Windows x64 发布由同一个自包含目录生成便携 ZIP、每用户 Inno Setup 安装包、符号包、发布清单和 `SHA256SUMS.txt`。本地生成并验证：
 
 ```powershell
-.\tools\Publish-Release.ps1 -Version 0.1.7
+.\tools\Publish-Release.ps1 -Version 0.1.8
 .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
 ```
 
