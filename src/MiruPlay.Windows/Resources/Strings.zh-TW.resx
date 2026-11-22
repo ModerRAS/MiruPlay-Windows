@@ -1668,4 +1668,7 @@
   <data name="tv.schedule.timeUnknown" xml:space="preserve"><value>時間未知</value></data>
   <data name="api.errScheduleUrl" xml:space="preserve"><value>時間表資料源位址無效</value></data>
   <data name="tv.schedule.notInLibraryShort" xml:space="preserve"><value>未在媒體庫</value></data>
+  <data name="playback.systemProxy" xml:space="preserve"><value>播放時使用系統代理</value></data>
+  <data name="playback.systemProxyHint" xml:space="preserve"><value>libmpv 播放網路影片時回退使用 Windows 系統代理；App 已設定的出站代理優先。</value></data>
+  <data name="playback.systemProxyEnabled" xml:space="preserve"><value>使用系統代理</value></data>
 </root>

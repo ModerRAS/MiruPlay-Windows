@@ -124,6 +124,29 @@ public sealed class LibMpvPlaybackSessionTests : IDisposable
     }
 
     [Fact]
+    public async Task StartSetsHttpProxyOptionBeforeLoadingRemoteMedia()
+    {
+        var client = new FakeLibMpvClient();
+        var mediaPath = Path.Combine(_directory, "remote-proxy.mp4");
+        File.WriteAllBytes(mediaPath, []);
+        var episode = CreateEpisode(mediaPath);
+
+        await using var session = await LibMpvPlaybackSession.StartAsync(
+            client,
+            episode,
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, "proxy-state.db")),
+            headless: true,
+            windowHandle: null,
+            transportLease: null,
+            videoOptions: null,
+            httpProxy: "http://127.0.0.1:7890");
+
+        Assert.Equal("http://127.0.0.1:7890", client.Options["http-proxy"]);
+        Assert.Contains(client.Commands, command => command.SequenceEqual(["loadfile", mediaPath, "replace"]));
+    }
+
+    [Fact]
     public async Task SdrPlaybackAppliesAnime4KShaderListAfterFileLoaded()
     {
         var client = new FakeLibMpvClient();
@@ -296,6 +319,34 @@ public sealed class LibMpvPlaybackSessionTests : IDisposable
 
         Assert.False(session.WasCompleted);
         Assert.Contains("-12", session.LastError, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task LoadFailureIncludesRedactedNativeLogTail()
+    {
+        var client = new FakeLibMpvClient(
+            new LibMpvEvent(2, 0, 0, IntPtr.Zero, LogMessage: new LibMpvLogMessage("ffmpeg", 1,
+                "failed to open https://resources.example.test/private/video.mp4?token=secret")),
+            new LibMpvEvent(7, 0, 0, IntPtr.Zero, new LibMpvEndFileEvent(LibMpvEndFileReason.Error, -13)));
+        var mediaPath = Path.Combine(_directory, "proxy-load-failure.mp4");
+        File.WriteAllBytes(mediaPath, []);
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => LibMpvPlaybackSession.StartAsync(
+            client,
+            CreateEpisode(mediaPath),
+            new AppSettings(),
+            new PlaybackProgressStore(Path.Combine(_directory, "proxy-load-failure.db")),
+            headless: true,
+            windowHandle: null,
+            transportLease: null,
+            videoOptions: null,
+            httpProxy: "http://127.0.0.1:7890"));
+
+        Assert.Contains("error code -13", error.Message, StringComparison.Ordinal);
+        Assert.Contains("Native log:", error.Message, StringComparison.Ordinal);
+        Assert.Contains("https://resources.example.test/...", error.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("private/video", error.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("secret", error.Message, StringComparison.Ordinal);
     }
 
     [Fact]

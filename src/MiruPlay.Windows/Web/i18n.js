@@ -1664,7 +1664,10 @@ const I18N = {
   "tv.schedule.airradarStale": "时间表数据源暂不可用，显示缓存数据",
   "tv.schedule.timeUnknown": "时间未知",
   "api.errScheduleUrl": "时间表数据源地址无效",
-  "tv.schedule.notInLibraryShort": "未在媒体库"
+  "tv.schedule.notInLibraryShort": "未在媒体库",
+  "playback.systemProxy": "播放时使用系统代理",
+  "playback.systemProxyHint": "libmpv 播放网络视频时回退使用 Windows 系统代理；App 已配置的出站代理优先。",
+  "playback.systemProxyEnabled": "使用系统代理"
  },
  "zh-TW": {
   "web.title": "MiruPlay Web Control",
@@ -3330,7 +3333,10 @@ const I18N = {
   "tv.schedule.airradarStale": "時間表資料源暫時不可用，顯示快取資料",
   "tv.schedule.timeUnknown": "時間未知",
   "api.errScheduleUrl": "時間表資料源位址無效",
-  "tv.schedule.notInLibraryShort": "未在媒體庫"
+  "tv.schedule.notInLibraryShort": "未在媒體庫",
+  "playback.systemProxy": "播放時使用系統代理",
+  "playback.systemProxyHint": "libmpv 播放網路影片時回退使用 Windows 系統代理；App 已設定的出站代理優先。",
+  "playback.systemProxyEnabled": "使用系統代理"
  },
  "zh-HK": {
   "web.title": "MiruPlay Web Control",
@@ -4996,7 +5002,10 @@ const I18N = {
   "tv.schedule.airradarStale": "時間表資料源暫時不可用，顯示快取資料",
   "tv.schedule.timeUnknown": "時間未知",
   "api.errScheduleUrl": "時間表資料源位址無效",
-  "tv.schedule.notInLibraryShort": "未在媒體庫"
+  "tv.schedule.notInLibraryShort": "未在媒體庫",
+  "playback.systemProxy": "播放時使用系統代理",
+  "playback.systemProxyHint": "libmpv 播放網路影片時回退使用 Windows 系統代理；App 已設定的出站代理優先。",
+  "playback.systemProxyEnabled": "使用系統代理"
  },
  "en-US": {
   "web.title": "MiruPlay Web Control",
@@ -6662,7 +6671,10 @@ const I18N = {
   "tv.schedule.airradarStale": "Schedule data source unavailable; showing cached data",
   "tv.schedule.timeUnknown": "Time unknown",
   "api.errScheduleUrl": "Invalid schedule data source URL",
-  "tv.schedule.notInLibraryShort": "Not in library"
+  "tv.schedule.notInLibraryShort": "Not in library",
+  "playback.systemProxy": "Use Windows system proxy for playback",
+  "playback.systemProxyHint": "When libmpv plays network videos, fall back to the Windows system proxy. The app outgoing proxy configured for RSS takes priority.",
+  "playback.systemProxyEnabled": "Use system proxy"
  },
  "en-GB": {
   "web.title": "MiruPlay Web Control",
@@ -8328,7 +8340,10 @@ const I18N = {
   "tv.schedule.airradarStale": "Schedule data source unavailable; showing cached data",
   "tv.schedule.timeUnknown": "Time unknown",
   "api.errScheduleUrl": "Invalid schedule data source URL",
-  "tv.schedule.notInLibraryShort": "Not in library"
+  "tv.schedule.notInLibraryShort": "Not in library",
+  "playback.systemProxy": "Use Windows system proxy for playback",
+  "playback.systemProxyHint": "When libmpv plays network videos, fall back to the Windows system proxy. The app outgoing proxy configured for RSS takes priority.",
+  "playback.systemProxyEnabled": "Use system proxy"
  }
 };
 let currentLocale = 'zh-CN';
