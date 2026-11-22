@@ -51,6 +51,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
     ];
     private readonly ILibMpvClient _client;
     private readonly LibraryEpisode _episode;
+    private readonly string? _httpProxy;
     private readonly IPlaybackProgressStore _progressStore;
     private IAsyncDisposable? _transportLease;
     private readonly TaskCompletionSource<object?> _completionSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -105,13 +106,15 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         LibraryEpisode episode,
         IPlaybackProgressStore progressStore,
         IAsyncDisposable? transportLease,
-        bool surfaceAttached = false)
+        bool surfaceAttached = false,
+        string? httpProxy = null)
     {
         _client = client;
         _episode = episode;
         _progressStore = progressStore;
         _transportLease = transportLease;
         _surfaceAttached = surfaceAttached;
+        _httpProxy = httpProxy;
         _durationMs = Convert.ToInt64(episode.Duration.TotalMilliseconds, CultureInfo.InvariantCulture);
     }
 
@@ -126,14 +129,16 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         MpvWindowsVideoOptions? videoOptions,
         long? startPositionMs = null,
         long? endPositionMs = null,
-        bool forceStartPosition = false)
+        bool forceStartPosition = false,
+        string? httpProxy = null)
     {
         var session = new LibMpvPlaybackSession(
             client,
             episode,
             progressStore,
             null,
-            surfaceAttached: !headless && windowHandle is { } handle && handle != IntPtr.Zero);
+            surfaceAttached: !headless && windowHandle is { } handle && handle != IntPtr.Zero,
+            httpProxy: httpProxy);
         try
         {
             session.Configure(settings, headless, windowHandle, videoOptions, startPositionMs, endPositionMs, forceStartPosition);
@@ -169,7 +174,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         MpvWindowsVideoOptions? videoOptions,
         long? startPositionMs = null,
         long? endPositionMs = null,
-        bool forceStartPosition = false)
+        bool forceStartPosition = false,
+        string? httpProxy = null)
     {
         var client = LibMpvClient.Create(libraryPath);
         try
@@ -185,7 +191,8 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 videoOptions,
                 startPositionMs,
                 endPositionMs,
-                forceStartPosition);
+                forceStartPosition,
+                httpProxy);
         }
         catch
         {
@@ -489,7 +496,10 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
                 if (nativeEvent.EventId == MpvEventEndFile)
                 {
                     var error = nativeEvent.EndFile?.Error ?? nativeEvent.Error;
-                    throw new InvalidOperationException($"libmpv media load ended before file-loaded (error code {error}).");
+                    var nativeTail = MpvProxyResolver.RedactUrlsToHosts(FormatNativeLogTail());
+                    var detail = nativeTail.Length == 0 ? string.Empty : $" Native log: {nativeTail}";
+                    throw new InvalidOperationException(
+                        $"libmpv media load ended before file-loaded (error code {error}).{detail}");
                 }
             }
             throw new TimeoutException(AppStrings.Get("mpv.loadTimeout"));
@@ -533,6 +543,14 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         finally
         {
             Complete(Volatile.Read(ref _explicitStop) == 0 && Volatile.Read(ref _naturalEnd) != 0);
+        }
+    }
+
+    private string FormatNativeLogTail()
+    {
+        lock (_nativeLogSync)
+        {
+            return string.Join(" | ", _nativeLogs.TakeLast(8).Select(message => message.Text));
         }
     }
 
@@ -600,6 +618,7 @@ internal sealed class LibMpvPlaybackSession : IPlaybackSession
         SetOption("sub-ass-override", "no");
         SetOption("audio-file-auto", _episode.ExternalAudioPaths.Count == 0 ? "fuzzy" : "no");
         SetOption("sub-auto", "fuzzy");
+        if (!string.IsNullOrWhiteSpace(_httpProxy)) SetOption("http-proxy", _httpProxy);
         if (headless)
         {
             SetOption("vo", "null");

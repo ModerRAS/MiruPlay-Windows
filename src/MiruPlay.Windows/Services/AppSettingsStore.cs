@@ -49,6 +49,7 @@ public sealed record AppSettings(
     string AudioPassthroughMode = "off",
     string AudioPassthroughCodecs = "truehd,eac3,ac3,dts,dts-hd",
     string AudioPassthroughDevice = "auto",
+    bool PlaybackUseSystemProxy = true,
     string MpvUpscalePreset = "off",
     string MpvAnime4KPreset = "off",
     string FrameInterpolationMode = "off",

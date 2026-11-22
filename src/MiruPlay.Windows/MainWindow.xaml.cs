@@ -878,6 +878,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 ["episodeId"] = episode.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 ["sourceId"] = episode.SourceId.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 ["backend"] = launch.UsedSystemPlayerFallback ? "system" : "libmpv",
+                ["host"] = MpvProxyResolver.HostOf(episode.MediaPath) ?? "local",
             });
             StatusText.Text = launch.UsedSystemPlayerFallback
                 ? AppStrings.Get("wpf.status.sysPlayer", episode.DisplayTitle)
@@ -898,6 +899,7 @@ public partial class MainWindow : Window, IAsyncDisposable
             {
                 ["episodeId"] = episode.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 ["sourceId"] = episode.SourceId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["host"] = MpvProxyResolver.HostOf(episode.MediaPath) ?? "local",
             });
             if (_activePlaybackEpisode?.ProgressKey == episode.ProgressKey)
                 HidePlaybackPage(showDetail: _activePlaybackSeries is not null);
@@ -2930,6 +2932,13 @@ public partial class MainWindow : Window, IAsyncDisposable
         }
     }
 
+    private void PlaybackUseSystemProxy_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loadingSettings || _settings.PlaybackUseSystemProxy == (PlaybackUseSystemProxyCheckBox.IsChecked == true)) return;
+        _settings = _settings with { PlaybackUseSystemProxy = PlaybackUseSystemProxyCheckBox.IsChecked == true };
+        _settingsStore.Save(_settings);
+    }
+
     private void ApplySettingsToView()
     {
         _loadingSettings = true;
@@ -2988,6 +2997,7 @@ public partial class MainWindow : Window, IAsyncDisposable
                 .OfType<ComboBoxItem>()
                 .FirstOrDefault(item => Equals(item.Tag, _settings.PreferredSubtitleLanguage))
                 ?? SubtitlePreference.Items[0];
+            PlaybackUseSystemProxyCheckBox.IsChecked = _settings.PlaybackUseSystemProxy;
             TvModeEnabledCheckBox.IsChecked = _settings.TvModeEnabled;
             AudioBalanceBox.SelectedItem = AudioBalanceBox.Items
                 .OfType<ComboBoxItem>()

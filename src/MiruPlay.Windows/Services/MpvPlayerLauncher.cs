@@ -59,6 +59,10 @@ public static class MpvPlayerLauncher
                 throw new FileNotFoundException(AppStrings.Get("play.noVideoFile"), episode.MediaPath);
 
             var launchEpisode = playbackProxy?.Episode ?? episode;
+            var httpProxy = MpvProxyResolver.Resolve(
+                settings,
+                new CloudDriveAutomationStore().Load(),
+                launchEpisode.MediaPath);
             var libMpvPath = FindLibMpv(settings.LibMpvPath);
             if (libMpvPath is not null)
             {
@@ -75,7 +79,8 @@ public static class MpvPlayerLauncher
                         videoOptions,
                         startPositionMs,
                         endPositionMs,
-                        forceStartPosition).ConfigureAwait(false);
+                        forceStartPosition,
+                        httpProxy).ConfigureAwait(false);
                     playbackProxy = null;
                     return new MpvPlaybackLaunchResult(
                         embeddedSession,

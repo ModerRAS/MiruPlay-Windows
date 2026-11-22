@@ -1668,4 +1668,7 @@
   <data name="tv.schedule.timeUnknown" xml:space="preserve"><value>Time unknown</value></data>
   <data name="api.errScheduleUrl" xml:space="preserve"><value>Invalid schedule data source URL</value></data>
   <data name="tv.schedule.notInLibraryShort" xml:space="preserve"><value>Not in library</value></data>
+  <data name="playback.systemProxy" xml:space="preserve"><value>Use Windows system proxy for playback</value></data>
+  <data name="playback.systemProxyHint" xml:space="preserve"><value>When libmpv plays network videos, fall back to the Windows system proxy. The app outgoing proxy configured for RSS takes priority.</value></data>
+  <data name="playback.systemProxyEnabled" xml:space="preserve"><value>Use system proxy</value></data>
 </root>

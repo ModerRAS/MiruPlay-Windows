@@ -11647,5 +11647,26 @@
     "zh-HK": "未在媒體庫",
     "en-US": "Not in library",
     "en-GB": "Not in library"
+  },
+  "playback.systemProxy": {
+    "zh-CN": "播放时使用系统代理",
+    "zh-TW": "播放時使用系統代理",
+    "zh-HK": "播放時使用系統代理",
+    "en-US": "Use Windows system proxy for playback",
+    "en-GB": "Use Windows system proxy for playback"
+  },
+  "playback.systemProxyHint": {
+    "zh-CN": "libmpv 播放网络视频时回退使用 Windows 系统代理；App 已配置的出站代理优先。",
+    "zh-TW": "libmpv 播放網路影片時回退使用 Windows 系統代理；App 已設定的出站代理優先。",
+    "zh-HK": "libmpv 播放網路影片時回退使用 Windows 系統代理；App 已設定的出站代理優先。",
+    "en-US": "When libmpv plays network videos, fall back to the Windows system proxy. The app outgoing proxy configured for RSS takes priority.",
+    "en-GB": "When libmpv plays network videos, fall back to the Windows system proxy. The app outgoing proxy configured for RSS takes priority."
+  },
+  "playback.systemProxyEnabled": {
+    "zh-CN": "使用系统代理",
+    "zh-TW": "使用系統代理",
+    "zh-HK": "使用系統代理",
+    "en-US": "Use system proxy",
+    "en-GB": "Use system proxy"
   }
 }

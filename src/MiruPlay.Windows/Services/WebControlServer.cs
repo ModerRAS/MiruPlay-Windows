@@ -1160,6 +1160,7 @@ public sealed class WebControlServer : IAsyncDisposable
                 ScheduleDataSourceUrl = body.ScheduleDataSourceUrl is null
                     ? current.ScheduleDataSourceUrl
                     : AppSettingsStore.NormalizeScheduleDataSourceUrl(body.ScheduleDataSourceUrl),
+                PlaybackUseSystemProxy = body.PlaybackUseSystemProxy ?? current.PlaybackUseSystemProxy,
             }).ConfigureAwait(false);
             if (_applyPlaybackSettings is not null) await _applyPlaybackSettings(updated).ConfigureAwait(false);
             return Success(ToPlaybackSettings(updated, _getRuntimeCapabilities?.Invoke()));
@@ -1744,6 +1745,7 @@ public sealed class WebControlServer : IAsyncDisposable
         endAction = settings.PlaybackEndAction,
         preferredSubtitleLanguage = settings.PreferredSubtitleLanguage,
         scheduleDataSourceUrl = AppSettingsStore.NormalizeScheduleDataSourceUrl(settings.ScheduleDataSourceUrl),
+        playbackUseSystemProxy = settings.PlaybackUseSystemProxy,
         formatAwareToneMapping = new
         {
             supported = false,
@@ -1931,7 +1933,8 @@ public sealed class WebControlServer : IAsyncDisposable
         string? Anime4KPreset = null,
         string? FrameInterpolationMode = null,
         RifeEnhancementSettings? RifeEnhancement = null,
-        string? ScheduleDataSourceUrl = null);
+        string? ScheduleDataSourceUrl = null,
+        bool? PlaybackUseSystemProxy = null);
     private sealed record ScanSettingsRequest(
         bool? AutoScanEnabled = null,
         int? AutoScanIntervalHours = null,
