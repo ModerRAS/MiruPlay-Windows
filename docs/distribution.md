@@ -33,7 +33,7 @@ Requirements: Windows 10/11, .NET 10 SDK, 7-Zip, and Inno Setup 6. The SDL3 runt
 
 ```powershell
 winget install --id JRSoftware.InnoSetup --exact --scope user
-.\tools\Publish-Release.ps1 -Version 0.1.7
+.\tools\Publish-Release.ps1 -Version 0.1.8
 .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
 ```
 

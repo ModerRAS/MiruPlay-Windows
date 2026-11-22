@@ -19,6 +19,11 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 提供默认端口 `9978` 的原生 WebUI 与 WebControl API，支持媒体库/详情/播放/字幕、来源 CRUD/测试/扫描、Anime/Drama 模式、CloudDrive2/RSS、Bangumi/TMDB、播放设置和令牌轮换，并使用 DPAPI 保护 WebControl、媒体源、Bangumi、TMDB 与 CloudDrive 凭据
 - 将客户端设置保存在 `%LOCALAPPDATA%\MiruPlay\settings.json`
 
+## 近期修复（0.1.8）
+
+- **在线源播放修复（libmpv 代理）**：TV / 桌面通过内置 libmpv 播放 ANi RSS 在线源时不再报 `mpv media load ended before file-loaded (error code -13)`。原因是直链 301 跳转到 Cloudflare Workers 域名、本机直连不可达，而 libmpv 不经过系统代理；现在播放前按「App 出站代理（RSS/CloudDrive）→ Windows 系统代理（默认开启，可在「设置 → 播放 → 播放时使用系统代理」关闭）」顺序解析代理并作为 `http-proxy` 传给 libmpv，loopback 与本地文件不代理。加载失败时异常会附带 mpv 原生日志尾部（URL 只保留 `scheme://host`）。已用系统代理在 TV 模式实测播放 ANi RSS 在线源成功。
+- **文档**：明确 lite / full 两个用户可见 edition 与内置 RIFE 的关系，并说明 `enhance-rife-*` release 只是 CI 构建输入 / 应用内安装源，不是给用户单独安装的发行版（详见下方「发布版本（lite / full）」）。
+
 ## 近期修复（0.1.7）
 
 - **TV 手柄摇杆极值崩溃修复**：手柄摇杆推到 `short.MinValue`（-32768）等极值时，方向判定与右摇杆快进/快退不再因 `Math.Abs`/取反溢出抛 `OverflowException` 导致进程崩溃；方向判定改为全程 int 运算，SDL Y 轴（+Y 向下）反向为 XInput 向上时安全取反并钳制回 short 范围。
@@ -67,7 +72,7 @@ WebControl 默认监听 `9978`。在浏览器打开设置页显示的地址，�
 Windows x64 发布由同一个自包含目录生成便携 ZIP、每用户 Inno Setup 安装包、符号包、发布清单和 `SHA256SUMS.txt`。本地生成并验证：
 
 ```powershell
-.\tools\Publish-Release.ps1 -Version 0.1.7
+.\tools\Publish-Release.ps1 -Version 0.1.8
 .\tools\Test-ReleaseArtifacts.ps1 -ReleaseDirectory .\artifacts\release
 ```
 

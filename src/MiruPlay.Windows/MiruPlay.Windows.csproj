@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <VersionPrefix>0.1.7</VersionPrefix>
+    <VersionPrefix>0.1.8</VersionPrefix>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <PublishTrimmed>false</PublishTrimmed>
     <Edition Condition="'$(Edition)' == ''">lite</Edition>
