@@ -1,6 +1,6 @@
 # RIFE 真插帧增强包
 
-本文说明 MiruPlay Windows 的 RIFE（Real-Time Intermediate Flow Estimation）真帧插帧增强包：可选、可下载/随 full 版内置、失败自动回退。用户文档见设置页；本文面向维护与发布。
+本文说明 MiruPlay Windows 的 RIFE（Real-Time Intermediate Flow Estimation）真帧插帧增强包：可选、可由应用内安装器下载或随 full 版内置、失败自动回退。用户文档见设置页；本文面向维护与发布。
 
 ## 1. 范围与开关
 

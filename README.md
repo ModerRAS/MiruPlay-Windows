@@ -12,7 +12,7 @@ MiruPlay 的原生 Windows 客户端，使用 .NET 10 和 WPF。目标是与 And
 - 显示模式支持自动（默认，不改变现有画质）、HDR 直通、映射到 SDR；Windows 需开启系统 HDR，HDR 直通参数需实机验证
 - 音频码流直通（关闭/自动/强制 + TrueHD/E-AC3/AC-3/DTS/DTS-HD）可把 Atmos 原样送入 HDMI/AVR；需要独占 WASAPI，失败自动回退 PCM，并与 PEQ/DSP/响度平衡互斥
 - 内置 libmpv 已支持 Dolby Vision Profile 7 FEL 播放器侧解码与合成（Windows 输出 HDR10，不输出 DV 信号）；设置页展示运行时 FEL 支持与 libmpv/libplacebo 版本
-- 可选画质增强：缩放预设、Anime4K、mpv 内置平滑插帧，以及可下载/随 full 版提供的 RIFE 真帧插帧增强包（SDR 限定，失败自动回退）
+- 可选画质增强：缩放预设、Anime4K、mpv 内置平滑插帧，以及 RIFE 真帧插帧增强包（SDR 限定，失败自动回退）：full 版已内置，lite 版可在设置页由应用自动下载并校验安装
 - 通过内置 libmpv 枚举内封与 MLIP 外挂字幕，按语言偏好自动选择，并可在 WPF 或 WebUI 中手动切换/关闭
 - 通过内置 libmpv 读取播放位置，并以 `%LOCALAPPDATA%\MiruPlay\state.db` 作为唯一续播状态源
 - 通过官方 .NET gRPC 客户端连接 CloudDrive2，验证登录或 API Token 成功后才写入 DPAPI 凭据
@@ -39,10 +39,12 @@ TV 模式的「新番」页提供「时间表 / 季番」两个模式（左右�
 
 ## 发布版本（lite / full）
 
-Windows 安装包分两个 edition：
+Windows 只有两个用户可见 edition，下载页的 lite / full 就是全部，不存在需要单独下载安装的第三个「RIFE 版」：
 
-- **lite（默认）**：应用 + libmpv + SDL3 + 基础 Anime4K Fast 等轻量资产，零额外依赖。
-- **full**：lite + 可选增强包（portable VapourSynth + RIFE ncnn + 模型、可选大 shader）；增强包从 `runtime/enhance/rife/` 打包，不进 git，版本/哈希由 `tools/Get-EnhancementPack.ps1` 固定。增强包未交付前 CI 只发布 lite。
+- **lite（默认，轻量）**：应用 + libmpv + SDL3 + 基础 Anime4K Fast 等轻量资产，**不包含** RIFE/VapourSynth 增强包；画质增强只有基础缩放、Anime4K 与 mpv 内置帧混合，默认全关。需要 RIFE 真帧插帧时可在设置页显式安装增强包（应用自动下载、校验后安装），或改用 full。
+- **full（内置 RIFE）**：lite + 打包时内置的 RIFE 增强包（portable VapourSynth + RIFE ncnn + 模型、可选大 shader），开箱即用。增强包从 `runtime/enhance/rife/` 打包，不进 git，版本/哈希由 `tools/Get-EnhancementPack.ps1` 按 `tools/enhance/rife-enhance-manifest.json` 固定。
+
+GitHub 上的 `enhance-rife-<version>` release（如 `enhance-rife-2026.11`）只是 CI 构建 full 时的输入包（pinned URL/SHA-256），也是应用内增强包安装器的固定下载源；**它不是给用户单独安装的发行版**，不要手动下载/解压其中的 7z。普通用户下载 full 即可获得内置 RIFE；lite 用户如需 RIFE 请用设置页的「安装 RIFE 增强包」。
 
 产物文件名包含 edition：`MiruPlay-<ver>-win-x64-<edition>-portable.zip` / `-setup.exe` / `-symbols.zip`；manifest 与自动更新清单也按 edition 区分，lite/full 不会互相升级。详见 [docs/distribution.md](docs/distribution.md)。
 

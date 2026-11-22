@@ -3,7 +3,15 @@
 MiruPlay publishes Windows x64 artifacts in two editions from one self-contained `.NET 10` publish directory:
 
 - **lite** (default): application + pinned in-process libmpv + SDL3 + base Anime4K Fast assets.
-- **full**: lite + RIFE/VapourSynth enhancement pack at `runtime/enhance/rife/` (portable VapourSynth R73 + MVTools + RIFE ncnn + models; ~42.3 MiB unpacked / ~21.3 MiB 7z). The pack is not in git; `tools/enhance/rife-enhance-manifest.json` + `tools/Get-EnhancementPack.ps1` pin its version, GitHub Release archive URL/SHA-256/size and per-file hashes. `Publish-Release.ps1 -Edition full` runs the pack verifier and fails if missing/tampered; CI skips full until the pack is delivered.
+- **full**: lite + RIFE/VapourSynth enhancement pack at `runtime/enhance/rife/` (portable VapourSynth R73 + MVTools + RIFE ncnn + models; ~42.3 MiB unpacked / ~21.3 MiB 7z). The pack is not in git; `tools/enhance/rife-enhance-manifest.json` + `tools/Get-EnhancementPack.ps1` pin its version, GitHub Release archive URL/SHA-256/size and per-file hashes. `Publish-Release.ps1 -Edition full` runs the pack verifier and fails if missing/tampered; the CI release job downloads the pinned pack before packaging and never silently degrades to a lite-only release.
+
+**User-facing editions.** lite and full are the only two editions users download. The
+`enhance-rife-<version>` GitHub Release is a **CI build input** (and the fixed download
+source used by the in-app installer), not a third user-facing edition: it is marked
+pre-release and its notes point users to the full edition. Users who want RIFE install
+**full**; lite users can add it from the settings page, where the app downloads and
+per-file-verifies the pack itself. Do not document manual extraction/installation of the
+7z archive.
 
 Artifacts are edition-scoped:
 
@@ -60,7 +68,7 @@ Pull requests and branch pushes run restore, warning-as-error Release build, tes
 
 - **v0.1.5** (2026-10-20, `Latest`): portable-only release, built locally from `2c715a6` via `Publish-Release.ps1 -Version 0.1.5 -SkipInstaller` and verified with `Test-ReleaseArtifacts.ps1 -SkipInstaller` (3 hashes, portable launch test). Assets: portable ZIP, symbols ZIP, `SHA256SUMS.txt`, `release-manifest.json`; unsigned. No installer/`windows-update.json` in this release (installer deferred: no Inno Setup on the build machine, no code-signing certificate).
 
-`tools/Test-ReleaseArtifacts.ps1` verifies every checksum, expands and launches the portable package, silently installs and launches the installer, closes the application through its normal WPF lifecycle, and silently uninstalls it. GitHub-hosted Windows runners provide the clean-user validation lane. The release job builds lite always and full only when `runtime/enhance/manifest.json` exists; `Test-ReleaseArtifacts.ps1 -Edition <edition>` asserts lite has no enhancement assets and full contains the VapourSynth/RIFE components plus license files and hashes.
+`tools/Test-ReleaseArtifacts.ps1` verifies every checksum, expands and launches the portable package, silently installs and launches the installer, closes the application through its normal WPF lifecycle, and silently uninstalls it. GitHub-hosted Windows runners provide the clean-user validation lane. The release job always downloads the pinned pack and builds both editions; `Test-ReleaseArtifacts.ps1 -Edition <edition>` asserts lite has no enhancement assets and full contains the VapourSynth/RIFE components plus license files and hashes.
 
 ## Release pipeline (CI, two editions)
 
@@ -71,7 +79,9 @@ upload is not part of the process.
 1. **Enhancement pack release first.** The RIFE pack is built/published by the
    `enhancement-pack.yml` workflow as GitHub Release asset `rife-<manifest.version>.7z`
    under tag `enhance-rife-<manifest.version>`. The pinned SHA-256/size live in
-   `tools/enhance/rife-enhance-manifest.json`.
+   `tools/enhance/rife-enhance-manifest.json`. This release is a build input, **not an
+   end-user package**: it is marked pre-release and its notes point users to the full
+   edition; do not document it as something users extract or install by hand.
 2. **Release job consumes it.** `tools/Fetch-ReleaseEnhancement.ps1` downloads the
    asset with `gh`, verifies size + SHA-256, and installs it to
    `runtime/enhance/rife` via `tools/Get-EnhancementPack.ps1 -ArchivePath`.
@@ -98,4 +108,6 @@ location before downloading the pack.
 - Application release: `vX.Y.Z` (both `MiruPlay-<ver>-win-x64-lite-*` and
   `MiruPlay-<ver>-win-x64-full-*` assets).
 - Enhancement pack release: `enhance-rife-<manifest.version>` with asset
-  `rife-<manifest.version>.7z`; publish it before the matching application tag.
+  `rife-<manifest.version>.7z`; publish it before the matching application tag. It is an
+  internal build input, not a user-facing edition: keep it marked pre-release and never
+  link it as a user download.

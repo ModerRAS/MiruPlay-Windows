@@ -9,7 +9,7 @@
 |---|---|---|
 | 缩放质量预设 | off / 低 / 中 / 高 -> mpv scale/cscale/dscale/correct-downscaling/linear-downscaling/sigmoid-upscaling | off（参数与今天完全相同） |
 | Anime4K 预设 | off / A / A+A / B / C -> 官方 v4.0.1 Fast 链（9 个 GLSL 文件，MIT） | off |
-| 插帧方式 | `off` / `mpv`（内置帧混合：video-sync=display-resample + interpolation=yes + tscale=oversample + hwdec-extra-frames=8）；`rife`（可选 RIFE 增强包真帧插帧，SDR 限定、需下载/随 full 版提供） | off |
+| 插帧方式 | `off` / `mpv`（内置帧混合：video-sync=display-resample + interpolation=yes + tscale=oversample + hwdec-extra-frames=8）；`rife`（可选 RIFE 增强包真帧插帧，SDR 限定、随 full 版内置或由应用内安装器下载安装） | off |
 
 ## 2. 行为与互斥
 
@@ -80,5 +80,5 @@
 
 - 仅 SDR 动画使用 Anime4K；不做 HDR 着色器链。
 - `mpv` 插帧不是运动补偿，不产生真实中间帧；需要真帧插帧时用可选的 `rife` 增强包。
-- 不提供自定义 shader 导入。VapourSynth/RIFE 仅通过 full 版内置或用户显式下载的增强包提供，不默认随 lite 包分发。
+- 不提供自定义 shader 导入。VapourSynth/RIFE 仅通过 full 版内置或用户在设置页显式安装的增强包提供，不默认随 lite 包分发。
 - 默认全部关闭，避免任何画质/性能回归。
