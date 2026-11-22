@@ -545,7 +545,7 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
             }
             foreach (var entry in day.Entries)
             {
-                var card = CreateAirRadarCard(entry);
+                var card = CreateAirRadarCard(entry, day.Weekday);
                 row.Children.Add(card);
                 cards.Add(card);
             }
@@ -562,9 +562,9 @@ public sealed class TvSeasonScreen : TvScreenBase, IDisposable
         }
     }
 
-    private TvPosterCard CreateAirRadarCard(AirRadarLocalEntry entry)
+    private TvPosterCard CreateAirRadarCard(AirRadarLocalEntry entry, DayOfWeek weekday)
     {
-        var dayLabel = TvAirWeekdayLabels.Title(ToTvWeekday(entry.LocalTime.DayOfWeek));
+        var dayLabel = TvAirWeekdayLabels.Title(ToTvWeekday(weekday));
         var timeLabel = string.IsNullOrEmpty(entry.TimeText)
             ? dayLabel + "  " + AppStrings.Get("tv.schedule.timeUnknown")
             : $"{dayLabel} {entry.TimeText}";

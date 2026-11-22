@@ -62,10 +62,81 @@ public sealed class AirRadarScheduleTests
         var sunday = days[6];
         Assert.Contains(sunday.Entries, entry => entry.Item.SubjectId == 104);
         Assert.DoesNotContain(monday.Entries, entry => entry.Item.SubjectId == 104);
-        // Entries without a time are shown without a clock and sort after timed entries in their local day.
-        var noTime = days.SelectMany(day => day.Entries).Single(entry => entry.Item.SubjectId == 103);
+        // Entries without a time use the API's JST weekday (3 = Wednesday) and
+        // do not shift back a day; they show no clock and sort after timed entries.
+        var noTime = days[2].Entries.Single(entry => entry.Item.SubjectId == 103);
         Assert.Equal(string.Empty, noTime.TimeText);
-        Assert.Same(noTime, days.SelectMany(day => day.Entries).Last(entry => entry.Item.SubjectId == 103));
+        Assert.Null(noTime.LocalTime);
+        Assert.False(noTime.Item.TimeKnown);
+        Assert.DoesNotContain(days[1].Entries, entry => entry.Item.SubjectId == 103);
+        Assert.Same(noTime, days[2].Entries[^1]);
+    }
+
+    [Fact]
+    public void GroupsUnknownTimeEntriesByApiWeekday()
+    {
+        var items = new List<object>();
+        for (var index = 0; index < 24; index++)
+        {
+            var weekday = index % 7 + 1;
+            items.Add(new
+            {
+                subjectId = 300 + index,
+                name = $"Unknown Time {index}",
+                nameCn = (string?)null,
+                airDate = "2026-10-12",
+                image = (string?)null,
+                weekday,
+                time = (string?)null,
+                timezone = "Asia/Tokyo",
+                confidence = "unknown",
+                timeKnown = false,
+                disputed = index % 6 == 0,
+            });
+        }
+        // Add one timed Tuesday entry so the 24 unknown entries have a clocked peer.
+        items.Add(new
+        {
+            subjectId = 999,
+            name = "Known Tuesday",
+            nameCn = (string?)null,
+            airDate = "2026-10-13",
+            image = (string?)null,
+            weekday = 2,
+            time = "22:00",
+            timezone = "Asia/Tokyo",
+            confidence = "high",
+            timeKnown = true,
+            disputed = false,
+        });
+        var data = AirRadarScheduleService.Parse(System.Text.Json.JsonSerializer.Serialize(new
+        {
+            schemaVersion = 1,
+            season = "2026-fall",
+            timezone = "Asia/Tokyo",
+            items,
+        }));
+        Assert.Equal(25, data.Items.Count);
+        Assert.Equal(24, data.Items.Count(item => !item.TimeKnown));
+        Assert.Contains(data.Items, item => item.Disputed);
+
+        var local = TimeZoneInfo.CreateCustomTimeZone("TestUTC+8", TimeSpan.FromHours(8), "Test UTC+8", "Test UTC+8");
+        var days = AirRadarScheduleService.BuildWeek(data, local);
+        for (var index = 0; index < 24; index++)
+        {
+            var weekday = index % 7 + 1;
+            var expectedDay = weekday == 7 ? days[6] : days[weekday - 1];
+            var entry = Assert.Single(expectedDay.Entries, candidate => candidate.Item.SubjectId == 300 + index);
+            Assert.Null(entry.LocalTime);
+            Assert.Equal(string.Empty, entry.TimeText);
+        }
+        // Cyberpunk-like item is API weekday 2 (Tuesday), firefly-like is weekday 1 (Monday).
+        Assert.Contains(days[1].Entries, entry => entry.Item.SubjectId == 301);
+        Assert.DoesNotContain(days[0].Entries, entry => entry.Item.SubjectId == 301);
+        Assert.Contains(days[0].Entries, entry => entry.Item.SubjectId == 300);
+        Assert.DoesNotContain(days[6].Entries, entry => entry.Item.SubjectId == 300);
+        Assert.Equal(999, days[1].Entries[0].Item.SubjectId);
+        Assert.All(days[1].Entries.Skip(1), entry => Assert.False(entry.Item.TimeKnown));
     }
 
     [Fact]
