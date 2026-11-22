@@ -1671,4 +1671,14 @@
   <data name="playback.systemProxy" xml:space="preserve"><value>Use Windows system proxy for playback</value></data>
   <data name="playback.systemProxyHint" xml:space="preserve"><value>When libmpv plays network videos, fall back to the Windows system proxy. The app outgoing proxy configured for RSS takes priority.</value></data>
   <data name="playback.systemProxyEnabled" xml:space="preserve"><value>Use system proxy</value></data>
+  <data name="tv.settings.rifeStatus" xml:space="preserve"><value>RIFE status</value></data>
+  <data name="tv.settings.rifeStatusNotInstalled" xml:space="preserve"><value>Not installed</value></data>
+  <data name="tv.settings.rifeStatusNotTested" xml:space="preserve"><value>Not self-tested</value></data>
+  <data name="tv.settings.rifeStatusPassed" xml:space="preserve"><value>Self-test passed</value></data>
+  <data name="tv.settings.rifeStatusFailed" xml:space="preserve"><value>Self-test failed</value></data>
+  <data name="tv.settings.rifeStatusTesting" xml:space="preserve"><value>Self-testing…</value></data>
+  <data name="tv.settings.rifeLiteHint" xml:space="preserve"><value>This is the lite edition without RIFE. Use the full edition or download the pack on desktop.</value></data>
+  <data name="tv.settings.rifeSelftestRunning" xml:space="preserve"><value>Testing RIFE…</value></data>
+  <data name="tv.settings.rifeSelftestPassed" xml:space="preserve"><value>RIFE self-test passed ({0})</value></data>
+  <data name="tv.settings.rifeSelftestFailed" xml:space="preserve"><value>RIFE self-test failed: {0}</value></data>
 </root>
