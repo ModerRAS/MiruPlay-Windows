@@ -22,7 +22,7 @@ public sealed class TvSearchScreen : TvScreenBase
     private readonly StackPanel _recentPanel = new() { Orientation = Orientation.Horizontal };
     private readonly StackPanel _actionPanel = new() { Orientation = Orientation.Horizontal };
     private readonly UniformGrid _keys = new() { Columns = 10, HorizontalAlignment = HorizontalAlignment.Left };
-    private readonly StackPanel _resultsPanel = new() { Orientation = Orientation.Horizontal };
+    private readonly StackPanel _resultsPanel = new() { Orientation = Orientation.Horizontal, Margin = new Thickness(6, 6, 6, 6) };
     private readonly ScrollViewer _resultsScroller;
     private readonly TextBlock _emptyText;
     private readonly StackPanel _keyboardHost = new();

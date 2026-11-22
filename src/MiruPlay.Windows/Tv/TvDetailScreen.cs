@@ -264,7 +264,7 @@ public sealed class TvDetailScreen : TvScreenBase
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Margin = new Thickness(0, 14, 0, 4),
         };
-        _episodePanel = new StackPanel { Orientation = Orientation.Horizontal };
+        _episodePanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(6, 6, 6, 6) };
         _episodes.Clear();
         _versions.Clear();
         foreach (var season in _series.Seasons)
