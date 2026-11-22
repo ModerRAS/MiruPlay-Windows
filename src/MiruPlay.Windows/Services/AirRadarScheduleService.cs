@@ -17,7 +17,9 @@ public sealed record AirRadarScheduleItem(
     int Weekday,
     string? Time,
     string? Timezone,
-    string? Confidence);
+    string? Confidence,
+    bool TimeKnown = true,
+    bool Disputed = false);
 
 public sealed record AirRadarScheduleData(
     int SchemaVersion,
@@ -31,7 +33,7 @@ public sealed record AirRadarScheduleData(
 
 public sealed record AirRadarLocalEntry(
     AirRadarScheduleItem Item,
-    DateTimeOffset LocalTime,
+    DateTimeOffset? LocalTime,
     string TimeText);
 
 public sealed record AirRadarScheduleDay(
@@ -176,19 +178,34 @@ public sealed class AirRadarScheduleService : IDisposable
         for (var i = 0; i < groups.Length; i++) groups[i] = [];
         foreach (var item in data.Items)
         {
-            if (ToLocal(item, zone) is not { } localTime) continue;
-            var index = localTime.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)localTime.DayOfWeek - 1;
-            groups[index].Add(new AirRadarLocalEntry(
-                item,
-                localTime,
-                string.IsNullOrWhiteSpace(item.Time) ? string.Empty : localTime.ToString("HH:mm", CultureInfo.InvariantCulture)));
+            var timeKnown = item.TimeKnown && !string.IsNullOrWhiteSpace(item.Time);
+            if (timeKnown)
+            {
+                // Timed entries are grouped by the converted local weekday so a
+                // cross-midnight JST time lands on the correct local day.
+                if (ToLocal(item, zone) is not { } localTime) continue;
+                var index = localTime.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)localTime.DayOfWeek - 1;
+                groups[index].Add(new AirRadarLocalEntry(
+                    item,
+                    localTime,
+                    localTime.ToString("HH:mm", CultureInfo.InvariantCulture)));
+            }
+            else
+            {
+                // Unknown-time entries must use the API's JST weekday directly;
+                // deriving a local date from airDate would shift them a day back.
+                if (item.Weekday is < 1 or > 7) continue;
+                var weekday = item.Weekday == 7 ? DayOfWeek.Sunday : (DayOfWeek)item.Weekday;
+                var index = weekday == DayOfWeek.Sunday ? 6 : (int)weekday - 1;
+                groups[index].Add(new AirRadarLocalEntry(item, null, string.Empty));
+            }
         }
         var days = new List<AirRadarScheduleDay>(7);
         for (var i = 0; i < 7; i++)
         {
             var weekday = i == 6 ? DayOfWeek.Sunday : (DayOfWeek)(i + 1);
             var entries = groups[i]
-                .OrderBy(entry => entry.Item.Time is null ? 1 : 0)
+                .OrderBy(entry => entry.LocalTime is null ? 1 : 0)
                 .ThenBy(entry => entry.LocalTime)
                 .ThenBy(entry => entry.Item.DisplayName(), StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -199,12 +216,9 @@ public sealed class AirRadarScheduleService : IDisposable
 
     public static DateTimeOffset? ToLocal(AirRadarScheduleItem item, TimeZoneInfo? localZone = null, TimeZoneInfo? sourceZone = null)
     {
-        if (string.IsNullOrWhiteSpace(item.AirDate) ||
-            !DateOnly.TryParseExact(item.AirDate.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
-            return null;
-        var time = TimeOnly.MinValue;
-        if (!string.IsNullOrWhiteSpace(item.Time) &&
-            !TimeOnly.TryParseExact(item.Time.Trim(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out time))
+        if (string.IsNullOrWhiteSpace(item.AirDate) || string.IsNullOrWhiteSpace(item.Time) ||
+            !DateOnly.TryParseExact(item.AirDate.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) ||
+            !TimeOnly.TryParseExact(item.Time.Trim(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var time))
             return null;
         var jst = sourceZone ?? Jst;
         var instant = new DateTimeOffset(date.ToDateTime(time), jst.GetUtcOffset(date.ToDateTime(time)));
@@ -226,6 +240,13 @@ public sealed class AirRadarScheduleService : IDisposable
         var weekday = element.TryGetProperty("weekday", out var weekdayElement) && weekdayElement.TryGetInt32(out var value) && value is >= 1 and <= 7
             ? value
             : 0;
+        var time = Text(element, "time");
+        var timeKnown = !string.IsNullOrWhiteSpace(time) &&
+            (!element.TryGetProperty("timeKnown", out var timeKnownElement) ||
+             timeKnownElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False) ||
+             timeKnownElement.GetBoolean());
+        var disputed = element.TryGetProperty("disputed", out var disputedElement) &&
+            disputedElement.ValueKind == JsonValueKind.True;
         return new AirRadarScheduleItem(
             subjectId,
             name!,
@@ -233,9 +254,11 @@ public sealed class AirRadarScheduleService : IDisposable
             Text(element, "airDate"),
             Text(element, "image"),
             weekday,
-            Text(element, "time"),
+            time,
             Text(element, "timezone"),
-            Text(element, "confidence"));
+            Text(element, "confidence"),
+            timeKnown,
+            disputed);
     }
 
     private static string? Text(JsonElement element, string property) =>
