@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Threading;
 using MiruPlay.Windows.Models;
 using MiruPlay.Windows.Services;
 
@@ -17,6 +18,11 @@ public sealed class TvLibraryScreen : TvScreenBase
     private readonly TvAppContext _context;
     private readonly TvShellWindow _shell;
     private readonly UniformGrid _grid = new() { Rows = Rows, Columns = Columns, VerticalAlignment = VerticalAlignment.Center };
+    private readonly Border _gridHost = new() { Margin = new Thickness(64, 18, 64, 6) };
+    private readonly DispatcherTimer _resizeTimer = new() { Interval = TimeSpan.FromMilliseconds(120) };
+    private double _posterWidth = 146;
+    private double _posterHeight = 219;
+    private (double Width, double Height) _pendingPosterSize = (146, 219);
     private readonly StackPanel _filterBar = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
     private readonly TextBlock _pageText = new();
     private readonly TextBlock _summaryText = new();
@@ -73,16 +79,18 @@ public sealed class TvLibraryScreen : TvScreenBase
         root.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.Children.Add(header);
-        var gridHost = new Border { Margin = new Thickness(64, 18, 64, 6) };
-        gridHost.Child = _grid;
-        Grid.SetRow(gridHost, 1);
-        root.Children.Add(gridHost);
+        _gridHost.Child = _grid;
+        Grid.SetRow(_gridHost, 1);
+        root.Children.Add(_gridHost);
         Grid.SetRow(footer, 2);
         root.Children.Add(footer);
         Content = root;
 
         _filterZone = new TvZone("filter", TvZoneKind.Horizontal, new FrameworkElement[] { _allChip, _genreChip, _sortChip, _searchChip });
         RegisterZone(_filterZone);
+        _resizeTimer.Tick += (_, _) => ApplyResponsivePosterSize();
+        _gridHost.SizeChanged += (_, _) => ScheduleResponsivePosterSize();
+        Unloaded += (_, _) => _resizeTimer.Stop();
         Refresh(rebuildGenres: true);
     }
 
@@ -169,6 +177,26 @@ public sealed class TvLibraryScreen : TvScreenBase
         }
     }
 
+    private void ScheduleResponsivePosterSize()
+    {
+        var availableHeight = _gridHost.ActualHeight;
+        var (width, height) = TvLibraryCardLayout.CalculatePosterSize(availableHeight);
+        if (Math.Abs(height - _posterHeight) < 2 && Math.Abs(width - _posterWidth) < 2) return;
+        _pendingPosterSize = (width, height);
+        _resizeTimer.Stop();
+        _resizeTimer.Start();
+    }
+
+    private void ApplyResponsivePosterSize()
+    {
+        _resizeTimer.Stop();
+        var (width, height) = _pendingPosterSize;
+        if (Math.Abs(height - _posterHeight) < 2 && Math.Abs(width - _posterWidth) < 2) return;
+        _posterHeight = height;
+        _posterWidth = width;
+        BuildPage();
+    }
+
     private TvPosterCard CreateCard(LibrarySeries series)
     {
         var (percent, label, completed) = TvAppContext.SeriesProgress(series);
@@ -178,8 +206,8 @@ public sealed class TvLibraryScreen : TvScreenBase
             PosterSource = TvImages.Load(series.PosterPath),
             TitleText = series.Title,
             SubtitleText = string.Empty,
-            PosterWidth = 146,
-            PosterHeight = 219,
+            PosterWidth = _posterWidth,
+            PosterHeight = _posterHeight,
             ShowProgress = percent > 0,
             ProgressPercent = percent,
             BadgeText = completed ? "✓" : percent > 0 ? label : string.Empty,
